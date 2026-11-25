@@ -364,3 +364,6 @@ sh -c "/nonexistent/python3 x || exit 2"   -> exit=2
 
 ## Open questions
 - Spec-level questions are in Spec → Open questions; design-level ones in Design → Open questions. (Older duplicate removed by Fang.)
+
+## Merwyn decisions, 25 Nov 2026 (recorded by Janice)
+- Prod reads allowed (read-only default); prod writes only when Merwyn instructs; Bytebase: agents never submit, they hand the plan to Merwyn. The Bytebase allowlist is therefore to stay empty (R-7 narrowed, R-8 narrowed, R-14). Implementation: T-043 (T-040 itself stays done). — Janice (pmo)

@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**42 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 11 · parked: 0
+**45 tasks** — todo: 31 · spec: 3 · design: 0 · build: 0 · review: 0 · done: 11 · parked: 0
 
 ## Waiting on you
 
@@ -44,9 +44,13 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 
-## spec (0)
+## spec (3)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | pm | — |
+| [T-044](backlog/T-044-process-lessons-validate-warning-and-replay.md) | P1 | Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase | pm | — |
+| [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | pm | — |
 
 ## design (0)
 
