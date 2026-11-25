@@ -33,3 +33,10 @@ offices:
   # klik-product:
   #   repo: impact-credit-solutions/klik-workspace
   #   path: .office/                   # company-owned office definitions live in the company org
+
+# Skills that live outside this repo. Agents list them as external_skills: [source:name].
+skill_sources:
+  claude:      { where: "Claude app session skills (Skill tool)", note: "available in chat/Cowork sessions; install as plugins for the SDK engine" }
+  design:      { where: "Claude app design plugin", note: "same as above" }
+  data:        { where: "Claude app data plugin", note: "same as above" }
+  klik-workspace: { repo: impact-credit-solutions/klik-workspace, path: .agents/skills, note: "company skills (prd-writer, backlog-writer, release-notes); company offices only, never copied here" }

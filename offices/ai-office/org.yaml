@@ -1,8 +1,8 @@
 agents:
-  - { id: pmo,        name: Sari,   personality: ESTJ, reports_to: human,     role: Chief of Staff (PMO) }
-  - { id: pm,         name: Ayu,    personality: ENFJ, reports_to: pmo,       role: Product Manager }
-  - { id: architect,  name: Bima,   personality: INTJ, reports_to: pmo,       role: Architect / Tech Lead }
-  - { id: engineer,   name: Raka,   personality: ISTP, reports_to: architect, role: Engineer }
-  - { id: reviewer,   name: Laras,  personality: INTP, reports_to: pmo,       role: Reviewer / QA }
-  - { id: compliance, name: Hendra, personality: ISTJ, reports_to: human,     role: Compliance Officer }
-  - { id: curator,    name: Nadia,  personality: INFJ, reports_to: pmo,       role: Knowledge Curator }
+  - { id: pmo,        name: Janice,   personality: ESTJ, reports_to: human,     role: Chief of Staff (PMO) }
+  - { id: pm,         name: Emmy,    personality: ENFJ, reports_to: pmo,       role: Product Manager }
+  - { id: architect,  name: Fang,   personality: INTJ, reports_to: pmo,       role: Architect / Tech Lead }
+  - { id: engineer,   name: Sebastian,   personality: ISTP, reports_to: architect, role: Engineer }
+  - { id: reviewer,   name: Cahyani,  personality: INTP, reports_to: pmo,       role: Reviewer / QA }
+  - { id: compliance, name: Wulan, personality: ISTJ, reports_to: human,     role: Compliance Officer }
+  - { id: curator,    name: April,  personality: INFJ, reports_to: pmo,       role: Knowledge Curator }
