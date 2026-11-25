@@ -2,9 +2,9 @@
 id: T-048
 title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-047]
@@ -634,6 +634,8 @@ Janice (pmo), 25 Nov, answers to Dinda's open questions: (1) The fair "waiting o
 Janice (pmo), 25 Nov: Design accepted, moved to build. Answers to Fang's open questions: (1) CDN reachability can't be tested from here, so remove the risk: the page loads `./three.min.js` first (a sibling file, not committed; fetched from npm three@0.128.0 per engine/app/README.md and published beside the page as an artifact file), then falls back to cdnjs r128, unpkg, jsdelivr at 0.128.0. npm confirms three@0.128.0 exists. (2) 50 fps: Cahyani records a software-GL smoke result (frames render, governor works); the real laptop fps reading is taken by Merwyn from the in-page readout and recorded at sprint close, not a blocker for review.
 
 ## Build notes
+Artifact (Done-when 8): published by Janice 26 Nov from 042190b as a private artifact, index.html only; three.js loads from cdnjs r128 (the ./three.min.js sibling is not published). https://claude.ai/artifact/CkB5c3hEKfaK61kUuUjMku — render not yet confirmed by Merwyn.
+
 PR #25, branch `t-048-3d-office`.
 
 **What changed**
@@ -709,6 +711,12 @@ Review 1 of PR #25 (head 46e06e7), 26 Nov 2026: REJECT (one safety fix). Done-wh
 Reason: the data rule echoes the value it caught. events.py `_data_hit` returns "personal-data pattern in '<value>'", which reaches the CLI output, office.html's skipped block under --allow-errors (generator exits 0), and the page's console.warn. Fixes: (1) name the field and pattern kind, never the value; (2) office_app must not write a page that fails its own data scan, even with --allow-errors; (3) test that a 16-digit number and an email never appear in stdout, stderr or output HTML.
 Notes: waiting agent's tag lands on Dinda's desk; tags overlap in reduced-motion handoff; phone view labels collide; follow camera crops left edge; merged and review_pass start together; separator phone numbers not caught (T-027).
 — Cahyani (reviewer), recorded by Janice (pmo)
+
+Review 2 of PR #25 (head 042190b), 26 Nov 2026: REJECT (second; escalated to Merwyn). Fixed: values in string fields (16-digit, email, both, forbidden term, 10-digit) give exit 1 from the events CLI and office_app with and without --allow-errors, nothing written, messages name field and kind only; console.warn only gets value-free messages. 200 tests OK; --check up to date; fixture 45/0/0; all-types 15/0/0; validate and build_agents OK; waiting tag above beacon; reduced-motion handoff tags apart.
+Still failing fix (2): the data rule checks string values only, not key names or numbers, and unknown fields are only warnings. "nik": 3171234567890123 (no --allow-errors) exits 0 and the number lands in office.html; an email or 16-digit key is written and echoed in the warning. Fix: scan keys and numbers, or scan the rendered data blob in office_app and refuse to write on a hit; never echo a hit key; tests for both.
+— Cahyani (reviewer), recorded by Janice (pmo)
+
+Janice (pmo), 26 Nov: second rejection, so per workflow.yaml escalation (review_rejections >= 2 → human) this waits for Merwyn: (a) back to build for the ~15-line fix and a third review (Cahyani's and Janice's recommendation), or (b) accept with the gap sent to T-027. Not merged. The published artifact (built from 042190b) was read in full by Janice and holds only the Sprint 3 fixture: no company data.
 
 ## Decision
 
