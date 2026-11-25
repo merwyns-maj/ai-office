@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-040]
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/20
 ---
 
 > Follow-up to T-040 (done, PR #11) after Merwyn's decision of 25 Nov 2026 22:44. Repo-only: changes the guard here. Installing it in nimbus or klik-workspace stays a human gate. Touches prod access, so Compliance (Wulan) must check the design.
