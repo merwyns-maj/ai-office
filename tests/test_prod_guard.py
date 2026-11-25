@@ -46,24 +46,43 @@ def payload_text(stdin):
     return stdin if isinstance(stdin, str) else json.dumps(stdin)
 
 
+ASK_KEYS = {"hookSpecificOutput": {"hookEventName", "permissionDecision", "permissionDecisionReason"}}
+
+
 class CaseMixin:
     def check(self, case):
         r = run_hook(payload_text(case["stdin"]))
         out, err = r.stdout.decode(), r.stderr.decode()
-        self.assertEqual(out, "", "stdout must be empty")
-        if case["expect"] == "allow":
+        expect = case["expect"]
+        if expect == "ask":
             self.assertEqual((r.returncode, err), (0, ""))
-            return
-        self.assertEqual(r.returncode, 2, err)
-        self.assertEqual(len(err.strip().splitlines()), 1, "one stderr line")
-        self.assertIn(f"rule={case['rule']}", err)
-        self.assertIn("prod-guard BLOCKED", err)
+            self.assertTrue(out.endswith("\n"))
+            self.assertEqual(len(out.splitlines()), 1, "one stdout line")
+            obj = json.loads(out)
+            reason = obj["hookSpecificOutput"]["permissionDecisionReason"]
+            self.assertEqual(obj, {"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                                          "permissionDecision": "ask",
+                                                          "permissionDecisionReason": reason}})
+            self.assertIn(f"rule={case['rule']}", reason)
+            self.assertIn("Merwyn confirms", reason)
+        else:
+            self.assertEqual(out, "", "stdout must be empty")
+            if expect == "allow":
+                self.assertEqual((r.returncode, err), (0, ""))
+                return
+            self.assertEqual(r.returncode, 2, err)
+            self.assertEqual(len(err.strip().splitlines()), 1, "one stderr line")
+            self.assertIn(f"rule={case['rule']}", err)
+            self.assertIn("prod-guard BLOCKED", err)
+            if case["rule"] == "bytebase":
+                self.assertIn("hand it to Merwyn", err)
         stdin = case["stdin"]
         if isinstance(stdin, dict) and isinstance(stdin.get("tool_input"), dict):
             ti = stdin["tool_input"]
             for v in [ti.get("command")] + [ti.get(f) for f in SQL_FIELDS]:
                 if isinstance(v, str) and v.strip():
                     self.assertNotIn(v, err, "stderr must not echo payload text")
+                    self.assertNotIn(v, out, "stdout must not echo payload text")
 
 
 class TestCases(CaseMixin, unittest.TestCase):
@@ -81,10 +100,23 @@ for _c in CASES:
 
 class TestCaseCoverage(unittest.TestCase):
     def test_minimum_case_counts(self):
-        n = {k: sum(1 for c in CASES if c["expect"] == k) for k in ("block", "allow", "malformed")}
+        n = {k: sum(1 for c in CASES if c["expect"] == k) for k in ("block", "ask", "allow", "malformed")}
         self.assertGreaterEqual(n["block"], 3)
+        self.assertGreaterEqual(n["ask"], 3)
         self.assertGreaterEqual(n["allow"], 3)
         self.assertGreaterEqual(n["malformed"], 1)
+
+    def test_required_kinds_present(self):
+        def has(expect, pred):
+            return any(c["expect"] == expect and pred(c) for c in CASES)
+        self.assertTrue(has("ask", lambda c: c["stdin"]["tool_name"] == "Bash"), "Bash ask")
+        self.assertTrue(has("ask", lambda c: c["stdin"]["tool_name"].startswith("mcp__")
+                            and c["rule"].startswith("mcp-")), "MCP write-tool ask")
+        self.assertTrue(has("ask", lambda c: c["stdin"]["tool_name"].startswith("mcp__")
+                            and c["rule"].startswith("sql-write:")), "MCP SQL-write ask")
+        self.assertTrue(has("block", lambda c: c["rule"] == "bytebase" and c["stdin"]["tool_name"] == "Bash"))
+        self.assertTrue(has("block", lambda c: c["rule"] == "bytebase"
+                            and c["stdin"]["tool_name"].startswith("mcp__")))
 
 
 class TestSentinelLeak(unittest.TestCase):
@@ -95,6 +127,21 @@ class TestSentinelLeak(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         for bad in ("PII_SENTINEL_X", "nik", "DROP TABLE"):
             self.assertNotIn(bad, err)
+
+    def test_pii_sentinel_never_echoed_on_ask(self):
+        payloads = [
+            {"tool_name": PROD_TOOL + "pg_execute_mutation",
+             "tool_input": {"sql": "UPDATE t SET a=1 WHERE nik = 'PII_SENTINEL_X'"}},
+            {"tool_name": "Bash",
+             "tool_input": {"command": "psql service=nimbus-prod -c \"DELETE FROM t WHERE nik='PII_SENTINEL_X'\""}},
+        ]
+        for p in payloads:
+            r = run_hook(json.dumps(p))
+            self.assertEqual(r.returncode, 0)
+            self.assertIn(b"permissionDecision", r.stdout)
+            for bad in ("PII_SENTINEL_X", "nik"):
+                self.assertNotIn(bad, r.stdout.decode())
+                self.assertNotIn(bad, r.stderr.decode())
 
     def test_hostile_tool_name_is_sanitised(self):
         r = run_hook(json.dumps({"tool_name": "mcp__x-prod__\nPII_SENTINEL_X pg_new", "tool_input": {}}))
@@ -168,6 +215,40 @@ class TestFailClosed(unittest.TestCase):
         self.assertIn("RuntimeError", err.getvalue())
         self.assertNotIn("PII_SENTINEL_X", err.getvalue())
 
+    ASK = {"tool_name": "Bash", "tool_input": {"command": "kubectl --context prod-cluster apply -f x.yaml"}}
+
+    def _entry_with(self, stdout):
+        err = io.StringIO()
+        stdin = mock.Mock(buffer=io.BytesIO(json.dumps(self.ASK).encode()))
+        with mock.patch.object(sys, "argv", ["prod_guard.py", "--config", str(CONFIG), "--deadline", "0"]), \
+                mock.patch.object(sys, "stdin", stdin), mock.patch.object(sys, "stdout", stdout), \
+                redirect_stderr(err):
+            with self.assertRaises(SystemExit) as cm:
+                prod_guard._entry()
+        return cm.exception.code, err.getvalue()
+
+    def test_ask_crash_exits_2(self):
+        out = io.StringIO()
+        with mock.patch.object(prod_guard, "format_ask", side_effect=RuntimeError("PII_SENTINEL_X")):
+            code, err = self._entry_with(out)
+        self.assertEqual(code, 2)
+        self.assertEqual(out.getvalue(), "")
+        self.assertIn("rule=internal-error", err)
+        self.assertNotIn("PII_SENTINEL_X", err)
+
+    def test_ask_flush_failure_exits_2(self):
+        class BadFlush(io.StringIO):
+            def flush(self):
+                raise OSError("disk")
+        code, err = self._entry_with(BadFlush())
+        self.assertEqual(code, 2)
+        self.assertIn("rule=internal-error", err)
+
+    def test_ask_through_wrapper_exits_0_with_json(self):
+        r = run_hook(json.dumps(self.ASK), wrapper=True)
+        self.assertEqual(r.returncode, 0)
+        self.assertEqual(json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"], "ask")
+
     def test_bad_arguments_exit_2(self):
         r = subprocess.run([sys.executable, str(SCRIPT), "--nope"], input=b"", capture_output=True, timeout=30)
         self.assertEqual(r.returncode, 2)
@@ -206,11 +287,20 @@ class TestConfig(unittest.TestCase):
         self.assert_config_error(self.cfg_with(
             lambda d: d["bash"]["write"].append({"id": "bash-bad", "pattern": "("})))
 
-    def test_allowlist_action_apply_rejected(self):
-        self.assert_config_error(self.cfg_with(lambda d: d["allowlist"][0].update(action="apply")))
+    def test_allowlist_nonempty_rejected(self):
+        entry = {"id": "bytebase-placeholder", "tool": "^Bash$", "action": "submit-change-issue",
+                 "command": "bytebase-submit-issue --project PLACEHOLDER"}
+        path = self.cfg_with(lambda d: d["allowlist"].append(entry))
+        self.assert_config_error(path)
+        r = subprocess.run([sys.executable, str(SCRIPT), "--check-config", "--config", path],
+                           capture_output=True, timeout=30)
+        self.assertEqual(r.returncode, 2)
+        self.assertEqual(r.stdout, b"")
+        self.assertIn(b"rule=config-error", r.stderr)
 
-    def test_allowlist_without_action_rejected(self):
-        self.assert_config_error(self.cfg_with(lambda d: d["allowlist"][0].pop("action")))
+    def test_allowlist_empty_in_shipped_configs(self):
+        for f in (CONFIG, EXAMPLE):
+            self.assertEqual(json.loads(f.read_text())["allowlist"], [], f.name)
 
     def test_wrong_version(self):
         self.assert_config_error(self.cfg_with(lambda d: d.update(version=2)))
@@ -238,27 +328,6 @@ class TestConfig(unittest.TestCase):
                                capture_output=True, env=env, timeout=30)
         self.assertEqual(r.returncode, 2)
         self.assertIn(b"rule=config-error", r.stderr)
-
-    def test_allowlist_eligibility_enforced_in_decide(self):
-        """A config whose write rules would not catch it: eligibility alone must deny."""
-        def mutate(d):
-            d["bash"]["write"] = []
-            d["bash"]["read_only"] = []
-            d["allowlist"][0]["command"] = "bytebase-submit-issue --project [^;]+"
-        path = self.cfg_with(mutate)
-
-        def go(cmd):
-            return run_hook(json.dumps({"tool_name": "Bash", "tool_input": {"command": cmd}}), config=path)
-        ok = go("bytebase-submit-issue --project PLACEHOLDER")
-        self.assertEqual((ok.returncode, ok.stderr), (0, b""))
-        for cmd in ("bytebase-submit-issue --project a..b",
-                    "bytebase-submit-issue --project a > out",
-                    "bytebase-submit-issue --project a apply",
-                    "bytebase-submit-issue --project a\npsql x",
-                    "bytebase-submit-issue --project $(id)"):
-            r = go(cmd)
-            self.assertEqual(r.returncode, 2, cmd)
-            self.assertIn(b"rule=default-deny", r.stderr, cmd)
 
 
 class TestUnits(unittest.TestCase):
@@ -293,13 +362,6 @@ class TestUnits(unittest.TestCase):
         self.assertEqual(k("please Delete x"), "DELETE")
         self.assertEqual(k("select pg_terminate_backend(1)"), "PG_TERMINATE_BACKEND")
 
-    def test_allowlist_eligible(self):
-        e = prod_guard.allowlist_eligible
-        self.assertTrue(e("tool --project X --file migrations/a.sql"))
-        for bad in ("a; b", "a && b", "a | b", "a `b`", "a $(b)", "a > b", "a < b", "a\nb", "x/../y",
-                    "tool apply", "tool ROLLOUT", "tool approve", "tool deploy", "tool execute", "tool run-now"):
-            self.assertFalse(e(bad), bad)
-
     def test_mentions_k8s_secret(self):
         m = prod_guard.mentions_k8s_secret
         self.assertTrue(m("Bash", {}, "kubectl get\n secrets"))
@@ -316,14 +378,33 @@ class TestUnits(unittest.TestCase):
         self.assertNotIn("\n", line)
         self.assertIn("tool=<unknown>", prod_guard.format_block("default-deny", None))
         self.assertIn("rule=bash-helm-write", prod_guard.format_block("bash-helm-write", "Bash"))
+        self.assertNotIn("Bytebase change issue", line)
+
+    def test_format_ask(self):
+        out = prod_guard.format_ask("sql-write:DELETE", "Bash")
+        self.assertTrue(out.endswith("\n"))
+        self.assertNotIn("\n", out[:-1])
+        obj = json.loads(out)
+        self.assertEqual(set(obj), {"hookSpecificOutput"})
+        self.assertEqual(set(obj["hookSpecificOutput"]), ASK_KEYS["hookSpecificOutput"])
+        self.assertEqual(obj["hookSpecificOutput"]["hookEventName"], "PreToolUse")
+        self.assertEqual(obj["hookSpecificOutput"]["permissionDecision"], "ask")
+        self.assertIn("rule=sql-write:DELETE", obj["hookSpecificOutput"]["permissionDecisionReason"])
+        bad = prod_guard.format_ask("bash-x", "mcp__x-prod__\nbad")
+        self.assertIn("tool=<invalid>", bad)
+        self.assertEqual(len(bad.splitlines()), 1)
 
     def test_decide_in_process(self):
         cfg = prod_guard.load_config(CONFIG)
         d = prod_guard.decide({"tool_name": "Bash", "tool_input": {"command": "ls"}}, cfg)
-        self.assertTrue(d.allow)
+        self.assertEqual(d.action, "allow")
         d = prod_guard.decide({"tool_name": "Bash", "tool_input": {"command": "kubectl get secrets"}}, cfg)
-        self.assertEqual((d.allow, d.rule), (False, "k8s-secret-read"))
+        self.assertEqual((d.action, d.rule), ("block", "k8s-secret-read"))
         self.assertEqual(d.reason, prod_guard.REASONS["k8s-secret-read"])
+        d = prod_guard.decide({"tool_name": "Bash", "tool_input": {"command": "kubectl --context prod-x apply -f a"}}, cfg)
+        self.assertEqual((d.action, d.rule), ("ask", "bash-kubectl-write"))
+        d = prod_guard.decide({"tool_name": "mcp__bytebase__x", "tool_input": {}}, cfg)
+        self.assertEqual((d.action, d.rule), ("block", "bytebase"))
 
 
 def _added_files():
@@ -334,6 +415,11 @@ def _added_files():
 
 
 class TestHygiene(unittest.TestCase):
+    def test_no_old_allowlist_wording(self):
+        old = "allow" "listed Bytebase"          # concatenated so this file does not match itself
+        for path in _added_files():
+            self.assertNotIn(old, path.read_text(encoding="utf-8"), str(path.relative_to(REPO)))
+
     # Detection patterns are built by concatenation so this file does not match itself.
     TLDS = "com|net|org|io|id|co|dev|app|cloud|local|internal|ai"
     DOMAIN = re.compile(r"\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:" + TLDS + r")\b", re.I)
