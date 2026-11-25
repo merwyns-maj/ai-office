@@ -2,7 +2,7 @@
 id: T-015
 title: "Partner-facing writing skill"
 phase: 3-skills
-status: design
+status: build
 priority: P2
 owner: engineer
 where: chat
