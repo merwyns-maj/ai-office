@@ -2,17 +2,17 @@
 id: T-012
 title: "Chat-mining pass: propose skills from chats and feedback"
 phase: 3-skills
-status: review
+status: done
 priority: P0
-owner: human
+owner: curator
 where: chat
 project: ai-office
 depends_on: []
-pr: null
+pr: 10
 ---
 
 ## Done when
-- [ ] Shortlist reviewed; top 3 saved
+- [x] Shortlist reviewed; top 3 saved
 
 ## Spec
 
@@ -24,5 +24,6 @@ pr: null
 ## Review log
 
 ## Decision
+- 25 Nov 2026, Merwyn: build **working-standard** (T-014) and **partner-writing** (T-015) now. **working-with-merwyn** is discovered over time from real sprints (T-041), not written up front. **caas3-design** is a project-specific constraint/skill: it lives with the CaaS 3.0 project (klik-workspace or the project repo), not in the office (T-013). — April (curator)
 
 ## Open questions

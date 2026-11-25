@@ -6,8 +6,8 @@ status: todo
 priority: P0
 owner: pmo
 where: chat
-project: ai-office
-depends_on: [T-012]
+project: klik-workspace
+depends_on: [T-012, T-002]
 pr: null
 ---
 
@@ -27,3 +27,4 @@ pr: null
 ## Decision
 
 ## Open questions
+- 25 Nov 2026, Merwyn: project-specific; build it inside the CaaS 3.0 project (klik-workspace or the project repo), not as an office skill. Needs T-002. — Janice (pmo)
