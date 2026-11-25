@@ -21,4 +21,5 @@ desks:
   - { agent: reviewer, label: Cahyani,   room: lab,        sprite: qa }
   - { agent: compliance, label: Wulan, room: corner,     sprite: officer }
   - { agent: curator, label: April,    room: archive,    sprite: librarian }
+  - { agent: designer, label: Dinda,     room: whiteboard, sprite: designer }
 hub: lobby

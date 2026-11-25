@@ -49,6 +49,7 @@ base/
 | `stages` | Ordered list of `{ id, owner, output_section, exit }`. `id` values are the allowed task `status` values. |
 | `terminal` | Stages that end a task (`done`, `parked`). |
 | `gates` | `{ stage, approver }`: transitions that need a human or a named agent before moving on. |
+| `consults` | Optional list of { agent, stage, when, output_section, accepted_by }: an org agent called inside a stage. It writes only its own section and never sets status or owner; accepted_by must be the stage owner; output_section must not be a stage's section. Added in T-047. |
 | `escalation` | Rules such as `review_rejections >= 2 → human`. |
 | `status_writers` | Who may change `status` (default: PMO only, plus listed exceptions). |
 

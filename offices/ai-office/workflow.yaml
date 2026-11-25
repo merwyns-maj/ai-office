@@ -6,6 +6,11 @@ stages:
   - { id: review, owner: reviewer,  output_section: Review log,   exit: "PASS (→ done) or REJECT (→ build)" }
 terminal: [done, parked]
 
+# Consults (T-047): an agent called inside a stage by the PMO or the stage owner. Not a stage: the consult
+# writes only its own section and never sets status or owner. The task stays with the stage owner, who accepts it.
+consults:
+  - { agent: designer, stage: design, when: "the Spec or Design has UI, visual or motion work", output_section: UX design, accepted_by: architect }
+
 # Authority (decided by Merwyn, 25 Nov 2026): the office is self-managed inside this repo.
 # PMO approves specs, Reviewer PASS is required before merge, PMO merges.
 gates:

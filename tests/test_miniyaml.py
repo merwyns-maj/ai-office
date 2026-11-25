@@ -24,7 +24,7 @@ class RealFiles(unittest.TestCase):
         self.assertEqual(o["budget"]["monthly_usd_cap"], 60)   # int, comment dropped
         self.assertEqual(o["human"]["approves"][0], "spec")
         org = loads((O / "org.yaml").read_text(), "org.yaml")
-        self.assertEqual(len(org["agents"]), 7)
+        self.assertEqual(len(org["agents"]), 8)
         self.assertEqual(org["agents"][0]["role"], "Chief of Staff (PMO)")
 
     def test_frontmatter_agent_and_task(self):
