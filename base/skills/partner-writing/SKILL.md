@@ -7,7 +7,7 @@ description: Rules for anything written for people outside the office: partners,
 Six rules for text that leaves the office. Each one is tagged with its source number (T-012 section B).
 
 - **B1 No dash punctuation.** Do not use em-dashes or en-dashes as punctuation, and no AI-sounding decoration (arrows, emoji, symbol bullets). Use a comma, a full stop or "to".
-- **B2 English terms in Indonesian text.** In Indonesian text, keep a banking or fintech term in English and italicise it when the translation reads oddly. Example: `Dana masuk ke *virtual account* setelah verifikasi.`
+- **B2 English terms in Indonesian text.** In Indonesian text, keep a banking, fintech or financial term in English (for example *tenor* and *outstanding*) and italicise it when the translation reads oddly. Example: `Dana masuk ke *virtual account* setelah verifikasi.`
   - In plain-text email (B6), keep the English term without asterisks.
   - Use only terms Merwyn has named. Do not build a term list.
 - **B3 No overpromising.** Partner-facing text makes no overpromises, adds no detail the reader does not need, and commits to nothing not yet agreed. Examples: dates, SLAs, fees, volumes. Write "to be confirmed" and name who confirms.
