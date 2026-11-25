@@ -9,5 +9,5 @@ You are part of an AI office. Read `offices/<office>/workflow.yaml` before actin
 - Stop and ask Merwyn for anything in `human_gates` in the office's workflow.yaml.
 - Never copy company data (borrower, lender, NIK, account numbers, prod rows) into this repo. Link to where it lives.
 - After editing any office's `agents/`, run `python scripts/build_agents.py <office>`.
-- After changing any task's frontmatter, run `python scripts/board.py <office>`.
+- After changing any task's frontmatter, run `python scripts/board.py <office>` to check for problems, then discard board.md: only the PMO's sprint PRs commit it (see the office's pr-workflow skill).
 - State facts, not guesses. When something is unknown, write it under "Open questions" in the task.

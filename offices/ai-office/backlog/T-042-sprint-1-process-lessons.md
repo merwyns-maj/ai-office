@@ -2,9 +2,9 @@
 id: T-042
 title: "Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: []
@@ -156,3 +156,36 @@ Links: T-042, sprints/sprint-01.md Retro, PR <n>
 - Spec approved: PMO never pushes board.md to main; task branches don't commit it; PMO refreshes it in sprint-NN-plan/close PRs. No CI exists. — Janice (pmo)
 - Design approved. Ruling on Fang's open question: workflow.yaml merge.requires is amended in this task to allow 'sprint-NN-*' branches for planning-only PRs (no Reviewer needed); this is an office rule, not a human gate. — Janice (pmo)
 
+
+
+## Build notes
+**What changed (text only, no script or engine change):** `pm-playbook` new section 0 (rule a); `pr-workflow` pre-commit check line plus section "board.md (generated)" (rule b); `handoff` step 5 rewritten plus section "If you cannot edit the task file" (rule c); `CLAUDE.md` line 12; pointer lines in `pmo-playbook` (section 2 step 5, new step 6, section 7) and `review-checklist` step 3; `offices/ai-office/workflow.yaml` merge exception per Janice's ruling.
+
+**Verify**
+```
+$ python3 scripts/build_agents.py ai-office
+ai-office: built 7 agents -> .claude/agents/ (architect, compliance, curator, engineer, pm, pmo, reviewer)
+$ python -m engine.runtime validate ai-office
+ai-office: OK — 7 agents, 5 stages, 42 tasks, 15 skills
+$ python -m unittest -q
+Ran 133 tests in 4.780s
+OK
+```
+`git status` after build_agents: only the 7 text files above changed; nothing under `.claude/agents/` (as Design expected). board.md was not committed (`git diff --cached --name-only -- 'offices/*/board.md'` prints nothing).
+
+**Done-when map**
+| Done when | Evidence |
+|---|---|
+| pm-playbook start-of-task step | `grep -n -i parent offices/ai-office/skills/pm-playbook/SKILL.md` finds section 0 steps 1-3 |
+| pr-workflow one board.md rule | `grep -n "board.md" offices/ai-office/skills/pr-workflow/SKILL.md` |
+| no skill/CLAUDE.md tells agents to commit board.md on a task branch | `grep -rn "board.py" offices/ai-office/skills CLAUDE.md` shows 5 lines: handoff step 5 and CLAUDE.md say discard; pr-workflow lines say discard/PMO sprint PR only. No `.github/` exists |
+| handoff read-only paragraph | `handoff/SKILL.md`, section "If you cannot edit the task file" |
+| build_agents exits 0, no unbuilt diffs | output above; no `.claude/agents/` diff |
+| each rule in one skill, none opposed | rule a only in pm-playbook (pmo-playbook only points to it), rule b only in pr-workflow (pointers elsewhere), rule c only in handoff |
+
+**Deviations**
+- workflow.yaml: Janice's ruling is added as a comment plus a new key `requires_planning_only` under `merge`, leaving `requires` unchanged, so existing consumers of `requires` are unaffected. `engine.runtime validate` still passes. Reviewer may prefer folding it into `requires`; wording only.
+- pr-workflow's board.md section also mentions the planning-only exception (one sentence, pointing to workflow.yaml).
+- Ticks in Done when left for the Reviewer.
+
+— Sebastian (engineer)

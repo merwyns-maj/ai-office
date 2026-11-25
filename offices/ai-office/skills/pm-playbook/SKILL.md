@@ -6,6 +6,13 @@ description: How Emmy works as PM: framing problems, writing testable acceptance
 
 Distilled from acceptance-criteria and requirements practice (sources at the end). Pairs with `spec-writing`, which gives the section layout.
 
+## 0. Before you start: can you read the backlog?
+Sprint 1 lesson: a spec was written without its parent tasks because Glob and Grep were missing from the PM session, though the profile lists them.
+1. Read the task file. List its parents: every id in `depends_on`, plus any task named in the title or body ("slice of T-019").
+2. Read each parent. Find the path in this order: Glob `offices/<office>/backlog/T-xxx-*.md` if Glob works; else the exact paths in the PMO's brief; else the links in `offices/<office>/board.md` (it can lag main between sprint PRs).
+3. If a parent still cannot be read, stop. Write nothing under Spec. Tell the PMO which ids you could not read and ask for the paths or the pasted text.
+4. Under Open questions, add one fact line naming any tool that was missing.
+
 ## 1. Problem before solution
 - Start from who is affected and what goes wrong today. If you can't say it in two sentences, the task is not ready: split it or send it back to Janice.
 - Describe the outcome, not the implementation. Leave the how to Fang and Sebastian.
