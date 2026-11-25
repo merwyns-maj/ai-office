@@ -13,7 +13,7 @@ git checkout -b t-xxx-short-name
 git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit -m "T-xxx: <what>
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01MDGJq3GfaeozLojJo8W5Td"
+Claude-Session: <your session URL>"
 
 # 3. Push (a "push negotiation failed" warning is harmless)
 git -c push.negotiate=true push -u origin t-xxx-short-name
@@ -24,11 +24,12 @@ gh api repos/merwyns-maj/ai-office/pulls -f title="T-xxx: <title>" \
 # body ends with:
 #   🤖 Generated with [Claude Code](https://claude.com/claude-code)
 #   (blank line)
-#   https://claude.ai/code/session_01MDGJq3GfaeozLojJo8W5Td
+#   <your session URL>
 
 # 5. Merge (PMO only, after Reviewer PASS). Wait until GitHub has computed mergeability:
 for i in 1 2 3 4 5; do
   m=$(gh api repos/merwyns-maj/ai-office/pulls/<n> --jq .mergeable); [ "$m" = true ] && break; sleep 5; done
+[ "$m" = true ] || { echo "PR <n> not mergeable ($m): stop and check"; exit 1; }
 gh api -X PUT repos/merwyns-maj/ai-office/pulls/<n>/merge -f merge_method=squash --jq .message
 git checkout main && git pull --depth=5 origin main
 ```
