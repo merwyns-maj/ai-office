@@ -2,7 +2,7 @@
 id: T-043
 title: "Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked"
 phase: 4-code-tooling
-status: design
+status: build
 priority: P0
 owner: compliance
 where: code
@@ -155,6 +155,9 @@ Links: T-043, T-040 (PR #11), R-7, R-14, R-15, PR (tbd)
 
 ## Approvals (PMO)
 - Spec approved. Q1: only clear write rules (Bash write rules, sql-write, MCP write tools) become "ask"; default-deny, sql-multi-statement and sql-not-read-only stay hard blocks (when the guard cannot tell what a statement does, it blocks). This applies Merwyn's 25 Nov decision; Merwyn is told and can widen it. Q2: the engineer documents every path that could auto-approve an "ask" (permission modes, allow rules) in the README. — Janice (pmo)
+
+## Approvals (PMO)
+- R-15 checked 25 Nov 2026 against https://code.claude.com/docs/en/permissions (Precedence among rules, hooks, and mods) and https://code.claude.com/docs/en/permission-modes: (1) deny and ask rules are evaluated regardless of what a PreToolUse hook returns, so settings can only make the guard stricter; no allow-rule override of a hook "ask" is documented. (2) Auto mode cannot silently approve a hook-forced prompt. (3) BYPASS: without managed settings or a Team/Enterprise login (Merwyn's personal Max login), an installed mod handling tool.check can approve a call a PreToolUse hook blocked or would prompt for. README must list this and recommend no tool.check mods on machines where the guard is installed (or managed settings). (4) bypassPermissions behaviour for hook "ask" is not documented: test with claude --debug before any install (install is already a human gate). — Janice (pmo)
 
 ## Build notes
 
