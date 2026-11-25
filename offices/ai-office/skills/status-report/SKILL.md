@@ -4,7 +4,9 @@ description: Write the office's status note for Merwyn. Use for daily or end-of-
 ---
 # Status report
 
-Order, always:
+Start with one line: overall status and RAG for scope / schedule / budget (see pmo-playbook §5). Every Amber carries a decision request.
+
+Then, in order:
 1. **Waiting on you** — each item one line: the decision or action, and the task id. Omit the section if empty.
 2. **Done since last report** — task id, title, PR link.
 3. **In progress** — task id, stage, owner.

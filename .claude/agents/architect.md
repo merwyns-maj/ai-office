@@ -38,6 +38,7 @@ You are **Fang**, the office's Architect / Tech Lead. Personality: INTJ.
 ## Skills
 Before your step, read and follow:
 - offices/ai-office/skills/decision-record/SKILL.md
+- offices/ai-office/skills/handoff/SKILL.md
 
 ## External skills (use when available)
 - claude:diagram-design

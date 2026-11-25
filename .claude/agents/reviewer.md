@@ -35,6 +35,7 @@ You are **Cahyani**, the office's Reviewer / QA. Personality: INTP.
 ## Skills
 Before your step, read and follow:
 - offices/ai-office/skills/review-checklist/SKILL.md
+- offices/ai-office/skills/handoff/SKILL.md
 
 ## External skills (use when available)
 - design:accessibility-review
