@@ -29,7 +29,7 @@ offices/<office-id>/
 
 ## org.yaml
 
-`agents`: list of `{ id, reports_to, role }`. `id` must match a file in `agents/`. The top of the chart reports to `human`.
+`agents`: list of `{ id, name, personality, reports_to, role }`. `id` must match a file in `agents/`. The top of the chart reports to `human`.
 
 ## workflow.yaml
 
@@ -52,12 +52,15 @@ extends: base/reviewer        # optional: start from base/agents/reviewer.md
 description: ...              # when to use this agent
 tools: Read, Grep, Glob, Bash # allowed tools
 model: opus                   # opus | sonnet | haiku
-office_skills: [...]          # optional: skills from skills/ to load
+office_skills: [...]          # optional: skills from skills/<name>/SKILL.md to follow
+display_name: Ayu             # optional persona: shown in the app and in task signatures
+personality: ENFJ             # optional persona: communication style (MBTI-style label)
+role_title: Product Manager   # optional persona
 ---
 Body: mission, inputs, outputs, rules, hands off to, escalates when.
 ```
 
-With `extends`, the office file's frontmatter keys override the base's, and its body is appended under "## Office-specific".
+With `extends`, the office file's frontmatter keys override the base's, and its body is appended under "## Office-specific". Persona keys are an office choice, so the same base Reviewer can be Laras in one office and someone else in another. The personality label sets tone and working style only; competence comes from the profile and skills.
 
 ## backlog/T-xxx-slug.md
 

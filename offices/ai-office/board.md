@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**34 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 2 · parked: 0
+**35 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 3 · parked: 0
 
 ## todo (32)
 
@@ -57,12 +57,13 @@ _empty_
 
 _empty_
 
-## done (2)
+## done (3)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
 | [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | curator | — |
 | [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) | P0 | Give Claude GitHub access to the impact-credit-solutions org | curator | — |
+| [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 
 ## parked (0)
 
