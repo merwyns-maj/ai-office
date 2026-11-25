@@ -2,13 +2,14 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**40 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 7 · parked: 0
+**40 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 1 · done: 7 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
+- [T-012](backlog/T-012-chat-mining-pass-propose-skills-from-cha.md) Chat-mining pass: propose skills from chats and feedback
 
-## todo (33)
+## todo (32)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -18,7 +19,6 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-006](backlog/T-006-seed-work-brain-shared-with-systems-glos.md) | P0 | Seed work brain shared/ with systems, glossary and key decisions | pmo | T-003, T-004 |
 | [T-007](backlog/T-007-metric-definitions-provision-revenue-out.md) | P0 | Metric definitions (provision revenue, outstanding, DPD, disbursement = loan amount) | pmo | T-003 |
 | [T-008](backlog/T-008-update-log-entry-skill-to-write-to-brain.md) | P0 | Update log-entry skill to write to brain logs | pmo | T-003 |
-| [T-012](backlog/T-012-chat-mining-pass-propose-skills-from-cha.md) | P0 | Chat-mining pass: propose skills from chats and feedback | pmo | — |
 | [T-013](backlog/T-013-caas-3-0-design-skill.md) | P0 | CaaS 3.0 design skill | pmo | T-012 |
 | [T-019](backlog/T-019-prod-guard-mod-or-hook.md) | P0 | Prod-guard mod or hook | pmo | — |
 | [T-005](backlog/T-005-create-personal-brain-repo-merwyns-maj-p.md) | P1 | Create personal brain repo (merwyns-maj/personal-brain) | pmo | T-003 |
@@ -58,9 +58,11 @@ _empty_
 
 _empty_
 
-## review (0)
+## review (1)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-012](backlog/T-012-chat-mining-pass-propose-skills-from-cha.md) | P0 | Chat-mining pass: propose skills from chats and feedback | human | — |
 
 ## done (7)
 

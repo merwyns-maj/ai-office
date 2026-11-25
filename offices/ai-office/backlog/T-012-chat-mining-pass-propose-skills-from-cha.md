@@ -2,9 +2,9 @@
 id: T-012
 title: "Chat-mining pass: propose skills from chats and feedback"
 phase: 3-skills
-status: todo
+status: review
 priority: P0
-owner: pmo
+owner: human
 where: chat
 project: ai-office
 depends_on: []
@@ -19,6 +19,7 @@ pr: null
 ## Design
 
 ## Build notes
+- Findings: offices/ai-office/research/T-012-chat-mining.md (A working standard, B writing, C CaaS 3.0 design, D governance between us). Chats inside claude.ai Projects were not searchable from here. — April (curator)
 
 ## Review log
 
