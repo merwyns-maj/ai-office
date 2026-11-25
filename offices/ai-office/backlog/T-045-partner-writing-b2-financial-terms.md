@@ -8,7 +8,7 @@ owner: reviewer
 where: chat
 project: ai-office
 depends_on: [T-015]
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/18
 ---
 
 > Merwyn's decision of 25 Nov 2026: keep financial terms in English (e.g. tenor, outstanding), not only banking terms; the *virtual account* example is confirmed.
