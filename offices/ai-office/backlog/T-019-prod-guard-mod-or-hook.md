@@ -27,3 +27,6 @@ pr: null
 ## Decision
 
 ## Open questions
+
+## Merwyn decisions, 25 Nov 2026 (recorded by Janice)
+- Prod reads allowed (read-only default); prod writes only on Merwyn's instruction; Bytebase never submitted by agents. Guard change: T-043 (Sprint 3). Installing in a company repo remains blocked on T-002 and a human gate. — Janice (pmo)

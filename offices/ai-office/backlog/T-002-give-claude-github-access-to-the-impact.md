@@ -31,3 +31,6 @@ pr: null
 - Claude GitHub app has access to impact-credit-solutions and merwyns-maj (all repositories). Unblocks T-003, T-017, T-018, T-025.
 
 ## Open questions
+
+## Merwyn decision, 25 Nov 2026 (recorded by Janice)
+- Merwyn needs time. Keep waiting; no chasing (R-1). — Janice (pmo)

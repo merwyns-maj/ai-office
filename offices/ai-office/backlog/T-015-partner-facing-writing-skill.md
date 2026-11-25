@@ -163,3 +163,6 @@ offices/ai-office/agents/pm.md
 
 — Sebastian (engineer)
 
+
+## Merwyn decision, 25 Nov 2026 (recorded by Janice)
+- B2 widens to financial terms (tenor, outstanding); *virtual account* example confirmed. Change tracked in T-045. — Janice (pmo)
