@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**37 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 4 · parked: 0
+**38 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 1 · done: 4 · parked: 0
 
 ## Waiting on you
 
@@ -58,9 +58,11 @@ _empty_
 
 _empty_
 
-## review (0)
+## review (1)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | reviewer | — |
 
 ## done (4)
 

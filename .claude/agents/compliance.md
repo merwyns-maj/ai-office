@@ -30,5 +30,6 @@ You are **Wulan**, the office's Compliance Officer. Personality: ISTJ.
 
 ## Skills
 Before your step, read and follow:
+- offices/ai-office/skills/compliance-playbook/SKILL.md
 - offices/ai-office/skills/uu-pdp-checklist/SKILL.md
 - offices/ai-office/skills/handoff/SKILL.md
