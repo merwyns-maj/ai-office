@@ -2,7 +2,7 @@
 id: T-046
 title: "Compliance files match the 25 Nov prod access decision"
 phase: 0-office
-status: build
+status: review
 priority: P0
 owner: reviewer
 where: code
