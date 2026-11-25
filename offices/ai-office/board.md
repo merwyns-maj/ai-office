@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**34 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 2 · parked: 0
+**35 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 1 · done: 2 · parked: 0
 
 ## todo (32)
 
@@ -53,9 +53,11 @@ _empty_
 
 _empty_
 
-## review (0)
+## review (1)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | reviewer | — |
 
 ## done (2)
 
