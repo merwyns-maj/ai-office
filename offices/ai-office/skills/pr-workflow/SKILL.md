@@ -41,11 +41,31 @@ git checkout main && git pull --depth=5 origin main
 
 Rules
 - One task, one branch, one PR. Put `pr: <n>` in the task frontmatter.
-- `mergeable: null` means "still computing", not "conflict": wait and retry. `false` means a conflict: rebase on main and push again.
-- Never force-push `main`. Never push to `main`.
-- If a push is rejected as too large: `git fetch --depth=50 origin main` and rebase onto `origin/main`.
+- `mergeable: null` means "still computing", not "conflict": wait and retry. `false` means a conflict: replay the branch onto fresh main and push again (see Replay, not rebase).
+- Never force-push `main`; task branches only as in Replay, not rebase. Never push to `main`.
+- If a push is rejected as too large: replay the branch onto `origin/main` (see Replay, not rebase); its first step fetches with `--depth=50`.
+
+## Replay, not rebase (shallow clones)
+Our clones are shallow (`--depth=5`). There `git rebase` can report add/add conflicts on files only your branch added, because the shared base commit is missing. Do not resolve those. Replay instead:
+
+```bash
+b=t-xxx-short-name
+git fetch --depth=50 origin main
+git log --oneline --reverse origin/main..$b   # must list only this task's commits; if not: git fetch --deepen=50 origin main, check again
+commits=$(git rev-list --reverse origin/main..$b)
+old=$(git ls-remote origin refs/heads/$b | cut -f1)
+git branch -f $b-backup $b
+git checkout -B $b origin/main
+git cherry-pick $commits                      # a conflict here is real: resolve it, then git cherry-pick --continue
+git -c push.negotiate=true push --force-with-lease=$b:$old origin $b
+git branch -D $b-backup                       # once the PR shows the new head
+```
+- Same branch name, so the open PR and `pr: <n>` stay. `--force-with-lease=$b:$old` refuses the push if someone else pushed to the branch since `$old`.
+- Force-push only a `t-xxx` task branch, only this way. Never `main`, never a `sprint-NN-*` branch with someone else's commits.
+- If GitHub rejects the force push (branch protection), push as `$b-r2`, open a new PR, close the old one with a link to the new one, and update `pr:`.
+- If you resolved a real conflict after a Reviewer PASS, say so in the PR; the Reviewer re-checks the changed files before the PMO merges.
 
 ## board.md (generated)
 - Task branches never commit `offices/<office>/board.md`. Run `board.py` to see Problems, then discard the file: `git checkout -- offices/<office>/board.md`.
-- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Planning-only sprint PRs need no Reviewer (workflow.yaml `merge.requires_planning_only`); the PMO merges them. Check before merge: `board.py` on the branch leaves `git diff --exit-code` clean.
+- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Planning-only sprint PRs need no Reviewer; the PMO merges them. Planning-only is defined once, in the comment on `merge.requires_planning_only` in workflow.yaml: sprints/, board.md, raid.md, new task files at todo or spec, and on existing tasks only status, owner, depends_on (never to done) plus dated PMO decision notes. Any other change needs a Reviewer PASS. Check before merge: `board.py` on the branch leaves `git diff --exit-code` clean.
 - Between sprint PRs, board.md on main can lag. For the live board, run board.py locally and do not commit it.

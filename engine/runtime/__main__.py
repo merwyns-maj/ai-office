@@ -36,6 +36,9 @@ def main(argv=None):
     except FileNotFoundError as e:
         print(str(e), file=sys.stderr)
         return 2
+    if office is not None:
+        for w in office.warnings:
+            print(f"warning: {w.file} {w.message}", file=sys.stderr)
     if problems:
         _report(root, problems)
         return 1
