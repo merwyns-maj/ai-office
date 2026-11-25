@@ -2,7 +2,7 @@
 id: T-042
 title: "Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents"
 phase: 7-ways-of-working
-status: design
+status: build
 priority: P1
 owner: engineer
 where: code
@@ -151,3 +151,8 @@ Links: T-042, sprints/sprint-01.md Retro, PR <n>
 - Why Glob/Grep are missing in PM sessions when the profile lists them: is it the launcher's tool config? Who: Janice (RAID R-10). The playbook works either way.
 
 — Fang (architect)
+
+## Approvals (PMO)
+- Spec approved: PMO never pushes board.md to main; task branches don't commit it; PMO refreshes it in sprint-NN-plan/close PRs. No CI exists. — Janice (pmo)
+- Design approved. Ruling on Fang's open question: workflow.yaml merge.requires is amended in this task to allow 'sprint-NN-*' branches for planning-only PRs (no Reviewer needed); this is an office rule, not a human gate. — Janice (pmo)
+
