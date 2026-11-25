@@ -4,7 +4,7 @@ title: "Sprint 1 process lessons: tool check, board.md rule, handoff for read-on
 phase: 7-ways-of-working
 status: design
 priority: P1
-owner: architect
+owner: engineer
 where: code
 project: ai-office
 depends_on: []
@@ -49,3 +49,105 @@ pr: null
 - Fact note: Glob/Grep were unavailable in my session too; I read the listed files directly.
 
 — Emmy (pm)
+
+## Design
+
+**Basis.** Spec above, Sprint 1 Retro, the skills named below, `CLAUDE.md`, `scripts/board.py`, `base/agents/*.md`. Janice's rulings came in the design brief (25 Nov), not in this file: (1) `board.md` is refreshed by a PMO PR at sprint plan and sprint close, so nothing is committed straight to `main` (answers the blocking open question); (2) when Glob/Grep are missing, the PM falls back to Read on paths the PMO supplies. `claude:diagram-design` was not available in this session; no diagram needed.
+
+**Facts checked**
+- There is no `.github/`, no git hook and no CI in the repo (`ls -a`; `git ls-files | grep -i github` matches only task files). Only `scripts/board.py` writes `board.md`; no test reads it. Open question 2 is closed: nothing to fix there.
+- These lines conflict with rule (b) today: `CLAUDE.md` line 12 ("run board.py" after frontmatter changes) and `handoff` step 5 ("run board.py and commit"). `pmo-playbook` §2.1 ("Regenerate the board") and `base/agents/pmo.md` line 15 say run, not commit, so they stay as they are. Base files are out of scope.
+- Read-only by profile: `reviewer` (Read, Grep, Glob, Bash; no Edit/Write) and `compliance` (Read, Grep, Glob). The PM profile lists Glob/Grep, but they were missing in the PM session in Sprint 1 and again in Sprint 2 (Emmy's note). The cause is unknown. The PM has no Bash.
+
+### Approach (text only; no script or engine change)
+1. `offices/ai-office/skills/pm-playbook/SKILL.md`: new section `## 0. Before you start: can you read the backlog?`. This is rule (a). `spec-writing` is unchanged because it covers layout only.
+2. `offices/ai-office/skills/pr-workflow/SKILL.md`: new section `## board.md (generated)` and a pre-commit check line in step 2. This is rule (b).
+3. `offices/ai-office/skills/handoff/SKILL.md`: rewrite step 5 and add the section `## If you cannot edit the task file`. This is rule (c).
+4. `CLAUDE.md` line 12: reworded to match (b).
+5. Pointer lines only, so each rule still lives in one file:
+   - `pmo-playbook` §2 step 5 gets "give the PM exact paths (pm-playbook §0)".
+   - `pmo-playbook` §2 gets a new step 6 and §7 gets one line: "board-refresh PR (pr-workflow)".
+   - `review-checklist` step 3 adds "`board.md` committed on a task branch (pr-workflow)" to its look-for list.
+6. Run `python scripts/build_agents.py ai-office`. Expect no diff under `.claude/agents/`: generated bodies list skill paths, not skill text, and no `office_skills` change. Show the empty `git status`.
+
+### Interfaces: text to add (Sebastian may adjust wording only, not the rules)
+
+(a) `pm-playbook`, inserted before `## 1.`:
+```
+## 0. Before you start: can you read the backlog?
+Sprint 1 lesson: a spec was written without its parent tasks because Glob and Grep were missing from the PM session, though the profile lists them.
+1. Read the task file. List its parents: every id in `depends_on`, plus any task named in the title or body ("slice of T-019").
+2. Read each parent. Find the path in this order: Glob `offices/<office>/backlog/T-xxx-*.md` if Glob works; else the exact paths in the PMO's brief; else the links in `offices/<office>/board.md` (it can lag main between sprint PRs).
+3. If a parent still cannot be read, stop. Write nothing under Spec. Tell the PMO which ids you could not read and ask for the paths or the pasted text.
+4. Under Open questions, add one fact line naming any tool that was missing.
+```
+
+(b) `pr-workflow`. Add this to step 2, before the commit: `git diff --cached --name-only -- 'offices/*/board.md'` must print nothing. Then add a new section after "Rules":
+```
+## board.md (generated)
+- Task branches never commit `offices/<office>/board.md`. Run `board.py` to see Problems, then discard the file: `git checkout -- offices/<office>/board.md`.
+- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Reviewer PASS and PMO merge as for any PR; the review check is that `board.py` on the branch leaves `git diff --exit-code` clean.
+- Between sprint PRs, board.md on main can lag. For the live board, run board.py locally and do not commit it.
+```
+
+(c) `handoff`. New step 5:
+`5. Run python scripts/board.py <office> to catch Problems, then discard the regenerated board.md (git checkout -- offices/<office>/board.md; see pr-workflow). Commit the task file with the task id in the message.`
+
+New section at the end:
+```
+## If you cannot edit the task file
+Applies to any agent without Edit/Write in its session: Reviewer and Compliance always (read-only profiles), any other agent when a tool is missing. Do not stop half done. End your reply with this block, ready to paste:
+
+    HANDOFF T-xxx
+    Section: <Spec | Design | Build notes | Review log | Decision>
+    Body:
+    <section text exactly as it should appear, ending with "— Name (agent-id)">
+    Done when ticks: <exact lines to tick, or none>      (Reviewer, on PASS only)
+    Open questions: <lines to add, each with who can answer, or none>
+    Proposed status: <stage id, or unchanged>
+    Proposed owner: <agent id or human>
+
+The PMO records it:
+- Paste Body verbatim under the section, appended, never reworded.
+- Apply the ticks and the open questions.
+- Set status and owner if `status_writers` and the stage owners allow it. If they do not, leave status, record the text anyway, and say why in the task.
+- Add the line "Recorded by <name> (pmo) from <agent-id>'s handoff."
+- Then run step 5.
+```
+
+`CLAUDE.md` line 12 becomes:
+`- After changing any task's frontmatter, run python scripts/board.py <office> to check for problems, then discard board.md: only the PMO's sprint PRs commit it (see the office's pr-workflow skill).`
+
+### Spec delta for the Reviewer
+Done-when 2 says "the PMO regenerates and commits it after merge". Per Janice's ruling, read it as "in a board-refresh PR at sprint plan and sprint close". The same `grep -n "board.md"` check still applies.
+
+### Risks
+| Risk | Handling |
+|---|---|
+| An agent stages board.md by habit (`git add -A`) | Pre-commit check in pr-workflow step 2, and the review-checklist pointer. The Reviewer can run `git diff --name-only main...HEAD -- 'offices/*/board.md'`; it should be empty |
+| board.md on main is stale between sprints | Its header has the generation date. Anyone can run board.py locally. Accepted trade-off |
+| The PMO rewords a returned handoff | "Verbatim, appended" plus the "Recorded by" line keeps authorship visible |
+| The PM still writes blind | §0 step 3 is a hard stop with nothing written under Spec |
+| Sprint PR branch names do not match workflow.yaml `merge.requires` ("PR open from a t-xxx branch") | Existing practice (PRs #8, #12). Raised below; not changed in this task |
+
+**Compliance:** not flagged. No prod, money, credentials or personal data.
+
+### Decision record draft (for April)
+```
+Decision: Task branches never commit the generated board.md; the PMO commits it only in sprint plan/close PRs.
+Context: Sprint 1, two task branches both committed board.md and conflicted on rebase; CLAUDE.md forbids pushing to main.
+Options: A PMO commits after each merge (direct push breaks the main rule; a PR per merge is noise);
+  B PMO board-refresh PR at sprint plan/close (no tooling, rides on PRs that already exist);
+  C .gitattributes merge driver (needs per-clone git config that does not travel);
+  D gitignore board.md (no board on GitHub for Merwyn).
+Chosen: B, ruled by Janice, because it adds no tooling, no direct push and no extra PRs.
+Consequences: board on main lags between sprints; live view = run board.py locally. Follow-up: ratify sprint-NN branches in workflow.yaml merge.requires.
+Also: read-only agents return a HANDOFF block and the PMO records it verbatim.
+Links: T-042, sprints/sprint-01.md Retro, PR <n>
+```
+
+### Open questions (non-blocking)
+- `workflow.yaml` `merge.requires` says "PR open from a t-xxx branch", but sprint PRs use `sprint-NN-*`. Should it be ratified with a one-line workflow.yaml edit in its own small task? Merwyn set the authority rules. Who: Merwyn via Janice.
+- Why Glob/Grep are missing in PM sessions when the profile lists them: is it the launcher's tool config? Who: Janice (RAID R-10). The playbook works either way.
+
+— Fang (architect)
