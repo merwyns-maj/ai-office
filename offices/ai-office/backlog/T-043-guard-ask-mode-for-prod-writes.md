@@ -4,7 +4,7 @@ title: "Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked"
 phase: 4-code-tooling
 status: build
 priority: P0
-owner: compliance
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-040]
@@ -162,6 +162,12 @@ Links: T-043, T-040 (PR #11), R-7, R-14, R-15, PR (tbd)
 ## Build notes
 
 ## Review log
+- Compliance: PASS — T-043 design: every fail-open path (stdout, JSON, flush) closed, no payload in ask or block output, Bytebase moved to code, allowlist forced empty. PASS is conditional on notes 1 to 3 being in the README or install gate. — Wulan (compliance)
+  1. README + install gate: never run bypassPermissions / --dangerously-skip-permissions on a guarded machine (treat bypass as auto-approving an ask until the claude --debug test shows otherwise); no tool.check mods unless managed settings; engine/SDK runs must not set bypassPermissions; install step 0 = claude --debug ask test in each permission mode; `|| exit 2`, onFailure: block and the throwaway-session prompt check are mandatory.
+  2. README read-access line: Merwyn approved agent reads 25 Nov (R-14); legal sign-off for cloud contexts is his to confirm; read-only DB role (R-8) is still the real control; no prod rows in repo, brains or logs.
+  3. Reviewer checks the README states findings 3 and 4 and that sentinel tests pass on ask and block.
+  4. Follow-up (Janice, before T-019 install): update base/agents/compliance.md, compliance-playbook, uu-pdp-checklist away from "Bytebase change issues"; rebuild agents. Not in this PR.
+  - Recorded by Janice (pmo) from Wulan's HANDOFF block.
 
 ## Decision
 
