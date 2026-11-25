@@ -2,9 +2,9 @@
 id: T-039
 title: "Engine loader and dry-run (repo-only slice of T-024)"
 phase: 6-office
-status: build
+status: review
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-001]
@@ -198,6 +198,73 @@ Links: T-039, T-024, engine/schema/office.md.
 - Approved for build; skipping human-owned tasks in dry-run is accepted. — Janice (pmo)
 
 ## Build notes
+
+**What changed** (new files unless noted)
+- `engine/__init__.py`, `engine/runtime/__init__.py`, `tests/__init__.py` (empty)
+- `engine/runtime/miniyaml.py` (YAML-subset parser, `YamlError`), `loader.py` (load + validate), `dryrun.py` (pick + plan), `__main__.py` (CLI), `README.md` (commands and test command)
+- `tests/test_miniyaml.py`, `tests/test_loader.py`, `tests/test_dryrun.py`, `tests/_helpers.py` (shared fixtures: temp office copy, CLI runner)
+- `engine/README.md`: `runtime/` row now says loader + validate + dry-run built (T-039). One line.
+- Task frontmatter: `status: review`, `owner: reviewer`, `pr` set. `board.md` regenerated.
+- `scripts/`, office files and agents are untouched.
+
+**How to verify** (repo root, Python 3.11+, no network, no API key)
+```
+python -m unittest -v                      # all tests, exit 0
+python -m engine.runtime validate ai-office
+python -m engine.runtime dry-run  ai-office
+```
+
+Real output, test run (`python -m unittest`):
+```
+..............................................
+----------------------------------------------------------------------
+Ran 46 tests in 0.511s
+
+OK
+```
+Real output, `validate ai-office` (exit 0):
+```
+ai-office: OK — 7 agents, 5 stages, 40 tasks, 15 skills
+```
+Real output, `dry-run ai-office` (exit 0):
+```
+ai-office: dry-run (no files changed, no SDK or network calls)
+task: T-012 Chat-mining pass: propose skills from chats and feedback
+file: offices/ai-office/backlog/T-012-chat-mining-pass-propose-skills-from-cha.md
+stage: todo
+owner: pmo (Janice)
+profile: offices/ai-office/agents/pmo.md
+office_skills: pmo-playbook, status-report, pr-workflow, handoff
+skill_files: offices/ai-office/skills/pmo-playbook/SKILL.md, offices/ai-office/skills/status-report/SKILL.md, offices/ai-office/skills/pr-workflow/SKILL.md, offices/ai-office/skills/handoff/SKILL.md
+external_skills: none
+output_section: none (exit: PMO picks it)
+```
+The real office validates clean, so no office-file defects to report. Dry-run picks T-012 (P0, lowest id of the eligible P0s), not T-039 (P1).
+
+**Done-when to test map**
+1. validate exits 0 with counts: `test_loader.RealOffice.test_validate_clean`, `test_validate_by_path`, `test_module_entry_point`
+2. one test per defect (exit 1, names file and problem): `test_loader.Defects.test_missing_required_file`, `test_org_agent_without_agents_file`, `test_task_status_not_in_workflow`, `test_depends_on_missing_task`, `test_agent_skill_without_skill_file`
+3. dry-run prints all keys: `test_dryrun.RealOffice.test_prints_every_key`, `Pick.test_plan_content`, `test_todo_stage_has_no_output_section`, `test_note_when_owner_differs_from_stage_owner`
+4. deterministic pick and "nothing to run": `Pick.test_priority_first`, `test_lowest_id_within_priority`, `test_numeric_id_order`, `test_skips_terminal`, `test_skips_unmet_dependency`, `test_skips_cross_office_dependency`, `test_skips_human_owner`, `test_nothing_to_run`
+5. no SDK/network/credential: `NoSdkNoNetworkNoWrites.test_imports_are_stdlib_allowlist`, `test_dry_run_offline_without_api_key` (sockets patched to raise, API key env vars removed, `anthropic` / `claude_agent_sdk` not in `sys.modules`), `test_runtime_source_has_no_env_or_write_calls`
+6. no file modified: `test_read_only` (sha256 of every file in the office folder before and after validate and dry-run), plus `test_snapshot_would_catch_a_write` so the check can fail
+7. one test command in README: `engine/runtime/README.md` states `python -m unittest -v`
+- I also broke the sort key by hand once; `test_lowest_id_within_priority` and `test_numeric_id_order` failed, then I restored it.
+
+**Deviations from the design** (none change an interface or rule)
+- Import allowlist test also permits relative imports inside `engine.runtime` (`from .loader import ...`), which is what the package uses; the design said "plus `engine.runtime.*`".
+- Duplicate task ids are reported by `load_office` (it builds the id-keyed dict), not by `validate`; the user sees the same one-line problem either way.
+- `tests/_helpers.py` added (shared helper, not in the design's file list).
+- Extra tests beyond the design: YAML parse error names file and line, all problems collected in one run, unknown office exits 2, bad subcommand exits 2, CLI via `python -m` in a subprocess.
+- `skill_files` paths are built as `offices/<id>/skills/<name>/SKILL.md` from the office root, as in the design example.
+
+**Known limits**
+- `miniyaml` rejects a block mapping inside a list item (`- k: v`); use a flow map. None of today's office files need it.
+- Plain scalars containing `: ` in block values are accepted leniently (split on the first `: `).
+- Cross-office `depends_on` are not checked by validate and count as not done in dry-run, per design.
+- Python 3.13 was the local interpreter; code uses nothing newer than 3.11.
+
+— Sebastian (engineer)
 
 ## Review log
 
