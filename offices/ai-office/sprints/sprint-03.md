@@ -23,3 +23,17 @@
 - T-002: org owner installs the Claude GitHub app on impact-credit-solutions (unblocks T-003, T-017, T-018, T-025). No chasing.
 - R-8: before any guard install, is the `kubernetes` MCP server prod-only, and will you commission a read-only DB role and scoped kube role? Not needed this sprint.
 - R-7: the SQL key names of the pg/mysql MCP tools (Bytebase part is closed). Not blocking; confirmed when T-043 is built.
+
+## Close (25 Nov 2026) — Janice (pmo)
+Status: scope Green, schedule Green, budget Green.
+
+**Finished (all with Reviewer PASS):**
+- T-045 partner-writing B2 financial terms — PR #18
+- T-044 defaults warning, replay-not-rebase rule, planning-only defined once — PR #19
+- T-043 guard ask mode: prod writes prompt Merwyn, Bytebase always blocked, fail-closed kept — PR #20 (Compliance PASS with conditions, all met in README)
+
+**What went well:** three tasks moved in parallel worktrees; Cahyani tested the replay rule in a real shallow-clone setup and 8 fail-open bypass attempts on the guard; R-15 settled from the docs in the main session.
+
+**What got stuck:** GitHub API returned 5xx and empty replies during several merges (retries worked); agent sandboxes cannot reach code.claude.com (403), so doc checks must run from the main session; `gh api -F body=@file` failed intermittently, `-f body="$(cat file)"` worked.
+
+**Carry forward:** T-046 (compliance files wording, P0, before any install); guard install (T-019) stays a human gate with step 0 the claude --debug ask test; R-8 read-only DB/kube roles; T-002 waiting on Merwyn, not chased.

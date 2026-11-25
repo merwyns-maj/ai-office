@@ -2,13 +2,13 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**45 tasks** — todo: 31 · spec: 3 · design: 0 · build: 0 · review: 0 · done: 11 · parked: 0
+**46 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 14 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (31)
+## todo (32)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -20,6 +20,7 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-008](backlog/T-008-update-log-entry-skill-to-write-to-brain.md) | P0 | Update log-entry skill to write to brain logs | pmo | T-003 |
 | [T-013](backlog/T-013-caas-3-0-design-skill.md) | P0 | CaaS 3.0 design skill | pmo | T-002 |
 | [T-019](backlog/T-019-prod-guard-mod-or-hook.md) | P0 | Prod-guard mod or hook | pmo | — |
+| [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
 | [T-005](backlog/T-005-create-personal-brain-repo-merwyns-maj-p.md) | P1 | Create personal brain repo (merwyns-maj/personal-brain) | pmo | T-003 |
 | [T-009](backlog/T-009-session-log-table-in-supabase.md) | P1 | Session log table in Supabase | pmo | T-008 |
 | [T-010](backlog/T-010-point-the-session-runs-dashboard-at-the.md) | P1 | Point the Session Runs dashboard at the live log | pmo | T-009 |
@@ -44,13 +45,9 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 
-## spec (3)
+## spec (0)
 
-| ID | P | Task | Owner | Blocked by |
-|---|---|---|---|---|
-| [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | pm | — |
-| [T-044](backlog/T-044-process-lessons-validate-warning-and-replay.md) | P1 | Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase | pm | — |
-| [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | pm | — |
+_empty_
 
 ## design (0)
 
@@ -64,7 +61,7 @@ _empty_
 
 _empty_
 
-## done (11)
+## done (14)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -73,12 +70,15 @@ _empty_
 | [T-037](backlog/T-037-pmo-playbook-and-process-skills.md) | P0 | PMO playbook and process skills (pr-workflow, handoff, RAID log) | curator | — |
 | [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
 | [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | curator | — |
+| [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | curator | — |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 | [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
 | [T-042](backlog/T-042-sprint-1-process-lessons.md) | P1 | Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents | curator | — |
+| [T-044](backlog/T-044-process-lessons-validate-warning-and-replay.md) | P1 | Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase | curator | — |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
+| [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | curator | — |
 
 ## parked (0)
 
