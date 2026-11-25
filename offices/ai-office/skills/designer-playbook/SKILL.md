@@ -22,7 +22,7 @@ Every rule line ends with a source URL or the words "office rule". A rule with n
 
 ## 3. Motion
 - Disney's 12 principles combine physics with cognitive psychology to produce emotion, and apply to UI. https://ixdf.org/literature/article/ui-animation-how-to-apply-disney-s-12-principles-of-animation-to-ui-design
-- The 12 principles solved realistic motion; UI is a different medium and needs its own principles,. https://medium.com/ux-in-motion/ui-animation-principles-disney-is-dead-8bf6c66207f9
+- The 12 principles solved realistic motion; UI is a different medium and needs its own principles. https://medium.com/ux-in-motion/ui-animation-principles-disney-is-dead-8bf6c66207f9
 - Use easing: it reinforces "rightness" and UI without easing feels clunky. https://medium.com/ux-in-motion/ui-animation-principles-disney-is-dead-8bf6c66207f9
 - Each motion names its purpose (continuity, relationship, attention). A motion with no purpose is removed. office rule
 - Any duration or easing figure is a starting value to be judged on screen, not a sourced number. office rule
