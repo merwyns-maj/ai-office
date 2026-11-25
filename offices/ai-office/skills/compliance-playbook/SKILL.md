@@ -7,9 +7,9 @@ description: How Wulan checks work for data-protection and safety risk, grounded
 An engineering guardrail, not legal advice. Legal questions go to KlikA2C's legal/compliance team through Merwyn. Pairs with `uu-pdp-checklist`.
 
 ## 1. The law in brief (what shapes our checks)
-- Indonesia's PDP Law (Law No. 27 of 2022) took effect on 17 October 2022 and is the main data-protection law; sector rules (OJK etc.) still apply where they don't conflict.
+- Indonesia's PDP Law (Law No. 27 of 2022) took effect on 17 October 2022, with a two-year transition to October 2024, and is the main data-protection law; sector rules (OJK etc.) still apply where they don't conflict.
 - It separates the **controller** (decides why and how data is processed) from the **processor** (processes on the controller's instructions). Know which one we are in each flow.
-- **Specific personal data** includes biometric and personal financial data. Lending data is in this category, so the bar is higher: it triggers extra duties such as a data protection impact assessment and a data protection officer.
+- **Specific personal data** includes biometric and personal financial data. Lending data is in this category, so the bar is higher: depending on scale and risk, processing it can trigger extra duties such as a data protection impact assessment and a data protection officer.
 - Processing needs a lawful basis: consent, or another ground such as fulfilling a contract or a legal obligation.
 - Transfers outside Indonesia need the destination to offer an equal or higher level of protection.
 
