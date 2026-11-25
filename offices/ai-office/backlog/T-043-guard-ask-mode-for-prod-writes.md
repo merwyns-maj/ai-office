@@ -2,9 +2,9 @@
 id: T-043
 title: "Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked"
 phase: 4-code-tooling
-status: review
+status: done
 priority: P0
-owner: reviewer
+owner: curator
 where: code
 project: ai-office
 depends_on: [T-040]
@@ -19,15 +19,15 @@ pr: https://github.com/merwyns-maj/ai-office/pull/20
 - Verified fact (Claude Code docs, https://code.claude.com/docs/en/hooks, PreToolUse decision control): `permissionDecision` "ask" prompts the user to confirm and shows `permissionDecisionReason` in the prompt; in a `-p` run where no one can answer, the call is denied and Claude reads the reason. Precedence: deny > defer > ask > allow.
 
 ## Done when
-- [ ] Given a fixture prod write (Bash or MCP) that a write rule blocks today (see Open question 1 for the exact set), when the hook runs, then it exits 0, stderr is empty, and stdout is one JSON object with `hookSpecificOutput.hookEventName` "PreToolUse", `permissionDecision` "ask" and a fixed, non-empty `permissionDecisionReason` that names the rule id and says Merwyn must confirm
-- [ ] Given any Bash command containing the word `bytebase`, or any MCP tool whose name contains `bytebase`, whether or not it names prod or looks like a read, when the hook runs, then it exits 2, stdout is empty, and the stderr reason tells the agent not to submit, to prepare the plan and hand it to Merwyn, who submits it himself
-- [ ] The allowlist is empty in `prod_guard.example.json` and in the test fixtures; given a config with any allowlist entry, `load_config` fails and the hook exits 2 with `rule=config-error`; the old allowlist-allow tests are removed or turned into this check
-- [ ] Unchanged, shown by the existing fixture cases still passing: reads exit 0 with empty stdout and stderr; every `k8s-secret-read` case exits 2; every fail-closed case (malformed input, input too large, config error, internal error, deadline, broken import, missing interpreter, through the `|| exit 2` wrapper) exits 2 with empty stdout (no "ask" JSON on any error path)
-- [ ] Given any ask, block or malformed case, neither stdout nor stderr contains the command or any SQL field value; the `PII_SENTINEL_X` test also covers an ask case (a write whose SQL holds the sentinel)
-- [ ] The old reason text "Prod writes go through an allowlisted Bytebase change issue" no longer appears in `engine/guard/` (code, config, README, tests)
-- [ ] `python -m unittest -v` from the repo root exits 0 and lists at least: 1 Bash ask, 1 MCP write-tool ask, 1 MCP SQL-write ask, 1 Bash and 1 MCP Bytebase block, and the unchanged read, secret and fail-closed cases
-- [ ] `engine/guard/README.md` states: prod writes ask Merwyn; Bytebase is always blocked and left to Merwyn; in `-p`/headless runs "ask" ends as a denial with the reason shown to Claude (cites https://code.claude.com/docs/en/hooks); Merwyn's confirmation in the prompt is his instruction; which settings (permission mode, allow rules) could auto-approve an "ask" (R-15); installing is not done here
-- [ ] Wulan (compliance) has passed the design
+- [x] Given a fixture prod write (Bash or MCP) that a write rule blocks today (see Open question 1 for the exact set), when the hook runs, then it exits 0, stderr is empty, and stdout is one JSON object with `hookSpecificOutput.hookEventName` "PreToolUse", `permissionDecision` "ask" and a fixed, non-empty `permissionDecisionReason` that names the rule id and says Merwyn must confirm
+- [x] Given any Bash command containing the word `bytebase`, or any MCP tool whose name contains `bytebase`, whether or not it names prod or looks like a read, when the hook runs, then it exits 2, stdout is empty, and the stderr reason tells the agent not to submit, to prepare the plan and hand it to Merwyn, who submits it himself
+- [x] The allowlist is empty in `prod_guard.example.json` and in the test fixtures; given a config with any allowlist entry, `load_config` fails and the hook exits 2 with `rule=config-error`; the old allowlist-allow tests are removed or turned into this check
+- [x] Unchanged, shown by the existing fixture cases still passing: reads exit 0 with empty stdout and stderr; every `k8s-secret-read` case exits 2; every fail-closed case (malformed input, input too large, config error, internal error, deadline, broken import, missing interpreter, through the `|| exit 2` wrapper) exits 2 with empty stdout (no "ask" JSON on any error path)
+- [x] Given any ask, block or malformed case, neither stdout nor stderr contains the command or any SQL field value; the `PII_SENTINEL_X` test also covers an ask case (a write whose SQL holds the sentinel)
+- [x] The old reason text "Prod writes go through an allowlisted Bytebase change issue" no longer appears in `engine/guard/` (code, config, README, tests)
+- [x] `python -m unittest -v` from the repo root exits 0 and lists at least: 1 Bash ask, 1 MCP write-tool ask, 1 MCP SQL-write ask, 1 Bash and 1 MCP Bytebase block, and the unchanged read, secret and fail-closed cases
+- [x] `engine/guard/README.md` states: prod writes ask Merwyn; Bytebase is always blocked and left to Merwyn; in `-p`/headless runs "ask" ends as a denial with the reason shown to Claude (cites https://code.claude.com/docs/en/hooks); Merwyn's confirmation in the prompt is his instruction; which settings (permission mode, allow rules) could auto-approve an "ask" (R-15); installing is not done here
+- [x] Wulan (compliance) has passed the design
 
 ## Spec
 **Problem.** Merwyn decided on 25 Nov 2026 that agents may read prod, that prod writes happen only on his instruction, and that agents never submit to Bytebase. The T-040 guard hard-blocks every prod write and routes writes to an allowlisted Bytebase submission, so it contradicts that decision.
@@ -199,6 +199,8 @@ Note: `kubectl --context prod-cluster get pods` asks (`sql-write:CLUSTER`): the 
 — Sebastian (engineer)
 
 ## Review log
+- PASS — 154 tests OK; crafted payloads through the README command form: prod writes give one ask JSON line (rule id + tool + fixed text only, PII sentinel absent); Bytebase via Bash or MCP name blocks with hand-to-Merwyn reason; non-empty allowlist is a config error; reads stay silent; k8s secret reads, multi-statement, non-read-only and unknown prod calls block; all malformed inputs exit 2 with empty stdout; 8 bypass attempts (dev/full, closed stdout, broken pipe, killed interpreter, JSON injection in tool name, JSON/ANSI in SQL, duplicate sql key, unlisted field) none failed open or leaked; README carries Wulan's notes 1–2 with doc URLs; old wording gone. Deviations accepted. Notes: Bytebase in MCP arguments is not matched (name-only, documented); Bash multi-statement asks rather than blocks; safe-charset tool names echoed. — Cahyani (reviewer)
+  - Recorded by Janice (pmo) from Cahyani's HANDOFF block. Open question answered: the R-15 docs pages were fetched from the main chat session on 25 Nov (WebFetch works there, not in agent sandboxes); install step 0 remains the proof.
 - Compliance: PASS — T-043 design: every fail-open path (stdout, JSON, flush) closed, no payload in ask or block output, Bytebase moved to code, allowlist forced empty. PASS is conditional on notes 1 to 3 being in the README or install gate. — Wulan (compliance)
   1. README + install gate: never run bypassPermissions / --dangerously-skip-permissions on a guarded machine (treat bypass as auto-approving an ask until the claude --debug test shows otherwise); no tool.check mods unless managed settings; engine/SDK runs must not set bypassPermissions; install step 0 = claude --debug ask test in each permission mode; `|| exit 2`, onFailure: block and the throwaway-session prompt check are mandatory.
   2. README read-access line: Merwyn approved agent reads 25 Nov (R-14); legal sign-off for cloud contexts is his to confirm; read-only DB role (R-8) is still the real control; no prod rows in repo, brains or logs.
@@ -207,6 +209,7 @@ Note: `kubectl --context prod-cluster get pods` asks (`sql-write:CLUSTER`): the 
   - Recorded by Janice (pmo) from Wulan's HANDOFF block.
 
 ## Decision
+- Prod writes the guard can identify become a Claude Code ask prompt (Merwyn's confirmation is his instruction); anything unclear still blocks; Bytebase is never submitted by agents. Installing the guard stays a human gate, with step 0 the claude --debug ask test. — April (curator)
 
 ## Open questions
 - Compliance flag: prod access. Wulan checks the design before build.
