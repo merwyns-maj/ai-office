@@ -75,6 +75,21 @@ class Defects(unittest.TestCase):
         f.write_text(f.read_text().replace("office_skills: [", "office_skills: [no-such-skill, ", 1))
         self.check("offices/ai-office/agents/architect.md: office_skills 'no-such-skill' has no skills/no-such-skill/SKILL.md")
 
+    def test_defaults_names_missing_base_skill(self):
+        (self.c.root.parent.parent / "base" / "defaults.yaml").write_text("base_skills: [working-standard, ghost]\n")
+        self.check("base/defaults.yaml: base_skills 'ghost' has no base/skills/ghost/SKILL.md")
+
+    def test_agent_base_skill_missing(self):
+        f = self.c.root / "agents" / "architect.md"
+        f.write_text(f.read_text().replace("name:", "base_skills: [ghost]\nname:", 1))
+        self.check("offices/ai-office/agents/architect.md: base_skills 'ghost' has no base/skills/ghost/SKILL.md")
+
+    def test_skill_clash_base_and_office(self):
+        d = self.c.root.parent.parent / "base" / "skills" / "handoff"
+        d.mkdir()
+        (d / "SKILL.md").write_text("---\nname: handoff\n---\n")
+        self.check("offices/ai-office/skills/handoff: skill 'handoff' also exists in base/skills/; keep one")
+
     def test_yaml_parse_error_names_file_and_line(self):
         f = self.c.root / "workflow.yaml"
         f.write_text("a: |\n  x\n")

@@ -11,6 +11,7 @@ ai-office/
   engine/            runtime, app, renderer (planned — see engine/README.md)
     schema/          what an office folder must contain
   base/agents/       shared agent profiles any office can extend
+  base/skills/       shared skills; base/defaults.yaml base_skills applies them to every agent of every office
   offices/
     ai-office/       the office that builds AI Office
       office.yaml    name, brain, repos, budget

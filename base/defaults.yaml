@@ -1,0 +1,3 @@
+# Repo-wide defaults every office inherits. Flat `key: [list]` lines only.
+# Read by scripts/build_agents.py and engine/runtime.
+base_skills: [working-standard]   # every agent in every office follows these

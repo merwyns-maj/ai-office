@@ -2,9 +2,9 @@
 id: T-014
 title: "Working-standard skill"
 phase: 3-skills
-status: build
+status: review
 priority: P1
-owner: engineer
+owner: reviewer
 where: chat
 project: ai-office
 depends_on: [T-012]
@@ -177,3 +177,51 @@ Build this before T-015, which uses `base_skills`. Independent of T-042, so the 
 - Spec approved: drop 'used by PRD and recon skills' (company skills); it becomes a follow-up on T-013 after T-002. ai-office is the only office today. — Janice (pmo)
 - Design approved (base/skills + base/defaults.yaml + optional per-agent base_skills). Company offices outside this repo get base/ when T-017/T-024 decide distribution. — Janice (pmo)
 
+
+## Build notes
+
+**What changed**
+- `base/skills/working-standard/SKILL.md`: rules A1 to A10, one line each, tagged with the A-number, no company data.
+- `base/defaults.yaml`: `base_skills: [working-standard]`.
+- `scripts/_fm.py`: `read_flat()`.
+- `scripts/build_agents.py`: `build(office, root=ROOT)`, new `skill_paths()` (base defaults, agent `base_skills`, `office_skills`, de-duplicated; clash and missing-name errors as designed). Every agent is resolved and checked first; `.claude/agents/` is cleared only after that. The extends-merge moved into `merged()`.
+- `engine/runtime/loader.py`: `Agent.base_skills`, `Office.base_skills`, `Office.default_base_skills`, `Office.skill_files()`, three new validate problems. `dryrun.py`: `base_skills` row after `profile`; `skill_files` uses `office.skill_files`.
+- Docs: `engine/schema/office.md` (Base section, `base_skills` key, clash rule), `README.md` layout.
+- Regenerated `.claude/agents/*.md` (7 files, +1 line each).
+- Tests: new `tests/test_build_agents.py` (7 tests, temp repo, temp second office `demo`), 3 new in `test_loader.py`, `test_dryrun.py` updated.
+
+**How to verify**
+`python3 scripts/build_agents.py ai-office; python3 -m engine.runtime validate ai-office; python3 -m engine.runtime dry-run ai-office; python3 -m unittest -v`
+
+**Output (real)**
+```
+$ python3 scripts/build_agents.py ai-office
+ai-office: built 7 agents -> .claude/agents/ (architect, compliance, curator, engineer, pm, pmo, reviewer)
+$ python3 -m engine.runtime validate ai-office
+ai-office: OK — 7 agents, 5 stages, 42 tasks, 15 skills
+$ python3 -m engine.runtime dry-run ai-office   (excerpt)
+base_skills: working-standard
+skill_files: base/skills/working-standard/SKILL.md, offices/ai-office/skills/pmo-playbook/SKILL.md, ...
+$ python3 -m unittest
+Ran 143 tests in 4.695s
+OK
+```
+
+**Done-when to evidence**
+| Done when | Evidence |
+|---|---|
+| One SKILL.md named working-standard, base level | `grep -rl --include=SKILL.md "name: working-standard" base offices \| wc -l` prints 1 (`base/skills/working-standard/SKILL.md`). Without `--include`, the count is 2 because this task file quotes the pattern. |
+| A1 to A10, one short rule each | `base/skills/working-standard/SKILL.md`, ten bullets A1..A10 |
+| Agent in a second office gets the skill with no profile edit | `test_second_office_agent_gets_skill_without_editing_profile` (ok); `grep -l "base/skills/working-standard" .claude/agents/*.md \| wc -l` prints 7, the agent count (`test_every_ai_office_agent_gets_working_standard`) |
+| build_agents exits 0 for every existing office | only ai-office exists; exit 0 above |
+| No agent file is the source of truth | `grep -rn working-standard offices/*/agents` prints nothing; `test_agent_files_do_not_list_the_skill` |
+| No company data in the skill | read the file: none |
+| A bad name never empties `.claude/agents/` | `tests.test_build_agents.Failures`: 3 tests assert a pre-existing file survives |
+
+**Deviations**
+- The Spec's grep over `offices/` also matches this task file, so it prints 2 unless limited to SKILL.md files. The skill itself is not duplicated.
+- The clash check covers every folder in `offices/<o>/skills/`, not only names an agent lists, so it matches the validate rule.
+- Extends-merge moved to a `merged()` helper so all checks run before the unlink. Generated output differs only by the added skill line.
+- "Used by PRD and recon skills" dropped per PMO approval; not built.
+
+— Sebastian (engineer)

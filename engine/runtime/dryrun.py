@@ -45,8 +45,9 @@ def plan(office, task):
         ("stage", task.status),
         ("owner", owner),
         ("profile", office.rel(agent.path) if agent else "none"),
+        ("base_skills", ", ".join(office.default_base_skills + (agent.base_skills if agent else [])) or "none"),
         ("office_skills", ", ".join(agent.office_skills) if agent and agent.office_skills else "none"),
-        ("skill_files", ", ".join(f"{office.rel(office.root)}/skills/{s}/SKILL.md" for s in agent.office_skills) if agent and agent.office_skills else "none"),
+        ("skill_files", ", ".join(office.skill_files(agent)) if agent and office.skill_files(agent) else "none"),
         ("external_skills", ", ".join(agent.external_skills) if agent and agent.external_skills else "none"),
         ("output_section", section),
     ]
