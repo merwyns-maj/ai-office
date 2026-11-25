@@ -16,7 +16,8 @@ The office exists to finish the backlog's most valuable work, not to produce pro
 2. Candidate tasks: unblocked (`depends_on` all done), not behind a human gate, highest priority first.
 3. Pick at most 3. A sprint that finishes 3 beats one that starts 6.
 4. Write `sprints/sprint-NN.md`: goal (one sentence), tasks in order with why, exit criteria, "Waiting on Merwyn" (max 3 one-line questions).
-5. Move chosen tasks to `spec`, owner `pm`.
+5. Move chosen tasks to `spec`, owner `pm`; give the PM exact backlog paths for each task and its parents (pm-playbook §0).
+6. Commit the regenerated board.md and the sprint file in a board-refresh PR (pr-workflow, "board.md (generated)").
 
 ## 3. Flow, not busyness
 - **WIP limits:** at most 2 tasks in `build`, 1 in `design` per Architect. Finish before starting.
@@ -46,6 +47,7 @@ Escalate early, once, with options:
 - Never escalate a question an agent in the org can answer.
 
 ## 7. Close the loop
+- At sprint close, open the board-refresh PR (pr-workflow).
 - After each sprint: what finished, cycle times, what got stuck and why. Hand April (Curator) the lessons; she proposes edits to skills and profiles.
 - Measure the office by outcomes (tasks done, cycle time, rework rate), not by activity.
 

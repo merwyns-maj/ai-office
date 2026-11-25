@@ -10,6 +10,8 @@ git checkout main && git pull --depth=5 origin main
 git checkout -b t-xxx-short-name
 
 # 2. Commit (author + trailer lines are required)
+# Pre-commit check, must print nothing (see "board.md (generated)" below):
+git diff --cached --name-only -- 'offices/*/board.md'
 git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit -m "T-xxx: <what>
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -26,7 +28,7 @@ gh api repos/merwyns-maj/ai-office/pulls -f title="T-xxx: <title>" \
 #   (blank line)
 #   <your session URL>
 
-# 5. Merge (PMO only, after Reviewer PASS). Wait until GitHub has computed mergeability:
+# 5. Merge (PMO only, after Reviewer PASS; planning-only sprint PRs excepted, see below). Wait until GitHub has computed mergeability:
 # Check the PR shows YOUR latest commit too: mergeable=true can be stale from before your last push.
 head=$(git rev-parse HEAD)
 for i in $(seq 1 10); do
@@ -42,3 +44,8 @@ Rules
 - `mergeable: null` means "still computing", not "conflict": wait and retry. `false` means a conflict: rebase on main and push again.
 - Never force-push `main`. Never push to `main`.
 - If a push is rejected as too large: `git fetch --depth=50 origin main` and rebase onto `origin/main`.
+
+## board.md (generated)
+- Task branches never commit `offices/<office>/board.md`. Run `board.py` to see Problems, then discard the file: `git checkout -- offices/<office>/board.md`.
+- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Planning-only sprint PRs need no Reviewer (workflow.yaml `merge.requires_planning_only`); the PMO merges them. Check before merge: `board.py` on the branch leaves `git diff --exit-code` clean.
+- Between sprint PRs, board.md on main can lag. For the live board, run board.py locally and do not commit it.

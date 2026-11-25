@@ -30,6 +30,9 @@ escalation:
 merge:
   who: pmo
   requires: [reviewer PASS, PR open from a t-xxx branch]
+  # Exception (Janice, T-042): planning-only PRs from sprint-NN-* branches (sprint file, board.md, raid.md)
+  # may merge without a Reviewer; the PMO merges them.
+  requires_planning_only: [PR open from a sprint-NN-* branch, changes limited to sprints/, board.md, raid.md]
   method: squash
 
 status_writers:
