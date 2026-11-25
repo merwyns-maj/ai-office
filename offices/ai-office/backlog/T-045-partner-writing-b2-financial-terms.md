@@ -2,7 +2,7 @@
 id: T-045
 title: "Partner-writing B2 update: keep financial terms in English too"
 phase: 3-skills
-status: design
+status: build
 priority: P2
 owner: engineer
 where: chat
