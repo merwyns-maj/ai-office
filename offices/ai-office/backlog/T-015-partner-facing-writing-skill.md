@@ -8,7 +8,7 @@ owner: reviewer
 where: chat
 project: ai-office
 depends_on: [T-012, T-014]
-pr: null
+pr: 15
 ---
 
 > Source: research/T-012-chat-mining.md section B (B1-B6). Picked by Merwyn for Sprint 2 (25 Nov 2026). Skill lives in this repo; no company data.
