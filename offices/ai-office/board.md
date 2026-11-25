@@ -7,6 +7,7 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
+- [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) Prod-guard hook script and tests (repo-only slice of T-019)
 
 ## todo (33)
 
@@ -54,7 +55,7 @@ _empty_
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | compliance | — |
+| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | human | — |
 
 ## build (0)
 
