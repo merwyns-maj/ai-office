@@ -28,7 +28,7 @@ gh api repos/merwyns-maj/ai-office/pulls -f title="T-xxx: <title>" \
 #   (blank line)
 #   <your session URL>
 
-# 5. Merge (PMO only, after Reviewer PASS). Wait until GitHub has computed mergeability:
+# 5. Merge (PMO only, after Reviewer PASS; planning-only sprint PRs excepted, see below). Wait until GitHub has computed mergeability:
 # Check the PR shows YOUR latest commit too: mergeable=true can be stale from before your last push.
 head=$(git rev-parse HEAD)
 for i in $(seq 1 10); do
@@ -47,5 +47,5 @@ Rules
 
 ## board.md (generated)
 - Task branches never commit `offices/<office>/board.md`. Run `board.py` to see Problems, then discard the file: `git checkout -- offices/<office>/board.md`.
-- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Planning-only sprint PRs need no Reviewer (workflow.yaml `merge.requires`); the PMO merges them. Check before merge: `board.py` on the branch leaves `git diff --exit-code` clean.
+- The PMO commits board.md only in sprint PRs: branch `sprint-NN-plan` at sprint plan and `sprint-NN-close` at sprint close (one PR may do both, as PR #12 did). Regenerate on fresh main, commit it with the sprint file, open a PR. Planning-only sprint PRs need no Reviewer (workflow.yaml `merge.requires_planning_only`); the PMO merges them. Check before merge: `board.py` on the branch leaves `git diff --exit-code` clean.
 - Between sprint PRs, board.md on main can lag. For the live board, run board.py locally and do not commit it.
