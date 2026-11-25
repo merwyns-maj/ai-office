@@ -4,10 +4,10 @@ title: "Partner-facing writing skill"
 phase: 3-skills
 status: design
 priority: P2
-owner: architect
+owner: engineer
 where: chat
 project: ai-office
-depends_on: [T-012]
+depends_on: [T-012, T-014]
 pr: null
 ---
 
@@ -45,3 +45,72 @@ pr: null
 - Note: this spec's own check uses the em-dash character in a grep; the Architect may phrase it differently.
 
 — Emmy (pm)
+
+## Design
+
+**Basis.** Spec above; `research/T-012-chat-mining.md` §B and §D4; the T-014 Design on branch `t-014-working-standard`; `scripts/build_agents.py`. Janice's brief (25 Nov): this skill is base-level and is attached to `pm` and `curator` in ai-office. `claude:diagram-design` was not available in this session; no diagram needed.
+
+**Depends on T-014.** This design uses the mechanism T-014 builds: `base/skills/<name>/SKILL.md` plus the optional agent key `base_skills: [...]`. Build it only after T-014 is merged: rebase `t-015-partner-writing` on fresh `main` first. I added `T-014` to `depends_on` so the dry-run and the board show the block. Janice, please confirm.
+
+**Answers to the Spec's open questions**
+- Which agents? `pm` (Emmy) and `curator` (April), as ruled in the brief. `pmo` status notes go to Merwyn (internal) and stay out. Add others later with a one-line `base_skills` edit.
+- Base-level or ai-office only? Base-level. The rules are Merwyn's own writing standard and hold for any office; they contain no company content. Cost and risk are the same either way, so this is an architect call, not a human gate.
+- B5: the rule is "tone only, never untrue", consistent with D4. The Design writes it that way; Merwyn may still confirm (below).
+
+### Approach
+1. Create `base/skills/partner-writing/SKILL.md`.
+2. Add `base_skills: [partner-writing]` to the frontmatter of `offices/ai-office/agents/pm.md` and `offices/ai-office/agents/curator.md`. Do not use `office_skills`: that key resolves only `offices/<o>/skills/`.
+3. Run `python scripts/build_agents.py ai-office`. Only `.claude/agents/pm.md` and `curator.md` change, each by one line under `## Skills`.
+4. In the T-014 test file `tests/test_build_agents.py`, add one assertion to the real-office test: the generated `pm.md` and `curator.md` list `base/skills/partner-writing/SKILL.md`, and the other five agents do not.
+5. No script, engine or schema change.
+
+### Interfaces
+**Frontmatter**: `name: partner-writing`, and a `description` like "Rules for anything written for people outside the office: partners, banks, leadership, email. Use when drafting or revising such text."
+- The whole file contains **no em-dash (U+2014) or en-dash (U+2013)**, including the description. Examples use words.
+- No partner names, company names or figures.
+
+**Body**: six rules, each tagged with its B-number. Wording to start from:
+- **B1** No em-dashes or en-dashes as punctuation, and no AI-sounding decoration (arrows, emoji, symbol bullets). Use a comma, a full stop or "to".
+- **B2** In Indonesian text, keep a banking or fintech term in English and italicise it when the translation reads oddly. Example: `Dana masuk ke *virtual account* setelah verifikasi.`
+  - In plain-text email (B6), keep the English term without asterisks.
+  - Use only terms Merwyn has named. Do not build a term list.
+- **B3** Partner-facing text makes no overpromises, adds no detail the reader does not need, and commits to nothing not yet agreed. Examples: dates, SLAs, fees, volumes. Write "to be confirmed" and name who confirms.
+- **B4** Once the requirement is clear, write the shortest version that carries it. Do not restate the ask.
+- **B5** Change tone only when asked. You may soften wording about our own side's failure for leadership readers, or place accountability with the partner when asked. Never state something untrue, drop a material fact or misrepresent a record (see D4). If a request needs that, say so and offer a truthful version.
+- **B6** Emails are plain text: no markdown headings, bold, tables or `*` bullets. Use short paragraphs, and "1." lines when a list is needed.
+
+### Spec deltas for the Reviewer (mechanical, same intent)
+- Check 1: the skill is at base level, so run `grep -rl "name: partner-writing" base/ offices/ | wc -l`. It prints 1.
+- Check 3, without typing the character:
+  ```
+  python3 -c "import sys;t=open(sys.argv[1],encoding='utf-8').read();print(t.count('—'),t.count('–'))" base/skills/partner-writing/SKILL.md
+  ```
+  It prints `0 0`. This also answers Emmy's note about the grep.
+- Check 5: the key is `base_skills`, not `office_skills`. `grep -l partner-writing offices/ai-office/agents/*.md` lists exactly `curator.md` and `pm.md`. `python scripts/build_agents.py ai-office` exits 0, and so does `python -m engine.runtime validate ai-office`.
+
+### Risks
+| Risk | Handling |
+|---|---|
+| Built before T-014 merges, so `base_skills` is unknown | Hard dependency in `depends_on`; rebase on main first. Without T-014, validate and build would ignore the key silently, so check that the generated `pm.md` lists the path |
+| B2 (italics) clashes with B6 (plain-text email) | B2 states the email case explicitly |
+| B5 read as permission to shift blame untruthfully | The rule bounds it to tone and cites D4 |
+| An invented term list | B2 forbids it; the example term needs Merwyn's confirmation (below) |
+| An em-dash slips in through an editor or the description | The Reviewer's python count covers the whole file |
+
+**Compliance:** not flagged. Writing rules only, no data.
+
+### Decision record draft (for April)
+```
+Decision: partner-writing is a base skill (base/skills/partner-writing), opted into per agent with base_skills; in ai-office, pm and curator use it.
+Context: T-015; rules come from Merwyn's own chats (T-012 section B) and apply to any office.
+Options: A base skill, opt-in per agent (chosen); B ai-office skill under office_skills (other offices would copy it); C every agent via base/defaults.yaml (adds context to agents that never write for outsiders).
+Chosen: A, because one copy serves every office and only writers pay the context cost.
+Consequences: depends on T-014's base_skills key; adding a writer later is a one-line edit.
+Links: T-015, T-014, PR <n>
+```
+
+### Open questions
+- B2 example term: the Design uses *virtual account* because T-012 mentions VA work. Is that the right example, and are there other terms Merwyn always keeps in English? Who: Merwyn via Janice. Non-blocking: swapping the example is a one-word edit.
+- B5 wording ("tone only, never untrue"). Who: Merwyn, for confirmation. Non-blocking.
+
+— Fang (architect)
