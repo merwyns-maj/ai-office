@@ -30,6 +30,10 @@ class RealOffice(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("not found", err)
 
+    def test_real_repo_no_defaults_warning(self):
+        _, _, err = run("validate", "ai-office")
+        self.assertNotIn("defaults.yaml is missing", err)
+
     def test_usage_error_exits_2(self):
         self.assertEqual(run("bogus", "ai-office")[0], 2)
 
@@ -50,6 +54,13 @@ class Defects(unittest.TestCase):
 
     def test_clean_copy_passes(self):
         self.assertEqual(run("validate", str(self.c.root))[0], 0)
+
+    def test_missing_defaults_warns_only(self):
+        (self.c.root.parents[1] / "base/defaults.yaml").unlink()
+        code, out, err = run("validate", str(self.c.root))
+        self.assertEqual(code, 0, out)
+        self.assertIn("warning: base/defaults.yaml is missing, so agents will get no base skills\n", err)
+        self.assertRegex(out, r"^ai-office: OK")
 
     def test_missing_required_file(self):
         (self.c.root / "workflow.yaml").unlink()

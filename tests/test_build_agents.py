@@ -1,4 +1,6 @@
+import io
 import re
+from contextlib import redirect_stderr
 import shutil
 import sys
 import tempfile
@@ -40,6 +42,19 @@ class Build(TempRepo):
         hits = [f for f in self.out.glob("*.md") if WS in f.read_text()]
         self.assertEqual(len(hits), n_agents)
         self.assertGreater(n_agents, 0)
+
+    def _build_err(self):
+        err = io.StringIO()
+        with redirect_stderr(err):
+            self.build()
+        return err.getvalue()
+
+    def test_missing_defaults_warns(self):
+        (self.root / "base/defaults.yaml").unlink()
+        self.assertIn(build_agents.DEFAULTS_MISSING + "\n", self._build_err())
+
+    def test_defaults_present_no_warning(self):
+        self.assertNotIn("base/defaults.yaml is missing", self._build_err())
 
     def test_partner_writing_only_on_pm_and_curator(self):
         self.build()

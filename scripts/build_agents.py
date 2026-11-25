@@ -7,6 +7,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from _fm import split, dump, as_list, read_flat
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+DEFAULTS_MISSING = "warning: base/defaults.yaml is missing, so agents will get no base skills"
 KEYS = ["name", "description", "tools", "model"]
 
 def skill_paths(fm, office, root, fname):
@@ -54,6 +55,8 @@ def build(office, root=ROOT):
     src = root / "offices" / office / "agents"
     if not src.is_dir():
         sys.exit(f"No such office: {office}")
+    if not (root / "base" / "defaults.yaml").is_file():
+        print(DEFAULTS_MISSING, file=sys.stderr)
     # every check runs before .claude/agents/ is touched
     sources = set(re.findall(r"^  ([\w-]+):", (root / "workspaces.yaml").read_text().split("skill_sources:")[-1], re.M))
     plan = []

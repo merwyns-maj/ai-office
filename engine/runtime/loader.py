@@ -57,6 +57,7 @@ class Office:
     skills: set = field(default_factory=set)
     base_skills: set = field(default_factory=set)
     default_base_skills: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
 
     @property
     def stage_ids(self):
@@ -177,6 +178,8 @@ def load_office(root):
                 office.default_base_skills = [str(x) for x in _as_list(doc.get("base_skills"))]
             else:
                 problems.append(Problem(_rel(defaults, repo_root), "top level must be a mapping"))
+    else:
+        office.warnings.append(Problem("base/defaults.yaml", "is missing, so agents will get no base skills"))
 
     for f in sorted((root / "backlog").glob("T-*.md")):
         meta = _parse_file(f, repo_root, problems, frontmatter=True)

@@ -2,9 +2,9 @@
 id: T-044
 title: "Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: []
@@ -139,6 +139,31 @@ Links: T-044, R-11, R-12, T-042, PR #17, PR (tbd)
 - Spec approved. Q1: plan-stage task files = new task files at status todo or spec, plus status, owner, depends_on and dated decision notes on existing tasks, written by the PMO at sprint plan/close (as in PR #17, which also touched sprints/, raid.md, board.md). Q2 and Q3 are Fang's design calls; PMO preference for Q2: keep the same branch name and push with --force-with-lease (task branches only, never main). — Janice (pmo)
 
 ## Build notes
+**What changed**
+- `scripts/build_agents.py`: `DEFAULTS_MISSING` constant; `build()` prints it once to stderr when `base/defaults.yaml` is absent. Exit code unchanged.
+- `engine/runtime/loader.py`: `Office.warnings`, filled when defaults.yaml is missing. `engine/runtime/__main__.py` prints `warning: <file> <message>` to stderr for validate and dry-run. stdout and exit code unchanged. `board.py` untouched (it never reads defaults.yaml).
+- Tests: `test_missing_defaults_warns`, `test_defaults_present_no_warning` (test_build_agents.py); `test_missing_defaults_warns_only`, `test_real_repo_no_defaults_warning` (test_loader.py).
+- `pr-workflow/SKILL.md`: new "Replay, not rebase (shallow clones)" section (`--force-with-lease=$b:$old`, backup branch, `-r2` fallback); the mergeable-false and too-large rules point to it; "Never force-push main" clarified; board.md section now points to the single planning-only definition.
+- `workflow.yaml`: planning-only defined once in the `merge` comment (sprints/, board.md, raid.md, new task files at todo/spec, PMO edits to status/owner/depends_on never to done, dated notes; anything else needs Reviewer PASS). `requires_planning_only` list updated.
+
+**How to verify**
+```
+python3 scripts/build_agents.py ai-office   -> ai-office: built 7 agents -> .claude/agents/ (...); no warning; git status shows no .claude/agents diff
+python3 -m engine.runtime validate ai-office -> ai-office: OK — 7 agents, 5 stages, 45 tasks, 15 skills (stderr empty)
+python3 -m unittest -q                       -> Ran 148 tests in 5.276s / OK
+```
+(The unittest run also prints a `demo: built 1 agents` line from an existing test; not new.)
+
+**Done when -> evidence**
+- R-11 warning, exit code unchanged: both tools; tests assert exit 0 and the exact line.
+- R-11 tests present/absent/real repo: the four tests above, all pass.
+- R-12 rule and two pointers: pr-workflow sections "Rules" and "Replay, not rebase".
+- Planning-only widening + no wider Reviewer-free path: workflow.yaml comment, pr-workflow board.md section; validate OK.
+- No contradictions: planning-only defined only in workflow.yaml, pr-workflow summarises and points to it. build_agents clean, tests exit 0.
+
+**Deviations.** None from the design. I did not exercise the replay commands against a real shallow clone; the text is as designed.
+
+— Sebastian (engineer)
 
 ## Review log
 
