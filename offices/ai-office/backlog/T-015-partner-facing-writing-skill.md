@@ -2,9 +2,9 @@
 id: T-015
 title: "Partner-facing writing skill"
 phase: 3-skills
-status: build
+status: review
 priority: P2
-owner: engineer
+owner: reviewer
 where: chat
 project: ai-office
 depends_on: [T-012, T-014]
@@ -118,4 +118,48 @@ Links: T-015, T-014, PR <n>
 ## Approvals (PMO)
 - Spec approved: B5 = soften tone, never state anything untrue (D4). Outsider-writing agents: pm (Emmy) and curator (April). Base level. — Janice (pmo)
 - Design approved; depends_on T-014 confirmed; build after T-014 merges, rebased on main. B2 example term (*virtual account*) accepted. — Janice (pmo)
+
+
+## Build notes
+
+**What changed**
+- `base/skills/partner-writing/SKILL.md` (new): rules B1 to B6, generic, no names or figures. B2 example is `Dana masuk ke *virtual account* setelah verifikasi.`; B2 covers plain-text email; B5 is tone only and cites D4.
+- `offices/ai-office/agents/pm.md`, `curator.md`: added `base_skills: [partner-writing]`.
+- `.claude/agents/pm.md`, `curator.md`: regenerated, one added line each under `## Skills` (`- base/skills/partner-writing/SKILL.md`). No other generated file changed.
+- `tests/test_build_agents.py`: new `test_partner_writing_only_on_pm_and_curator` (pm and curator list the skill, the other five do not).
+
+**How to verify (real output)**
+```
+$ python3 scripts/build_agents.py ai-office
+ai-office: built 7 agents -> .claude/agents/ (architect, compliance, curator, engineer, pm, pmo, reviewer)
+$ python3 -m unittest -q
+Ran 144 tests in 5.326s
+OK
+$ python3 -m engine.runtime validate ai-office
+ai-office: OK — 7 agents, 5 stages, 42 tasks, 15 skills
+$ python3 -c "...count('\u2014'),count('\u2013')..." base/skills/partner-writing/SKILL.md   # design's command
+0 0
+$ grep -l partner-writing offices/ai-office/agents/*.md
+offices/ai-office/agents/curator.md
+offices/ai-office/agents/pm.md
+```
+
+**Done when to evidence**
+| Done when | Evidence |
+|---|---|
+| Exactly one `name: partner-writing` | `grep -rl "name: partner-writing" base/ offices/` lists the skill and this task file (the task text quotes the string in a sentence below, not as frontmatter). Exactly one SKILL.md carries it: `grep -rl "name: partner-writing" base/ offices/ --include=SKILL.md \| wc -l` prints 1. See deviation 2. |
+| Six rules citing B1 to B6 | Open `base/skills/partner-writing/SKILL.md` |
+| No em-dash (and no en-dash) | python count prints `0 0` |
+| B2 italic example, B3 lists dates and SLAs | In the file: B2 example line, B3 "Examples: dates, SLAs, fees, volumes" |
+| In agents that write for outsiders; build exits 0 | grep lists curator.md and pm.md only; build output above; validate OK; new test passes |
+| No borrower, lender, partner name or figures | Open the file; none present |
+
+**Deviations**
+1. Two existing T-014 tests injected a second `base_skills:` line into the real `pm.md` frontmatter, which now already has one, so they failed (order test, unknown-skill test). I pointed those two tests at `architect.md`, which has no `base_skills`. Intent unchanged. Test-only edit.
+2. The Design's check 1 (`grep -rl ... base/ offices/ | wc -l` prints 1) prints 2 because this task file itself contains the string "name: partner-writing". The extra hit is the task file, not a second skill. Use `--include=SKILL.md`.
+3. `claude:diagram-design` etc. not used; no diagram needed.
+
+**Known limits:** B2 example term still awaits Merwyn's confirmation (non-blocking). board.md not committed (task branch rule).
+
+— Sebastian (engineer)
 
