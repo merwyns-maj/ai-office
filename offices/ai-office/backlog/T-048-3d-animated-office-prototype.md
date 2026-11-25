@@ -4,7 +4,7 @@ title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-047]
@@ -672,6 +672,38 @@ Rendered: commands in `engine/app/README.md` (three@0.128.0 from npm, `python -m
 
 — Sebastian (engineer)
 
+### Rework 1 (after Review 1 REJECT)
+**Safety fix**
+- `engine/runtime/events.py`: `_data_hit` now returns the field path and the kind, never the text: `personal-data pattern (16-digit run) in field 'reason'`, `personal-data pattern (email address) in field 'lines[1].text'`, `forbidden term (listed in workspaces.yaml) in field 'reason'`. The data check now runs first on every line (before the `t`/`wall` checks), so a leaky line is always reported as a data-rule problem and never as some other error. New `is_data_problem(message)`.
+- `scripts/office_app.py`: any data-rule problem exits 1 and writes nothing, also with `--allow-errors`. Other errors can still be skipped with `--allow-errors`. The page's `console.warn` prints `skipped[].message`, which is now always the sanitised text.
+- Tests (200 now, was 197): `test_problem_names_field_and_kind_never_the_value`, `test_cli_never_echoes_personal_data` (events CLI: 16-digit number and email absent from stdout+stderr, exit 1), `test_data_rule_problem_always_exits_1_and_never_echoes_the_value` (office_app by subprocess, with and without `--allow-errors`, plus a malformed line: exit 1, no HTML file, neither string in stdout/stderr or in the built data), and a node assertion that `merged` starts after every earlier event of its task has ended.
+
+**Polish (template)**
+- Waiting agent's name tag sits above the beacon (world position head + 1.3), not 46 px below the feet.
+- Reduced-motion handoff: the sending agent's tag is moved 62 px down (under the avatar) while the handoff runs, so it no longer overlaps the receiver's tag.
+- Follow camera: the active agents' heads (and waiting agents' beacons) must stay inside a margin of 70 px from the screen edge, so tags are not cropped at the left.
+- `merged` waits for all earlier events of its task (so it starts after the `review_pass` beat). Replay length changes slightly; nothing else moved.
+
+**Evidence**
+```
+python -m unittest discover -s tests           # Ran 200 tests in 5.8s ... OK
+python scripts/office_app.py ai-office --check # office.html: up to date (102 KB, 45 events)
+python -m engine.runtime events ai-office engine/app/fixtures/sprint-03.jsonl   # 45 events kept, 0 errors, 0 warnings
+python -m engine.runtime validate ai-office    # ai-office: OK - 8 agents, 5 stages, 48 tasks, 16 skills
+python scripts/build_agents.py ai-office       # built 8 agents (no tracked change); board.py ran, board.md discarded
+# a log with a 16-digit number and an email:
+python -m engine.runtime events ai-office /tmp/leak.jsonl
+2: error: personal-data pattern (email address) in field 'reason'
+/tmp/leak.jsonl: 0 events kept, 1 error, 0 warnings          (exit 1)
+python scripts/office_app.py ai-office --fixture /tmp/leak.jsonl --out /tmp/leak.html --allow-errors
+office_app: 1 data-rule problem(s); nothing written. --allow-errors does not skip these   (exit 1, no file)
+```
+Screenshots re-taken headless from `file://` (not committed), `/tmp/t048-shots2/`: `door.png` (Janice's tag above the beacon at the door), `handoff1842.png` (reduced motion, Janice -> Emmy: two tags apart), `follow.png` (follow on, Emmy's tag at the left edge intact). No JS errors seen.
+
+**Not changed / still open**: phone layout label collisions and separator phone-number patterns (`+62 812-...`) are left for T-027 (see Open questions). The `merged`-after-`review_pass` beat and the follow-camera margin were checked by the node assertion and a still, not on a screen recording.
+
+— Sebastian (engineer)
+
 ## Review log
 Review 1 of PR #25 (head 46e06e7), 26 Nov 2026: REJECT (one safety fix). Done-when 1–5 and 7 pass with evidence (197 tests OK, parser broken 16 ways with the expected errors, hosts limited to ./three.min.js + cdnjs/unpkg/jsdelivr, 8 s fallback works, fixture wall times match git, needs-Merwyn readable by colour + shape + position, both reduced-motion modes). Done-when 6 fps waived for review (software GL 22–40 fps, 44–50 draw calls; laptop reading owed by Merwyn). Done-when 8 artifact is Janice's step.
 Reason: the data rule echoes the value it caught. events.py `_data_hit` returns "personal-data pattern in '<value>'", which reaches the CLI output, office.html's skipped block under --allow-errors (generator exits 0), and the page's console.warn. Fixes: (1) name the field and pattern kind, never the value; (2) office_app must not write a page that fails its own data scan, even with --allow-errors; (3) test that a 16-digit number and an email never appear in stdout, stderr or output HTML.
@@ -683,3 +715,4 @@ Notes: waiting agent's tag lands on Dinda's desk; tags overlap in reduced-motion
 ## Open questions
 - Does https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js resolve and load in the artifact sandbox? Agent proxy returns 403 for all three CDNs, so it is unchecked. Janice, from the main session (curl or stub artifact). Blocking for the artifact Done-when only; build can proceed.
 - fps on a real laptop: headless here is software GL. Merwyn or Janice runs the 60 s check on the laptop and reports device + numbers for Cahyani to record. Not blocking for build.
+- T-027: phone layout (<600px) label collisions, and a data-rule pattern for separator phone numbers (e.g. `+62 812-3456-7890`), which the 10+ digit-run pattern does not catch. Deliberately left out of T-048 (Cahyani's notes).

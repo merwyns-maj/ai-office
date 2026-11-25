@@ -78,27 +78,36 @@ def forbidden_terms(repo_root):
     return tuple(sorted({t.lower() for t in terms if t}))
 
 
-def _strings(v):
+PATTERN_KINDS = ("email address", "16-digit run", "run of 10+ digits")
+DATA_MARK = "personal-data pattern"   # messages that start with this or "forbidden term" are data-rule problems
+
+
+def _strings(v, path=""):
+    """Yield (path, string) for every string value; path names the field, never the value."""
     if isinstance(v, str):
-        yield v
+        yield path or "(value)", v
     elif isinstance(v, dict):
-        for x in v.values():
-            yield from _strings(x)
+        for k, x in v.items():
+            yield from _strings(x, f"{path}.{k}" if path else str(k))
     elif isinstance(v, list):
-        for x in v:
-            yield from _strings(x)
+        for i, x in enumerate(v):
+            yield from _strings(x, f"{path}[{i}]")
 
 
 def _data_hit(obj, forbidden):
-    for s in _strings(obj):
+    """Return a message naming the field and the kind of hit, never the matched text."""
+    for path, s in _strings(obj):
         low = s.lower()
-        for p in DATA_PATTERNS:
+        for p, kind in zip(DATA_PATTERNS, PATTERN_KINDS):
             if p.search(s):
-                return f"personal-data pattern in {s[:40]!r}"
-        for f in forbidden:
-            if f and f in low:
-                return f"forbidden term {f!r}"
+                return f"{DATA_MARK} ({kind}) in field '{path}'"
+        if any(f and f in low for f in forbidden):
+            return f"forbidden term (listed in workspaces.yaml) in field '{path}'"
     return None
+
+
+def is_data_problem(message):
+    return message.startswith((DATA_MARK, "forbidden term"))
 
 
 def _text_ok(v):
@@ -195,6 +204,10 @@ def parse_log(text, *, agents, stages, forbidden=()):
         if not isinstance(obj, dict):
             err(n, "line is not a JSON object")
             continue
+        hit = _data_hit(obj, forbidden)   # first, so a leaky line is always reported as a data-rule problem
+        if hit:
+            err(n, hit)
+            continue
         typ = obj.get("type")
         t = obj.get("t")
         if not isinstance(typ, str) or not typ:
@@ -219,10 +232,6 @@ def parse_log(text, *, agents, stages, forbidden=()):
                 continue
         else:
             w = None
-        hit = _data_hit(obj, forbidden)
-        if hit:
-            err(n, hit)
-            continue
         spec = EVENT_TYPES.get(typ)
         bad = None
         if spec is None:

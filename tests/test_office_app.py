@@ -86,6 +86,28 @@ class Generator(unittest.TestCase):
             self.assertEqual(len(data["skipped"]), 1)
             self.assertEqual(len(data["events"]), 45)
 
+    def test_data_rule_problem_always_exits_1_and_never_echoes_the_value(self):
+        secrets = ["1234567890123456", "jane.doe@example.com"]
+        base = office_app.DEFAULT_FIXTURE.read_text(encoding="utf-8")
+        leaks = [json.dumps({"t": 200 + i, "type": "needs_merwyn", "agent": "pmo", "task": "T-043", "src": "x.md", "reason": f"v {s}"})
+                 for i, s in enumerate(secrets)]
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / "leak.jsonl"
+            bad.write_text(base + "\n".join(leaks) + "\n{broken\n", encoding="utf-8")
+            for extra in ([], ["--allow-errors"]):
+                out = Path(tmp) / "o.html"
+                r = subprocess.run([sys.executable, str(REPO / "scripts/office_app.py"), "ai-office", "--fixture", str(bad),
+                                    "--out", str(out), *extra], cwd=REPO, capture_output=True, text=True)
+                self.assertEqual(r.returncode, 1, r.stderr)
+                self.assertFalse(out.exists(), "no file may be written")
+                for sec in secrets:
+                    self.assertNotIn(sec, r.stdout + r.stderr)
+                self.assertIn("field 'reason'", r.stderr)
+            # the same in-process: no output file, and the skipped block (if it were built) carries no value
+            data, probs = office_app.build_data(OFFICE, bad)
+            for sec in secrets:
+                self.assertNotIn(sec, json.dumps(data) + " ".join(str(p) for p in probs))
+
 
 class PageRules(unittest.TestCase):
     @classmethod
@@ -138,6 +160,10 @@ function run(D) {
   return { s, tl };
 }
 if (!full) {
+  { const tl = C.timeline(D.events); let n = 0;   // merged starts only after the task's earlier beats (review_pass) have finished
+    D.events.forEach((e, i) => { if (e.type !== 'merged') return; n++;
+      D.events.forEach((p, j) => { if (j < i && p.task === e.task) assert.ok(tl[i].start >= tl[j].end - 1e-9, e.task + ' merged before event ' + j + ' ended'); }); });
+    assert.ok(n >= 1); }
   let s = C.initState(D), tl = C.timeline(D.events);
   for (let i = 0; i < 3; i++) C.apply(s, D.events[i], tl[i].start);
   assert.strictEqual(C.agentStatus(s, 'pmo'), 'waiting');

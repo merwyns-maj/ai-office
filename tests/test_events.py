@@ -119,6 +119,20 @@ class BadLines(unittest.TestCase):
         self.assertEqual(evs, [])
         self.assertIn("forbidden", errors(probs)[0].message)
 
+    def test_problem_names_field_and_kind_never_the_value(self):
+        secrets = ["1234567890123456", "jane.doe@example.com", "98765432109", "Acme-Corp"]
+        for sec in secrets:
+            _, evs, probs = parse(ev(type="needs_merwyn", t=2, reason=f"x {sec} y"), forbidden=("acme-corp",))
+            msg = errors(probs)[0].message
+            self.assertNotIn(sec.lower(), msg.lower())
+            self.assertIn("field 'reason'", msg)
+            self.assertTrue(events.is_data_problem(msg))
+        disc = json.dumps({"t": 2, "type": "discussion", "task": "T-043", "agents": ["pmo", "pm"], "src": "x.md",
+                           "lines": [{"agent": "pmo", "text": "ok"}, {"agent": "pm", "text": "id 1234567890123456"}]})
+        self.assertIn("field 'lines[1].text'", errors(parse(disc)[2])[0].message)
+        _, _, probs = parse(header=HDR.replace("ai-office", "a@b.example"))
+        self.assertNotIn("a@b.example", " ".join(str(p) for p in probs))
+
     def test_forbidden_terms_come_from_workspaces(self):
         terms = events.forbidden_terms(REPO)
         self.assertIn("impact-credit-solutions", terms)
@@ -154,6 +168,18 @@ class Cli(unittest.TestCase):
             self.assertIn("3: error: malformed JSON", out)
         code, _, err = run("events", "ai-office", "/nonexistent/x.jsonl")
         self.assertEqual(code, 2)
+
+    def test_cli_never_echoes_personal_data(self):
+        secrets = ["1234567890123456", "jane.doe@example.com"]
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "leak.jsonl"
+            log.write_text("\n".join([HDR, ev(type="needs_merwyn", t=2, reason=f"id {secrets[0]}"),
+                                      ev(type="needs_merwyn", t=3, reason=f"mail {secrets[1]}")]) + "\n", encoding="utf-8")
+            code, out, err = run("events", "ai-office", str(log))
+        self.assertEqual(code, 1)
+        self.assertIn("field 'reason'", out)
+        for sec in secrets:
+            self.assertNotIn(sec, out + err)
 
 
 if __name__ == "__main__":

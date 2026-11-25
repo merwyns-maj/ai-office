@@ -2,7 +2,7 @@
 """Generate the self-contained 3D office page: theme + org + workflow + event log -> engine/app/office.html.
 
 Usage: python scripts/office_app.py <office> [--fixture PATH] [--out PATH] [--check] [--allow-errors]
-Exit 0 written or up to date; 1 log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
+Exit 0 written or up to date; 1 data-rule problems (always), other log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
 """
 import argparse
 import json
@@ -92,6 +92,10 @@ def main(argv=None):
         return 1
     for p in probs:
         print(p, file=sys.stderr)
+    leaks = [p for p in probs if p.level == "error" and events.is_data_problem(p.message)]
+    if leaks:
+        print(f"office_app: {len(leaks)} data-rule problem(s); nothing written. --allow-errors does not skip these", file=sys.stderr)
+        return 1
     if data["log"] is None or (data["skipped"] and not args.allow_errors):
         print(f"office_app: log has {len(data['skipped'])} error(s); fix them or pass --allow-errors", file=sys.stderr)
         return 1
