@@ -4,11 +4,11 @@ title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-047]
-pr: null
+pr: 25
 ---
 
 > Merwyn, 25 Nov 2026: "start designing my 3d animated office". A first slice of T-027 that does not wait on the SDK runtime (T-024): it plays a recorded event log instead of live events.
@@ -634,6 +634,43 @@ Janice (pmo), 25 Nov, answers to Dinda's open questions: (1) The fair "waiting o
 Janice (pmo), 25 Nov: Design accepted, moved to build. Answers to Fang's open questions: (1) CDN reachability can't be tested from here, so remove the risk: the page loads `./three.min.js` first (a sibling file, not committed; fetched from npm three@0.128.0 per engine/app/README.md and published beside the page as an artifact file), then falls back to cdnjs r128, unpkg, jsdelivr at 0.128.0. npm confirms three@0.128.0 exists. (2) 50 fps: Cahyani records a software-GL smoke result (frames render, governor works); the real laptop fps reading is taken by Merwyn from the in-page readout and recorded at sprint close, not a blocker for review.
 
 ## Build notes
+PR #25, branch `t-048-3d-office`.
+
+**What changed**
+- `engine/schema/events.md` (log v0), `engine/runtime/events.py` (parser, data rule, sequence rules), `events <office> <log>` in `engine/runtime/__main__.py`.
+- `scripts/office_app.py` (generator, `--check`); `engine/app/office.template.html` (1396 lines, 93 KB) -> `office.html` (104 KB, limit 200 KB); `engine/app/fixtures/sprint-03.jsonl` (45 events, 0 errors, 0 warnings); `engine/app/README.md`.
+- `theme.yaml`: Dinda's palette tokens, `rect` per room, `at` per desk, `door`, meeting room; `engine/schema/office.md` documents them.
+- Tests: `tests/test_events.py` (18), `tests/test_office_app.py` (13, includes the pure core run under node), `tests/fixtures/events-all-types.jsonl` (synthetic, all 11 types).
+- The page: warm low-poly studio (one baked vertex-coloured mesh for the office, 8 distinct avatars with hair/hat, accessory, name tag), eased waypoint walking with a T-xxx card, hand-over arc, discussion at the meeting table with speech bubbles, amber beacon + beam + floor ring + door light + diamond for "needs Merwyn", red hexagon tag for blocked/rejected, confetti on merge. HUD: Needs-you pill, agent strip sorted attention-first (FLIP, 2 s throttle), ticker (last 8), play/pause, 1x/2x/4x, scrub with markers, fps and calls readout, Motion and Follow toggles, focus card, keyboard, aria-live. Phone (<600px): amber banner, 8 chips, one-line ticker, settings sheet.
+
+**How to verify**
+```
+python -m unittest discover -s tests            # Ran 197 tests in 5.7s ... OK
+python scripts/office_app.py ai-office --check  # office.html: up to date (101 KB, 45 events)
+python -m engine.runtime events ai-office engine/app/fixtures/sprint-03.jsonl   # 45 events kept, 0 errors, 0 warnings
+python -m engine.runtime validate ai-office     # ai-office: OK - 8 agents, 5 stages, 48 tasks, 16 skills
+```
+Rendered: commands in `engine/app/README.md` (three@0.128.0 from npm, `python -m http.server`, headless Chrome with SwiftShader). Screenshots (not committed) in `/tmp/t048-shots/`: `door.png` (t=2, Janice at Merwyn's door, beacon, 1280x800), `reduced.png` (same, `motion=reduced`), `talk.png` (t=58.5, discussion with bubble), `walk.png` (t=29.4 playing, Janice walking with T-043), `end.png` (t=198, three tasks archived), `phone.png` (390x844), `phone360-talk.png` (360x740). Console: no JS errors in any run; the only CONSOLE lines are Chrome's software-GL "GPU stall due to ReadPixels" messages. Playback length at 1x: 198.6 s.
+
+**Deviations from the design**
+1. `MeshLambertMaterial` has no `flatShading` in r128 (console warning on the first run). Facets come from non-indexed geometry with recomputed face normals instead.
+2. Avatars are drawn 1.3x the sizes in Dinda's table (readability at 1280 px); relative proportions are unchanged.
+3. Agents sit behind their desk facing the camera (not on the corridor side facing the back wall), otherwise the viewer sees only backs.
+4. Phone portrait (aspect < 0.8) turns the camera azimuth from 30 to 62 degrees so the office fills the width; Dinda's design had no rule for this.
+5. The stage (3D area) sits between the HUD bars and the ticker instead of full bleed behind them, so nothing covers the office.
+6. `merwyn_answered` releases a task still in `todo` (no one holds an unstarted task); documented in events.md. Needed so Janice does not hold T-002 for the rest of the replay.
+7. Timeline: an event's start is also pushed back by the DUR estimate of earlier events of the same agents, and a `stage_changed` is shown together with the handoff that follows it.
+8. `tests/test_dryrun.py` import allowlist for `engine/runtime` gains `json` and `datetime` (events.py parses JSON and ISO times; still no network or SDK).
+9. Blob shadows are one InstancedMesh, one speech bubble at a time (lines never overlap), the beacon is drawn about 2x Dinda's radius so it reads at a glance.
+10. The fixture was written by a throwaway script (not committed) to get the JSON quoting right; the content is hand-authored from sprint-03.md and the task files.
+
+**Known limits and not verified**
+- fps: only software GL here (13-33 fps in headless, meaningless for the 50 fps goal). Draw calls are 46-50, well under the 120 budget. The 60 s laptop reading comes from the in-page readout (Merwyn or Janice, Cahyani records it).
+- Artifact render and CDN reachability not tested (CDNs are blocked here); `./three.min.js` must sit beside the page, or the CDN fallbacks must work.
+- Reduced mode was checked in a still (`reduced.png`) and the logic, not as a screen recording. Light/dark surroundings: the page paints its own dark background, so both look the same.
+- Archive spines are small green blocks on top of the shelf; the walk path to the meeting table's far seat uses a fixed detour.
+
+— Sebastian (engineer)
 
 ## Review log
 
