@@ -56,7 +56,7 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | architect | — |
+| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | engineer | — |
 
 ## build (0)
 
