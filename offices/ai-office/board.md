@@ -54,7 +54,7 @@ _empty_
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | architect | — |
+| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | compliance | — |
 
 ## build (0)
 

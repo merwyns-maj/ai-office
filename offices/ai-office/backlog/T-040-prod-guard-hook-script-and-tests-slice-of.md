@@ -4,7 +4,7 @@ title: "Prod-guard hook script and tests (repo-only slice of T-019)"
 phase: 4-code-tooling
 status: design
 priority: P0
-owner: architect
+owner: compliance
 where: code
 project: ai-office
 depends_on: []
@@ -50,19 +50,68 @@ pr: null
 
 ## Design
 
-**Answers to the Spec's architect questions**
-- *How prod is identified without hostnames:* by regex patterns over the MCP tool name (e.g. `-prod__`, `__kubernetes__`) and over the Bash command text (pg service names, kube contexts, client aliases). Patterns live in a JSON config. The repo ships `prod_guard.example.json` with tool-name patterns and `.invalid` placeholders only; the installed copy lives outside this repo (user `~/.claude/` or the company repo) and is where any local pattern is added.
-- *Hook contract:* designed against the facts Janice gave (stdin JSON with `tool_name`, `tool_input`; `tool_input.command` for Bash; exit 2 blocks and stderr goes to Claude; exit 0 allows; `hooks.PreToolUse[].matcher` in settings.json). Not yet re-checked against current docs: logged as RAID R-6 (Assumption). Engineer verifies before opening the PR and notes the doc URL in Build notes.
+**Revision 2 (after compliance BLOCK).** This replaces Revision 1 (commit 86568c1). The interfaces stay the same except for the additions listed below.
+
+**What changed from Revision 1 (each item from Wulan's BLOCK, which Merwyn accepted on 25 Nov)**
+
+| # | Compliance item | Change in this revision |
+|---|---|---|
+| 1 | Fail-open paths (exit 127/1, decode error, timeout) | Settings command ends with `\|\| exit 2`. The script's imports and the whole run, including the stdin read and decode, sit under one top-level handler that exits 2. A self-deadline (`signal.alarm`, default action) stops a slow run, and the wrapper turns that into exit 2. stdin is capped at 1 MiB. New tests cover these cases. The README explains timeouts. |
+| 2 | `kubectl get secret(s)` leaks credentials | New rule in code, `k8s-secret-read`, checked before the prod check. It applies to Bash and to every MCP `__kubectl_` tool, whatever the context or cluster. Tests added. |
+| 3 | stderr may echo a NIK from SQL | stderr carries the rule id, the tool name (sanitised) and a fixed reason from a table in code. Payload text is never interpolated into it. A sentinel test asserts this. |
+| 4 | README must state what the guard is not | New README section: "What this guard does not do", with the limits listed below |
+| 5 | Allowlist too permissive | A command containing `..` (or chaining characters, or an apply verb) can never match the allowlist. Every entry must declare `"action": "submit-change-issue"`, or `load_config` fails. |
+| 6 | Hygiene scan / installed config | The scan covers `tests/test_prod_guard.py` too. `.gitignore` gets `prod_guard.json`. The README says the installed config lives outside the repo and is never committed. |
+
+**Answers to the Spec's architect questions** (unchanged)
+- *How prod is identified without hostnames.* Regex patterns over the MCP tool name (e.g. `-prod__`, `__kubernetes__`) and over the Bash command text (pg service names, kube contexts, client aliases), kept in a JSON config. The repo ships `prod_guard.example.json`, which has tool-name patterns and `.invalid` placeholders only. The installed copy lives outside this repo, in `~/.claude/hooks/`, and any local pattern is added there.
+- *Hook contract.* This is RAID R-6 (Assumption). Before opening the PR, the Engineer verifies these against the current Claude Code hook docs and cites the URL in Build notes: the stdin shape, exit 2 blocks, a timeout or any other non-zero exit is non-blocking, the per-hook `timeout` key, and the command runs through a POSIX shell so `|| exit 2` works.
 
 **Approach**
-- One self-contained hook script, stdlib only, copyable into any repo as a single file plus its config:
-  - `engine/__init__.py`, `engine/guard/__init__.py` (empty, so tests can import)
-  - `engine/guard/prod_guard.py` — the hook
-  - `engine/guard/prod_guard.example.json` — starter config (tool-name patterns, placeholder command patterns, placeholder allowlist)
-  - `engine/guard/README.md` — what it blocks, test command, settings snippet, install steps, and "installing is not done here"
-  - `tests/__init__.py` (empty), `tests/test_prod_guard.py`, `tests/fixtures/guard/config.json`, `tests/fixtures/guard/cases.json`
-- Policy is default-deny for anything identified as prod, fail-closed on any error. Nothing outside prod is touched: a non-prod call exits 0 silently.
-- No change to `scripts/`, `.claude/settings.json` or any other repo. `engine/README.md` gets one row for `guard/` (whichever of T-039/T-040 merges second rebases; one-line change).
+- One self-contained, stdlib-only hook script that can be copied into any repo as a single file plus its config:
+  - `engine/__init__.py`, `engine/guard/__init__.py` (both empty, so tests can import)
+  - `engine/guard/prod_guard.py`: the hook
+  - `engine/guard/prod_guard.example.json`: starter config (tool-name patterns, placeholder command patterns, placeholder allowlist)
+  - `engine/guard/README.md`: what it blocks, what it does not do, the test command, the settings snippet, install steps, timeout handling, and "installing is not done here"
+  - `tests/__init__.py` (empty), `tests/test_prod_guard.py`, `tests/fixtures/guard/config.json`, `tests/fixtures/guard/slow_config.json` (deadline test only), `tests/fixtures/guard/cases.json`
+  - `.gitignore`: add the line `prod_guard.json`
+- Policy: default-deny for anything identified as prod, and fail closed on any error, at every layer: the shell wrapper, the import, stdin, config and decide. A non-prod call exits 0 silently.
+- No change to `scripts/`, `.claude/settings.json` or any other repo. `engine/README.md` gets one row for `guard/` (whichever of T-039/T-040 merges second rebases; it is a one-line change).
+
+**Fail-closed layers (item 1)**
+
+| Failure | What happens | Exit seen by Claude Code |
+|---|---|---|
+| `python3` missing (127), script syntax error (1), killed by a signal | Shell wrapper `\|\| exit 2` | 2 |
+| Stdlib import fails (e.g. a shadowing module next to the script) | Module-level `try: import ... except BaseException: write fixed line; sys.exit(2)`. Only `import sys` sits outside it. | 2 |
+| stdin not UTF-8, over 1 MiB, empty, not JSON | Inside `main`, under `_entry`'s handler; rule `malformed-input` / `input-too-large` | 2 |
+| Config missing or invalid | `ConfigError`; rule `config-error` | 2 |
+| Any other exception, including `KeyboardInterrupt` or a stray `SystemExit` | `_entry` catches `BaseException`; rule `internal-error`, printing the exception class name only | 2 |
+| Runaway regex or a hang | `signal.alarm(deadline)` with the default SIGALRM action (no Python handler, so it also works mid-regex in C). The kernel kills the process and the wrapper turns that into 2. Skipped where SIGALRM does not exist (Windows); the README says so. | 2 |
+| Claude Code hook timeout (settings `timeout`) | **Non-blocking: the call proceeds.** The internal deadline (5 s) is below the settings timeout (10 s), so this should not happen. The README tells the operator to treat any "hook timed out" notice as an alert: stop the session and tell Merwyn. | n/a |
+
+Entry point shape (load-bearing):
+```python
+import sys
+try:
+    import argparse, json, os, pathlib, re, signal
+    from typing import NamedTuple
+except BaseException:
+    sys.stderr.write("prod-guard BLOCKED [rule=internal-error] tool=<unknown>. Guard failed to start; ask Merwyn.\n")
+    sys.exit(2)
+...
+def _entry() -> None:
+    try:
+        code = main()
+    except BaseException as e:          # incl. SystemExit from argparse, KeyboardInterrupt
+        _block_line("internal-error", None, extra=type(e).__name__)
+        code = 2
+    sys.exit(code if code in (0, 2) else 2)
+
+if __name__ == "__main__":
+    _entry()
+```
+`main` reads `stdin.buffer.read(MAX_INPUT + 1)` and decodes UTF-8 strictly. It never uses text-mode stdin.
 
 **Decision order (function `decide`)**
 
@@ -71,137 +120,164 @@ Input is the parsed payload. Rule ids below appear in the stderr message.
 | Step | Bash (`tool_name == "Bash"`) | MCP (`tool_name` starts with `mcp__`) |
 |---|---|---|
 | 0 | Payload not a JSON object, no `tool_name`, or Bash without a string `tool_input.command` → **block** `malformed-input` | same; `tool_input` must be an object if present |
+| 0b (new) | Command matches `K8S_SECRET_BASH` (in code: `\bkubectl\b.*\b(get\|describe\|edit)\b.*\bsecrets?\b`, case-insensitive) → **block** `k8s-secret-read`, **whatever the context** | Tool name matches `__kubectl_` and (the tool name contains `secret`, or any string value anywhere in `tool_input`, walked recursively, matches `\bsecrets?\b`) → **block** `k8s-secret-read` |
 | 1 | No `bash.prod_targets` pattern matches the command → **allow** | No `mcp.prod_tools` pattern matches `tool_name` → **allow** |
-| 2 | Command `re.fullmatch`es an `allowlist` entry with `tool: "Bash"` **and** contains no chaining characters (`;` `&` `\|` backtick `$(` newline) → **allow** `allowlist:<id>` | Tool name and SQL `re.fullmatch` an allowlist entry with that `tool` pattern → **allow** (starter allowlist has no MCP entries) |
+| 2 | Allowlist check (below) passes → **allow** `allowlist:<id>` | Tool name and SQL `re.fullmatch` an entry with that `tool` pattern (the same entry rules apply) → **allow**. The starter has no MCP entries. |
 | 3 | Any `bash.write` pattern matches, or `sql_write_keyword(command)` finds one → **block** `<rule id>` / `sql-write:<KEYWORD>` | `mcp.write_tools` matches → **block** `<rule id>` |
-| 4 | Any `bash.read_only` pattern matches → **allow** | If a SQL text is found in `tool_input[f]` for `f` in `mcp.sql_fields` and `classify_sql` says write → **block** `sql-write:<KEYWORD>` / `sql-multi-statement` |
+| 4 | Any `bash.read_only` pattern matches → **allow** | SQL found in `tool_input[f]` for `f` in `mcp.sql_fields` and `classify_sql` says write → **block** `sql-write:<KEYWORD>` / `sql-multi-statement` |
 | 5 | → **block** `default-deny` | `mcp.read_tools` matches → **allow** |
-| 6 | | `mcp.sql_tools` matches and SQL was found and is read-only → **allow**; matches but no SQL field → **block** `malformed-input` (fail closed) |
+| 6 | | `mcp.sql_tools` matches, SQL found and read-only → **allow**; matches but no SQL field → **block** `malformed-input` |
 | 7 | | → **block** `default-deny` |
 | — | Any other `tool_name` (not Bash, not `mcp__`) → **allow** (the matcher should not send them; out of scope) | |
 
-SQL classifier (in code, not config, so a config cannot weaken it): strip `--` and `/* */` comments; `sql-multi-statement` if a `;` is followed by more non-space text; write if any whole word (case-insensitive) is in `INSERT UPDATE DELETE MERGE UPSERT REPLACE CREATE ALTER DROP TRUNCATE RENAME GRANT REVOKE COPY CALL DO EXEC EXECUTE SET RESET LOCK VACUUM REINDEX CLUSTER COMMENT REFRESH IMPORT LOAD INTO`, or the text contains `FOR UPDATE`/`FOR SHARE`, `nextval(`, `setval(`, `pg_terminate_backend`, `pg_cancel_backend`, `lo_import`, `lo_export`, `dblink`; otherwise read-only only if the first keyword is `SELECT`, `WITH`, `SHOW`, `EXPLAIN` (and not followed by `ANALYZE`), `DESCRIBE`, `DESC`, `TABLE` or `VALUES`; else `sql-not-read-only`. False positives (e.g. the word "update" inside a string literal) block, by design. For Bash only `sql_write_keyword` is used (no multi-statement rule, since `;` is normal shell).
+The secret rule is in code, not config, so a config cannot weaken it. It is checked before step 1 because a Bash `kubectl` with no `--context` uses the current context, which may be prod.
+
+**Allowlist check (item 5), in code.** A Bash command is eligible only if:
+(a) it contains none of `;` `&` `|` backtick `$(` `>` `<` or a newline;
+(b) it does not contain `..`;
+(c) it has no whole word `apply`, `rollout`, `approve`, `deploy`, `execute` or `run-now`;
+(d) it `re.fullmatch`es the entry's `command`.
+
+If (a), (b) or (c) fails, the command skips the allowlist and goes on to steps 3 to 5, so it ends up blocked by a write rule or by `default-deny`. `load_config` rejects any allowlist entry whose `action` is not exactly `"submit-change-issue"` (config error). Entries exist to submit a Bytebase change issue for human review in Bytebase, never to apply one.
+
+**SQL classifier** (in code; unchanged from Revision 1): strip `--` and `/* */` comments. `sql-multi-statement` if a `;` is followed by more non-space text. It is a write if any whole word (case-insensitive) is in `INSERT UPDATE DELETE MERGE UPSERT REPLACE CREATE ALTER DROP TRUNCATE RENAME GRANT REVOKE COPY CALL DO EXEC EXECUTE SET RESET LOCK VACUUM REINDEX CLUSTER COMMENT REFRESH IMPORT LOAD INTO`, or the text contains `FOR UPDATE`/`FOR SHARE`, `nextval(`, `setval(`, `pg_terminate_backend`, `pg_cancel_backend`, `lo_import`, `lo_export` or `dblink`. Otherwise it is read-only only if the first keyword is `SELECT`, `WITH`, `SHOW`, `EXPLAIN` (not followed by `ANALYZE`), `DESCRIBE`, `DESC`, `TABLE` or `VALUES`; anything else is `sql-not-read-only`. False positives block, by design. Bash uses `sql_write_keyword` only.
 
 **Interfaces**
 
 CLI (`engine/guard/prod_guard.py`):
 ```
-python3 prod_guard.py [--config PATH]          # hook mode: reads payload JSON on stdin
-python3 prod_guard.py --check-config [--config PATH]   # validate config, print "prod-guard: config OK (<n> rules)"
+python3 prod_guard.py [--config PATH] [--deadline SECONDS]   # hook mode; payload JSON on stdin; deadline default 5, 0 disables (tests only)
+python3 prod_guard.py --check-config [--config PATH]         # prints "prod-guard: config OK (<n> rules)"
 ```
-Config lookup: `--config` → env `PROD_GUARD_CONFIG` → `prod_guard.json` in the script's folder. Not found, unreadable, invalid JSON, wrong `version`, missing key, or a regex that fails to compile → exit 2 with `prod-guard: config error: <reason>` (fail closed; a missing config blocks every matched call, and the message says how to fix it).
+Config lookup is unchanged: `--config`, then env `PROD_GUARD_CONFIG`, then `prod_guard.json` in the script's folder.
 
-Exit codes: `0` allow (no stdout, no stderr). `2` block, malformed input, config error, or any unexpected exception (caught at top level). No other codes.
+Exit codes: `0` allow (no stdout, no stderr). `2` for everything else. No other codes, whether from the script or from the wrapper.
 
-stderr on block (one line):
-`prod-guard BLOCKED [rule=<rule-id>] <tool_name>: <reason>. Prod writes go through an allowlisted Bytebase script; ask Merwyn.`
-
-Config (`prod_guard.example.json`; all patterns are Python regexes compiled with `re.IGNORECASE`; every rule has an `id`):
-```json
-{
-  "version": 1,
-  "bash": {
-    "prod_targets": [
-      {"id": "bash-prod-service", "pattern": "\\bservice=[\\w-]*prod\\b"},
-      {"id": "bash-prod-kube-context", "pattern": "--context[= ]\\S*prod"},
-      {"id": "bash-prod-placeholder-host", "pattern": "\\bprod\\.example\\.invalid\\b"}
-    ],
-    "write": [
-      {"id": "bash-kubectl-write", "pattern": "\\bkubectl\\b.*\\b(apply|delete|create|patch|edit|replace|scale|rollout|set|label|annotate|drain|cordon|exec|cp)\\b"},
-      {"id": "bash-helm-write", "pattern": "\\bhelm\\b.*\\b(install|upgrade|uninstall|rollback)\\b"},
-      {"id": "bash-migrate-deploy", "pattern": "\\b(migrate|terraform\\s+apply|dbt\\s+(run|build|seed|snapshot)|make\\s+deploy)\\b|\\bdeploy\\S*\\.sh\\b"},
-      {"id": "bash-sql-file", "pattern": "\\s(-f|--file)[= ]\\S+\\.sql\\b|<\\s*\\S+\\.sql\\b"}
-    ],
-    "read_only": [
-      {"id": "bash-sql-client-command", "pattern": "\\b(psql|mysql|mariadb)\\b.*\\s(-c|-e|--command|--execute)[= ]"},
-      {"id": "bash-kubectl-read", "pattern": "\\bkubectl\\b.*\\b(get|describe|logs|top)\\b"}
-    ]
-  },
-  "mcp": {
-    "prod_tools": [
-      {"id": "mcp-prod-server", "pattern": "^mcp__.*-prod__"},
-      {"id": "mcp-kubernetes", "pattern": "^mcp__.*__kubernetes__"}
-    ],
-    "write_tools": [
-      {"id": "mcp-pg-write", "pattern": "__pg_(execute_mutation|manage_schema|import_table_data)$"},
-      {"id": "mcp-kubectl-write", "pattern": "__kubectl_(apply|delete|create|patch|edit|replace|scale|rollout|exec|cp|label|annotate|drain|cordon)\\w*$"}
-    ],
-    "read_tools": [
-      {"id": "mcp-pg-read", "pattern": "__pg_execute_query$"},
-      {"id": "mcp-kubectl-read", "pattern": "__kubectl_(get|describe|logs|top)\\w*$"}
-    ],
-    "sql_tools": [
-      {"id": "mcp-generic-sql", "pattern": "__(pg_execute_sql|mysql_query)$"}
-    ],
-    "sql_fields": ["sql", "query", "statement"]
-  },
-  "allowlist": [
-    {"id": "bytebase-placeholder", "tool": "^Bash$",
-     "command": "bytebase-run --project PLACEHOLDER --file migrations/[\\w./-]+\\.sql",
-     "note": "Placeholder until Merwyn names the real Bytebase invocations (Spec open question)"}
-  ]
-}
+stderr on block (item 3), always one line, built only from the rule id, the sanitised tool name and a fixed string:
 ```
-Kubernetes is treated as prod by default (fail-safe) because the tool name does not say which cluster; see Open questions.
+prod-guard BLOCKED [rule=<rule-id>] tool=<tool_name>. <REASONS[rule-family]> Prod writes go through an allowlisted Bytebase change issue; ask Merwyn.
+```
+- `REASONS` is a dict in code, keyed by rule family (`malformed-input`, `input-too-large`, `config-error`, `internal-error`, `k8s-secret-read`, `sql-write`, `sql-multi-statement`, `sql-not-read-only`, `default-deny`, `config-rule`), for example `"Command matches a prod write rule."`.
+- `<tool_name>` is printed only if it fullmatches `[A-Za-z0-9_.:-]{1,128}`; otherwise it shows `<invalid>`.
+- The `sql-write:<KEYWORD>` suffix comes from the fixed keyword list.
+- `config-error` adds the config path and the failure kind (e.g. `bad regex in rule bash-helm-write`), never payload text.
+- `internal-error` adds the exception class name only.
+- `Decision.reason` holds the fixed `REASONS` string.
+
+Config (`prod_guard.example.json`): the same as Revision 1 except for:
+- the allowlist entry:
+  ```json
+  {"id": "bytebase-placeholder", "tool": "^Bash$", "action": "submit-change-issue",
+   "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/[\\w/-]+\\.sql",
+   "note": "Placeholder until Merwyn names the real Bytebase invocations (Spec open question). Submits a change issue only; never applies."}
+  ```
+  The path class has no `.`, so `..` cannot match it either.
+- `bash.read_only` → `bash-kubectl-read` keeps `get|describe|logs|top`. Secrets are already blocked at step 0b.
+
+The full Revision 1 config listing (version 1; bash `prod_targets`, `write`, `read_only`; mcp `prod_tools`, `write_tools`, `read_tools`, `sql_tools`, `sql_fields`) still applies unchanged; see commit 86568c1. `load_config` adds one validation: each allowlist entry needs `id`, `tool`, `command` and `action == "submit-change-issue"`.
 
 Python (`engine/guard/prod_guard.py`):
 ```python
+MAX_INPUT = 1_048_576
 class ConfigError(Exception): ...
 Decision = NamedTuple("Decision", [("allow", bool), ("rule", str), ("reason", str)])
-def load_config(path: pathlib.Path) -> dict          # validates + compiles; raises ConfigError
+def load_config(path: pathlib.Path) -> dict
 def find_config(cli_path: str | None) -> pathlib.Path
-def classify_sql(sql: str) -> tuple[bool, str]       # (read_only, rule_id); rule_id "" when read-only
-def sql_write_keyword(text: str) -> str | None       # first write keyword found, upper-case
+def classify_sql(sql: str) -> tuple[bool, str]
+def sql_write_keyword(text: str) -> str | None
+def allowlist_eligible(command: str) -> bool          # new: checks (a)-(c)
+def mentions_k8s_secret(tool_name: str, tool_input: object, command: str | None) -> bool   # new
 def decide(payload: object, config: dict) -> Decision
+def format_block(rule: str, tool_name: object, extra: str = "") -> str   # new: the only stderr writer
 def main(argv: list[str] | None = None, stdin=sys.stdin, stderr=sys.stderr) -> int
+def _entry() -> None                                   # new: top-level BaseException handler
 ```
-Imports allowed: `argparse, json, os, pathlib, re, sys, typing` only.
+Imports allowed: `argparse, json, os, pathlib, re, signal, sys, typing` only (`signal` is new).
 
-Settings snippet for the README (user-level `~/.claude/settings.json`, because MCP servers are session-wide, not per repo):
+Settings snippet for the README (user-level `~/.claude/settings.json`, because MCP servers are session-wide):
 ```json
 {"hooks": {"PreToolUse": [{"matcher": "Bash|mcp__.*",
-  "hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/prod_guard.py --config ~/.claude/hooks/prod_guard.json"}]}]}}
+  "hooks": [{"type": "command", "timeout": 10,
+    "command": "python3 ~/.claude/hooks/prod_guard.py --config ~/.claude/hooks/prod_guard.json || exit 2"}]}]}}
 ```
 
+**README: "What this guard does not do" (item 4).** This section is required and must state:
+- **It does not gate reads.** Allowed reads of prod (SELECT, `kubectl get/logs`, `pg_execute_query`) return real personal data (borrower, lender, NIK) into the agent's context and transcript. Agent read access to prod needs Merwyn's and legal's approval (UU PDP); it is not granted by installing this guard.
+- **It is a safety net against agent mistakes, not a security boundary.** A determined or confused agent can get around it.
+- Known limits:
+  - prod access that is not named with `-prod__` / a configured pattern (new MCP server names, aliases, env vars, a script file that calls psql, base64 into sh, a default kube context that is prod)
+  - a `SELECT` that calls a mutating function (e.g. `SELECT my_cleanup_fn()`), which the classifier cannot see
+  - a hook timeout is non-blocking
+  - no internal deadline on Windows
+  - MCP SQL field names are assumed
+- The real control is a read-only DB role (and a scoped kube role) for agent sessions. That is Merwyn's decision and a human gate, and is not part of this task.
+- Timeout handling: keep the hook fast (no network, no subprocess, stdin capped). `timeout: 10` sits above the 5 s internal deadline. Any "hook timed out" or hook-error notice is an alert: stop and tell Merwyn.
+- Config handling: the installed `prod_guard.json` lives in `~/.claude/hooks/` (or another path outside any repo) and is never committed. `.gitignore` carries `prod_guard.json` as a backstop.
+
 **Tests** (`python -m unittest -v` from the repo root; stated in the README)
-- `tests/fixtures/guard/cases.json`: list of `{name, expect: "allow"|"block"|"malformed", rule?: str, stdin: <payload object or raw string>}`. `test_prod_guard.py` generates one test method per case named `test_<expect>_<name>` (so `-v` output lists each), runs the script with `subprocess.run([sys.executable, script, "--config", fixture_config], input=...)`, and asserts exit code, empty stderr on allow, and `rule=<rule>` in stderr on block.
-- Minimum cases: block — Bash `psql "service=nimbus-prod" -c "DELETE ..."`, Bash `kubectl --context prod-cluster apply -f x.yaml`, Bash `psql service=nimbus-prod -f fix.sql`, Bash allowlist-lookalike with `; psql ...` chained, MCP `..._nimbus-prod__pg_execute_mutation`, `..._pg_manage_schema`, `..._pg_import_table_data`, `..._kubernetes__kubectl_delete`, MCP `mysql_query` with `UPDATE`, MCP `pg_execute_sql` with `SELECT 1; DROP TABLE t`, MCP `pg_execute_query` whose SQL contains `DELETE`, unknown prod tool (`..._nimbus-prod__pg_something_new`) → `default-deny`, Bash Bytebase invocation not on allowlist → `default-deny`. Allow — `git status`, `ls -la`, Bash `psql service=nimbus-prod -c "SELECT count(*) FROM t"`, MCP `pg_execute_query` SELECT, MCP `mysql_query` SELECT, `kubectl_get`, non-prod MCP tool (`mcp__remote-devices__nimbus-staging__pg_execute_mutation`), Bytebase allowlisted invocation. Malformed — empty stdin, `not json`, `[]`, missing `tool_name`, Bash with no `command`, `sql_tools` call with no SQL field.
-- Unit tests for `classify_sql` (comments, multi-statement, `EXPLAIN ANALYZE`, `SELECT ... INTO`, `FOR UPDATE`, CTE with `DELETE`).
-- Config tests: missing file, bad JSON, bad regex → exit 2 with `config error`.
-- `test_example_config_valid`: `--check-config --config engine/guard/prod_guard.example.json` exits 0.
-- Hygiene test: scans `engine/guard/` and `tests/fixtures/guard/` and fails on any domain-like token not ending in `.invalid`/`.example`/`example.com`, any `://` URL with credentials, `password`/`passwd`/`secret`/`token` followed by `=` or `:` and a value, or an IPv4 address other than `127.0.0.1`/`0.0.0.0`.
-- No-network test: parses `prod_guard.py` with `ast` and asserts its imports are within the allowed list above; tests themselves import nothing network-related.
+- `cases.json` runner as in Revision 1: one test method per case, run by `subprocess.run([sys.executable, script, "--config", fixture_config], input=...)`. It asserts the exit code, empty stdout always, empty stderr on allow, and `rule=<rule>` in stderr on block.
+- **New in this revision:**
+  - Leak check (item 3): for every block and malformed case, assert that stderr contains neither the `command` nor any SQL field value from the payload. Plus a dedicated case: MCP `pg_execute_query` with `SELECT * FROM t WHERE nik = 'PII_SENTINEL_X'; DROP TABLE t` (block), where stderr must not contain `PII_SENTINEL_X`, `nik` or `DROP TABLE`. The sentinel is letters, not digits, so the hygiene scan never sees a NIK-shaped number.
+  - Fail-closed (item 1), each through the exact settings wrapper, `subprocess.run(["sh", "-c", f"{py} {script} --config {cfg} || exit 2"], ...)`:
+    - `test_block_broken_import`: copy the script to a temp dir next to a `re.py` that raises ImportError → exit 2 with `rule=internal-error`
+    - `test_block_syntax_error`: copy with garbage appended → exit 2
+    - `test_block_missing_interpreter`: `/nonexistent/python3` → exit 2
+    - `test_malformed_undecodable_stdin`: bytes `b"\xff\xfe\x00"` → exit 2, `rule=malformed-input`
+    - `test_block_oversize_stdin`: 1 MiB + 1 bytes → `rule=input-too-large`
+    - `test_block_deadline`: `slow_config.json` with prod target `(a+)+$`, command `"a"*40 + "!"`, `--deadline 1` → exit 2 within 5 s (skipped if no SIGALRM)
+    - `test_block_internal_error`: in-process, `main` with a monkeypatched `decide` raising → `_entry` exits 2
+  - Secrets (item 2):
+    - block `kubectl get secret db-creds`, `kubectl get secrets -A`, `kubectl describe secret/x` (Bash, **no** prod context)
+    - block `kubectl --context prod-cluster get secrets -o yaml`
+    - block MCP `..._kubernetes__kubectl_get` with `{"resourceType": "secrets"}`
+    - block MCP `..._kubernetes__kubectl_get` with nested `{"args": ["secret", "x"]}`
+    - block MCP `..._kubernetes__kubectl_get_secret` (name)
+    - allow MCP `kubectl_get` pods
+    - allow Bash `kubectl get pods` (non-prod)
+  - Allowlist (item 5): each of these is blocked (not allowlisted):
+    - placeholder Bytebase command with `migrations/../x.sql`
+    - with `--file migrations/a.sql apply`
+    - with `> out`
+    - with `; psql ...` (kept from Revision 1)
+
+    Config test: an entry with `action: "apply"` or with no `action` → `config error`, exit 2.
+  - Hygiene (item 6): the scan covers `engine/guard/`, `tests/fixtures/guard/` **and `tests/test_prod_guard.py`**. The scanner's own detection patterns are built by string concatenation so they do not match themselves. Plus a test that `.gitignore` contains `prod_guard.json` and that `engine/guard/prod_guard.json` does not exist in the working tree.
+- Kept from Revision 1: all the block, allow and malformed minimum cases, the `classify_sql` unit tests, config tests, `test_example_config_valid`, and the no-network `ast` import check (now with `signal` on the allowed list).
 
 **Risks**
 
 | Risk | Handling |
 |---|---|
-| Regex guard is bypassable (a script file that calls psql, base64 piped into sh, env vars holding the target, a new MCP tool name) | Default-deny on anything that names prod; unknown prod MCP tools blocked. Stated plainly in README: this is a seatbelt against agent mistakes, not a security boundary. Real control is a read-only DB role for agent sessions (follow-up, Merwyn gate). |
-| MCP `tool_input` field names for SQL are not confirmed | `sql_fields` is config; a `sql_tools` call with no recognised field is blocked. Open question below to confirm from a real payload (field names only, no data). |
-| Hook payload / exit-code contract differs from assumption | RAID R-6; Engineer verifies against Claude Code hook docs before PR. |
-| Missing or broken config blocks every Bash and MCP call | Clear `config error` message with the path searched; `--check-config` in install steps. Accepted: fail closed is the spec. |
-| False positives on read queries | Accepted (fail closed). User rephrases or Merwyn adds an allowlist entry. |
-| Allowlist entry too loose lets a chained write through | `fullmatch` + reject chaining characters before allowlist match; test case covers it. |
-| Hook latency | One Python start per matched call (~30–50 ms). Acceptable. |
+| Regex guard is bypassable | Default-deny on anything that names prod; unknown prod MCP tools are blocked. The README says plainly that it is a safety net, not a boundary, and lists the limits. The real control is a read-only DB role (Merwyn gate). |
+| Reads of prod bring personal data into agent context | Out of the guard's power by design. The README requires Merwyn's and legal's approval before agents get prod read access. |
+| Hook timeout or hook error lets a call through (Claude Code treats it as non-blocking) | `\|\| exit 2` covers non-zero exits. The internal deadline (5 s) is below the settings timeout (10 s). stdin is capped at 1 MiB. The README says to treat timeouts as an alert. A residual risk remains if Claude Code's own runner fails before the shell starts; that is noted in the README limits. |
+| Default SIGALRM kills the process with no message | The wrapper's exit 2 still blocks. The reason line is missing in that one case; accepted, and documented. |
+| stderr leaks payload | One writer (`format_block`), fixed reasons, sanitised tool name, and a leak test over every block case |
+| Secret rule false positives (e.g. a pod named `secret-rotator`) | Accepted: it fails closed, and the user rephrases with a resource type |
+| MCP `tool_input` field names not confirmed | `sql_fields` is in config; no recognised field → block. The secret scan walks every string value, so it does not depend on field names. |
+| Hook contract differs from the assumption | RAID R-6, extended to cover the timeout semantics and shell execution; the Engineer verifies |
+| Broken config blocks every Bash and MCP call | A clear `config error` naming the path; `--check-config` is in the install steps. Accepted. |
 
-**Flags.** Touches access control to production data (nimbus-prod, MariaDB prod, Kubernetes): **Compliance (Wulan) must check this design before build.** Installing the hook anywhere (user settings, nimbus, klik-workspace) is a Merwyn human gate and is not part of this task.
+**Flags.** This touches access control for production data (nimbus-prod, MariaDB prod, Kubernetes). **Wulan (compliance) re-checks this revision before build.** Installing the hook anywhere, and any decision on agent read access to prod or a read-only DB role, are Merwyn human gates and are not part of this task.
 
-**Decision record (draft for April)**
+**Decision record (draft for April, revised)**
 ```
-Decision: Guard prod with one stdlib PreToolUse hook covering Bash and MCP tools, default-deny and fail-closed, with prod identified by tool-name and command regexes in a JSON config.
-Context: T-019/T-040. Agents can reach nimbus-prod, MariaDB prod and Kubernetes through MCP tools and Bash; nothing blocks writes today. No hostnames or credentials may live in this repo.
-Options: A — hook script + JSON pattern config (pro: no dependency, one file to install, testable offline; con: regex is bypassable).
-         B — per-server MCP permission deny rules in settings.json (pro: native; con: tool-level only, cannot tell SELECT from DELETE in a generic SQL tool, nothing for Bash).
-         C — read-only DB roles for agent sessions (pro: real boundary; con: needs prod credential and DBA changes, a human gate, out of repo scope).
-Chosen: A now, because it is buildable and testable here; C recommended as the follow-up real control; B can complement A at install time.
-Consequences: Easier: one tested guard reused across repos. Harder: config must track new MCP tool names (unknown prod tools are blocked, so drift fails safe). Follow-ups: Merwyn's Bytebase allowlist; install task (gate); read-only DB role (gate).
-Links: T-040, T-019, RAID R-6.
+Decision: Guard prod with one stdlib PreToolUse hook (Bash + MCP), default-deny and fail-closed at every layer (shell wrapper, import, stdin, config, deadline), prod identified by regexes in a JSON config kept outside the repo; it never echoes payload text and does not gate reads.
+Context: T-019/T-040. Agents reach nimbus-prod, MariaDB prod and Kubernetes via MCP and Bash; nothing blocks writes. Compliance BLOCKed Rev 1 for fail-open paths, secret reads, stderr leaks and allowlist looseness; Merwyn accepted all fixes (25 Nov 2026).
+Options: A — hook + JSON pattern config (pro: no dependency, testable offline; con: bypassable, timeouts non-blocking).
+         B — native per-tool permission deny rules (pro: built in; con: cannot tell SELECT from DELETE in a generic SQL tool; nothing for Bash).
+         C — read-only DB role + scoped kube role for agent sessions (pro: real boundary, also limits reads; con: prod credentials and DBA work, human gate).
+Chosen: A now as a safety net, because it is buildable and testable here; C is the recommended real control (Merwyn's decision); B may complement A at install.
+Consequences: Easier: one tested guard reused across repos; leaks via the guard's own output ruled out. Harder: the config must track new MCP tool names (drift fails safe); false positives block. Reads of prod stay ungated and need Merwyn + legal approval.
+Supersedes: the Revision 1 draft (same task, not yet accepted).
+Links: T-040, T-019, RAID R-6, compliance BLOCK in T-040 Review log.
 ```
 
 **Open questions (design)**
-- Merwyn: is the `kubernetes` MCP server prod-only, or does it also reach staging? Design treats it as prod (fail-safe). Non-blocking.
-- Merwyn: which `tool_input` key carries the SQL for `pg_execute_sql`, `pg_execute_query` and `mysql_query` (key names only, no query text or data)? Design assumes one of `sql`, `query`, `statement`. Non-blocking: unknown keys fail closed.
-- Merwyn: Bytebase allowlist entries (from the Spec) still open; build ships the placeholder.
+- Merwyn: is the `kubernetes` MCP server prod-only, or does it also reach staging? The design treats it as prod (fail-safe). Non-blocking.
+- Merwyn: which `tool_input` key carries the SQL for `pg_execute_sql`, `pg_execute_query` and `mysql_query`? Key names only, no query text or data. The design assumes one of `sql`, `query`, `statement`. Non-blocking: unknown keys fail closed.
+- Merwyn: the Bytebase allowlist entries (from the Spec) are still open, and each must be a "submit change issue" command. The build ships the placeholder.
+- Merwyn (+ legal): whether agent sessions may read prod at all, and whether to commission the read-only DB role (option C). Not needed for this build. It must be answered before any install task.
 
 — Fang (architect)
 
