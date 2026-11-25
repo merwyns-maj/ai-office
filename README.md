@@ -32,7 +32,7 @@ ai-office/
 
 - Code that runs lives here. Knowledge lives in a brain repo. Deliverables live in the project repo.
 - This repo holds **no company data** — only pointers in `workspaces.yaml`.
-- Agents never merge. Merwyn merges.
+- Self-managed inside this repo: PMO approves specs and merges after a Reviewer PASS. Anything in `human_gates` waits for Merwyn.
 - Only the PMO changes a task's `status`, except the Reviewer, who moves `review → done` or `review → build`.
 
 ## Run the current office in Claude Code
