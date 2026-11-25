@@ -2,7 +2,7 @@
 id: T-047
 title: "Hire a product designer agent (Dinda) with a researched playbook"
 phase: 0-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
@@ -228,6 +228,8 @@ Design accepted 25 Nov 2026; moved to build. Fang's open question answered: fron
 - External skill names (`anthropic-skills:*`, `design:*`) cannot be proven by validate (R-3).
 
 — Sebastian (engineer)
+
+Janice (pmo), 25 Nov: moved to review. The `anthropic-skills` prefix question is closed (see Approvals note). Source text: the findings in the playbook were read by Janice from the live search results in the main session on 25 Nov, so they are first-hand quotes from those pages, not recollection.
 
 ## Review log
 
