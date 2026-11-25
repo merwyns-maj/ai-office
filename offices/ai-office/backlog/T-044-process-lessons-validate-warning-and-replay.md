@@ -2,7 +2,7 @@
 id: T-044
 title: "Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase"
 phase: 7-ways-of-working
-status: design
+status: build
 priority: P1
 owner: engineer
 where: code
