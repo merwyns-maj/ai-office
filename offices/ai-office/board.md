@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**37 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 4 · parked: 0
+**38 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 5 · parked: 0
 
 ## Waiting on you
 
@@ -62,12 +62,13 @@ _empty_
 
 _empty_
 
-## done (4)
+## done (5)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
 | [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | curator | — |
 | [T-037](backlog/T-037-pmo-playbook-and-process-skills.md) | P0 | PMO playbook and process skills (pr-workflow, handoff, RAID log) | curator | — |
+| [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 

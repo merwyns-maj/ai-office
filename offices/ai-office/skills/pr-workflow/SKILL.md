@@ -27,9 +27,12 @@ gh api repos/merwyns-maj/ai-office/pulls -f title="T-xxx: <title>" \
 #   <your session URL>
 
 # 5. Merge (PMO only, after Reviewer PASS). Wait until GitHub has computed mergeability:
-for i in 1 2 3 4 5; do
-  m=$(gh api repos/merwyns-maj/ai-office/pulls/<n> --jq .mergeable); [ "$m" = true ] && break; sleep 5; done
-[ "$m" = true ] || { echo "PR <n> not mergeable ($m): stop and check"; exit 1; }
+# Check the PR shows YOUR latest commit too: mergeable=true can be stale from before your last push.
+head=$(git rev-parse HEAD)
+for i in $(seq 1 10); do
+  r=$(gh api repos/merwyns-maj/ai-office/pulls/<n> --jq '[.head.sha,.mergeable]|@tsv')
+  [ "$r" = "$head	true" ] && break; sleep 5; done
+[ "$r" = "$head	true" ] || { echo "PR <n> not ready ($r): stop and check"; exit 1; }
 gh api -X PUT repos/merwyns-maj/ai-office/pulls/<n>/merge -f merge_method=squash --jq .message
 git checkout main && git pull --depth=5 origin main
 ```
