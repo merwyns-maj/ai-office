@@ -27,4 +27,5 @@ pr: null
 ## Decision
 
 ## Open questions
+- Follow-up from T-014: once built in the CaaS 3.0 project, make the company PRD and recon skills reference the working-standard rules. — Janice (pmo)
 - 25 Nov 2026, Merwyn: project-specific; build it inside the CaaS 3.0 project (klik-workspace or the project repo), not as an office skill. Needs T-002. — Janice (pmo)

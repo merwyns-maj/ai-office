@@ -2,9 +2,9 @@
 id: T-014
 title: "Working-standard skill"
 phase: 3-skills
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: curator
 where: chat
 project: ai-office
 depends_on: [T-012]
@@ -14,7 +14,7 @@ pr: https://github.com/merwyns-maj/ai-office/pull/14
 > Source: research/T-012-chat-mining.md section A (A1-A10). Picked by Merwyn for Sprint 2 (25 Nov 2026). Skill lives in this repo; no company data.
 
 ## Done when
-- [ ] Verify vs prod, flag incidental bugs, check external edits, state fact not guesses
+- [x] Verify vs prod, flag incidental bugs, check external edits, state fact not guesses
 - [ ] Used by PRD and recon skills
 
 ## Spec
@@ -33,12 +33,12 @@ pr: https://github.com/merwyns-maj/ai-office/pull/14
 - Choosing the base-level mechanism (Architect).
 
 **Done when**
-- [ ] Exactly one `SKILL.md` has `name: working-standard`. Check: `grep -rl "name: working-standard" offices/ | wc -l` prints 1, at a base-level path every office can reach.
-- [ ] The file contains A1 to A10 each as one short rule. Check: open it; ten distinct rules, each citing its A-number.
-- [ ] A new agent built for a second office gets the skill without editing its own profile. Check: run the build for any office and `grep -l "working-standard"` on the generated agent files for every agent in it; the count equals the agent count.
-- [ ] `python scripts/build_agents.py <office>` exits 0 for every office that exists.
-- [ ] `grep -rn "working-standard" offices/*/agents` lists no agent file as the source of truth (the skill is not copy-pasted into agents).
-- [ ] The skill contains no borrower, lender, NIK, account numbers or amounts. Check: open the file.
+- [x] Exactly one `SKILL.md` has `name: working-standard`. Check: `grep -rl "name: working-standard" offices/ | wc -l` prints 1, at a base-level path every office can reach.
+- [x] The file contains A1 to A10 each as one short rule. Check: open it; ten distinct rules, each citing its A-number.
+- [x] A new agent built for a second office gets the skill without editing its own profile. Check: run the build for any office and `grep -l "working-standard"` on the generated agent files for every agent in it; the count equals the agent count.
+- [x] `python scripts/build_agents.py <office>` exits 0 for every office that exists.
+- [x] `grep -rn "working-standard" offices/*/agents` lists no agent file as the source of truth (the skill is not copy-pasted into agents).
+- [x] The skill contains no borrower, lender, NIK, account numbers or amounts. Check: open the file.
 
 **Open questions**
 - Does a base-level skills location exist today, and how do `office_skills` and `build_agents.py` treat it? Not verified. Who: Architect. Blocking for design.
