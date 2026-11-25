@@ -2,7 +2,7 @@
 id: T-039
 title: "Engine loader and dry-run (repo-only slice of T-024)"
 phase: 6-office
-status: design
+status: build
 priority: P1
 owner: engineer
 where: code
@@ -193,6 +193,9 @@ Links: T-039, T-024, engine/schema/office.md.
 - Janice: confirm the design addition that dry-run skips tasks owned by `human`. Non-blocking: build includes it; removing it is a one-line change.
 
 — Fang (architect)
+
+## Design approval
+- Approved for build; skipping human-owned tasks in dry-run is accepted. — Janice (pmo)
 
 ## Build notes
 
