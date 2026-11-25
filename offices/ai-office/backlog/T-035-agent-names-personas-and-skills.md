@@ -40,3 +40,4 @@ As above (requested directly by Merwyn).
 - Agents carry office-level personas (name, MBTI-style personality, role title) and office skills; the base profile stays persona-free so other offices can cast their own. — Nadia (curator)
 
 ## Open questions
+- Superseded 25 Nov: Merwyn renamed the agents (T-036).

@@ -2,13 +2,18 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**35 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 3 · parked: 0
+**36 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 3 · parked: 0
 
-## todo (32)
+## Waiting on you
+
+- [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
+
+## todo (33)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-003](backlog/T-003-decide-brain-home-and-structure-work-bra.md) | P0 | Decide brain home and structure: work brain (product / data / shared) in product-brain, personal brain separate | pmo | — |
+| [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) | P0 | Give Claude GitHub access to the impact-credit-solutions org | human | — |
+| [T-003](backlog/T-003-decide-brain-home-and-structure-work-bra.md) | P0 | Decide brain home and structure: work brain (product / data / shared) in product-brain, personal brain separate | pmo | T-002 |
 | [T-004](backlog/T-004-write-brain-rules-no-pii-nik-account-num.md) | P0 | Write brain rules: no PII, NIK, account numbers or prod data; pointers only | pmo | T-003 |
 | [T-006](backlog/T-006-seed-work-brain-shared-with-systems-glos.md) | P0 | Seed work brain shared/ with systems, glossary and key decisions | pmo | T-003, T-004 |
 | [T-007](backlog/T-007-metric-definitions-provision-revenue-out.md) | P0 | Metric definitions (provision revenue, outstanding, DPD, disbursement = loan amount) | pmo | T-003 |
@@ -21,17 +26,17 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-010](backlog/T-010-point-the-session-runs-dashboard-at-the.md) | P1 | Point the Session Runs dashboard at the live log | pmo | T-009 |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | pmo | T-012 |
 | [T-016](backlog/T-016-golden-examples-and-evals-for-top-skills.md) | P1 | Golden examples and evals for top skills (SLIK, recon, PRD) | pmo | — |
-| [T-018](backlog/T-018-graphify-on-nimbus-data-platform-dbt-mod.md) | P1 | Graphify on Nimbus, data-platform, dbt models and the brain | pmo | — |
+| [T-018](backlog/T-018-graphify-on-nimbus-data-platform-dbt-mod.md) | P1 | Graphify on Nimbus, data-platform, dbt models and the brain | pmo | T-002 |
 | [T-021](backlog/T-021-build-brain-mcp-server-search-read-appen.md) | P1 | Build brain MCP server (search, read, append_log, propose_decision) with work/personal scopes | pmo | T-003 |
 | [T-022](backlog/T-022-connect-brain-mcp-to-chat.md) | P1 | Connect brain MCP to chat | pmo | T-021 |
 | [T-023](backlog/T-023-nightly-curator-agent.md) | P1 | Nightly curator agent | pmo | T-021 |
 | [T-024](backlog/T-024-engine-runtime-load-an-office-folder-and.md) | P1 | Engine runtime: load an office folder and run its agents on the Agent SDK | pmo | — |
-| [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024 |
+| [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024, T-002 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | pmo | T-012 |
-| [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | — |
+| [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
 | [T-027](backlog/T-027-office-visualization-renderer-reads-them.md) | P2 | Office visualization renderer (reads theme/) | pmo | T-024 |
 | [T-028](backlog/T-028-chat-panel-and-approvals-in-the-app.md) | P2 | Chat panel and approvals in the app | pmo | T-027 |
@@ -62,8 +67,8 @@ _empty_
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
 | [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | curator | — |
-| [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) | P0 | Give Claude GitHub access to the impact-credit-solutions org | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
+| [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 
 ## parked (0)
 

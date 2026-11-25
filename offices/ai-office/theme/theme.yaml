@@ -14,11 +14,11 @@ rooms:
   - { id: archive,   label: Archive,       stage: done }
   - { id: corner,    label: Merwyn's door, stage: null }   # where agents wait for approval
 desks:
-  - { agent: pmo, label: Sari,        room: lobby,      sprite: chief }
-  - { agent: pm, label: Ayu,         room: product,    sprite: pm }
-  - { agent: architect, label: Bima,  room: whiteboard, sprite: architect }
-  - { agent: engineer, label: Raka,   room: workshop,   sprite: engineer }
-  - { agent: reviewer, label: Laras,   room: lab,        sprite: qa }
-  - { agent: compliance, label: Hendra, room: corner,     sprite: officer }
-  - { agent: curator, label: Nadia,    room: archive,    sprite: librarian }
+  - { agent: pmo, label: Janice,        room: lobby,      sprite: chief }
+  - { agent: pm, label: Emmy,         room: product,    sprite: pm }
+  - { agent: architect, label: Fang,  room: whiteboard, sprite: architect }
+  - { agent: engineer, label: Sebastian,   room: workshop,   sprite: engineer }
+  - { agent: reviewer, label: Cahyani,   room: lab,        sprite: qa }
+  - { agent: compliance, label: Wulan, room: corner,     sprite: officer }
+  - { agent: curator, label: April,    room: archive,    sprite: librarian }
 hub: lobby

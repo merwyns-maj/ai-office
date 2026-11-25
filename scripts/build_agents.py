@@ -2,7 +2,7 @@
 
 Usage: python scripts/build_agents.py <office-id>
 """
-import sys, pathlib
+import re, sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from _fm import split, dump, as_list
 
@@ -44,6 +44,14 @@ def build(office):
         if skills:
             body = body.rstrip() + "\n\n## Skills\nBefore your step, read and follow:\n" + "".join(
                 f"- offices/{office}/skills/{sk}/SKILL.md\n" for sk in skills)
+        ext = as_list(fm.get("external_skills"))
+        sources = set(re.findall(r"^  ([\w-]+):", (ROOT / "workspaces.yaml").read_text().split("skill_sources:")[-1], re.M))
+        for e in ext:
+            if ":" not in e or e.split(":")[0] not in sources:
+                sys.exit(f"{f.name}: external skill '{e}' must be source:name with a source listed under skill_sources in workspaces.yaml")
+        if ext:
+            body = body.rstrip() + "\n\n## External skills (use when available)\n" + "".join(f"- {e}\n" for e in ext) + \
+                "These live outside this repo. In a Claude app session, call the Skill tool with the name after the colon. If a skill is not available, carry on and say so in your section of the task file.\n"
         missing = [k for k in ("name", "description") if not fm.get(k)]
         if missing:
             sys.exit(f"{f.name}: missing {missing}")
