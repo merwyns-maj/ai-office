@@ -10,6 +10,7 @@ import build_agents  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 WS = "base/skills/working-standard/SKILL.md"
+PW = "base/skills/partner-writing/SKILL.md"
 
 
 class TempRepo(unittest.TestCase):
@@ -40,6 +41,12 @@ class Build(TempRepo):
         self.assertEqual(len(hits), n_agents)
         self.assertGreater(n_agents, 0)
 
+    def test_partner_writing_only_on_pm_and_curator(self):
+        self.build()
+        for f in self.out.glob("*.md"):
+            want = f.stem in ("pm", "curator")
+            self.assertEqual(PW in f.read_text(), want, f.name)
+
     def test_agent_files_do_not_list_the_skill(self):
         for f in (REPO / "offices").glob("*/agents/*.md"):
             self.assertNotIn("working-standard", f.read_text(), f)
@@ -57,14 +64,14 @@ class Build(TempRepo):
         extra = self.root / "base" / "skills" / "extra"
         extra.mkdir()
         (extra / "SKILL.md").write_text("---\nname: extra\n---\n")
-        f = self.root / "offices/ai-office/agents/pm.md"
-        f.write_text(f.read_text().replace("name: pm\n", "name: pm\nbase_skills: [extra, working-standard]\n", 1))
+        f = self.root / "offices/ai-office/agents/architect.md"
+        f.write_text(f.read_text().replace("name: architect\n", "name: architect\nbase_skills: [extra, working-standard]\n", 1))
         self.build()
-        paths = re.findall(r"^- (\S+SKILL\.md)$", (self.out / "pm.md").read_text(), re.M)
+        paths = re.findall(r"^- (\S+SKILL\.md)$", (self.out / "architect.md").read_text(), re.M)
         self.assertEqual(paths[:2], [WS, "base/skills/extra/SKILL.md"])
         self.assertEqual(len(paths), len(set(paths)))
         self.assertTrue(paths[2].startswith("offices/ai-office/skills/"))
-        self.assertNotIn("base_skills", (self.out / "pm.md").read_text().split("<!--")[0])
+        self.assertNotIn("base_skills", (self.out / "architect.md").read_text().split("<!--")[0])
 
 
 class Failures(TempRepo):
@@ -80,9 +87,9 @@ class Failures(TempRepo):
         self.assertTrue(self.keep.exists())
 
     def test_unknown_agent_base_skill_exits_and_keeps_output(self):
-        f = self.root / "offices/ai-office/agents/pm.md"
-        f.write_text(f.read_text().replace("name: pm\n", "name: pm\nbase_skills: [ghost]\n", 1))
-        self.assertIn("pm.md: base_skills names 'ghost', but base/skills/ghost/SKILL.md is missing", self.fails())
+        f = self.root / "offices/ai-office/agents/architect.md"
+        f.write_text(f.read_text().replace("name: architect\n", "name: architect\nbase_skills: [ghost]\n", 1))
+        self.assertIn("architect.md: base_skills names 'ghost', but base/skills/ghost/SKILL.md is missing", self.fails())
         self.assertTrue(self.keep.exists())
 
     def test_clash_exits_and_keeps_output(self):
