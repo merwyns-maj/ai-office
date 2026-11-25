@@ -2,7 +2,7 @@
 id: T-048
 title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
