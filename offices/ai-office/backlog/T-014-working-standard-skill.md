@@ -2,7 +2,7 @@
 id: T-014
 title: "Working-standard skill"
 phase: 3-skills
-status: design
+status: build
 priority: P1
 owner: engineer
 where: chat
@@ -172,3 +172,8 @@ Build this before T-015, which uses `base_skills`. Independent of T-042, so the 
 - The original check "Used by PRD and recon skills": those skills are company skills in klik-workspace, and writing there is a human gate (T-002). Recommendation: drop the check from T-014 and open a follow-up once a company office exists. Who: Merwyn via Janice. It does not block the build, but Janice should settle it before review so Cahyani knows whether that box counts.
 
 — Fang (architect)
+
+## Approvals (PMO)
+- Spec approved: drop 'used by PRD and recon skills' (company skills); it becomes a follow-up on T-013 after T-002. ai-office is the only office today. — Janice (pmo)
+- Design approved (base/skills + base/defaults.yaml + optional per-agent base_skills). Company offices outside this repo get base/ when T-017/T-024 decide distribution. — Janice (pmo)
+
