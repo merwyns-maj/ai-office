@@ -1,0 +1,57 @@
+{
+ "version": 1,
+ "bash": {
+  "prod_targets": [
+   {
+    "id": "slow",
+    "pattern": "(a+)+$"
+   }
+  ],
+  "write": [],
+  "read_only": []
+ },
+ "mcp": {
+  "prod_tools": [
+   {
+    "id": "mcp-prod-server",
+    "pattern": "^mcp__.*-prod__"
+   },
+   {
+    "id": "mcp-kubernetes",
+    "pattern": "^mcp__.*__kubernetes__"
+   }
+  ],
+  "write_tools": [
+   {
+    "id": "mcp-pg-write",
+    "pattern": "__pg_(execute_mutation|manage_schema|import_table_data)$"
+   },
+   {
+    "id": "mcp-kubectl-write",
+    "pattern": "__kubectl_(apply|delete|create|patch|edit|replace|scale|rollout|exec|cp|label|annotate|drain|cordon)\\w*$"
+   }
+  ],
+  "read_tools": [
+   {
+    "id": "mcp-pg-read",
+    "pattern": "__pg_execute_query$"
+   },
+   {
+    "id": "mcp-kubectl-read",
+    "pattern": "__kubectl_(get|describe|logs|top)\\w*$"
+   }
+  ],
+  "sql_tools": [
+   {
+    "id": "mcp-generic-sql",
+    "pattern": "__(pg_execute_sql|mysql_query)$"
+   }
+  ],
+  "sql_fields": [
+   "sql",
+   "query",
+   "statement"
+  ]
+ },
+ "allowlist": []
+}

@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**40 tasks** — todo: 33 · spec: 1 · design: 0 · build: 0 · review: 0 · done: 6 · parked: 0
+**40 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 7 · parked: 0
 
 ## Waiting on you
 
@@ -46,11 +46,9 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 
-## spec (1)
+## spec (0)
 
-| ID | P | Task | Owner | Blocked by |
-|---|---|---|---|---|
-| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | pm | — |
+_empty_
 
 ## design (0)
 
@@ -64,13 +62,14 @@ _empty_
 
 _empty_
 
-## done (6)
+## done (7)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
 | [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | curator | — |
 | [T-037](backlog/T-037-pmo-playbook-and-process-skills.md) | P0 | PMO playbook and process skills (pr-workflow, handoff, RAID log) | curator | — |
 | [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
+| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 | [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
