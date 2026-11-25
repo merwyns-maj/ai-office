@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**42 tasks** — todo: 31 · spec: 3 · design: 0 · build: 0 · review: 0 · done: 8 · parked: 0
+**42 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 11 · parked: 0
 
 ## Waiting on you
 
@@ -44,13 +44,9 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 
-## spec (3)
+## spec (0)
 
-| ID | P | Task | Owner | Blocked by |
-|---|---|---|---|---|
-| [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | pm | — |
-| [T-042](backlog/T-042-sprint-1-process-lessons.md) | P1 | Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents | pm | — |
-| [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | pm | — |
+_empty_
 
 ## design (0)
 
@@ -64,7 +60,7 @@ _empty_
 
 _empty_
 
-## done (8)
+## done (11)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -73,9 +69,12 @@ _empty_
 | [T-037](backlog/T-037-pmo-playbook-and-process-skills.md) | P0 | PMO playbook and process skills (pr-workflow, handoff, RAID log) | curator | — |
 | [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
 | [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | curator | — |
+| [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 | [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
+| [T-042](backlog/T-042-sprint-1-process-lessons.md) | P1 | Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents | curator | — |
+| [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
 
 ## parked (0)
 
