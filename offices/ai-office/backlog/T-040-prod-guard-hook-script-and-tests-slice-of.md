@@ -4,7 +4,7 @@ title: "Prod-guard hook script and tests (repo-only slice of T-019)"
 phase: 4-code-tooling
 status: design
 priority: P0
-owner: human
+owner: architect
 where: code
 project: ai-office
 depends_on: []
@@ -211,6 +211,7 @@ Links: T-040, T-019, RAID R-6.
 - Compliance: BLOCK — fail-open path: only exceptions inside main() exit 2; a missing python3 (127), import/syntax error (1), stdin decode error or hook timeout would let a prod call through. Fix: settings command ends with `|| exit 2`; wrap the whole script incl. stdin read in the top-level handler; test broken import and undecodable stdin expect exit 2; README notes timeouts are non-blocking. — Wulan (compliance)
   - Also in the same revision: block `kubectl get secret(s)` in Bash and MCP read paths (credential leak); stderr names rule + tool only, never the command or SQL (WHERE may hold a NIK), with a test; README states the guard does not gate reads and is a safety net, not a security boundary, with its limits; Bytebase allowlist rejects `..` and only submits change issues; hygiene scan covers the test file; installed prod_guard.json never committed. — Wulan (compliance)
   - Escalated to Merwyn per human_gates (compliance BLOCK). Recommendation: accept all fixes, send back to Fang. — Janice (pmo)
+  - 25 Nov 2026 21:47: Merwyn accepted all of Wulan's fixes. Back to Fang for a design revision. Default-deny with allowlist stays the working assumption; kubernetes scope and Bytebase allowlist contents remain open. — Janice (pmo)
 
 ## Decision
 
