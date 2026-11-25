@@ -6,3 +6,4 @@ agents:
   - { id: reviewer,   name: Cahyani,  personality: INTP, reports_to: pmo,       role: Reviewer / QA }
   - { id: compliance, name: Wulan, personality: ISTJ, reports_to: human,     role: Compliance Officer }
   - { id: curator,    name: April,  personality: INFJ, reports_to: pmo,       role: Knowledge Curator }
+  - { id: designer,   name: Dinda,    personality: ISFP, reports_to: pmo,       role: Product Designer }

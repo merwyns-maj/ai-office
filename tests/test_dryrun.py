@@ -19,7 +19,7 @@ class RealOffice(unittest.TestCase):
         self.assertEqual(lines[0], "ai-office: dry-run (no files changed, no SDK or network calls)")
         keys = [ln.split(":", 1)[0] for ln in lines[1:]]
         self.assertEqual(keys[:len(KEYS)], KEYS)
-        self.assertTrue(all(k in KEYS + ["note"] for k in keys))
+        self.assertTrue(all(k in KEYS + ["note", "consults"] for k in keys))
         self.assertRegex(lines[1], r"^task: T-\d+ ")
         self.assertRegex(lines[5], r"^profile: offices/ai-office/agents/\w+\.md$")
 
@@ -84,6 +84,7 @@ class Pick(unittest.TestCase):
         self.assertIn("office_skills: architect-playbook, decision-record, handoff\n", out)
         self.assertIn("external_skills: claude:diagram-design\n", out)
         self.assertIn("output_section: Design", out)
+        self.assertIn("consults: designer (Dinda) writes UX design when the Spec or Design has UI, visual or motion work\n", out)
         self.assertNotIn("note:", out)
 
     def test_note_when_owner_differs_from_stage_owner(self):
@@ -93,6 +94,7 @@ class Pick(unittest.TestCase):
     def test_todo_stage_has_no_output_section(self):
         out = self.picked([("T-050", "todo", "P0", "pmo", [])])
         self.assertIn("output_section: none (exit: PMO picks it)", out)
+        self.assertNotIn("consults:", out)
 
     def test_invalid_office_exits_1(self):
         (self.c.root / "workflow.yaml").unlink()

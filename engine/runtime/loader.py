@@ -264,6 +264,28 @@ def validate(office):
         if g.get("approver") != "human" and g.get("approver") not in org_ids:
             add(wf, f"gate approver '{g.get('approver')}' is neither 'human' nor an org agent")
 
+    # 5b. consults (optional): an org agent called inside a stage, accepted by the stage owner
+    consults = office.workflow.get("consults")
+    if consults is not None and not isinstance(consults, list):
+        add(wf, "'consults' must be a list")
+    elif consults:
+        stage_sections = {s.get("output_section") for s in _as_list(office.workflow.get("stages")) if isinstance(s, dict)}
+        for c in consults:
+            fields = ("agent", "stage", "when", "output_section", "accepted_by")
+            if not isinstance(c, dict) or not all(c.get(k) for k in fields):
+                add(wf, f"consult {c!r} needs agent, stage, when, output_section and accepted_by")
+                continue
+            if c["agent"] not in org_ids:
+                add(wf, f"consult agent '{c['agent']}' is not an org agent")
+            if c["stage"] not in office.stage_ids:
+                add(wf, f"consult stage '{c['stage']}' is not a workflow stage")
+            else:
+                owner = office.stage(c["stage"]).get("owner")
+                if c["accepted_by"] != owner:
+                    add(wf, f"consult accepted_by '{c['accepted_by']}' must be the owner of stage '{c['stage']}' ('{owner}')")
+            if c["output_section"] in stage_sections:
+                add(wf, f"consult output_section '{c['output_section']}' is already a stage's output_section")
+
     # 6. agents/*.md
     for sk in office.default_base_skills:
         if sk not in office.base_skills:

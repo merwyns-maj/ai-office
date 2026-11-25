@@ -51,6 +51,13 @@ def plan(office, task):
         ("external_skills", ", ".join(agent.external_skills) if agent and agent.external_skills else "none"),
         ("output_section", section),
     ]
+    consults = [
+        f"{c['agent']} ({org.get(c['agent'], {}).get('name', c['agent'])}) writes {c['output_section']} when {c['when']}"
+        for c in office.workflow.get("consults") or []
+        if isinstance(c, dict) and c.get("stage") == task.status
+    ]
+    if consults:
+        rows.append(("consults", "; ".join(consults)))
     if stage.get("owner") and stage["owner"] != task.owner:
         rows.append(("note", f"task owner {task.owner} differs from stage owner {stage['owner']}"))
     return rows

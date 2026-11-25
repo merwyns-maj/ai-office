@@ -115,5 +115,58 @@ class Defects(unittest.TestCase):
         self.assertNotIn("1 problem\n", out)
 
 
+class Consults(unittest.TestCase):
+    ENTRY = '  - { agent: designer, stage: design, when: "the Spec or Design has UI, visual or motion work", output_section: UX design, accepted_by: architect }\n'
+
+    def setUp(self):
+        self.c = OfficeCopy()
+        self.addCleanup(self.c.cleanup)
+        self.wf = self.c.root / "workflow.yaml"
+        self.text = self.wf.read_text()
+        self.assertIn(self.ENTRY, self.text)
+
+    def validate(self, text):
+        self.wf.write_text(text)
+        return run("validate", str(self.c.root))
+
+    def bad(self, text, needle):
+        code, out, _ = self.validate(text)
+        self.assertEqual(code, 1, out)
+        self.assertIn(needle, out)
+        self.assertIn("offices/ai-office/workflow.yaml", out)
+
+    def test_real_office_validates_clean(self):
+        code, out, _ = run("validate", "ai-office")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.validate(self.text)[0], 0)
+
+    def test_consults_not_a_list(self):
+        self.bad(self.text.replace("consults:\n" + self.ENTRY, "consults: x\n"), "'consults' must be a list")
+
+    def test_entry_missing_accepted_by(self):
+        self.bad(self.text.replace(", accepted_by: architect", ""), "needs agent, stage, when, output_section and accepted_by")
+
+    def test_unknown_agent(self):
+        self.bad(self.text.replace("agent: designer", "agent: desginer"), "consult agent 'desginer' is not an org agent")
+
+    def test_terminal_stage_rejected(self):
+        self.bad(self.text.replace("stage: design,", "stage: done,"), "consult stage 'done' is not a workflow stage")
+
+    def test_accepted_by_not_stage_owner(self):
+        self.bad(self.text.replace("accepted_by: architect", "accepted_by: pmo"),
+                 "consult accepted_by 'pmo' must be the owner of stage 'design' ('architect')")
+
+    def test_output_section_clash(self):
+        self.bad(self.text.replace("output_section: UX design", "output_section: Design"),
+                 "consult output_section 'Design' is already a stage's output_section")
+
+    def test_no_consults_still_clean(self):
+        head = self.text.split("# Consults (T-047)")[0]
+        tail = self.text.split(self.ENTRY, 1)[1]
+        self.assertNotIn("consults:", head + tail)
+        code, out, _ = self.validate(head + tail)
+        self.assertEqual(code, 0, out)
+
+
 if __name__ == "__main__":
     unittest.main()
