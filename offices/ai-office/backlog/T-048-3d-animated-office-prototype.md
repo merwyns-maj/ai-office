@@ -2,9 +2,9 @@
 id: T-048
 title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-047]
@@ -673,6 +673,10 @@ Rendered: commands in `engine/app/README.md` (three@0.128.0 from npm, `python -m
 — Sebastian (engineer)
 
 ## Review log
+Review 1 of PR #25 (head 46e06e7), 26 Nov 2026: REJECT (one safety fix). Done-when 1–5 and 7 pass with evidence (197 tests OK, parser broken 16 ways with the expected errors, hosts limited to ./three.min.js + cdnjs/unpkg/jsdelivr, 8 s fallback works, fixture wall times match git, needs-Merwyn readable by colour + shape + position, both reduced-motion modes). Done-when 6 fps waived for review (software GL 22–40 fps, 44–50 draw calls; laptop reading owed by Merwyn). Done-when 8 artifact is Janice's step.
+Reason: the data rule echoes the value it caught. events.py `_data_hit` returns "personal-data pattern in '<value>'", which reaches the CLI output, office.html's skipped block under --allow-errors (generator exits 0), and the page's console.warn. Fixes: (1) name the field and pattern kind, never the value; (2) office_app must not write a page that fails its own data scan, even with --allow-errors; (3) test that a 16-digit number and an email never appear in stdout, stderr or output HTML.
+Notes: waiting agent's tag lands on Dinda's desk; tags overlap in reduced-motion handoff; phone view labels collide; follow camera crops left edge; merged and review_pass start together; separator phone numbers not caught (T-027).
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
