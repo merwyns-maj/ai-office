@@ -2,9 +2,9 @@
 id: T-045
 title: "Partner-writing B2 update: keep financial terms in English too"
 phase: 3-skills
-status: build
+status: review
 priority: P2
-owner: engineer
+owner: reviewer
 where: chat
 project: ai-office
 depends_on: [T-015]
@@ -79,6 +79,37 @@ Links: T-045, T-015, R-13, PR (tbd)
 - Spec approved. Fang checks with grep whether any other skill or agent file restates B2. — Janice (pmo)
 
 ## Build notes
+**What changed.** One line in `base/skills/partner-writing/SKILL.md`, rule B2: "a banking or fintech term" became "a banking, fintech or financial term", and "(for example *tenor* and *outstanding*)" was added. Example sentence and both sub-bullets untouched. No deviation from Fang's design.
+
+**How to verify**
+```
+git diff main -- base/          # one changed line, inside B2
+python3 scripts/build_agents.py ai-office
+python3 -m unittest -q
+python3 -m engine.runtime validate ai-office
+python3 -c "s=open('base/skills/partner-writing/SKILL.md',encoding='utf-8').read();print(s.count('\u2014'),s.count('\u2013'))"
+```
+
+**Output**
+```
+ai-office: built 7 agents -> .claude/agents/ (architect, compliance, curator, engineer, pm, pmo, reviewer)   (no diff in .claude/agents/)
+Ran 144 tests in 5.256s
+OK
+ai-office: OK - 7 agents, 5 stages, 45 tasks, 15 skills
+0 0     (em dash count, en dash count)
+git diff main -- base/ : 1 file, 1 line changed (B2 first line)
+```
+
+**Done-when to evidence**
+1. B2 covers financial terms and names tenor and outstanding: new B2 line in the diff.
+2. Example sentence unchanged: it is context text on the same line, identical in the diff.
+3. Both sub-bullets kept: unchanged context lines in the diff.
+4. No U+2014 or U+2013, only B2 touched: counts 0 0; `git diff main -- base/` shows one hunk, one line.
+5. build_agents clean, tests exit 0: output above.
+
+Fang's open question (other copies of B2): none found per Design; not re-checked.
+
+— Sebastian (engineer)
 
 ## Review log
 
