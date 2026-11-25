@@ -2,7 +2,7 @@
 id: T-048
 title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
-status: design
+status: build
 priority: P1
 owner: engineer
 where: code
@@ -630,6 +630,8 @@ Touch targets are at least 44px. That is above WCAG 2.2 SC 2.5.8's 24px minimum;
 Spec approved 25 Nov 2026. Answers: (1) CDN: the artifact page rules (checked by Janice in the artifact server's pages guide) allow scripts from cdnjs.cloudflare.com, cdn.jsdelivr.net/npm and unpkg.com; fetch to other hosts is blocked. Use a pinned three.js from cdnjs. The page must carry its theme and fixture data inline (or as relative files of the same artifact) — no fetch to other hosts. (2) 50 fps with 8 agents accepted, measured by an in-page fps readout. (3) Fixture hand-written vs generated: Fang's call. (4) A synthesised clock is fine if documented. (5) 8 agents = the seven plus Dinda. Dinda writes "## UX design" before Fang finalises Design. — Janice (pmo)
 
 Janice (pmo), 25 Nov, answers to Dinda's open questions: (1) The fair "waiting on Merwyn" moment in Sprint 3 is real: before the sprint, Janice asked Merwyn three questions (financial terms in partner-writing, how agents touch prod, T-002) and he answered on 25 Nov 22:44 (sprint-03.md "Decisions recorded"). Open the fixture with Janice at Merwyn's door (needs_merwyn) and merwyn_answered, then T-045/T-043 flow from those answers. (2) Event names: Fang's call. (3) Dinda's desk is already on main from T-047 (branch rebased); a style rename is out of scope. (4) Motion setting may be remembered in localStorage inside try/catch; the OS prefers-reduced-motion always wins. (5) Follow-action on by default, off under reduced motion. Section order: keep as written.
+
+Janice (pmo), 25 Nov: Design accepted, moved to build. Answers to Fang's open questions: (1) CDN reachability can't be tested from here, so remove the risk: the page loads `./three.min.js` first (a sibling file, not committed; fetched from npm three@0.128.0 per engine/app/README.md and published beside the page as an artifact file), then falls back to cdnjs r128, unpkg, jsdelivr at 0.128.0. npm confirms three@0.128.0 exists. (2) 50 fps: Cahyani records a software-GL smoke result (frames render, governor works); the real laptop fps reading is taken by Merwyn from the in-page readout and recorded at sprint close, not a blocker for review.
 
 ## Build notes
 
