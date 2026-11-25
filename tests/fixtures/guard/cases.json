@@ -1,7 +1,7 @@
 [
  {
   "name": "bash_psql_delete_prod",
-  "expect": "block",
+  "expect": "ask",
   "rule": "sql-write:DELETE",
   "stdin": {
    "tool_name": "Bash",
@@ -12,7 +12,7 @@
  },
  {
   "name": "bash_kubectl_apply_prod",
-  "expect": "block",
+  "expect": "ask",
   "rule": "bash-kubectl-write",
   "stdin": {
    "tool_name": "Bash",
@@ -23,7 +23,7 @@
  },
  {
   "name": "bash_kubectl_apply_prod_multiline",
-  "expect": "block",
+  "expect": "ask",
   "rule": "bash-kubectl-write",
   "stdin": {
    "tool_name": "Bash",
@@ -34,7 +34,7 @@
  },
  {
   "name": "bash_psql_file_prod",
-  "expect": "block",
+  "expect": "ask",
   "rule": "bash-sql-file",
   "stdin": {
    "tool_name": "Bash",
@@ -45,7 +45,7 @@
  },
  {
   "name": "bash_helm_upgrade_prod",
-  "expect": "block",
+  "expect": "ask",
   "rule": "bash-helm-write",
   "stdin": {
    "tool_name": "Bash",
@@ -56,7 +56,7 @@
  },
  {
   "name": "bash_migrate_prod",
-  "expect": "block",
+  "expect": "ask",
   "rule": "bash-migrate-deploy",
   "stdin": {
    "tool_name": "Bash",
@@ -67,7 +67,7 @@
  },
  {
   "name": "bash_placeholder_host_update",
-  "expect": "block",
+  "expect": "ask",
   "rule": "sql-write:UPDATE",
   "stdin": {
    "tool_name": "Bash",
@@ -79,7 +79,7 @@
  {
   "name": "bash_allowlist_lookalike_chained",
   "expect": "block",
-  "rule": "bash-sql-file",
+  "rule": "bytebase",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
@@ -90,7 +90,7 @@
  {
   "name": "bash_bytebase_not_on_allowlist",
   "expect": "block",
-  "rule": "default-deny",
+  "rule": "bytebase",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
@@ -101,7 +101,7 @@
  {
   "name": "bash_bytebase_dotdot",
   "expect": "block",
-  "rule": "bash-sql-file",
+  "rule": "bytebase",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
@@ -112,7 +112,7 @@
  {
   "name": "bash_bytebase_apply",
   "expect": "block",
-  "rule": "bash-sql-file",
+  "rule": "bytebase",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
@@ -123,7 +123,7 @@
  {
   "name": "bash_bytebase_redirect",
   "expect": "block",
-  "rule": "bash-sql-file",
+  "rule": "bytebase",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
@@ -133,7 +133,7 @@
  },
  {
   "name": "mcp_pg_execute_mutation",
-  "expect": "block",
+  "expect": "ask",
   "rule": "mcp-pg-write",
   "stdin": {
    "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_mutation",
@@ -144,7 +144,7 @@
  },
  {
   "name": "mcp_pg_manage_schema",
-  "expect": "block",
+  "expect": "ask",
   "rule": "mcp-pg-write",
   "stdin": {
    "tool_name": "mcp__remote-devices__nimbus-prod__pg_manage_schema",
@@ -155,7 +155,7 @@
  },
  {
   "name": "mcp_pg_import_table_data",
-  "expect": "block",
+  "expect": "ask",
   "rule": "mcp-pg-write",
   "stdin": {
    "tool_name": "mcp__remote-devices__nimbus-prod__pg_import_table_data",
@@ -166,7 +166,7 @@
  },
  {
   "name": "mcp_kubectl_delete",
-  "expect": "block",
+  "expect": "ask",
   "rule": "mcp-kubectl-write",
   "stdin": {
    "tool_name": "mcp__remote-devices__kubernetes__kubectl_delete",
@@ -178,7 +178,7 @@
  },
  {
   "name": "mcp_mysql_query_update",
-  "expect": "block",
+  "expect": "ask",
   "rule": "sql-write:UPDATE",
   "stdin": {
    "tool_name": "mcp__remote-devices__klik-mariadb-prod__mysql_query",
@@ -200,7 +200,7 @@
  },
  {
   "name": "mcp_pg_execute_query_with_delete",
-  "expect": "block",
+  "expect": "ask",
   "rule": "sql-write:DELETE",
   "stdin": {
    "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
@@ -211,7 +211,7 @@
  },
  {
   "name": "mcp_pg_execute_query_select_into",
-  "expect": "block",
+  "expect": "ask",
   "rule": "sql-write:INTO",
   "stdin": {
    "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
@@ -395,14 +395,15 @@
   }
  },
  {
-  "name": "bash_bytebase_allowlisted",
-  "expect": "allow",
+  "name": "bash_bytebase_submit_blocked",
+  "expect": "block",
   "stdin": {
    "tool_name": "Bash",
    "tool_input": {
     "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/a.sql"
    }
-  }
+  },
+  "rule": "bytebase"
  },
  {
   "name": "mcp_pg_execute_query_select",
@@ -549,5 +550,56 @@
    }
   },
   "rule": "malformed-input"
+ },
+ {
+  "name": "bash_bytebase_read_like",
+  "expect": "block",
+  "rule": "bytebase",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-cli list issues"
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_mixed_case",
+  "expect": "block",
+  "rule": "bytebase",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "ByteBase issue create"
+   }
+  }
+ },
+ {
+  "name": "mcp_bytebase_tool",
+  "expect": "block",
+  "rule": "bytebase",
+  "stdin": {
+   "tool_name": "mcp__bytebase__create_issue",
+   "tool_input": {}
+  }
+ },
+ {
+  "name": "mcp_bytebase_read_tool",
+  "expect": "block",
+  "rule": "bytebase",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__bytebase__list_projects",
+   "tool_input": {}
+  }
+ },
+ {
+  "name": "mcp_pg_mutation_multi_statement",
+  "expect": "block",
+  "rule": "sql-multi-statement",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_mutation",
+   "tool_input": {
+    "sql": "UPDATE t SET a=1; DROP TABLE t"
+   }
+  }
  }
 ]

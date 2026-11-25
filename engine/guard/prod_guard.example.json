@@ -4,8 +4,7 @@
     "prod_targets": [
       {"id": "bash-prod-service", "pattern": "\\bservice=[\\w-]*prod\\b"},
       {"id": "bash-prod-kube-context", "pattern": "--context[= ]\\S*prod"},
-      {"id": "bash-prod-placeholder-host", "pattern": "\\bprod\\.example\\.invalid\\b"},
-      {"id": "bash-bytebase", "pattern": "\\bbytebase\\S*"}
+      {"id": "bash-prod-placeholder-host", "pattern": "\\bprod\\.example\\.invalid\\b"}
     ],
     "write": [
       {"id": "bash-kubectl-write", "pattern": "\\bkubectl\\b.*\\b(apply|delete|create|patch|edit|replace|scale|rollout|set|label|annotate|drain|cordon|exec|cp)\\b"},
@@ -36,9 +35,5 @@
     ],
     "sql_fields": ["sql", "query", "statement"]
   },
-  "allowlist": [
-    {"id": "bytebase-placeholder", "tool": "^Bash$", "action": "submit-change-issue",
-     "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/[\\w/-]+\\.sql",
-     "note": "Placeholder until Merwyn names the real Bytebase invocations (Spec open question). Submits a change issue only; never applies."}
-  ]
+  "allowlist": []
 }

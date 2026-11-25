@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Claude Code PreToolUse hook: default-deny guard for prod writes (Bash and MCP tools).
+"""Claude Code PreToolUse hook: guard for prod writes (Bash and MCP tools).
 
-Exit 0 = allow (no output). Exit 2 = block (one line on stderr). No other exit codes.
-Stdlib only. stderr never contains payload text. See README.md in this folder.
+Exit 0 with no output = allow. Exit 0 with one JSON line on stdout = ask Merwyn (permissionDecision "ask").
+Exit 2 = block (one line on stderr). No other exit codes. Stdlib only.
+stdout and stderr never contain payload text. See README.md in this folder.
 """
 import sys
 
@@ -21,8 +22,7 @@ except BaseException:
 
 MAX_INPUT = 1_048_576
 DEFAULT_DEADLINE = 5
-CHAIN_CHARS = (";", "&", "|", "`", "$(", ">", "<", "\n", "\r")
-ALLOWLIST_ACTION = "submit-change-issue"
+ALLOW, ASK, BLOCK = "allow", "ask", "block"
 _FLAGS = re.IGNORECASE | re.DOTALL   # DOTALL: `.` crosses newlines, so a multi-line command cannot dodge a rule
 
 # In code, not config, so a config cannot weaken it. [\s\S] so it matches across newlines.
@@ -30,7 +30,7 @@ K8S_SECRET_BASH = re.compile(r"\bkubectl\b[\s\S]*?\b(?:get|describe|edit)\b[\s\S
                              re.IGNORECASE)
 _SECRET_WORD = re.compile(r"\bsecrets?\b", re.IGNORECASE)
 _KUBECTL_TOOL = re.compile(r"__kubectl_", re.IGNORECASE)
-_APPLY_WORDS = re.compile(r"\b(?:apply|rollout|approve|deploy|execute|run-now)\b", re.IGNORECASE)
+_BYTEBASE = re.compile(r"bytebase", re.IGNORECASE)   # substring: also catches bytebase-cli, bytebase_x, mcp__bytebase__*
 _TOOL_OK = re.compile(r"[A-Za-z0-9_.:-]{1,128}")
 
 _WRITE_WORDS = ("INSERT UPDATE DELETE MERGE UPSERT REPLACE CREATE ALTER DROP TRUNCATE RENAME GRANT "
@@ -41,6 +41,10 @@ _SQL_WRITE_RE = re.compile(
     r"pg_terminate_backend|pg_cancel_backend|lo_import|lo_export|dblink", re.IGNORECASE)
 _READ_FIRST = {"SELECT", "WITH", "SHOW", "EXPLAIN", "DESCRIBE", "DESC", "TABLE", "VALUES"}
 
+ASK_TEXT = ("This is a prod write and runs only if Merwyn confirms it. Merwyn: read the full command, "
+            "and any file it runs, before you confirm. If it is denied, do not try another way; "
+            "hand the change to Merwyn.")
+
 REASONS = {
     "malformed-input": "The hook input could not be understood.",
     "input-too-large": "The hook input is larger than the 1 MiB limit.",
@@ -50,7 +54,9 @@ REASONS = {
     "sql-write": "The SQL contains a write or DDL keyword.",
     "sql-multi-statement": "The SQL contains more than one statement.",
     "sql-not-read-only": "The SQL is not recognised as read-only.",
-    "default-deny": "The call targets prod and is neither read-only nor on the allowlist.",
+    "default-deny": "The call targets prod and is not recognised as read-only.",
+    "bytebase": ("Agents never submit to Bytebase. Do not try another way: prepare the plan "
+                 "(change, target, rollback) and hand it to Merwyn, who submits it himself."),
     "config-rule": "The call matches a prod write rule.",
 }
 
@@ -59,15 +65,19 @@ class ConfigError(Exception):
     pass
 
 
-Decision = NamedTuple("Decision", [("allow", bool), ("rule", str), ("reason", str)])
+Decision = NamedTuple("Decision", [("action", str), ("rule", str), ("reason", str)])
 
 
 def _block(rule: str) -> Decision:
-    return Decision(False, rule, REASONS.get(rule.split(":", 1)[0], REASONS["config-rule"]))
+    return Decision(BLOCK, rule, REASONS.get(rule.split(":", 1)[0], REASONS["config-rule"]))
+
+
+def _ask(rule: str) -> Decision:
+    return Decision(ASK, rule, ASK_TEXT)
 
 
 def _allow(rule: str) -> Decision:
-    return Decision(True, rule, "")
+    return Decision(ALLOW, rule, "")
 
 
 # ---------------------------------------------------------------- config
@@ -115,22 +125,11 @@ def load_config(path: pathlib.Path) -> dict:
     if not isinstance(fields, list) or not fields or not all(isinstance(f, str) for f in fields):
         raise ConfigError("mcp.sql_fields must be a non-empty list of strings")
     cfg["mcp"]["sql_fields"] = list(fields)
-    if not isinstance(allow, list):
-        raise ConfigError("allowlist must be a list")
-    entries = []
-    for e in allow:
-        if not isinstance(e, dict) or not all(isinstance(e.get(k), str) for k in ("id", "tool", "command")):
-            raise ConfigError("allowlist entry needs string id, tool and command")
-        if e.get("action") != ALLOWLIST_ACTION:
-            raise ConfigError(f"allowlist entry {_clean(e['id'])}: action must be {ALLOWLIST_ACTION}")
-        try:
-            entries.append({"id": e["id"], "tool": re.compile(e["tool"], _FLAGS),
-                            "command": re.compile(e["command"], _FLAGS)})
-        except re.error:
-            raise ConfigError(f"bad regex in allowlist entry {_clean(e['id'])}") from None
-    cfg["allowlist"] = entries
+    if not isinstance(allow, list) or allow:
+        raise ConfigError("allowlist must be empty: agents never submit to Bytebase "
+                          "and no prod write is pre-approved")
     cfg["n_rules"] = (sum(len(v) for v in cfg["bash"].values())
-                      + sum(len(v) for k, v in cfg["mcp"].items() if k != "sql_fields") + len(entries))
+                      + sum(len(v) for k, v in cfg["mcp"].items() if k != "sql_fields"))
     return cfg
 
 
@@ -204,14 +203,6 @@ def _sql_values(tool_input: dict, fields: list) -> list:
 
 # ---------------------------------------------------------------- rules
 
-def allowlist_eligible(command: str) -> bool:
-    if any(c in command for c in CHAIN_CHARS):
-        return False
-    if ".." in command:
-        return False
-    return not _APPLY_WORDS.search(command)
-
-
 def mentions_k8s_secret(tool_name: str, tool_input: object, command: str | None) -> bool:
     if command is not None:
         return bool(K8S_SECRET_BASH.search(command))
@@ -239,15 +230,6 @@ def _first(rules: list, text: str) -> str | None:
     return None
 
 
-def _allowlisted(config: dict, tool_name: str, text: str) -> str | None:
-    if not allowlist_eligible(text):
-        return None
-    for e in config["allowlist"]:
-        if e["tool"].fullmatch(tool_name) and e["command"].fullmatch(text):
-            return e["id"]
-    return None
-
-
 def decide(payload: object, config: dict) -> Decision:
     if not isinstance(payload, dict):
         return _block("malformed-input")
@@ -267,39 +249,43 @@ def decide(payload: object, config: dict) -> Decision:
             return _block("malformed-input")
         if mentions_k8s_secret(name, tool_input, cmd):
             return _block("k8s-secret-read")
+        if _BYTEBASE.search(cmd):
+            return _block("bytebase")
         b = config["bash"]
         if _first(b["prod_targets"], cmd) is None:
             return _allow("no-prod-target")
-        hit = _allowlisted(config, name, cmd)
-        if hit:
-            return _allow(f"allowlist:{hit}")
         rid = _first(b["write"], cmd)
         if rid:
-            return _block(rid)
+            return _ask(rid)
         kw = sql_write_keyword(cmd)
         if kw:
-            return _block(f"sql-write:{kw}")
+            return _ask(f"sql-write:{kw}")
         if _first(b["read_only"], cmd):
             return _allow("read-only")
         return _block("default-deny")
 
     if mentions_k8s_secret(name, tool_input, None):
         return _block("k8s-secret-read")
+    if _BYTEBASE.search(name):
+        return _block("bytebase")
     m = config["mcp"]
     if _first(m["prod_tools"], name) is None:
         return _allow("no-prod-target")
     sqls = _sql_values(tool_input, m["sql_fields"])
-    for s in sqls:
-        hit = _allowlisted(config, name, s)
-        if hit:
-            return _allow(f"allowlist:{hit}")
+    write_rule = None
+    for s_ in sqls:
+        ok, rule = classify_sql(s_)
+        if ok:
+            continue
+        if rule.startswith("sql-write:"):
+            write_rule = write_rule or rule
+        else:
+            return _block(rule)             # sql-multi-statement, sql-not-read-only
     rid = _first(m["write_tools"], name)
     if rid:
-        return _block(rid)
-    for s in sqls:
-        ok, rule = classify_sql(s)
-        if not ok:
-            return _block(rule)
+        return _ask(rid)
+    if write_rule:
+        return _ask(write_rule)
     if _first(m["read_tools"], name):
         return _allow("read-tool")
     if _first(m["sql_tools"], name):
@@ -309,19 +295,30 @@ def decide(payload: object, config: dict) -> Decision:
 
 # ---------------------------------------------------------------- output / entry
 
-def format_block(rule: str, tool_name: object, extra: str = "") -> str:
-    """The only stderr writer's formatter: rule id, sanitised tool name, fixed reason. No payload text."""
+def _tool_label(tool_name: object) -> str:
     if tool_name is None:
-        tool = "<unknown>"
-    elif isinstance(tool_name, str) and _TOOL_OK.fullmatch(tool_name):
-        tool = tool_name
-    else:
-        tool = "<invalid>"
+        return "<unknown>"
+    if isinstance(tool_name, str) and _TOOL_OK.fullmatch(tool_name):
+        return tool_name
+    return "<invalid>"
+
+
+def format_block(rule: str, tool_name: object, extra: str = "") -> str:
+    """Rule id, sanitised tool name, fixed reason. No payload text."""
     reason = REASONS.get(rule.split(":", 1)[0], REASONS["config-rule"])
-    msg = f"prod-guard BLOCKED [rule={_clean(rule)}] tool={tool}. {reason}"
+    msg = f"prod-guard BLOCKED [rule={_clean(rule)}] tool={_tool_label(tool_name)}. {reason}"
     if extra:
         msg += " (" + " ".join(extra.split())[:300] + ")"
-    return msg + " Prod writes go through an allowlisted Bytebase change issue; ask Merwyn."
+    return msg + " Do not try another way; ask Merwyn."
+
+
+def format_ask(rule: str, tool_name: object) -> str:
+    """The whole stdout text for an ask, newline-terminated. Built only from rule id, tool name, fixed text."""
+    reason = f"prod-guard ASK [rule={_clean(rule)}] tool={_tool_label(tool_name)}. {ASK_TEXT}"
+    return json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                              "permissionDecision": "ask",
+                                              "permissionDecisionReason": reason}},
+                      separators=(",", ":")) + "\n"
 
 
 class _Parser(argparse.ArgumentParser):
@@ -333,10 +330,11 @@ def _tool_of(payload: object) -> object:
     return payload.get("tool_name") if isinstance(payload, dict) else None
 
 
-def _run(args, stdin, stderr) -> int:
+def _run(args, stdin, stderr) -> tuple[int, str]:
+    """Returns (exit code, stdout text). Never writes stdout itself; main() does that once, at the end."""
     def block(rule, tool=None, extra=""):
         stderr.write(format_block(rule, tool, extra) + "\n")
-        return 2
+        return 2, ""
 
     cfg_path = find_config(args.config)
     if args.check_config:
@@ -344,8 +342,7 @@ def _run(args, stdin, stderr) -> int:
             cfg = load_config(cfg_path)
         except ConfigError as e:
             return block("config-error", None, f"config error in {cfg_path}: {e}")
-        sys.stdout.write(f"prod-guard: config OK ({cfg['n_rules']} rules)\n")
-        return 0
+        return 0, f"prod-guard: config OK ({cfg['n_rules']} rules)\n"
     raw = stdin.buffer.read(MAX_INPUT + 1)
     if len(raw) > MAX_INPUT:
         return block("input-too-large")
@@ -361,13 +358,16 @@ def _run(args, stdin, stderr) -> int:
     except ConfigError as e:
         return block("config-error", _tool_of(payload), f"config error in {cfg_path}: {e}")
     d = decide(payload, cfg)
-    if d.allow:
-        return 0
+    if d.action == ALLOW:
+        return 0, ""
+    if d.action == ASK:
+        return 0, format_ask(d.rule, _tool_of(payload))
     return block(d.rule, _tool_of(payload))
 
 
-def main(argv: list[str] | None = None, stdin=None, stderr=None) -> int:
+def main(argv: list[str] | None = None, stdin=None, stderr=None, stdout=None) -> int:
     stdin = sys.stdin if stdin is None else stdin
+    stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
     p = _Parser(add_help=False)
     p.add_argument("--config")
@@ -379,7 +379,11 @@ def main(argv: list[str] | None = None, stdin=None, stderr=None) -> int:
         signal.signal(signal.SIGALRM, signal.SIG_DFL)   # default action: kernel kills us, wrapper exits 2
         signal.alarm(args.deadline)
     try:
-        return _run(args, stdin, stderr)
+        code, out = _run(args, stdin, stderr)
+        if out:                           # the only stdout write; every error path returned above
+            stdout.write(out)
+            stdout.flush()
+        return code
     finally:
         if armed:
             signal.alarm(0)

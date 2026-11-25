@@ -2,9 +2,9 @@
 id: T-043
 title: "Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked"
 phase: 4-code-tooling
-status: build
+status: review
 priority: P0
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-040]
@@ -160,6 +160,43 @@ Links: T-043, T-040 (PR #11), R-7, R-14, R-15, PR (tbd)
 - R-15 checked 25 Nov 2026 against https://code.claude.com/docs/en/permissions (Precedence among rules, hooks, and mods) and https://code.claude.com/docs/en/permission-modes: (1) deny and ask rules are evaluated regardless of what a PreToolUse hook returns, so settings can only make the guard stricter; no allow-rule override of a hook "ask" is documented. (2) Auto mode cannot silently approve a hook-forced prompt. (3) BYPASS: without managed settings or a Team/Enterprise login (Merwyn's personal Max login), an installed mod handling tool.check can approve a call a PreToolUse hook blocked or would prompt for. README must list this and recommend no tool.check mods on machines where the guard is installed (or managed settings). (4) bypassPermissions behaviour for hook "ask" is not documented: test with claude --debug before any install (install is already a human gate). — Janice (pmo)
 
 ## Build notes
+**What changed** (branch `t-043-guard-ask-mode`; files in `engine/guard/`, `tests/`, `tests/fixtures/guard/`)
+- `prod_guard.py`: `decide()` returns allow / ask / block. Clear writes (Bash write rule, Bash `sql-write:*`, MCP write tool, MCP `sql-write:*`) ask; `default-deny`, `sql-multi-statement`, `sql-not-read-only` still block. Bytebase is in code (`_BYTEBASE`, substring, any case, Bash command or MCP tool name, `rule=bytebase`, after `k8s-secret-read`, before the prod-target check). Allowlist machinery deleted; `allowlist` must be `[]` or `config-error`. `_run` returns `(code, stdout_text)`; `main` writes stdout once at the end and flushes; `_entry` unchanged.
+- Example and fixture configs: `"allowlist": []`, `bash-bytebase` prod target removed.
+- README rewritten for ask/Bytebase/allowlist, ask semantics, R-15 list, Wulan notes 1 and 2 (bypass, tool.check mods, no bypassPermissions for engine/SDK runs, install step 0 `claude --debug` ask test per permission mode, `|| exit 2` + `onFailure: block` + throwaway-session check mandatory, R-14 read approval, legal sign-off his to confirm, R-8 read-only role the real control, no prod rows in repo/brains/logs). Cites https://code.claude.com/docs/en/hooks and https://code.claude.com/docs/en/permissions.
+- Tests: 14 fixtures turned to ask; 6 Bytebase fixtures now `bytebase` block (`bash_bytebase_allowlisted` renamed `bash_bytebase_submit_blocked`) plus 4 new; new `mcp_pg_mutation_multi_statement`; new ask-crash, flush-failure, ask-through-wrapper, ask sentinel, `test_format_ask`, `test_allowlist_nonempty_rejected`, `test_no_old_allowlist_wording`, `test_required_kinds_present`; three old allowlist tests and `test_allowlist_eligible` removed.
+
+**How to verify**
+```
+python3 -m unittest -v          # Ran 154 tests ... OK (60 guard case tests; 14 ask)
+```
+Command form from the README (`python3 engine/guard/prod_guard.py --config engine/guard/prod_guard.example.json || exit 2`), real output:
+```
+ask   {"tool_name":"Bash","tool_input":{"command":"kubectl --context prod-cluster apply -f x.yaml"}}
+ -> {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"prod-guard ASK [rule=bash-kubectl-write] tool=Bash. This is a prod write and runs only if Merwyn confirms it. Merwyn: read the full command, and any file it runs, before you confirm. If it is denied, do not try another way; hand the change to Merwyn."}}   exit=0
+block {"tool_name":"mcp__bytebase__create_issue","tool_input":{}}
+ -> prod-guard BLOCKED [rule=bytebase] tool=mcp__bytebase__create_issue. Agents never submit to Bytebase. Do not try another way: prepare the plan (change, target, rollback) and hand it to Merwyn, who submits it himself. Do not try another way; ask Merwyn.   exit=2
+allow {"tool_name":"Bash","tool_input":{"command":"ls"}}  -> (no output) exit=0   (covered by the allow cases)
+```
+Note: `kubectl --context prod-cluster get pods` asks (`sql-write:CLUSTER`): the word "cluster" in the context name trips the SQL-word scan. It blocked before T-043; it is the documented false-positive limit, not a new gap.
+
+**Done-when -> evidence**
+1. Ask fixtures: `test_ask_*` (14 cases): exit 0, stderr empty, one JSON line with exact keys, reason has rule id and "Merwyn confirms" (`CaseMixin.check`). Pass.
+2. Bytebase: `test_block_bash_bytebase_*` (6), `test_block_mcp_bytebase_tool`, `test_block_mcp_bytebase_read_tool`: exit 2, stdout empty, stderr contains "hand it to Merwyn". Pass.
+3. Allowlist: `test_allowlist_nonempty_rejected` (hook and `--check-config` exit 2, `rule=config-error`), `test_allowlist_empty_in_shipped_configs`. Pass.
+4. Unchanged: read/allow, all `k8s-secret*` and fail-closed tests pass untouched; `test_ask_crash_exits_2`, `test_ask_flush_failure_exits_2` added (stdout empty, exit 2, `rule=internal-error`). Pass.
+5. No payload echo: `CaseMixin.check` asserts on stdout and stderr; `test_pii_sentinel_never_echoed_on_ask` (SQL and Bash) and the old block sentinel test. Pass.
+6. Old wording: `test_no_old_allowlist_wording`; `grep` of `engine/guard/` and `tests/` finds none. Pass.
+7. `python3 -m unittest -v`: 154 tests, OK; includes Bash ask, MCP write-tool ask (`mcp_pg_execute_mutation`), MCP SQL-write ask (`mcp_mysql_query_update`), Bash and MCP Bytebase blocks, read, secret and fail-closed cases (`test_required_kinds_present` asserts the kinds).
+8. README states all listed points. Pass (reviewer to read).
+9. Wulan conditional PASS: notes 1 and 2 in README; note 3 for the Reviewer.
+
+**Deviations / not done**
+- R-15 re-check of the docs pages: I could not fetch https://code.claude.com/docs/en/* from the build sandbox (proxy returned 403 on all three pages). The README R-15 list therefore rests on Janice's 25 Nov check (Approvals block) and says so. Reviewer or Merwyn should confirm on a machine with access, and the install step 0 `claude --debug` test is the real proof. No auto-approve path was found that I could add beyond those Janice listed; bypassPermissions stays "treat as auto-approve".
+- `format_block` suffix is now "Do not try another way; ask Merwyn." (design said the old suffix is gone, new text not specified). Bytebase block lines therefore say "Do not try another way" twice; harmless.
+- Nothing installed, `~/.claude` untouched, `board.md` not committed.
+
+— Sebastian (engineer)
 
 ## Review log
 - Compliance: PASS — T-043 design: every fail-open path (stdout, JSON, flush) closed, no payload in ask or block output, Bytebase moved to code, allowlist forced empty. PASS is conditional on notes 1 to 3 being in the README or install gate. — Wulan (compliance)
