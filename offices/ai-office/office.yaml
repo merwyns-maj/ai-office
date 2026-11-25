@@ -1,0 +1,14 @@
+id: ai-office
+name: AI Office — Build Office
+purpose: Build the AI Office itself (engine, brains, skills, app), dogfooding the workflow.
+brain: personal
+projects: [ai-office]
+human:
+  name: Merwyn
+  approves: [spec, merge, compliance-block, budget]
+budget:
+  monthly_usd_cap: 60          # placeholder: set your share of the Max monthly Agent SDK credit
+  max_review_rounds: 2
+defaults:
+  model: sonnet
+  branch_prefix: t-

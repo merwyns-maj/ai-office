@@ -1,0 +1,24 @@
+style: pixel-startup
+palette:
+  floor: "#2b2d42"
+  wall: "#8d99ae"
+  accent: "#53BA7E"
+  warn: "#f4a261"
+  bad: "#e63946"
+rooms:
+  - { id: lobby,     label: Backlog,       stage: todo }
+  - { id: product,   label: Product room,  stage: spec }
+  - { id: whiteboard,label: Design wall,   stage: design }
+  - { id: workshop,  label: Workshop,      stage: build }
+  - { id: lab,       label: QA lab,        stage: review }
+  - { id: archive,   label: Archive,       stage: done }
+  - { id: corner,    label: Merwyn's door, stage: null }   # where agents wait for approval
+desks:
+  - { agent: pmo,        room: lobby,      sprite: chief }
+  - { agent: pm,         room: product,    sprite: pm }
+  - { agent: architect,  room: whiteboard, sprite: architect }
+  - { agent: engineer,   room: workshop,   sprite: engineer }
+  - { agent: reviewer,   room: lab,        sprite: qa }
+  - { agent: compliance, room: corner,     sprite: officer }
+  - { agent: curator,    room: archive,    sprite: librarian }
+hub: lobby

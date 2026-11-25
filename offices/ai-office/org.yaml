@@ -1,0 +1,8 @@
+agents:
+  - { id: pmo,        reports_to: human, role: Chief of staff, backlog and status }
+  - { id: pm,         reports_to: pmo,   role: Specs and "done when" }
+  - { id: architect,  reports_to: pmo,   role: Design and decision records }
+  - { id: engineer,   reports_to: architect, role: Builds on branches, opens PRs }
+  - { id: reviewer,   reports_to: pmo,   role: Independent check against the spec }
+  - { id: compliance, reports_to: human, role: Data, security and prod-access checks }
+  - { id: curator,    reports_to: pmo,   role: Decisions and lessons into the brain }

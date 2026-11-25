@@ -1,0 +1,35 @@
+# Brains and project repos the offices may touch.
+# Pointers only: no company content is copied into this repo.
+
+brains:
+  work:
+    repo: impact-credit-solutions/product-brain   # to be expanded into product/ data/ shared/ (T-003)
+    owner: company
+  personal:
+    repo: merwyns-maj/personal-brain              # to be created (T-005)
+    owner: personal
+
+projects:
+  ai-office:
+    repo: merwyns-maj/ai-office
+    brain: personal
+    access: write
+  klik-workspace:
+    repo: impact-credit-solutions/klik-workspace
+    brain: work
+    access: write          # via PR only
+  nimbus:
+    repo: impact-credit-solutions/nimbus
+    brain: work
+    access: read
+  data-platform:
+    repo: impact-credit-solutions/data-platform
+    brain: work
+    access: read
+
+offices:
+  ai-office:
+    path: offices/ai-office            # lives in this repo
+  # klik-product:
+  #   repo: impact-credit-solutions/klik-workspace
+  #   path: .office/                   # company-owned office definitions live in the company org

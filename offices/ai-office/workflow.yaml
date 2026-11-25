@@ -1,0 +1,26 @@
+stages:
+  - { id: todo,   owner: pmo,       output_section: null,         exit: "PMO picks it" }
+  - { id: spec,   owner: pm,        output_section: Spec,         exit: "Human approves the spec" }
+  - { id: design, owner: architect, output_section: Design,       exit: "Design written; Compliance passed if flagged" }
+  - { id: build,  owner: engineer,  output_section: Build notes,  exit: "PR open and linked" }
+  - { id: review, owner: reviewer,  output_section: Review log,   exit: "PASS (→ done) or REJECT (→ build)" }
+terminal: [done, parked]
+
+gates:
+  - { stage: spec,   approver: human }        # spec approval
+  - { stage: design, approver: compliance, when: "flagged by architect" }
+  - { stage: done,   approver: human }        # human merges the PR
+
+escalation:
+  - { when: "review_rejections >= 2",  to: human }
+  - { when: "blocked_days > 3",         to: human }
+  - { when: "budget_used >= 0.8",       to: human }
+  - { when: "compliance == BLOCK",      to: human }
+
+status_writers:
+  default: pmo
+  exceptions:
+    - { agent: reviewer, may_set: [done, build], from: review }
+    - { agent: human,    may_set: any }
+
+after_done: curator         # records the decision once merged
