@@ -2,9 +2,9 @@
 id: T-039
 title: "Engine loader and dry-run (repo-only slice of T-024)"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: curator
 where: code
 project: ai-office
 depends_on: [T-001]
@@ -14,13 +14,13 @@ pr: 9
 > Slice of T-024. Covers load, validate and dry-run only. Live agent runs on the Agent SDK (which spend SDK credit) stay in T-024.
 
 ## Done when
-- [ ] Given `offices/ai-office`, when the engine's validate command runs, it exits 0 and reports counts of agents, stages and tasks loaded (office.yaml, org.yaml, workflow.yaml, agents/*.md, backlog/T-*.md)
-- [ ] Given a copy of an office with one defect each (missing required file; org agent id with no agents/ file; task `status` not in workflow stages; task `depends_on` pointing to a missing task; agent listing a skill with no skills/<name>/SKILL.md), validate exits 1 and the message names the file and the problem; one test per defect
-- [ ] Given `offices/ai-office`, when dry-run runs, it exits 0 and prints, for the task it picks: task id, stage, owner, the owner's agent profile path, its skills (office and external), and the workflow output section it would write
-- [ ] Dry-run picks deterministically: a test with a fixture backlog shows highest priority first, then lowest task id, skipping tasks that are terminal or whose `depends_on` are not done; with nothing eligible it exits 0 and prints "nothing to run"
-- [ ] Dry-run makes no SDK call, no network call and reads no credential: tests pass with network disabled and no API key in the environment, and no SDK package is imported by the loader or dry-run
-- [ ] Dry-run does not modify any file (a test compares the office folder before and after)
-- [ ] One test command (stated in the README) runs all of the above and exits 0 on a clean checkout
+- [x] Given `offices/ai-office`, when the engine's validate command runs, it exits 0 and reports counts of agents, stages and tasks loaded (office.yaml, org.yaml, workflow.yaml, agents/*.md, backlog/T-*.md)
+- [x] Given a copy of an office with one defect each (missing required file; org agent id with no agents/ file; task `status` not in workflow stages; task `depends_on` pointing to a missing task; agent listing a skill with no skills/<name>/SKILL.md), validate exits 1 and the message names the file and the problem; one test per defect
+- [x] Given `offices/ai-office`, when dry-run runs, it exits 0 and prints, for the task it picks: task id, stage, owner, the owner's agent profile path, its skills (office and external), and the workflow output section it would write
+- [x] Dry-run picks deterministically: a test with a fixture backlog shows highest priority first, then lowest task id, skipping tasks that are terminal or whose `depends_on` are not done; with nothing eligible it exits 0 and prints "nothing to run"
+- [x] Dry-run makes no SDK call, no network call and reads no credential: tests pass with network disabled and no API key in the environment, and no SDK package is imported by the loader or dry-run
+- [x] Dry-run does not modify any file (a test compares the office folder before and after)
+- [x] One test command (stated in the README) runs all of the above and exits 0 on a clean checkout
 
 ## Spec
 **Problem.** Nothing in the repo can read an office folder and check it against the schema, so mistakes in an office (bad status, missing agent or skill) are found only when an agent trips on them. Before spending SDK credit on live runs (T-024), Merwyn and the team need to see what a run would do.
@@ -267,8 +267,10 @@ The real office validates clean, so no office-file defects to report. Dry-run pi
 — Sebastian (engineer)
 
 ## Review log
+- PASS — validate exits 0 (7 agents, 5 stages, 40 tasks, 15 skills); all five defect copies exit 1 naming file and problem; dry-run picks T-012 correctly (verified by hand); pick tests fail under mutation; no SDK/network/credential use (socket-blocked run ok); office/engine/tests hashes unchanged; 46 tests OK. Tested on Python 3.13. — Cahyani (reviewer)
 
 ## Decision
+- The engine starts as a stdlib loader + validator + dry-run behind `python -m engine.runtime`; the YAML subset parser sits behind loads() so PyYAML can replace it. Follow-up: move scripts/_fm.py onto miniyaml. — April (curator)
 
 ## Open questions
 - Spec-level questions are in Spec → Open questions; design-level ones in Design → Open questions. (Older duplicate removed by Fang; language question answered in Design: Python stdlib.)

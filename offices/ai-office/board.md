@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**40 tasks** — todo: 33 · spec: 1 · design: 0 · build: 0 · review: 1 · done: 5 · parked: 0
+**40 tasks** — todo: 33 · spec: 1 · design: 0 · build: 0 · review: 0 · done: 6 · parked: 0
 
 ## Waiting on you
 
@@ -60,13 +60,11 @@ _empty_
 
 _empty_
 
-## review (1)
+## review (0)
 
-| ID | P | Task | Owner | Blocked by |
-|---|---|---|---|---|
-| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | reviewer | — |
+_empty_
 
-## done (5)
+## done (6)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -75,6 +73,7 @@ _empty_
 | [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
+| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
 
 ## parked (0)
 
