@@ -6,16 +6,31 @@ stages:
   - { id: review, owner: reviewer,  output_section: Review log,   exit: "PASS (→ done) or REJECT (→ build)" }
 terminal: [done, parked]
 
+# Authority (decided by Merwyn, 25 Nov 2026): the office is self-managed inside this repo.
+# PMO approves specs, Reviewer PASS is required before merge, PMO merges.
 gates:
-  - { stage: spec,   approver: human }        # spec approval
+  - { stage: spec,   approver: pmo }
   - { stage: design, approver: compliance, when: "flagged by architect" }
-  - { stage: done,   approver: human }        # human merges the PR
+  - { stage: done,   approver: reviewer }     # PASS required; then PMO merges the PR
+
+human_gates:                                  # always stop and ask Merwyn
+  - writes to any repo other than merwyns-maj/ai-office (company repos, brains)
+  - creating repos, accounts, connectors or paid resources
+  - anything touching production systems, money movement or personal data
+  - a business decision between options with different cost or risk
+  - compliance BLOCK
+  - budget_used >= 0.8
 
 escalation:
   - { when: "review_rejections >= 2",  to: human }
   - { when: "blocked_days > 3",         to: human }
   - { when: "budget_used >= 0.8",       to: human }
   - { when: "compliance == BLOCK",      to: human }
+
+merge:
+  who: pmo
+  requires: [reviewer PASS, PR open from a t-xxx branch]
+  method: squash
 
 status_writers:
   default: pmo
