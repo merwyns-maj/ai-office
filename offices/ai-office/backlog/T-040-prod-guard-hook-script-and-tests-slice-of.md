@@ -2,9 +2,9 @@
 id: T-040
 title: "Prod-guard hook script and tests (repo-only slice of T-019)"
 phase: 4-code-tooling
-status: build
+status: review
 priority: P0
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: []
@@ -285,6 +285,69 @@ Links: T-040, T-019, RAID R-6, compliance BLOCK in T-040 Review log.
 - Approved for build with Wulan's three notes and onFailure: block. — Janice (pmo)
 
 ## Build notes
+
+**What changed** (Revision 2, built as designed; deviations below)
+- `engine/guard/prod_guard.py` (hook), `engine/guard/prod_guard.example.json` (starter config), `engine/guard/README.md`, `engine/guard/__init__.py`
+- `tests/test_prod_guard.py`, `tests/fixtures/guard/{config.json,slow_config.json,cases.json}`
+- `.gitignore` gets `prod_guard.json`; `engine/README.md` gets one row for `guard/`
+- Not touched: `scripts/`, `.claude/`, `~/.claude`, any settings.json. The hook is not installed anywhere.
+- Build notes from Wulan applied: `K8S_SECRET_BASH` matches across newlines (test `test_block_k8s_secrets_newline`); README limits (Write/Edit could weaken the installed config, `k` aliases uncovered, every allowlist entry needs human review); settings snippet has `|| exit 2` plus `"onFailure": "block"` plus `timeout`, citing https://code.claude.com/docs/en/hooks; `.gitignore` line added.
+
+**Hook contract (RAID R-6)**: relied on Janice's verification in the Review log (25 Nov 2026, https://code.claude.com/docs/en/hooks); I did not re-fetch the docs. Facts used: stdin has `tool_name`/`tool_input`; exit 2 blocks with stderr as the reason; other non-zero exits and (without `onFailure: "block"`) timeouts do not block.
+
+**How to verify**
+```
+python -m unittest -v        # from repo root; runs ALL tests incl. engine/runtime
+python3 engine/guard/prod_guard.py --check-config --config engine/guard/prod_guard.example.json
+```
+
+**Test output** (Python 3.13.18 here; stdlib only, no 3.11-only syntax used)
+```
+Ran 133 tests in 5.0s
+OK
+```
+46 existing (engine/runtime) + 87 new. `cases.json` has 53 cases (31 block, 12 allow, 10 malformed), each its own `test_<expect>_<name>` in the `-v` listing. Mutation checks: reverting the multiline secret regex fails 2 tests; removing the `..` check fails 2 tests.
+
+**Example runs** (fixture config, from repo root; stdout empty in all)
+```
+MCP nimbus-prod pg_execute_mutation        -> exit=2  prod-guard BLOCKED [rule=mcp-pg-write] tool=mcp__remote-devices__nimbus-prod__pg_execute_mutation. The call matches a prod write rule. Prod writes go through an allowlisted Bytebase change issue; ask Merwyn.
+Bash "kubectl get\n secrets"                -> exit=2  prod-guard BLOCKED [rule=k8s-secret-read] tool=Bash. Reading Kubernetes secrets is blocked in every context. ...
+MCP pg_execute_query, nik=PII_SENTINEL_X; DROP TABLE t -> exit=2  prod-guard BLOCKED [rule=sql-multi-statement] tool=mcp__...pg_execute_query. The SQL contains more than one statement. ...   (no SQL text echoed)
+Bash psql service=nimbus-prod -c "SELECT count(*) FROM t" -> exit=0, no output
+Bash git status                            -> exit=0, no output
+stdin "not json"                           -> exit=2  prod-guard BLOCKED [rule=malformed-input] tool=<unknown>. The hook input could not be understood. ...
+sh -c "/nonexistent/python3 x || exit 2"   -> exit=2
+```
+
+**Done-when to test**
+| Done when | Test(s) |
+|---|---|
+| 1 Write to prod exits 2, rule named on stderr | `TestCases.test_block_*` (bash_psql_delete_prod, bash_kubectl_apply_prod, bash_psql_file_prod, bash_helm_upgrade_prod, bash_migrate_prod, mcp_pg_execute_mutation, mcp_pg_manage_schema, mcp_pg_import_table_data, mcp_kubectl_delete, mcp_mysql_query_update, ...); each asserts exit 2, `rule=<id>`, one line |
+| 2 Read-only exits 0, no stderr | `TestCases.test_allow_*` (bash_git_status, bash_ls, bash_psql_select_prod, mcp_pg_execute_query_select, mcp_mysql_query_select, mcp_kubectl_get_pods, ...) |
+| 3 Bytebase allowlisted 0, unlisted 2 | `test_allow_bash_bytebase_allowlisted`, `test_block_bash_bytebase_not_on_allowlist` (default-deny), `..._dotdot`, `..._apply`, `..._redirect`, `..._allowlist_lookalike_chained`; `TestConfig.test_allowlist_eligibility_enforced_in_decide`; `TestUnits.test_allowlist_eligible` |
+| 4 Malformed/empty/no command exits 2 and says why | `TestCases.test_malformed_*` (10), `TestFailClosed.test_malformed_undecodable_stdin`, `test_block_oversize_stdin` |
+| 5 One test command; output lists >=3 blocked, 3 allowed, 1 malformed | `python -m unittest -v` (stated in README); `TestCaseCoverage.test_minimum_case_counts` |
+| 6 No real host/credential/row; no network | `TestHygiene.*` (scans engine/guard, fixtures, and the test file; checks `.gitignore` and no installed config), `TestNoNetwork.*` (ast import checks) |
+| 7 README has snippet and install steps, says install not done here | `engine/guard/README.md` (first paragraph, "Settings snippet", "Install steps"); reviewer reads |
+| Rev 2 items | fail-closed: `TestFailClosed.*` through the exact `sh -c "... || exit 2"` wrapper; leak: `TestSentinelLeak.*` and the per-case leak assertion; secrets: `test_block_k8s_*`, `test_block_mcp_kubectl_get_*`, `test_allow_mcp_kubectl_get_pods`, `test_allow_bash_kubectl_get_pods_nonprod`; config action: `TestConfig.test_allowlist_*` |
+
+**Deviations from the design** (all small; none changes an interface)
+1. Config patterns compile with `re.IGNORECASE | re.DOTALL` (design: IGNORECASE only). Without DOTALL, `kubectl --context prod\n apply` slipped past `.*` in `bash-kubectl-write`. Same reason as the secret-rule note.
+2. Added prod target `bash-bytebase` (`\bbytebase\S*`) to the config. Without it the allowlisted Bytebase command never names prod, so "unlisted Bytebase run -> exit 2" was unreachable.
+3. Allowlist `..`/chaining/apply checks are redundant in the starter config (its `--file x.sql` already trips `bash-sql-file`), so a separate test uses a temp config without write rules to prove the eligibility check alone denies.
+4. `classify_sql` scans write keywords on the raw text (comments and string literals included), not only the comment-stripped text, and rejects `/*!` MySQL executable comments. Reason: stripping comments naively let `SELECT '--'; DROP TABLE t` hide the DROP. Cost: a write word inside a comment or string blocks (false positive, fails closed). Multi-statement runs first, so `SELECT 1; DROP ...` reports `sql-multi-statement`.
+5. `main(argv, stdin=None, stderr=None)` resolves `sys.stdin`/`sys.stderr` at call time (design showed them as default args) so tests can patch them. Argparse errors are routed to the `internal-error` block (parser `error` raises).
+6. Broken-import test shadows `json.py`, not `re.py` (argparse imports `re` first on some setups; json is not preloaded). Same mechanism.
+7. A blank (whitespace-only) Bash `command` is `malformed-input` (design only said missing/non-string).
+
+**Known limits / things for the reviewer**
+- Prod-targeted Bash commands are scanned with the SQL keyword list, so words like `cluster` (e.g. `--context prod-cluster`), `set`, `do` block reads such as `kubectl --context prod-cluster logs ...`. Design behaviour (fail closed); documented in README; I used `prod-main` in the allow fixture. Worth a call from Merwyn when the real context names are known.
+- The deadline test and SIGALRM kill leave no reason line (wrapper's exit 2 still blocks), as designed.
+- The K8S secret regex uses lazy `[\s\S]*?` with three segments; on a 1 MiB command it is slow but bounded by the 5 s deadline (-> exit 2).
+- Verified on Linux only; the Windows no-SIGALRM path is not exercised.
+- Merwyn open questions from Design (kubernetes MCP scope, SQL field names, Bytebase entries, read access to prod) are unchanged.
+
+— Sebastian (engineer)
 
 ## Review log
 - Compliance: PASS — Revision 2 resolves every BLOCK item (fail-closed on all paths, k8s secret reads blocked, stderr leak-free, README limits, stricter allowlist, hygiene). Notes for build: match K8S_SECRET_BASH across newlines with a test; README adds that Write/Edit could weaken the installed config (recommend file permissions or managed settings) and that kubectl aliases are uncovered; every allowlist entry Merwyn adds needs human review. — Wulan (compliance)

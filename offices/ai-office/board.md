@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**40 tasks** — todo: 33 · spec: 0 · design: 0 · build: 1 · review: 0 · done: 6 · parked: 0
+**40 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 1 · done: 6 · parked: 0
 
 ## Waiting on you
 
@@ -54,15 +54,15 @@ _empty_
 
 _empty_
 
-## build (1)
+## build (0)
+
+_empty_
+
+## review (1)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | engineer | — |
-
-## review (0)
-
-_empty_
+| [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | reviewer | — |
 
 ## done (6)
 

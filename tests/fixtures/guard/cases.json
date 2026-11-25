@@ -1,0 +1,553 @@
+[
+ {
+  "name": "bash_psql_delete_prod",
+  "expect": "block",
+  "rule": "sql-write:DELETE",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "psql \"service=nimbus-prod\" -c \"DELETE FROM t WHERE id=1\""
+   }
+  }
+ },
+ {
+  "name": "bash_kubectl_apply_prod",
+  "expect": "block",
+  "rule": "bash-kubectl-write",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl --context prod-cluster apply -f x.yaml"
+   }
+  }
+ },
+ {
+  "name": "bash_kubectl_apply_prod_multiline",
+  "expect": "block",
+  "rule": "bash-kubectl-write",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl --context prod-cluster \\\n  apply -f x.yaml"
+   }
+  }
+ },
+ {
+  "name": "bash_psql_file_prod",
+  "expect": "block",
+  "rule": "bash-sql-file",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "psql service=nimbus-prod -f fix.sql"
+   }
+  }
+ },
+ {
+  "name": "bash_helm_upgrade_prod",
+  "expect": "block",
+  "rule": "bash-helm-write",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "helm upgrade app ./chart --context prod-cluster"
+   }
+  }
+ },
+ {
+  "name": "bash_migrate_prod",
+  "expect": "block",
+  "rule": "bash-migrate-deploy",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "service=nimbus-prod python manage.py migrate"
+   }
+  }
+ },
+ {
+  "name": "bash_placeholder_host_update",
+  "expect": "block",
+  "rule": "sql-write:UPDATE",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "mysql -h prod.example.invalid -e \"UPDATE t SET a=1\""
+   }
+  }
+ },
+ {
+  "name": "bash_allowlist_lookalike_chained",
+  "expect": "block",
+  "rule": "bash-sql-file",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/a.sql; psql service=nimbus-prod -c \"SELECT 1\""
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_not_on_allowlist",
+  "expect": "block",
+  "rule": "default-deny",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project OTHER --db x"
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_dotdot",
+  "expect": "block",
+  "rule": "bash-sql-file",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/../x.sql"
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_apply",
+  "expect": "block",
+  "rule": "bash-sql-file",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/a.sql apply"
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_redirect",
+  "expect": "block",
+  "rule": "bash-sql-file",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/a.sql > out"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_mutation",
+  "expect": "block",
+  "rule": "mcp-pg-write",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_mutation",
+   "tool_input": {
+    "sql": "UPDATE t SET a=1"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_manage_schema",
+  "expect": "block",
+  "rule": "mcp-pg-write",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_manage_schema",
+   "tool_input": {
+    "sql": "ALTER TABLE t ADD c int"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_import_table_data",
+  "expect": "block",
+  "rule": "mcp-pg-write",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_import_table_data",
+   "tool_input": {
+    "table": "t"
+   }
+  }
+ },
+ {
+  "name": "mcp_kubectl_delete",
+  "expect": "block",
+  "rule": "mcp-kubectl-write",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__kubernetes__kubectl_delete",
+   "tool_input": {
+    "resourceType": "pod",
+    "name": "x"
+   }
+  }
+ },
+ {
+  "name": "mcp_mysql_query_update",
+  "expect": "block",
+  "rule": "sql-write:UPDATE",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__klik-mariadb-prod__mysql_query",
+   "tool_input": {
+    "sql": "UPDATE t SET a=1"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_sql_multi",
+  "expect": "block",
+  "rule": "sql-multi-statement",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_sql",
+   "tool_input": {
+    "sql": "SELECT 1; DROP TABLE t"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_query_with_delete",
+  "expect": "block",
+  "rule": "sql-write:DELETE",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
+   "tool_input": {
+    "query": "DELETE FROM t"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_query_select_into",
+  "expect": "block",
+  "rule": "sql-write:INTO",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
+   "tool_input": {
+    "query": "SELECT a INTO t2 FROM t"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_sql_explain_analyze",
+  "expect": "block",
+  "rule": "sql-not-read-only",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_sql",
+   "tool_input": {
+    "sql": "EXPLAIN ANALYZE SELECT 1"
+   }
+  }
+ },
+ {
+  "name": "mcp_unknown_prod_tool",
+  "expect": "block",
+  "rule": "default-deny",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_something_new",
+   "tool_input": {
+    "sql": "SELECT 1"
+   }
+  }
+ },
+ {
+  "name": "mcp_sql_tool_pii_sentinel",
+  "expect": "block",
+  "rule": "sql-multi-statement",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
+   "tool_input": {
+    "query": "SELECT * FROM t WHERE nik = 'PII_SENTINEL_X'; DROP TABLE t"
+   }
+  }
+ },
+ {
+  "name": "k8s_secret_get_noctx",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl get secret db-creds"
+   }
+  }
+ },
+ {
+  "name": "k8s_secrets_all_ns",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl get secrets -A"
+   }
+  }
+ },
+ {
+  "name": "k8s_secret_describe_slash",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl describe secret/x"
+   }
+  }
+ },
+ {
+  "name": "k8s_secrets_newline",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl get\n secrets"
+   }
+  }
+ },
+ {
+  "name": "k8s_secrets_prod_ctx",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl --context prod-cluster get secrets -o yaml"
+   }
+  }
+ },
+ {
+  "name": "mcp_kubectl_get_resource_secrets",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__kubernetes__kubectl_get",
+   "tool_input": {
+    "resourceType": "secrets"
+   }
+  }
+ },
+ {
+  "name": "mcp_kubectl_get_nested_secret",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__kubernetes__kubectl_get",
+   "tool_input": {
+    "args": [
+     "secret",
+     "x"
+    ]
+   }
+  }
+ },
+ {
+  "name": "mcp_kubectl_get_secret_tool",
+  "expect": "block",
+  "rule": "k8s-secret-read",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__kubernetes__kubectl_get_secret",
+   "tool_input": {
+    "name": "x"
+   }
+  }
+ },
+ {
+  "name": "bash_git_status",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "git status"
+   }
+  }
+ },
+ {
+  "name": "bash_ls",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "ls -la"
+   }
+  }
+ },
+ {
+  "name": "bash_psql_select_prod",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "psql service=nimbus-prod -c \"SELECT count(*) FROM t\""
+   }
+  }
+ },
+ {
+  "name": "bash_kubectl_get_pods_nonprod",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl get pods"
+   }
+  }
+ },
+ {
+  "name": "bash_kubectl_logs_prod",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "kubectl --context prod-main logs deploy-x"
+   }
+  }
+ },
+ {
+  "name": "bash_bytebase_allowlisted",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/a.sql"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_query_select",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
+   "tool_input": {
+    "query": "SELECT count(*) FROM t"
+   }
+  }
+ },
+ {
+  "name": "mcp_mysql_query_select",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__klik-mariadb-prod__mysql_query",
+   "tool_input": {
+    "sql": "SELECT 1"
+   }
+  }
+ },
+ {
+  "name": "mcp_pg_execute_sql_select_comment",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_sql",
+   "tool_input": {
+    "sql": "/* c */ SELECT 1;"
+   }
+  }
+ },
+ {
+  "name": "mcp_kubectl_get_pods",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__kubernetes__kubectl_get",
+   "tool_input": {
+    "resourceType": "pods"
+   }
+  }
+ },
+ {
+  "name": "mcp_nonprod_mutation_tool",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-staging__pg_execute_mutation",
+   "tool_input": {
+    "sql": "UPDATE t SET a=1"
+   }
+  }
+ },
+ {
+  "name": "write_tool_out_of_scope",
+  "expect": "allow",
+  "stdin": {
+   "tool_name": "Write",
+   "tool_input": {
+    "file_path": "x",
+    "content": "y"
+   }
+  }
+ },
+ {
+  "name": "empty_stdin",
+  "expect": "malformed",
+  "stdin": "",
+  "rule": "malformed-input"
+ },
+ {
+  "name": "not_json",
+  "expect": "malformed",
+  "stdin": "not json",
+  "rule": "malformed-input"
+ },
+ {
+  "name": "json_array",
+  "expect": "malformed",
+  "stdin": "[]",
+  "rule": "malformed-input"
+ },
+ {
+  "name": "json_null",
+  "expect": "malformed",
+  "stdin": "null",
+  "rule": "malformed-input"
+ },
+ {
+  "name": "missing_tool_name",
+  "expect": "malformed",
+  "stdin": {
+   "tool_input": {
+    "command": "ls"
+   }
+  },
+  "rule": "malformed-input"
+ },
+ {
+  "name": "bash_no_command",
+  "expect": "malformed",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {}
+  },
+  "rule": "malformed-input"
+ },
+ {
+  "name": "bash_command_not_string",
+  "expect": "malformed",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": 123
+   }
+  },
+  "rule": "malformed-input"
+ },
+ {
+  "name": "bash_command_blank",
+  "expect": "malformed",
+  "stdin": {
+   "tool_name": "Bash",
+   "tool_input": {
+    "command": "   "
+   }
+  },
+  "rule": "malformed-input"
+ },
+ {
+  "name": "mcp_tool_input_not_object",
+  "expect": "malformed",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_query",
+   "tool_input": "x"
+  },
+  "rule": "malformed-input"
+ },
+ {
+  "name": "mcp_sql_tool_without_sql",
+  "expect": "malformed",
+  "stdin": {
+   "tool_name": "mcp__remote-devices__nimbus-prod__pg_execute_sql",
+   "tool_input": {
+    "other": "x"
+   }
+  },
+  "rule": "malformed-input"
+ }
+]

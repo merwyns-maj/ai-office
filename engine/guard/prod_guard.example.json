@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "bash": {
+    "prod_targets": [
+      {"id": "bash-prod-service", "pattern": "\\bservice=[\\w-]*prod\\b"},
+      {"id": "bash-prod-kube-context", "pattern": "--context[= ]\\S*prod"},
+      {"id": "bash-prod-placeholder-host", "pattern": "\\bprod\\.example\\.invalid\\b"},
+      {"id": "bash-bytebase", "pattern": "\\bbytebase\\S*"}
+    ],
+    "write": [
+      {"id": "bash-kubectl-write", "pattern": "\\bkubectl\\b.*\\b(apply|delete|create|patch|edit|replace|scale|rollout|set|label|annotate|drain|cordon|exec|cp)\\b"},
+      {"id": "bash-helm-write", "pattern": "\\bhelm\\b.*\\b(install|upgrade|uninstall|rollback)\\b"},
+      {"id": "bash-migrate-deploy", "pattern": "\\b(migrate|terraform\\s+apply|dbt\\s+(run|build|seed|snapshot)|make\\s+deploy)\\b|\\bdeploy\\S*\\.sh\\b"},
+      {"id": "bash-sql-file", "pattern": "\\s(-f|--file)[= ]\\S+\\.sql\\b|<\\s*\\S+\\.sql\\b"}
+    ],
+    "read_only": [
+      {"id": "bash-sql-client-command", "pattern": "\\b(psql|mysql|mariadb)\\b.*\\s(-c|-e|--command|--execute)[= ]"},
+      {"id": "bash-kubectl-read", "pattern": "\\bkubectl\\b.*\\b(get|describe|logs|top)\\b"}
+    ]
+  },
+  "mcp": {
+    "prod_tools": [
+      {"id": "mcp-prod-server", "pattern": "^mcp__.*-prod__"},
+      {"id": "mcp-kubernetes", "pattern": "^mcp__.*__kubernetes__"}
+    ],
+    "write_tools": [
+      {"id": "mcp-pg-write", "pattern": "__pg_(execute_mutation|manage_schema|import_table_data)$"},
+      {"id": "mcp-kubectl-write", "pattern": "__kubectl_(apply|delete|create|patch|edit|replace|scale|rollout|exec|cp|label|annotate|drain|cordon)\\w*$"}
+    ],
+    "read_tools": [
+      {"id": "mcp-pg-read", "pattern": "__pg_execute_query$"},
+      {"id": "mcp-kubectl-read", "pattern": "__kubectl_(get|describe|logs|top)\\w*$"}
+    ],
+    "sql_tools": [
+      {"id": "mcp-generic-sql", "pattern": "__(pg_execute_sql|mysql_query)$"}
+    ],
+    "sql_fields": ["sql", "query", "statement"]
+  },
+  "allowlist": [
+    {"id": "bytebase-placeholder", "tool": "^Bash$", "action": "submit-change-issue",
+     "command": "bytebase-submit-issue --project PLACEHOLDER --file migrations/[\\w/-]+\\.sql",
+     "note": "Placeholder until Merwyn names the real Bytebase invocations (Spec open question). Submits a change issue only; never applies."}
+  ]
+}
