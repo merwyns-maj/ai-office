@@ -17,7 +17,7 @@ An engineering guardrail, not legal advice. Legal questions go to KlikA2C's lega
 - This repo and the brains hold **pointers, never personal data**: no names, NIK, phone, email, address, bank account numbers, loan rows or exports.
 - Company content stays in company-owned repos. Personal repos never receive it.
 - No secrets, tokens or connection strings in code, logs or task files.
-- Production writes only through the approved path (Bytebase change issues). Read access to prod is still flagged for review.
+- Production writes happen only when Merwyn instructs them: once the guard is installed (T-019, still open) it asks and he confirms; until then this is a process rule. Agents never submit to Bytebase; they prepare the plan (change, target, rollback) and hand it to Merwyn. Read access to prod, read-only by default, was approved by Merwyn on 25 Nov (raid.md R-14). That approval is Merwyn's, not a legal sign-off, and the line below still applies; read access is still flagged for review. The real control is a read-only DB role (R-8, still open); the guard is a safety net, not a security boundary (R-9).
 - Agents running on cloud infrastructure must not be fed personal data from production as context unless Merwyn and legal have approved that flow.
 
 ## 3. How to check
