@@ -2,9 +2,9 @@
 id: T-040
 title: "Prod-guard hook script and tests (repo-only slice of T-019)"
 phase: 4-code-tooling
-status: design
+status: build
 priority: P0
-owner: compliance
+owner: engineer
 where: code
 project: ai-office
 depends_on: []
@@ -281,9 +281,14 @@ Links: T-040, T-019, RAID R-6, compliance BLOCK in T-040 Review log.
 
 — Fang (architect)
 
+## Design approval
+- Approved for build with Wulan's three notes and onFailure: block. — Janice (pmo)
+
 ## Build notes
 
 ## Review log
+- Compliance: PASS — Revision 2 resolves every BLOCK item (fail-closed on all paths, k8s secret reads blocked, stderr leak-free, README limits, stricter allowlist, hygiene). Notes for build: match K8S_SECRET_BASH across newlines with a test; README adds that Write/Edit could weaken the installed config (recommend file permissions or managed settings) and that kubectl aliases are uncovered; every allowlist entry Merwyn adds needs human review. — Wulan (compliance)
+- RAID R-6 verified 25 Nov 2026 against https://code.claude.com/docs/en/hooks: stdin has tool_name, tool_input, tool_use_id; exit 2 blocks and stderr is the reason; any other non-zero exit is non-blocking; default timeout 600 s, per-hook `timeout` in seconds; a timed-out PreToolUse hook does not block unless `"onFailure": "block"` is set (Claude Code v2.1.295+); matcher with non-plain characters is an unanchored regex on tool_name. Build: add `"onFailure": "block"` to the settings snippet alongside `|| exit 2`. — Janice (pmo)
 - Compliance: BLOCK — fail-open path: only exceptions inside main() exit 2; a missing python3 (127), import/syntax error (1), stdin decode error or hook timeout would let a prod call through. Fix: settings command ends with `|| exit 2`; wrap the whole script incl. stdin read in the top-level handler; test broken import and undecodable stdin expect exit 2; README notes timeouts are non-blocking. — Wulan (compliance)
   - Also in the same revision: block `kubectl get secret(s)` in Bash and MCP read paths (credential leak); stderr names rule + tool only, never the command or SQL (WHERE may hold a NIK), with a test; README states the guard does not gate reads and is a safety net, not a security boundary, with its limits; Bytebase allowlist rejects `..` and only submits change issues; hygiene scan covers the test file; installed prod_guard.json never committed. — Wulan (compliance)
   - Escalated to Merwyn per human_gates (compliance BLOCK). Recommendation: accept all fixes, send back to Fang. — Janice (pmo)
