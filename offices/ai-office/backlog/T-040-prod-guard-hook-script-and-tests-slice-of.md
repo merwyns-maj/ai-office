@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: []
-pr: null
+pr: 11
 ---
 
 > Slice of T-019 ("biggest risk reducer"). Builds and tests the guard here, using fixture commands only. Installing it in nimbus or klik-workspace is a write to a company repo and stays a Merwyn gate.
