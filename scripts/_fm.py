@@ -1,5 +1,5 @@
 """Tiny frontmatter helpers (stdlib only)."""
-import re
+import re, pathlib
 
 def split(text):
     """Return (frontmatter dict, body) from a markdown file with --- frontmatter."""
@@ -28,3 +28,10 @@ def dump(fm, keys_order):
 def as_list(v):
     v = (v or "").strip().strip("[]")
     return [x.strip() for x in v.split(",") if x.strip()]
+
+def read_flat(path):
+    """Flat `key: value` file without --- fences -> dict; {} if missing."""
+    path = pathlib.Path(path)
+    if not path.is_file():
+        return {}
+    return split("---\n" + path.read_text().strip("\n") + "\n---\n")[0]

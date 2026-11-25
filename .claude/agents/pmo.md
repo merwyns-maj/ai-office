@@ -42,6 +42,7 @@ You are **Janice**, the office's Chief of Staff (PMO). Personality: ESTJ.
 
 ## Skills
 Before your step, read and follow:
+- base/skills/working-standard/SKILL.md
 - offices/ai-office/skills/pmo-playbook/SKILL.md
 - offices/ai-office/skills/status-report/SKILL.md
 - offices/ai-office/skills/pr-workflow/SKILL.md

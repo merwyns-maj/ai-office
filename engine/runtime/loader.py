@@ -29,6 +29,7 @@ class Agent:
     office_skills: list
     external_skills: list
     display_name: "str | None"
+    base_skills: list = field(default_factory=list)
 
 
 @dataclass
@@ -54,6 +55,8 @@ class Office:
     agents: dict = field(default_factory=dict)
     tasks: dict = field(default_factory=dict)
     skills: set = field(default_factory=set)
+    base_skills: set = field(default_factory=set)
+    default_base_skills: list = field(default_factory=list)
 
     @property
     def stage_ids(self):
@@ -71,6 +74,13 @@ class Office:
 
     def rel(self, path):
         return _rel(path, self.repo_root)
+
+    def skill_files(self, agent):
+        """Repo-relative SKILL.md paths for an agent: base defaults, its base_skills, its office_skills."""
+        paths = [f"base/skills/{s}/SKILL.md" for s in self.default_base_skills]
+        paths += [f"base/skills/{s}/SKILL.md" for s in agent.base_skills]
+        paths += [f"{self.rel(self.root)}/skills/{s}/SKILL.md" for s in agent.office_skills]
+        return list(dict.fromkeys(paths))
 
 
 def _as_list(v):
@@ -149,11 +159,24 @@ def load_office(root):
             id=f.stem, path=f, meta=meta,
             office_skills=list(_as_list(meta.get("office_skills"))),
             external_skills=list(_as_list(meta.get("external_skills"))),
-            display_name=meta.get("display_name"))
+            display_name=meta.get("display_name"),
+            base_skills=list(_as_list(meta.get("base_skills"))))
 
     skills_dir = root / "skills"
     if skills_dir.is_dir():
         office.skills = {d.name for d in skills_dir.iterdir() if (d / "SKILL.md").is_file()}
+
+    bdir = repo_root / "base" / "skills"
+    if bdir.is_dir():
+        office.base_skills = {d.name for d in bdir.iterdir() if (d / "SKILL.md").is_file()}
+    defaults = repo_root / "base" / "defaults.yaml"
+    if defaults.is_file():
+        doc = _parse_file(defaults, repo_root, problems)
+        if doc is not None:
+            if isinstance(doc, dict):
+                office.default_base_skills = [str(x) for x in _as_list(doc.get("base_skills"))]
+            else:
+                problems.append(Problem(_rel(defaults, repo_root), "top level must be a mapping"))
 
     for f in sorted((root / "backlog").glob("T-*.md")):
         meta = _parse_file(f, repo_root, problems, frontmatter=True)
@@ -239,12 +262,20 @@ def validate(office):
             add(wf, f"gate approver '{g.get('approver')}' is neither 'human' nor an org agent")
 
     # 6. agents/*.md
+    for sk in office.default_base_skills:
+        if sk not in office.base_skills:
+            P.append(Problem("base/defaults.yaml", f"base_skills '{sk}' has no base/skills/{sk}/SKILL.md"))
+    for sk in sorted(office.skills & office.base_skills):
+        add(root / "skills" / sk, f"skill '{sk}' also exists in base/skills/; keep one")
     for a in office.agents.values():
         if "name" not in a.meta:
             add(a.path, "frontmatter is missing 'name'")
         for sk in a.office_skills:
             if sk not in office.skills:
                 add(a.path, f"office_skills '{sk}' has no skills/{sk}/SKILL.md")
+        for sk in a.base_skills:
+            if sk not in office.base_skills:
+                add(a.path, f"base_skills '{sk}' has no base/skills/{sk}/SKILL.md")
         for sk in a.external_skills:
             if not isinstance(sk, str) or not _EXTERNAL.match(sk):
                 add(a.path, f"external_skills '{sk}' must have the form source:name")

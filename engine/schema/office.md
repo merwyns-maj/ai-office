@@ -14,6 +14,17 @@ offices/<office-id>/
   board.md         generated
 ```
 
+## Base (shared by every office)
+
+```
+base/
+  agents/<name>.md             profiles an office agent can `extends`
+  skills/<name>/SKILL.md       shared skills, Agent Skills format
+  defaults.yaml                repo-wide defaults, flat `key: [list]` lines only
+```
+
+`defaults.yaml` `base_skills` lists base skills that every agent of every office follows, with no per-agent edit. An agent may add more with its own `base_skills` key. The effective list is, in order and de-duplicated: `defaults.yaml` `base_skills`, the agent's `base_skills`, its `office_skills`. A skill name lives in `base/skills/` or in one office's `skills/`, never both; build and validate fail on a clash. Every name must resolve to a `SKILL.md`. Added in T-014; optional, so existing offices stay valid.
+
 ## office.yaml
 
 | Key | Type | Meaning |
@@ -52,6 +63,7 @@ extends: base/reviewer        # optional: start from base/agents/reviewer.md
 description: ...              # when to use this agent
 tools: Read, Grep, Glob, Bash # allowed tools
 model: opus                   # opus | sonnet | haiku
+base_skills: [...]            # optional: extra skills from base/skills/<name>/SKILL.md, on top of base/defaults.yaml
 office_skills: [...]          # optional: skills from skills/<name>/SKILL.md to follow
 external_skills: [claude:skill-creator]  # optional: skills outside the repo, source from workspaces.yaml skill_sources
 display_name: Emmy            # optional persona: shown in the app and in task signatures

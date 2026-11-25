@@ -8,7 +8,7 @@ from unittest import mock
 
 from tests._helpers import REPO, OfficeCopy, run
 
-KEYS = ["task", "file", "stage", "owner", "profile", "office_skills", "skill_files", "external_skills", "output_section"]
+KEYS = ["task", "file", "stage", "owner", "profile", "base_skills", "office_skills", "skill_files", "external_skills", "output_section"]
 
 
 class RealOffice(unittest.TestCase):
@@ -80,6 +80,7 @@ class Pick(unittest.TestCase):
         self.assertIn("stage: design\n", out)
         self.assertIn("owner: architect (Fang)\n", out)
         self.assertIn("profile: offices/ai-office/agents/architect.md\n", out)
+        self.assertIn("base_skills: working-standard\n", out)
         self.assertIn("office_skills: architect-playbook, decision-record, handoff\n", out)
         self.assertIn("external_skills: claude:diagram-design\n", out)
         self.assertIn("output_section: Design", out)
