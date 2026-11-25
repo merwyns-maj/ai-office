@@ -2,14 +2,16 @@
 id: T-014
 title: "Working-standard skill"
 phase: 3-skills
-status: todo
+status: spec
 priority: P1
-owner: pmo
+owner: pm
 where: chat
 project: ai-office
 depends_on: [T-012]
 pr: null
 ---
+
+> Source: research/T-012-chat-mining.md section A (A1-A10). Picked by Merwyn for Sprint 2 (25 Nov 2026). Skill lives in this repo; no company data.
 
 ## Done when
 - [ ] Verify vs prod, flag incidental bugs, check external edits, state fact not guesses
