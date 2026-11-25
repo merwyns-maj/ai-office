@@ -2,13 +2,13 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**41 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 8 · parked: 0
+**42 tasks** — todo: 31 · spec: 3 · design: 0 · build: 0 · review: 0 · done: 8 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (33)
+## todo (31)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -23,7 +23,6 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-005](backlog/T-005-create-personal-brain-repo-merwyns-maj-p.md) | P1 | Create personal brain repo (merwyns-maj/personal-brain) | pmo | T-003 |
 | [T-009](backlog/T-009-session-log-table-in-supabase.md) | P1 | Session log table in Supabase | pmo | T-008 |
 | [T-010](backlog/T-010-point-the-session-runs-dashboard-at-the.md) | P1 | Point the Session Runs dashboard at the live log | pmo | T-009 |
-| [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | pmo | — |
 | [T-016](backlog/T-016-golden-examples-and-evals-for-top-skills.md) | P1 | Golden examples and evals for top skills (SLIK, recon, PRD) | pmo | — |
 | [T-018](backlog/T-018-graphify-on-nimbus-data-platform-dbt-mod.md) | P1 | Graphify on Nimbus, data-platform, dbt models and the brain | pmo | T-002 |
 | [T-021](backlog/T-021-build-brain-mcp-server-search-read-appen.md) | P1 | Build brain MCP server (search, read, append_log, propose_decision) with work/personal scopes | pmo | T-003 |
@@ -34,7 +33,6 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
-| [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | pmo | — |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
 | [T-027](backlog/T-027-office-visualization-renderer-reads-them.md) | P2 | Office visualization renderer (reads theme/) | pmo | T-024 |
@@ -46,9 +44,13 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 
-## spec (0)
+## spec (3)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | pm | — |
+| [T-042](backlog/T-042-sprint-1-process-lessons.md) | P1 | Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents | pm | — |
+| [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | pm | — |
 
 ## design (0)
 
