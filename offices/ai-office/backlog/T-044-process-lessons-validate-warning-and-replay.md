@@ -2,9 +2,9 @@
 id: T-044
 title: "Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase"
 phase: 7-ways-of-working
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: curator
 where: code
 project: ai-office
 depends_on: []
@@ -14,13 +14,13 @@ pr: 19
 > Opened by Janice at Sprint 2 close; carries RAID R-11 and R-12.
 
 ## Done when
-- [ ] R-11: given an office whose repo has no `base/defaults.yaml`, when `build_agents.py` validates (and `board.py`, if it loads offices the same way), then the output contains a warning that names `base/defaults.yaml` and says agents will get no base skills, and the exit code is what it is today for an otherwise clean office
-- [ ] R-11: a test (fixture office without the file) asserts that warning; a second assertion shows no such warning when the file is present, and a run on this repo prints no such warning
-- [ ] R-12: pr-workflow has a short rule: in a shallow clone, if `git rebase` reports add/add conflicts, do not resolve them; create a branch from fresh main, replay the branch's own commits with cherry-pick, then push
-- [ ] R-12: the "`mergeable` false" rule and the "push rejected as too large" rule in pr-workflow each point to the replay rule, and neither still says only "rebase"
-- [ ] workflow.yaml `merge.requires_planning_only` (and its comment) also allows PRs whose changes are limited to plan-stage backlog task files (see Open question 1), plus the existing `sprints/`, `board.md`, `raid.md`; pr-workflow's board.md section says the same; workflow.yaml still passes validate
-- [ ] Nothing widens the Reviewer-free path beyond that: a PR touching a task file past the plan stage, or any other path, still needs a Reviewer PASS (stated in workflow.yaml or pr-workflow)
-- [ ] No skill or workflow text contradicts another (the two planning-only statements agree); `build_agents.py` runs clean on the real office and the full test command exits 0
+- [x] R-11: given an office whose repo has no `base/defaults.yaml`, when `build_agents.py` validates (and `board.py`, if it loads offices the same way), then the output contains a warning that names `base/defaults.yaml` and says agents will get no base skills, and the exit code is what it is today for an otherwise clean office
+- [x] R-11: a test (fixture office without the file) asserts that warning; a second assertion shows no such warning when the file is present, and a run on this repo prints no such warning
+- [x] R-12: pr-workflow has a short rule: in a shallow clone, if `git rebase` reports add/add conflicts, do not resolve them; create a branch from fresh main, replay the branch's own commits with cherry-pick, then push
+- [x] R-12: the "`mergeable` false" rule and the "push rejected as too large" rule in pr-workflow each point to the replay rule, and neither still says only "rebase"
+- [x] workflow.yaml `merge.requires_planning_only` (and its comment) also allows PRs whose changes are limited to plan-stage backlog task files (see Open question 1), plus the existing `sprints/`, `board.md`, `raid.md`; pr-workflow's board.md section says the same; workflow.yaml still passes validate
+- [x] Nothing widens the Reviewer-free path beyond that: a PR touching a task file past the plan stage, or any other path, still needs a Reviewer PASS (stated in workflow.yaml or pr-workflow)
+- [x] No skill or workflow text contradicts another (the two planning-only statements agree); `build_agents.py` runs clean on the real office and the full test command exits 0
 
 ## Spec
 **Problem.** Two Sprint 2 lessons are still open: if `base/defaults.yaml` is missing, build and validate pass while agents silently get no base skills (R-11), and in shallow clones `git rebase` produces false add/add conflicts, which pr-workflow still answers with "rebase" (R-12). Also, planning-only PRs may skip the Reviewer only for sprint files, so a PR that only writes plan-stage task files (specs) cannot merge on the same path, which Janice noted on PR #17.
@@ -166,7 +166,10 @@ python3 -m unittest -q                       -> Ran 148 tests in 5.276s / OK
 — Sebastian (engineer)
 
 ## Review log
+- PASS — 148 tests OK; build/validate/dry-run clean on the real repo; with base/defaults.yaml deleted each prints the warning once on stderr with unchanged exit codes; replay-not-rebase commands run as written in a shallow-clone test (cherry-pick, backup branch, lease rejects a stale sha); force-push limited to task branches; planning-only defined once (workflow.yaml), done excluded; board.md not in diff. — Cahyani (reviewer)
+  - Recorded by Janice (pmo) from Cahyani's HANDOFF block.
 
 ## Decision
+- Missing base defaults warn instead of passing silently; shallow-clone branches are replayed onto fresh main, never rebased; planning-only PRs are defined once in workflow.yaml. — April (curator)
 
 ## Open questions
