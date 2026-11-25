@@ -82,3 +82,5 @@ Why each part (contract verified against https://code.claude.com/docs/en/hooks o
 ## Timeouts and alerts
 
 Keep the hook fast: no network, no subprocess, stdin capped at 1 MiB. The internal deadline (`--deadline`, default 5 s, 0 disables, for tests only) kills a runaway process and the wrapper turns that into exit 2. Treat any "hook timed out" or hook-error notice as an alert: stop the session and tell Merwyn.
+
+- **Shell quote-splitting.** The shell joins `sec''rets` into `secrets` after the guard has read the raw text, so `kubectl get sec''rets` is not caught. Like aliases, this is a known gap: the guard stops mistakes, not a determined agent.

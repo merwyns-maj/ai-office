@@ -2,9 +2,9 @@
 id: T-040
 title: "Prod-guard hook script and tests (repo-only slice of T-019)"
 phase: 4-code-tooling
-status: review
+status: done
 priority: P0
-owner: reviewer
+owner: curator
 where: code
 project: ai-office
 depends_on: []
@@ -14,13 +14,13 @@ pr: 11
 > Slice of T-019 ("biggest risk reducer"). Builds and tests the guard here, using fixture commands only. Installing it in nimbus or klik-workspace is a write to a company repo and stays a Merwyn gate.
 
 ## Done when
-- [ ] Given a fixture hook payload (JSON on stdin) whose Bash command writes to the prod target (e.g. INSERT/UPDATE/DELETE/DDL via a SQL client, or a deploy/migrate command), when the hook script runs, then it exits 2 and prints a reason naming the matched rule on stderr
-- [ ] Given a fixture payload for a read-only command (e.g. SELECT, `git status`, `ls`), the script exits 0 with no stderr
-- [ ] Given a fixture payload for a Bytebase script run that matches an entry in the allowlist file, the script exits 0; given one that matches no entry, it exits 2 (default deny)
-- [ ] Given malformed or empty stdin, or a payload with no command, the script exits 2 (fail closed) and says why
-- [ ] One test command (stated in the README) runs all fixture cases, exits 0, and the output lists at least 3 blocked, 3 allowed and 1 malformed case
-- [ ] A scan of the repo files added by this task finds no real hostname, credential, connection string or data row (fixtures use obvious placeholders such as `prod.example.invalid`); the tests make no network call
-- [ ] README (in the guard's folder) gives the settings snippet and steps a company repo would follow to install it, and states that installing is not done here
+- [x] Given a fixture hook payload (JSON on stdin) whose Bash command writes to the prod target (e.g. INSERT/UPDATE/DELETE/DDL via a SQL client, or a deploy/migrate command), when the hook script runs, then it exits 2 and prints a reason naming the matched rule on stderr
+- [x] Given a fixture payload for a read-only command (e.g. SELECT, `git status`, `ls`), the script exits 0 with no stderr
+- [x] Given a fixture payload for a Bytebase script run that matches an entry in the allowlist file, the script exits 0; given one that matches no entry, it exits 2 (default deny)
+- [x] Given malformed or empty stdin, or a payload with no command, the script exits 2 (fail closed) and says why
+- [x] One test command (stated in the README) runs all fixture cases, exits 0, and the output lists at least 3 blocked, 3 allowed and 1 malformed case
+- [x] A scan of the repo files added by this task finds no real hostname, credential, connection string or data row (fixtures use obvious placeholders such as `prod.example.invalid`); the tests make no network call
+- [x] README (in the guard's folder) gives the settings snippet and steps a company repo would follow to install it, and states that installing is not done here
 
 ## Spec
 **Problem.** Agents running in company repos could write to nimbus-prod (production lending data) by mistake, and nothing stops them today. This is the repo-only slice of T-019: build and test the guard here so it is proven before any company repo adopts it.
@@ -350,6 +350,8 @@ sh -c "/nonexistent/python3 x || exit 2"   -> exit=2
 — Sebastian (engineer)
 
 ## Review log
+- PASS — all 7 checks verified with crafted payloads through the README command form; 133 tests OK; secret reads and NIK-sentinel leak checks pass; 21 bypass attempts, 20 blocked (`sec''rets` quote-splitting gets through, now listed as a limit); all 7 deviations accepted; hygiene clean, nothing written outside the repo. — Cahyani (reviewer)
+- Before merge: README limits now list shell quote-splitting. — Janice (pmo)
 - Compliance: PASS — Revision 2 resolves every BLOCK item (fail-closed on all paths, k8s secret reads blocked, stderr leak-free, README limits, stricter allowlist, hygiene). Notes for build: match K8S_SECRET_BASH across newlines with a test; README adds that Write/Edit could weaken the installed config (recommend file permissions or managed settings) and that kubectl aliases are uncovered; every allowlist entry Merwyn adds needs human review. — Wulan (compliance)
 - RAID R-6 verified 25 Nov 2026 against https://code.claude.com/docs/en/hooks: stdin has tool_name, tool_input, tool_use_id; exit 2 blocks and stderr is the reason; any other non-zero exit is non-blocking; default timeout 600 s, per-hook `timeout` in seconds; a timed-out PreToolUse hook does not block unless `"onFailure": "block"` is set (Claude Code v2.1.295+); matcher with non-plain characters is an unanchored regex on tool_name. Build: add `"onFailure": "block"` to the settings snippet alongside `|| exit 2`. — Janice (pmo)
 - Compliance: BLOCK — fail-open path: only exceptions inside main() exit 2; a missing python3 (127), import/syntax error (1), stdin decode error or hook timeout would let a prod call through. Fix: settings command ends with `|| exit 2`; wrap the whole script incl. stdin read in the top-level handler; test broken import and undecodable stdin expect exit 2; README notes timeouts are non-blocking. — Wulan (compliance)
@@ -358,6 +360,7 @@ sh -c "/nonexistent/python3 x || exit 2"   -> exit=2
   - 25 Nov 2026 21:47: Merwyn accepted all of Wulan's fixes. Back to Fang for a design revision. Default-deny with allowlist stays the working assumption; kubernetes scope and Bytebase allowlist contents remain open. — Janice (pmo)
 
 ## Decision
+- The prod guard is a fail-closed PreToolUse hook covering Bash and MCP tool names; it is a safety net against agent mistakes, not a security boundary. Installing it, prod read access and a read-only DB role remain Merwyn's decisions. — April (curator)
 
 ## Open questions
 - Spec-level questions are in Spec → Open questions; design-level ones in Design → Open questions. (Older duplicate removed by Fang.)
