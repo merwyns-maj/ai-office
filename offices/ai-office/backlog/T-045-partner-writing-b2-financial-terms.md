@@ -2,9 +2,9 @@
 id: T-045
 title: "Partner-writing B2 update: keep financial terms in English too"
 phase: 3-skills
-status: review
+status: done
 priority: P2
-owner: reviewer
+owner: curator
 where: chat
 project: ai-office
 depends_on: [T-015]
@@ -14,11 +14,11 @@ pr: https://github.com/merwyns-maj/ai-office/pull/18
 > Merwyn's decision of 25 Nov 2026: keep financial terms in English (e.g. tenor, outstanding), not only banking terms; the *virtual account* example is confirmed.
 
 ## Done when
-- [ ] Rule B2 in `base/skills/partner-writing/SKILL.md` says that banking, fintech and financial terms stay in English in Indonesian text, and names `tenor` and `outstanding` as examples
-- [ ] The existing example sentence `Dana masuk ke *virtual account* setelah verifikasi.` is still in B2, unchanged
-- [ ] The sub-bullets "plain-text email keeps the English term without asterisks" and "Use only terms Merwyn has named. Do not build a term list." are kept in B2; `tenor`, `outstanding` and `virtual account` are the named terms
-- [ ] The file contains no em dash (U+2014) and no en dash (U+2013); rules B1 and B3 to B6 are word-for-word unchanged (diff touches only B2)
-- [ ] `build_agents.py` runs clean, and the full test command exits 0
+- [x] Rule B2 in `base/skills/partner-writing/SKILL.md` says that banking, fintech and financial terms stay in English in Indonesian text, and names `tenor` and `outstanding` as examples
+- [x] The existing example sentence `Dana masuk ke *virtual account* setelah verifikasi.` is still in B2, unchanged
+- [x] The sub-bullets "plain-text email keeps the English term without asterisks" and "Use only terms Merwyn has named. Do not build a term list." are kept in B2; `tenor`, `outstanding` and `virtual account` are the named terms
+- [x] The file contains no em dash (U+2014) and no en dash (U+2013); rules B1 and B3 to B6 are word-for-word unchanged (diff touches only B2)
+- [x] `build_agents.py` runs clean, and the full test command exits 0
 
 ## Spec
 **Problem.** B2 covers only "a banking or fintech term". On 25 Nov 2026 Merwyn decided that financial terms such as tenor and outstanding also stay in English, and agents writing Indonesian text for partners would otherwise translate them.
@@ -112,7 +112,10 @@ Fang's open question (other copies of B2): none found per Design; not re-checked
 — Sebastian (engineer)
 
 ## Review log
+- PASS — B2 first line only changed (names tenor, outstanding); *virtual account* example and sub-bullets unchanged; 0 em/en dashes; no stale copy of the old wording outside history; build clean; 144 tests OK; board.md not in diff. — Cahyani (reviewer)
+  - Recorded by Janice (pmo) from Cahyani's HANDOFF block.
 
 ## Decision
+- B2 now covers banking, fintech and financial terms (tenor, outstanding, virtual account stay in English). — April (curator)
 
 ## Open questions
