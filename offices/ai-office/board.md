@@ -2,11 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**34 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 1 · done: 1 · parked: 0
-
-## Waiting on you
-
-- [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) Define the office schema (office, org, workflow, agents, theme, backlog)
+**34 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 2 · parked: 0
 
 ## todo (32)
 
@@ -29,7 +25,7 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-021](backlog/T-021-build-brain-mcp-server-search-read-appen.md) | P1 | Build brain MCP server (search, read, append_log, propose_decision) with work/personal scopes | pmo | T-003 |
 | [T-022](backlog/T-022-connect-brain-mcp-to-chat.md) | P1 | Connect brain MCP to chat | pmo | T-021 |
 | [T-023](backlog/T-023-nightly-curator-agent.md) | P1 | Nightly curator agent | pmo | T-021 |
-| [T-024](backlog/T-024-engine-runtime-load-an-office-folder-and.md) | P1 | Engine runtime: load an office folder and run its agents on the Agent SDK | pmo | T-001 |
+| [T-024](backlog/T-024-engine-runtime-load-an-office-folder-and.md) | P1 | Engine runtime: load an office folder and run its agents on the Agent SDK | pmo | — |
 | [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
@@ -57,16 +53,15 @@ _empty_
 
 _empty_
 
-## review (1)
+## review (0)
+
+_empty_
+
+## done (2)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
-| [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | human | — |
-
-## done (1)
-
-| ID | P | Task | Owner | Blocked by |
-|---|---|---|---|---|
+| [T-001](backlog/T-001-define-the-office-schema-office-org-work.md) | P0 | Define the office schema (office, org, workflow, agents, theme, backlog) | curator | — |
 | [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) | P0 | Give Claude GitHub access to the impact-credit-solutions org | curator | — |
 
 ## parked (0)

@@ -1,4 +1,4 @@
-# Office schema (v0 — draft, task T-001)
+# Office schema (v0, approved 25 Nov 2026 — T-001)
 
 An office is a folder. The engine loads it; nothing about an office is hard-coded in the engine.
 
@@ -94,7 +94,7 @@ pr: null
 | `desks` | `{ agent, room, sprite }`: where each agent sits |
 | `hub` | Where handoffs are drawn (agents walk between rooms) |
 
-## Open questions for v0
+## Decisions (v0)
 
-- Should `skills/` follow the Agent Skills folder format (`skills/<name>/SKILL.md`)? Proposed: yes.
-- Does a task ever belong to two offices? Proposed: no; link across offices with `depends_on: office-id/T-xxx`.
+- `skills/` follows the Agent Skills folder format: `skills/<name>/SKILL.md`.
+- A task belongs to exactly one office. Cross-office links use `depends_on: <office-id>/T-xxx`.
