@@ -13,6 +13,10 @@ def build(office):
     src = ROOT / "offices" / office / "agents"
     if not src.is_dir():
         sys.exit(f"No such office: {office}")
+    for f in sorted(src.glob("*.md")):
+        for sk in as_list(split(f.read_text())[0].get("office_skills")):
+            if not (ROOT / "offices" / office / "skills" / sk / "SKILL.md").exists():
+                sys.exit(f"{f.name}: office_skills names '{sk}', but offices/{office}/skills/{sk}/SKILL.md is missing")
     out = ROOT / ".claude" / "agents"
     out.mkdir(parents=True, exist_ok=True)
     for old in out.glob("*.md"):

@@ -1,6 +1,6 @@
 ---
 name: pmo
-description: Sari (Chief of Staff (PMO)). Office PMO / chief of staff. Use to pick the next task, report status, update task status and the board, and escalate to the human.
+description: Sari (Chief of Staff). Office PMO / chief of staff. Use to pick the next task, report status, update task status and the board, and escalate to the human.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 ---
