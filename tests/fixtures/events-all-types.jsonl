@@ -1,0 +1,16 @@
+{"log": "office-events", "v": 0, "office": "ai-office", "clock": "synthetic", "title": "SYNTHETIC log, all 11 event types, for tests and review only (not a real replay)"}
+{"t": 0, "type": "step_started", "agent": "engineer", "task": "T-901", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 3, "type": "stage_changed", "task": "T-901", "from": "todo", "to": "build", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 6, "type": "blocked", "agent": "engineer", "task": "T-901", "reason": "Waiting on a test fixture", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 10, "type": "step_started", "agent": "engineer", "task": "T-901", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 14, "type": "discussion", "task": "T-901", "agents": ["engineer", "architect", "designer"], "lines": [{"agent": "engineer", "text": "Can the beacon be bigger?"}, {"agent": "designer", "text": "Yes, 20 percent."}, {"agent": "architect", "text": "Fine by the design."}], "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 24, "type": "handoff", "task": "T-901", "from_agent": "engineer", "to_agent": "reviewer", "to_stage": "review", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 30, "type": "review_reject", "task": "T-901", "agent": "reviewer", "reason": "Missing a test for the empty case", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 31, "type": "handoff", "task": "T-901", "from_agent": "reviewer", "to_agent": "engineer", "to_stage": "build", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 38, "type": "handoff", "task": "T-901", "from_agent": "engineer", "to_agent": "compliance", "to_stage": "review", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 44, "type": "compliance_result", "task": "T-901", "agent": "compliance", "verdict": "BLOCK", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 45, "type": "needs_merwyn", "agent": "compliance", "task": "T-901", "reason": "Synthetic BLOCK: needs a human decision", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 55, "type": "merwyn_answered", "agent": "compliance", "task": "T-901", "answer": "Synthetic answer: go ahead", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 60, "type": "handoff", "task": "T-901", "from_agent": "compliance", "to_agent": "reviewer", "to_stage": "review", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 66, "type": "review_pass", "task": "T-901", "agent": "reviewer", "src": "tests/fixtures/events-all-types.jsonl"}
+{"t": 70, "type": "merged", "task": "T-901", "pr": 1, "src": "tests/fixtures/events-all-types.jsonl"}

@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Generate the self-contained 3D office page: theme + org + workflow + event log -> engine/app/office.html.
+
+Usage: python scripts/office_app.py <office> [--fixture PATH] [--out PATH] [--check] [--allow-errors]
+Exit 0 written or up to date; 1 log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
+"""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+from engine.runtime import events, loader, miniyaml  # noqa: E402
+
+TEMPLATE = REPO / "engine" / "app" / "office.template.html"
+DEFAULT_FIXTURE = REPO / "engine" / "app" / "fixtures" / "sprint-03.jsonl"
+DEFAULT_OUT = REPO / "engine" / "app" / "office.html"
+PLACEHOLDER_LINE = '<script type="application/json" id="office-data">__OFFICE_DATA__</script>'
+
+
+class BuildError(Exception):
+    pass
+
+
+def build_data(office_root, fixture):
+    """Return (data dict for the page, list of LogProblem)."""
+    office_root = Path(office_root)
+    office, problems = loader.load_office(office_root)
+    if office is None:
+        raise BuildError("; ".join(str(p) for p in problems) or "office failed to load")
+    theme_path = office_root / "theme" / "theme.yaml"
+    if not theme_path.exists():
+        raise BuildError(f"{theme_path}: theme.yaml is missing")
+    theme = miniyaml.loads(theme_path.read_text(encoding="utf-8"), str(theme_path))
+    rooms, desks = theme.get("rooms") or [], theme.get("desks") or []
+    missing = [f"room {r.get('id')} has no rect" for r in rooms if not isinstance(r.get("rect"), list) or len(r["rect"]) != 4]
+    missing += [f"desk {d.get('agent')} has no at" for d in desks if not isinstance(d.get("at"), list) or len(d["at"]) != 2]
+    if not isinstance(theme.get("door"), list) or len(theme["door"]) != 2:
+        missing.append("theme has no door [x, z]")
+    if missing:
+        raise BuildError("theme layout incomplete: " + "; ".join(missing))
+    org_agents = [a for a in office.org.get("agents", []) if isinstance(a, dict)]
+    ids = {a["id"] for a in org_agents}
+    stages = list(office.stage_ids) + list(office.terminal)
+    log_text = Path(fixture).read_text(encoding="utf-8")
+    header, evs, probs = events.parse_log(log_text, agents=ids, stages=set(stages),
+                                          forbidden=events.forbidden_terms(office.repo_root))
+    skipped = [{"line": p.line, "message": p.message} for p in probs if p.level == "error"]
+    data = {
+        "v": 0,
+        "office": {"id": office.id, "name": office.office.get("name", office.id)},
+        "theme": {k: theme.get(k) for k in ("style", "palette", "rooms", "desks", "hub", "door")},
+        "agents": [{k: a.get(k) for k in ("id", "name", "role", "personality")} for a in org_agents],
+        "stages": stages,
+        "log": header,
+        "events": evs,
+        "skipped": skipped,
+    }
+    return data, probs
+
+
+def render(template_text, data):
+    if template_text.count(PLACEHOLDER_LINE) != 1:
+        raise BuildError(f"template must contain exactly one line: {PLACEHOLDER_LINE}")
+    blob = json.dumps(data, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    blob = blob.replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+    return template_text.replace(PLACEHOLDER_LINE, PLACEHOLDER_LINE.replace("__OFFICE_DATA__", blob), 1)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(prog="office_app.py", description=__doc__.split("\n")[0])
+    ap.add_argument("office", help="office id (offices/<id>) or a path to an office folder")
+    ap.add_argument("--fixture", default=str(DEFAULT_FIXTURE))
+    ap.add_argument("--out", default=str(DEFAULT_OUT))
+    ap.add_argument("--check", action="store_true", help="fail if --out is not what would be generated")
+    ap.add_argument("--allow-errors", action="store_true", help="drop bad log lines instead of failing")
+    try:
+        args = ap.parse_args(argv)
+    except SystemExit as e:
+        return int(e.code or 0)
+    try:
+        root = loader.resolve_office(args.office, Path.cwd())
+        template = TEMPLATE.read_text(encoding="utf-8")
+        data, probs = build_data(root, Path(args.fixture))
+    except FileNotFoundError as e:
+        print(str(e), file=sys.stderr)
+        return 2
+    except BuildError as e:
+        print(f"office_app: {e}", file=sys.stderr)
+        return 1
+    for p in probs:
+        print(p, file=sys.stderr)
+    if data["log"] is None or (data["skipped"] and not args.allow_errors):
+        print(f"office_app: log has {len(data['skipped'])} error(s); fix them or pass --allow-errors", file=sys.stderr)
+        return 1
+    try:
+        html = render(template, data)
+    except BuildError as e:
+        print(f"office_app: {e}", file=sys.stderr)
+        return 1
+    out = Path(args.out)
+    if args.check:
+        if not out.exists() or out.read_text(encoding="utf-8") != html:
+            print(f"office_app: {out} is stale; run: python scripts/office_app.py {args.office}", file=sys.stderr)
+            return 1
+        print(f"{out}: up to date ({len(html.encode('utf-8')) // 1024} KB, {len(data['events'])} events)")
+        return 0
+    out.write_text(html, encoding="utf-8")
+    print(f"{out}: written, {len(html.encode('utf-8')) // 1024} KB, {len(data['agents'])} agents, {len(data['events'])} events")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

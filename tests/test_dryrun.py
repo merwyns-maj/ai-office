@@ -104,7 +104,7 @@ class Pick(unittest.TestCase):
 
 
 class NoSdkNoNetworkNoWrites(unittest.TestCase):
-    ALLOWED = {"argparse", "dataclasses", "pathlib", "re", "sys", "typing"}
+    ALLOWED = {"argparse", "dataclasses", "datetime", "json", "pathlib", "re", "sys", "typing"}
 
     def test_imports_are_stdlib_allowlist(self):
         files = sorted((REPO / "engine" / "runtime").glob("*.py"))

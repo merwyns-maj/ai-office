@@ -110,6 +110,11 @@ pr: null
 | `rooms` | `{ id, label, stage }`: one room per workflow stage; tasks in that stage show there |
 | `desks` | `{ agent, room, sprite }`: where each agent sits |
 | `hub` | Where handoffs are drawn (agents walk between rooms) |
+| `rooms[].rect` | Optional (required by the 3D page, `scripts/office_app.py`): `[x0, z0, x1, z1]` in metres on a floor grid, x left to right, z back wall to front. A room with `stage: null` is a place, not a stage (Merwyn's door, the meeting table) |
+| `desks[].at` | Optional (required by the 3D page): `[x, z]` of the desk centre in the same grid |
+| `door` | Optional (required by the 3D page): `[x, z]` of Merwyn's door on the back wall |
+
+The page reads these through the generator and the layout is data, not code. Added in T-048.
 
 ## Decisions (v0)
 
