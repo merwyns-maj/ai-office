@@ -2,9 +2,9 @@
 id: T-046
 title: "Compliance files match the 25 Nov prod access decision"
 phase: 0-office
-status: review
+status: done
 priority: P0
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-043]
@@ -150,6 +150,9 @@ Playbook diff is a single line (20); the other 6 generated agents are unchanged.
 — Sebastian (engineer)
 
 ## Review log
+Review: PASS (25 Nov 2026). PR #23, head 8f7584f. Every "done when" check passed with commands run by Cahyani: grep shows 4 Bytebase lines, each "never submit"/BLOCK; no "change issues"; R-14/R-8 cited, R-8 and T-019 described as still open; checklist still BLOCKs; build_agents exit 0 with no further diff; diff limited to 5 files; Wulan C1 (exact string) and C2 PASS; playbook line 21 byte-identical (sha256 match); 158 tests OK.
+Notes: checklist:11 keeps "the guard asks, he confirms" without "once installed" as Wulan asked (fails safe). Curator follow-up: update "R-8, still open" and "T-019, still open" mentions when those close.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
