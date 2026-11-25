@@ -2,7 +2,7 @@
 
 _Generated 2026-11-25 by scripts/board.py. Do not edit._
 
-**40 tasks** — todo: 33 · spec: 2 · design: 0 · build: 0 · review: 0 · done: 5 · parked: 0
+**40 tasks** — todo: 33 · spec: 1 · design: 1 · build: 0 · review: 0 · done: 5 · parked: 0
 
 ## Waiting on you
 
@@ -46,16 +46,17 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 
-## spec (2)
+## spec (1)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
 | [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | pm | — |
-| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | pm | — |
 
-## design (0)
+## design (1)
 
-_empty_
+| ID | P | Task | Owner | Blocked by |
+|---|---|---|---|---|
+| [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | architect | — |
 
 ## build (0)
 
