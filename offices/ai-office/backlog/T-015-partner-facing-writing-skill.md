@@ -2,9 +2,9 @@
 id: T-015
 title: "Partner-facing writing skill"
 phase: 3-skills
-status: review
+status: done
 priority: P2
-owner: reviewer
+owner: curator
 where: chat
 project: ai-office
 depends_on: [T-012, T-014]
@@ -14,7 +14,7 @@ pr: 15
 > Source: research/T-012-chat-mining.md section B (B1-B6). Picked by Merwyn for Sprint 2 (25 Nov 2026). Skill lives in this repo; no company data.
 
 ## Done when
-- [ ] No overpromising, English banking terms in italics, no em-dashes
+- [x] No overpromising, English banking terms in italics, no em-dashes
 
 ## Spec
 
@@ -31,12 +31,12 @@ pr: 15
 - Company data or partner names in the skill.
 
 **Done when**
-- [ ] Exactly one `SKILL.md` has `name: partner-writing`. Check: `grep -rl "name: partner-writing" offices/ | wc -l` prints 1.
-- [ ] It has six rules, each citing B1 to B6. Check: open the file.
-- [ ] The skill file contains no em-dash character. Check: `grep -c "—" <path>` prints 0 (rule examples use words, not the character).
-- [ ] The B2 rule shows one example with a term italicised in Indonesian text, and the B3 rule lists dates and SLAs as examples of what not to commit to.
-- [ ] The skill is in `office_skills` of each agent that writes for outsiders, and `python scripts/build_agents.py ai-office` exits 0. Check: `grep -l partner-writing offices/ai-office/agents/*.md`.
-- [ ] The skill contains no borrower, lender, partner name or figures. Check: open the file.
+- [x] Exactly one `SKILL.md` has `name: partner-writing`. Check: `grep -rl "name: partner-writing" offices/ | wc -l` prints 1.
+- [x] It has six rules, each citing B1 to B6. Check: open the file.
+- [x] The skill file contains no em-dash character. Check: `grep -c "—" <path>` prints 0 (rule examples use words, not the character).
+- [x] The B2 rule shows one example with a term italicised in Indonesian text, and the B3 rule lists dates and SLAs as examples of what not to commit to.
+- [x] The skill is in `office_skills` of each agent that writes for outsiders, and `python scripts/build_agents.py ai-office` exits 0. Check: `grep -l partner-writing offices/ai-office/agents/*.md`.
+- [x] The skill contains no borrower, lender, partner name or figures. Check: open the file.
 
 **Open questions**
 - Which ai-office agents write for outsiders (Emmy, April, others)? Who: Architect with PMO. Blocking for the `office_skills` check.
