@@ -114,3 +114,8 @@ Links: T-015, T-014, PR <n>
 - B5 wording ("tone only, never untrue"). Who: Merwyn, for confirmation. Non-blocking.
 
 — Fang (architect)
+
+## Approvals (PMO)
+- Spec approved: B5 = soften tone, never state anything untrue (D4). Outsider-writing agents: pm (Emmy) and curator (April). Base level. — Janice (pmo)
+- Design approved; depends_on T-014 confirmed; build after T-014 merges, rebased on main. B2 example term (*virtual account*) accepted. — Janice (pmo)
+
