@@ -307,7 +307,7 @@ def usage_section(office_dir, repo):
         S = t["session"]
         out += [f"Covers: {header['covers']}.", "",
                 f"Source: {header['source']}. Recorded by {header['recorded_by']}, {header['date']}.", "",
-                "Main session's own tokens: not reported (the harness reports agent runs only).", "",
+                "Main session's own tokens: not reported here (the harness reports agent runs only; metered readings are in the ledger, T-070).", "",
                 "Model used: not reported (profile models are planned, not measured).", "",
                 "Share of the Max plan: not shown. The plan has no published fixed token limit, so any percentage of it "
                 "would be a guess.", ""]

@@ -20,6 +20,8 @@ RUN_KEYS = ("n", "sprint", "agent", "tasks", "step", "tokens", "tool_uses", "dur
 NUMS = ("tokens", "tool_uses", "duration_ms")
 SPLIT = ("input", "output", "cache_read", "cache_write")
 MAX_NOTE = 200
+MAIN_KEYS = ("kind", "window", "date", "source", "since", "requests", "input", "cache_write", "cache_read", "output", "note")
+MAIN_PARTS = ("input", "cache_write", "cache_read", "output")
 CHAT_NOTE = re.compile(r"^chat message m-[0-9a-z]{6,12}-[0-9a-z]{4}$")
 
 
@@ -104,11 +106,61 @@ def _check_run(r, agents):
     return None
 
 
+def _check_main(r):
+    """A kind:'main_session' line (T-070): one explain-usage reading of the main session, kept apart from agent runs."""
+    if "tokens" in r:
+        return "main-session lines carry no tokens total; units differ from agent runs"
+    for k in ("window", "date", "source", "since") + MAIN_PARTS:
+        if k not in r:
+            return f"missing field {k!r}"
+    if not _int(r["window"], 1):
+        return "window must be an integer >= 1"
+    if not _iso_date(r["date"]):
+        return "date must be YYYY-MM-DD"
+    for k in ("source", "since"):
+        if not _text(r[k], 1, 200):
+            return f"{k} must be 1-200 characters with no newline"
+    for k in MAIN_PARTS:
+        if not _int(r[k]):
+            return f"{k} must be an integer from 0 to {events.MAX_TOKENS}"
+    if r.get("requests") is not None and not _int(r["requests"]):
+        return "requests must be an integer or null"
+    if "note" in r and not _text(r["note"], 1, MAX_NOTE):
+        return f"note must be 1-{MAX_NOTE} characters with no newline"
+    for k in ("n", "agent", "tasks"):
+        if k in r:
+            return f"main-session lines carry no {k!r}"
+    return None
+
+
+def main_totals(main):
+    """Per window the last reading counts; windows add. None when there are no readings."""
+    if not main:
+        return None
+    last = {}
+    for r in main:
+        last[r["window"]] = r
+    out = {"windows": len(last), "readings": len(main), "requests": 0, "input": 0, "cache_write": 0, "cache_read": 0,
+           "output": 0, "since": main[-1]["since"], "last_date": main[-1]["date"]}
+    for r in last.values():
+        out["requests"] += r.get("requests") or 0
+        for k in MAIN_PARTS:
+            out[k] += r[k]
+    return out
+
+
 def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
-    """Return (header or None, kept runs in file order, problems). A bad header rejects the file.
+    """Old 3-tuple: (header or None, kept runs, problems). Main-session lines are validated but not returned (see parse_ledger_full)."""
+    h, runs, _, probs = parse_ledger_full(text, agents=agents, office=office, forbidden=forbidden, providers=providers)
+    return h, runs, probs
+
+
+def parse_ledger_full(text, *, agents, office=None, forbidden=(), providers=None):
+    """Return (header or None, kept runs in file order, kept main-session readings, problems). A bad header rejects the file.
 
     providers: optional ids from providers.yaml; with it, a header provider outside them is an error."""
-    problems, runs, header = [], [], None
+    problems, runs, header, main = [], [], None, []
+    last_win, last_read = 0, {}
     seen_header, last_n = False, 0
     warned = set()
 
@@ -121,7 +173,7 @@ def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
         if len(raw) > events.MAX_LINE:
             err(n, f"line longer than {events.MAX_LINE} characters")
             if not seen_header:
-                return None, [], problems
+                return None, [], [], problems
             continue
         try:
             obj = json.loads(raw, object_pairs_hook=events._pairs)
@@ -139,14 +191,14 @@ def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
             seen_header = True
             if obj is None:
                 err(n, "missing or invalid header: file rejected")
-                return None, [], problems
+                return None, [], [], problems
             if hit:
                 err(n, hit)
-                return None, [], problems
+                return None, [], [], problems
             bad = _check_header(obj, office, providers)
             if bad:
                 err(n, bad + ": file rejected")
-                return None, [], problems
+                return None, [], [], problems
             for k in obj:
                 if k not in HEADER_KEYS:
                     problems.append(LogProblem(n, "warning", f"header field {k!r} is not defined (kept)"))
@@ -156,6 +208,24 @@ def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
             continue
         if hit:
             err(n, hit)
+            continue
+        if "kind" in obj:
+            bad = _check_main(obj) if obj["kind"] == "main_session" else f"unknown kind {obj['kind']!r}"
+            if not bad:
+                w = obj["window"]
+                if w < last_win:
+                    bad = f"window must not decrease ({w} after {last_win})"
+                elif w in last_read and any(obj[k] < last_read[w][k] for k in MAIN_PARTS):
+                    bad = "a reading is lower than the previous one in this window: start a new window"
+            if bad:
+                err(n, bad)
+                continue
+            for k in obj:
+                if k not in MAIN_KEYS and k not in warned:
+                    warned.add(k)
+                    problems.append(LogProblem(n, "warning", f"field {k!r} is not defined for a main-session line (kept)"))
+            last_win, last_read[obj["window"]] = obj["window"], obj
+            main.append(obj)
             continue
         bad = _check_run(obj, agents)
         if not bad and obj["n"] <= last_n:
@@ -173,17 +243,23 @@ def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
         runs.append(obj)
     if not seen_header:
         err(1, "empty file: no header")
-    return header, runs, problems
+    return header, runs, main, problems
 
 
-def load_ledger(path, *, agents, office=None, forbidden=(), providers=None):
-    """parse_ledger on a file, plus the file-stem = session check. Raises OSError for an unreadable file."""
+def load_ledger_full(path, *, agents, office=None, forbidden=(), providers=None):
+    """parse_ledger_full on a file, plus the file-stem = session check. Raises OSError for an unreadable file."""
     path = Path(path)
-    header, runs, problems = parse_ledger(path.read_text(encoding="utf-8"), agents=agents, office=office, forbidden=forbidden, providers=providers)
+    header, runs, main, problems = parse_ledger_full(path.read_text(encoding="utf-8"), agents=agents, office=office, forbidden=forbidden, providers=providers)
     if header is not None and header["session"] != path.stem:
         problems.append(LogProblem(1, "error", f"file name {path.stem!r} must equal the header session {header['session']!r}"))
         problems.sort(key=lambda p: p.line)
-    return header, runs, problems
+    return header, runs, main, problems
+
+
+def load_ledger(path, *, agents, office=None, forbidden=(), providers=None):
+    """load_ledger_full without the main-session readings (3-tuple)."""
+    h, runs, _, probs = load_ledger_full(path, agents=agents, office=office, forbidden=forbidden, providers=providers)
+    return h, runs, probs
 
 
 def _row():

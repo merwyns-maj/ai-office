@@ -69,7 +69,7 @@ def build_data(office_root, fixture, ledger=None, chat=False):
     forbidden = events.forbidden_terms(office.repo_root)
     lprobs, totals = [], None
     if ledger is not None:
-        lh, runs, lprobs = ledger_mod.load_ledger(ledger, agents=ids, office=office.id, forbidden=forbidden, providers=set(catalogue))
+        lh, runs, main, lprobs = ledger_mod.load_ledger_full(ledger, agents=ids, office=office.id, forbidden=forbidden, providers=set(catalogue))
         if lh is None:
             return {"log": None, "skipped": [{"line": p.line, "message": p.message} for p in lprobs]}, lprobs
         log_text = ledger_mod.to_event_log(lh, runs)
@@ -109,7 +109,7 @@ def build_data(office_root, fixture, ledger=None, chat=False):
         "skipped": skipped,
     }
     if totals is not None:
-        data["ledger"] = totals
+        data["ledger"] = dict(totals, main=ledger_mod.main_totals(main))
     if chat:
         data["chat"] = {"v": 1, "agents": [{k: a.get(k) for k in ("id", "name", "role")} for a in org_agents], "default": "pmo",
                         "all": "all", "max_len": CHAT_MAX_LEN, "lease_s": CHAT_LEASE_S}

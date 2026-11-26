@@ -50,7 +50,7 @@ merge:
   #   - a new backlog task file at status todo or spec
   #   - on an existing task file, only the frontmatter keys status, owner, depends_on (status never set to done)
   #     and appended dated decision notes, written by the PMO at sprint plan or close
-  #   - offices/<office>/usage/: appended run lines to a session ledger (existing lines never edited or deleted; a new session file starts with its header line), checked with `python -m engine.runtime ledger`
+  #   - offices/<office>/usage/: appended run or main-session lines to a session ledger (existing lines never edited or deleted; a new session file starts with its header line), checked with `python -m engine.runtime ledger`
   # Anything else (Spec, Design, Build notes, Review log or Decision text, Done when, other frontmatter keys,
   # any other path) needs a Reviewer PASS.
   requires_planning_only: [PR open from a sprint-NN-* branch, changes limited to sprints/, board.md, raid.md, usage/ and plan-stage task edits (see comment)]

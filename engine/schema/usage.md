@@ -26,6 +26,16 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 - An unknown field is a warning and is kept.
 - Data rule: the `events.py` rule (email, 16-digit run, 10+ digit run, forbidden term from `workspaces.yaml`) runs first on every string of the header and every line; a header hit rejects the file. Keys and numbers are not scanned.
 
+## Main-session lines (T-070)
+A second line kind, kept apart from runs. The header keeps `main_session` in `not_reported` (the harness does not report it, and the header is append-only); these lines come from another source, the Claude app's `explain-usage` skill, whose figures are metered cache and input/output counts and are not the harness's per-run `tokens`. Never add the two.
+```json
+{"kind":"main_session","window":1,"date":"2026-11-26","source":"explain-usage skill","since":"last context summary","requests":103,"input":250,"cache_write":211583,"cache_read":26678886,"output":52012}
+```
+- Required: `kind`, `window` (integer >= 1, never decreasing across lines; +1 after each context summary), `date`, `source` and `since` (1-200 characters, the window caveat), `input`, `cache_write`, `cache_read`, `output` (integer 0 to 999,999,999). `requests`: integer or null. `note` optional (1-200). No `n`, `agent`, `tasks` or `tokens`.
+- Errors: a `tokens` field (units differ from agent runs); any of the four figures lower than the previous reading in the same window (start a new window); a lower `window`; an unknown `kind`. The data rule runs first, as for runs.
+- Readings are cumulative: per window the last reading counts, windows add (`ledger.main_totals`). A window nobody read is lost and never estimated; `since` says so.
+- Never in `totals()`, the invariant or the event log. The page shows its own row, "Main session (metered)", and without lines "Main session: not reported".
+
 ## Totals
 `ledger.totals(runs)`: session, per agent, per sprint, per task. A null adds 0 to every sum and 1 to `not_reported`. A run with one task counts in that task's `solo_tokens`; a run with 2+ tasks, or none (a chat run), counts once under `shared` and in full in `tokens_with_shared` of each task it touched. It is never split between tasks. Invariant: sum over agents = sum over sprints = sum of `solo_tokens` + `shared` = session.
 

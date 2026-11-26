@@ -185,6 +185,88 @@ class Parser(unittest.TestCase):
             self.assertEqual(ledger.load_ledger(g, agents=AGENTS)[2], [])
 
 
+def main_line(window=1, **k):
+    d = {"kind": "main_session", "window": window, "date": "2026-11-26", "source": "explain-usage skill", "since": "last context summary",
+         "requests": 103, "input": 250, "cache_write": 211583, "cache_read": 26678886, "output": 52012}
+    d.update(k)
+    return json.dumps(d)
+
+
+class MainSession(unittest.TestCase):
+    """kind:'main_session' lines (T-070): their own source, never in run totals, the invariant or the event log."""
+
+    def test_valid_line_is_kept_apart_and_runs_are_unchanged(self):
+        h, runs, main, probs = ledger.parse_ledger_full("\n".join([HDR, run_line(1), main_line(), run_line(2)]), agents=AGENTS)
+        self.assertEqual(probs, [])
+        self.assertEqual([r["n"] for r in runs], [1, 2])
+        self.assertEqual(len(main), 1)
+        t = ledger.totals(runs)
+        self.assertEqual(t["session"]["tokens"], 20)
+        self.assertEqual(sum(a["tokens"] for a in t["agents"].values()), t["session"]["tokens"])
+        self.assertEqual(sum(a["tokens"] for a in t["sprints"].values()), t["session"]["tokens"])
+        self.assertEqual(len(parse(run_line(1), main_line())[1]), 1)      # the 3-tuple wrapper still returns runs only
+        self.assertEqual(errs(parse(run_line(1), main_line())[2]), [])
+        self.assertNotIn("main", ledger.to_event_log(h, runs))
+        self.assertEqual(ledger.to_event_log(h, runs), ledger.to_event_log(h, [r for r in runs]))
+
+    def test_event_log_ignores_main_lines(self):
+        h, runs, main, _ = ledger.parse_ledger_full("\n".join([HDR, run_line(1), main_line()]), agents=AGENTS)
+        evs = ledger.to_event_log(h, runs).splitlines()
+        self.assertEqual(len(evs), 2)                                       # header + one run
+        self.assertNotIn("26678886", "".join(evs))
+
+    def test_errors(self):
+        cases = {
+            "tokens": main_line(tokens=5),
+            "missing": json.dumps({k: v for k, v in json.loads(main_line()).items() if k != "cache_read"}),
+            "type": main_line(output="9"),
+            "window": main_line(window=0),
+            "kind": json.dumps({"kind": "other", "window": 1}),
+            "n": main_line(n=3),
+        }
+        for name, line in cases.items():
+            h, runs, main, probs = ledger.parse_ledger_full(HDR + "\n" + line, agents=AGENTS)
+            self.assertEqual(main, [], name)
+            self.assertEqual(len(errs(probs)), 1, name)
+        self.assertIn("no tokens total", errs(parse(main_line(tokens=5))[2])[0].message)
+
+    def test_decrease_in_window_and_window_decrease(self):
+        _, _, main, probs = ledger.parse_ledger_full("\n".join([HDR, main_line(1), main_line(1, output=1)]), agents=AGENTS)
+        self.assertEqual(len(main), 1)
+        self.assertIn("new window", errs(probs)[0].message)
+        _, _, main, probs = ledger.parse_ledger_full("\n".join([HDR, main_line(2), main_line(1)]), agents=AGENTS)
+        self.assertEqual(len(main), 1)
+        self.assertIn("window must not decrease", errs(probs)[0].message)
+        # a lower figure is fine in a new window
+        _, _, main, probs = ledger.parse_ledger_full("\n".join([HDR, main_line(1), main_line(2, output=1)]), agents=AGENTS)
+        self.assertEqual((len(main), probs), (2, []))
+
+    def test_last_reading_per_window_counts_and_windows_add(self):
+        lines = [main_line(1, input=1, cache_write=2, cache_read=3, output=4, requests=10),
+                 main_line(1, input=10, cache_write=20, cache_read=30, output=40, requests=20),
+                 main_line(2, input=100, cache_write=200, cache_read=300, output=400, requests=None, since="summary 2")]
+        _, _, main, probs = ledger.parse_ledger_full("\n".join([HDR] + lines), agents=AGENTS)
+        self.assertEqual(probs, [])
+        m = ledger.main_totals(main)
+        self.assertEqual((m["input"], m["cache_write"], m["cache_read"], m["output"], m["requests"]), (110, 220, 330, 440, 20))
+        self.assertEqual((m["windows"], m["readings"], m["since"]), (2, 3, "summary 2"))
+        self.assertIsNone(ledger.main_totals([]))
+
+    def test_data_rule_hit_in_since_is_rejected(self):
+        h, runs, main, probs = ledger.parse_ledger_full(HDR + "\n" + main_line(since="mail someone@example.com"), agents=AGENTS)
+        self.assertEqual(main, [])
+        self.assertEqual(len(errs(probs)), 1)
+        self.assertNotIn("someone@", errs(probs)[0].message)
+
+    def test_cli_accepts_a_file_with_a_main_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "session_TEST0001.jsonl"
+            f.write_text(HDR + "\n" + run_line(1) + "\n" + main_line() + "\n", encoding="utf-8")
+            self.assertEqual(run("ledger", "ai-office", str(f))[0], 0)
+            f.write_text(HDR + "\n" + main_line(tokens=1) + "\n", encoding="utf-8")
+            self.assertEqual(run("ledger", "ai-office", str(f))[0], 1)
+
+
 class Cli(unittest.TestCase):
     def test_exit_codes(self):
         code, out, _ = run("ledger", "ai-office", str(REAL))

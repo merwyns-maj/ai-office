@@ -1380,7 +1380,11 @@ function budgetsHTML() {
       var r = p.row, hd = r.state === 'unset' ? 'budget not set' : (r.state === 'over' ? 'over by ' + fmtTok(r.over) : r.pct + '% of your budget' + (LVWORD[r.level] ? ', ' + LVWORD[r.level] : ''));
       h += '<div class="dhead"><span class="nm">' + (r.state === 'over' ? '<span class="gl" aria-hidden="true">&#9650;</span>' : '') + esc(shortLabel(p.label)) + '</span><span class="dh lv-' + r.level + '">' + esc(hd) + '</span></div>';
       p.agents.forEach(function (g) {
-        if (g.kind === 'main') { h += '<div class="ur brow dim" role="img" aria-label="' + esc(g.name + ': main session, tokens not reported') + '"><div class="l1"><span class="nm">' + esc(g.name) + '</span><span class="cost">Main session: not reported</span></div></div>'; return; }
+        if (g.kind === 'main') {
+          var M = D.ledger && D.ledger.main, t1 = 'Main session: not reported', t2 = '', nm = g.name;
+          if (M) { t1 = 'in ' + fmtTok(M.input) + ' \u00b7 cache write ' + fmtTok(M.cache_write) + ' \u00b7 cache read ' + fmtTok(M.cache_read) + ' \u00b7 out ' + fmtTok(M.output);
+            nm = 'Main session (metered)'; t2 = 'since ' + M.since + ', ' + M.windows + ' window' + (M.windows > 1 ? 's' : '') + ', ' + M.last_date + '; explain-usage; not added to totals or budgets'; }
+          h += '<div class="ur brow dim" role="img" aria-label="' + esc(M ? nm + ': ' + t1 + '; ' + t2 : g.name + ': main session, tokens not reported') + '"><div class="l1"><span class="nm">' + esc(nm) + '</span>' + (M ? '' : '<span class="cost">' + esc(t1) + '</span>') + '</div>' + (M ? '<div class="l3">' + esc(t1) + '</div><div class="l3">' + esc(t2) + '</div>' : '') + '</div>'; return; }
         h += rowHTML(g.name, g.row, { key: 'a:' + p.id + ':' + g.id, summary: false, extra: shortLabel(p.label) + ', ' + periodLabel(v).toLowerCase() });
       });
     });
