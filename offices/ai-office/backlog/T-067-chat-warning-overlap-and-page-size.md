@@ -2,7 +2,7 @@
 id: T-067
 title: "No overlapping parts: panels, chat and bar never cover each other; composer warning; page-size headroom"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
