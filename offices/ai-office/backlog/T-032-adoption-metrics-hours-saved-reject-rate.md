@@ -2,9 +2,9 @@
 id: T-032
 title: "Adoption metrics (hours saved, reject rate, turnaround)"
 phase: 7-ways-of-working
-status: review
+status: build
 priority: P2
-owner: reviewer
+owner: engineer
 where: chat
 project: ai-office
 depends_on: []
@@ -172,6 +172,11 @@ Janice (pmo), 26 Nov: Design accepted, moved to build. Answers: the metrics repo
 — Sebastian (engineer)
 
 ## Review log
+REJECT, Review 1 of PR #30 (head 8c1994e), 26 Nov 2026. Fails Done-when 2: Sprint 2 and T-042/T-014/T-015 show "not recorded" for REJECTs, BLOCKs and escalations, but they are derivable: sprint-02.md Close says "Finished (all with Reviewer PASS)" and "without escalating"; PR-ref status history has one review → done and no review → build for each; each Design says "Compliance: not flagged". Expected Sprint 2 row: 0 | 0 | 0.
+Fix: with no Review log, derive REJECTs from review → build transitions (T-048 = 2, consistent); BLOCKs 0 when Design says "Compliance: not flagged"; escalations from "escalated to Merwyn" lines or the sprint Close. Add a real-file test for the Sprint 2 row; regenerate metrics/2026-11.md; correct the Build notes line.
+Passing: 214 tests OK; validate and build_agents clean; scratch-clone rerun matches (bar PR ref count); shallow run exits 0 with notice; T-040 0/1/1 and T-048 2/0/1 by hand; sprint counts 2/3/3/3; T-012 footnote; hours saved "not set"; no data hits.
+Notes: the engineer set status review himself (only PMO/Reviewer write status).
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
