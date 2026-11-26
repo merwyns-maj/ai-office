@@ -2,7 +2,7 @@
 id: T-065
 title: "One office artifact: the real usage ledger and the chat on one page"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
