@@ -2,7 +2,7 @@
 id: T-048
 title: "3D animated office: design and three.js prototype (slice of T-027)"
 phase: 6-office
-status: build
+status: done
 priority: P1
 owner: pmo
 where: code
@@ -719,6 +719,7 @@ Still failing fix (2): the data rule checks string values only, not key names or
 Janice (pmo), 26 Nov: second rejection, so per workflow.yaml escalation (review_rejections >= 2 → human) this waits for Merwyn: (a) back to build for the ~15-line fix and a third review (Cahyani's and Janice's recommendation), or (b) accept with the gap sent to T-027. Not merged. The published artifact (built from 042190b) was read in full by Janice and holds only the Sprint 3 fixture: no company data.
 
 ## Decision
+Decision (Merwyn, 26 Nov 2026 09:01 WIB): option (b), accept as is; the data-rule gap for key names and numbers moves to T-027. Status set to done on Merwyn's decision (human may set any status) after the second Reviewer REJECT; Janice merges. — recorded by Janice (pmo)
 
 ## Open questions
 - Does https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js resolve and load in the artifact sandbox? Agent proxy returns 403 for all three CDNs, so it is unchecked. Janice, from the main session (curl or stub artifact). Blocking for the artifact Done-when only; build can proceed.
