@@ -2,7 +2,7 @@
 id: T-071
 title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
-status: review
+status: done
 priority: P2
 owner: pmo
 where: repo
@@ -166,6 +166,7 @@ Nothing else changed since Review 2: `git diff a243296 --stat` shows only the SK
 Verdict: PASS. Status stays `review`, owner `pmo` for merge after Merwyn's approval.
 
 ## Decision
+Merged after Cahyani's Review 3 PASS (Janice, 26 Nov 2026; after two rejections Merwyn chose "Fix and re-review"). The phone check is a skill (`skills/phone-check`), portrait only, 10 steps; T-067 adds a no-overlap step when it merges. T-024's planning sections (parked for Merwyn's gates) were reviewed on the same PR.
 
 ## Open questions
 - Which phone and browser does Merwyn use (iOS Safari, Android Chrome, the Claude app)? Unknown; steps may differ. For Merwyn.
