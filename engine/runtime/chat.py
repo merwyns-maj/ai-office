@@ -221,22 +221,23 @@ def validate(doc, agent_ids, default=DEFAULT):
     return out
 
 
-def rules_problem(rules):
-    """None when the declared rules keep chat readable and writable by the owner only; else a short reason (C7)."""
+def rules_problem(rules, path="chat"):
+    """None when the declared rules keep `path` (default chat; T-069 also checks usage) readable and writable by the owner only;
+    else a short reason (C7). With the default path the answers are exactly those of T-063."""
     if not isinstance(rules, list):
         return "rules: not a list"
-    for r in rules:   # a wider rule (root "" or "/", a parent of chat) applies to chat too
+    for r in rules:   # a wider rule (root "" or "/", a parent of the path) applies to it too
         if isinstance(r, dict) and str(r.get("path", "")).strip("/") in ("", "*", "**") and (r.get("read") != "owner" or r.get("write") != "owner"):
-            return "rules: a path above chat is open below owner"
-    hit = [r for r in rules if isinstance(r, dict) and r.get("path") == "chat"]
+            return f"rules: a path above {path} is open below owner"
+    hit = [r for r in rules if isinstance(r, dict) and r.get("path") == path]
     if len(hit) != 1:
-        return "rules: need exactly one rule for path chat"
+        return f"rules: need exactly one rule for path {path}"
     if hit[0].get("read") != "owner" or hit[0].get("write") != "owner":
-        return "rules: chat must be read owner and write owner"
+        return f"rules: {path} must be read owner and write owner"
     for r in rules:
-        if isinstance(r, dict) and r is not hit[0] and str(r.get("path", "")).startswith("chat/") and \
+        if isinstance(r, dict) and r is not hit[0] and str(r.get("path", "")).startswith(path + "/") and \
                 (r.get("read") != "owner" or r.get("write") != "owner"):
-            return "rules: a path under chat is open below owner"
+            return f"rules: a path under {path} is open below owner"
     return None
 
 

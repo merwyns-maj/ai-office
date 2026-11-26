@@ -26,7 +26,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-o
 .panel{background:rgba(29,30,44,.92);border:1px solid rgba(255,255,255,.07);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
 @supports (backdrop-filter:blur(6px)){.panel{backdrop-filter:blur(8px)}}
 
-/* stage = where the 3D lives; the HUD never covers it */
 #stage{position:absolute;left:0;right:0;top:var(--bar);bottom:var(--bb);overflow:hidden;touch-action:none}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -67,7 +66,6 @@ body.rm .tag,body.rm .bubble{transition:none}
 body.rm .tag.flash .chip,body.rm .tag.flash .t2 .m{animation:none}
 body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 
-/* top: needs-you pill + agent strip */
 #top{position:absolute;left:0;right:0;top:0;height:var(--bar);display:flex;gap:10px;align-items:center;padding:8px 12px}
 #pill{flex:none;display:flex;gap:8px;align-items:center;height:38px;padding:0 16px 0 12px;border-radius:19px;border:0;font:700 16px/1 var(--ui);background:var(--panel);color:var(--text-dim);border:1px solid rgba(255,255,255,.08)}
 #pill.on{background:var(--warn);color:var(--panel);border-color:transparent;box-shadow:0 0 0 3px rgba(244,162,97,.28),0 4px 18px rgba(244,162,97,.35)}
@@ -82,7 +80,6 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 .seg .ini{display:none}
 .seg[aria-pressed=true]{background:#2a2c42;border-color:rgba(255,255,255,.35)}
 
-/* ticker */
 #side{position:absolute;right:12px;top:calc(var(--bar) + var(--fh,0px));bottom:calc(var(--bb) + var(--fb,0px));width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
 #ticker{flex:1 1 0;min-height:40px;padding:0 12px 12px;overflow:visible;position:relative;display:flex;flex-direction:column;gap:2px}
 #ticker .uh{padding:10px 0 8px}
@@ -91,7 +88,6 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 #usage.xc,#ticker.xc,#focus.xc{display:none!important}
 #nomodel{color:var(--text-dim);font-size:12px;margin:0 0 6px}
 
-/* usage panel (T-056) */
 #usage{flex:0 1 auto;min-height:0;max-height:64%;display:flex;flex-direction:column;padding:0;overflow:visible;position:relative}
 .uh{display:flex;align-items:center;gap:8px;padding:10px 10px 8px 12px;flex:none}
 .uh h2{margin:0;font:700 11px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
@@ -118,13 +114,11 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur.tot .cost{font-size:12px}
 .ufoot{margin-top:8px;font-size:10.5px;line-height:1.35;color:var(--text-dim)}
 .uempty{color:var(--text-dim);font-size:12px;padding:2px 0 4px}
-/* Summary and Detail rows (T-060) */
 .ur .bl{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;margin:3px 0 1px}
 .bt{flex:1 1 56px;min-width:56px;display:flex;gap:2px;align-items:center}
 .bar{position:relative;height:4px;border-radius:2px;overflow:hidden;flex:1 1 0;min-width:0}
 .bar::before{content:'';position:absolute;inset:0;background:var(--text-dim);opacity:.3}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width .16s ease-out}
-/* budget state (T-062): green, yellow, red; the word beside the % carries it too. Yellow is lemon, never the needs-you amber (--warn). */
 .bar i.lv-near{background:var(--near)}.bar i.lv-alert,.bar i.lv-over{background:var(--bad)}
 .bx.lv-ok,.dhead .dh.lv-ok{color:var(--accent)}.bx.lv-near,.dhead .dh.lv-near,.bw.lv-near{color:var(--near)}.bx.lv-alert,.bx.lv-over,.dhead .dh.lv-alert,.dhead .dh.lv-over,.bw.lv-alert,.bw.lv-over{color:var(--bad-text)}
 .usum .lv-ok{color:var(--accent)}.usum .lv-near{color:var(--near)}.usum .lv-alert,.usum .lv-over{color:var(--bad-text)}
@@ -189,7 +183,6 @@ body.rm .tl.new{animation:none}
 #tempty{color:var(--text-dim);font-size:12px}
 #tone{display:none}
 
-/* focus card */
 #focus{position:absolute;right:12px;top:var(--bar);width:calc(var(--side) - 24px);margin-top:4px;padding:14px;z-index:5;max-height:max(96px,calc(100% - var(--bar) - var(--bb) - 8px));overflow:auto}
 #focus[hidden]{display:none}
 #focus h3{margin:0;font:700 16px/1.2 var(--ui)}
@@ -202,7 +195,6 @@ body.rm .tl.new{animation:none}
 #focus ol{margin:8px 0 0;padding:0 0 0 16px;color:var(--text-dim);font-size:12px}
 #fx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:8px;border:0;background:transparent;font-size:18px}
 
-/* bottom bar */
 #bar{position:absolute;left:0;right:0;bottom:var(--chat-h);height:var(--bar);display:flex;gap:10px;align-items:center;padding:8px 12px}
 .btn{height:38px;min-width:38px;padding:0 12px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(29,30,44,.92);font:600 13px/1 var(--ui);display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:hover{background:#2a2c42}
@@ -222,7 +214,6 @@ body.rm .tl.new{animation:none}
 #gear{display:none}
 #opts{display:contents}
 
-/* states */
 #loading,#failed{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:24px;color:var(--text);pointer-events:none}
 #failed{pointer-events:auto}
 #loading{font-size:15px;color:var(--text-dim)}
@@ -232,7 +223,6 @@ body.rm .tl.new{animation:none}
 #banner{display:none}
 #msheet{display:none}
 
-/* movable panels (T-059): grip, resize handle, options menu; floating layout only at 900px and wider */
 #usage .uh,#ticker .uh{cursor:grab;touch-action:none}
 .grip{flex:none;width:20px;height:28px;margin:0 -2px 0 -4px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);cursor:grab;touch-action:none;border-radius:6px}
 .grip svg{width:10px;height:16px}
@@ -265,7 +255,6 @@ body.rm .tl.new{animation:none}
   @supports (backdrop-filter:blur(1px)){body.free .pp{backdrop-filter:blur(var(--pblur));-webkit-backdrop-filter:blur(var(--pblur))}}
   body.free .pp.tp{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6)}
   body.free .pp.tpd{--text-dim:var(--text)}
-  /* at 60% and below: every text line keeps a soft dark backing so it stays readable; the panel fill itself stays as set */
   body.free .pp.tpd :not(:has(*)):not(:empty):not(svg *):not(.bar):not(.synpill):not(.pmb):not(.grip):not(.rz):not(.pm *){background:rgba(12,13,22,.8);border-radius:4px;padding:2px 3px;margin:-2px -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;box-sizing:border-box;width:fit-content;max-width:calc(100% + 6px)}
   body.free .pp.anim{transition:left var(--pdur,.16s) ease-out,top var(--pdur,.16s) ease-out,width var(--pdur,.16s) ease-out,height var(--pdur,.16s) ease-out}
   body.free .pp.drag{box-shadow:0 16px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.2);transition:box-shadow .1s}
@@ -320,12 +309,10 @@ body.rm .tl.new{animation:none}
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
 body.tk #ticker{display:flex!important;position:fixed;margin:0;left:8px;right:8px;width:auto;top:auto;height:auto;z-index:7}
 body.tk #ticker.hd #tlist{display:block}
-/* phone and tablet (T-067): card, usage sheet, menu and event list share one slot in the stage and scroll inside */
 @media (max-width:899px){body.nost #tone,body.nost #focus,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}
 #focus,#usheet,#msheet,body.tk #ticker{top:auto;bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--st) - var(--bb) - 48px);overflow:auto}}
 @media (min-width:900px){body.nost #tone,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}body.tk #ticker{left:auto;right:12px;width:calc(var(--side) - 24px);bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--bar) - var(--bb) - 48px);overflow:auto}}
 @media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
-/* office chat (T-063) */
 #chat[hidden],#chatbtn[hidden]{display:none}
 #chat{position:absolute;left:0;right:0;bottom:var(--kb,0px);height:calc(var(--chat-h) - var(--kb,0px));z-index:6;display:flex;flex-direction:column;padding:0 0 env(safe-area-inset-bottom);border-radius:12px 12px 0 0;border-bottom:0}
 :root{transition:--chat-h .18s ease-out}
@@ -482,13 +469,11 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
 </div>
 <script type="application/json" id="office-data">{"agents":[{"id":"pmo","name":"Janice","personality":"ESTJ","planned_model":"sonnet","role":"Chief of Staff (PMO)"},{"id":"pm","name":"Emmy","personality":"ENFJ","planned_model":"sonnet","role":"Product Manager"},{"id":"architect","name":"Fang","personality":"INTJ","planned_model":"opus","role":"Architect / Tech Lead"},{"id":"engineer","name":"Sebastian","personality":"ISTP","planned_model":"sonnet","role":"Engineer"},{"id":"reviewer","name":"Cahyani","personality":"INTP","planned_model":"opus","role":"Reviewer / QA"},{"id":"compliance","name":"Wulan","personality":"ISTJ","planned_model":"sonnet","role":"Compliance Officer"},{"id":"curator","name":"April","personality":"INFJ","planned_model":"sonnet","role":"Knowledge Curator"},{"id":"designer","name":"Dinda","personality":"ISFP","planned_model":"sonnet","role":"Product Designer"}],"budgets":{"main_session":"pmo","period":"session","providers":{"anthropic-api":{"agents":{"reviewer":{"set_by":"synthetic","set_on":"2026-11-26","tokens":50000}},"note":"Demo budget","set_by":"synthetic","set_on":"2026-11-26","tokens":50000},"claude-sdk":{"agents":{"architect":{"set_by":"synthetic","set_on":"2026-11-26","tokens":500000},"compliance":{"set_by":"synthetic","set_on":"2026-11-26","tokens":60000},"curator":{"set_by":"synthetic","set_on":"2026-11-26","tokens":40000},"designer":{"set_by":"synthetic","set_on":"2026-11-26","tokens":160000},"engineer":{"set_by":"synthetic","set_on":"2026-11-26","tokens":600000},"pm":{"set_by":"synthetic","set_on":"2026-11-26","tokens":300000},"pmo":{"set_by":"synthetic","set_on":"2026-11-26","tokens":100000},"reviewer":{"set_by":"synthetic","set_on":"2026-11-26","tokens":240000}},"note":"Demo budget","set_by":"synthetic","set_on":"2026-11-26","tokens":2000000},"openai":{"agents":{"engineer":{"set_by":"synthetic","set_on":"2026-11-26","tokens":300000}},"note":"Demo budget","set_by":"synthetic","set_on":"2026-11-26","tokens":300000}},"synthetic":true,"thresholds":{"alert_at":90,"set_by":"default","set_on":null,"warn_at":70}},"chat":{"agents":[{"id":"pmo","name":"Janice","role":"Chief of Staff (PMO)"},{"id":"pm","name":"Emmy","role":"Product Manager"},{"id":"architect","name":"Fang","role":"Architect / Tech Lead"},{"id":"engineer","name":"Sebastian","role":"Engineer"},{"id":"reviewer","name":"Cahyani","role":"Reviewer / QA"},{"id":"compliance","name":"Wulan","role":"Compliance Officer"},{"id":"curator","name":"April","role":"Knowledge Curator"},{"id":"designer","name":"Dinda","role":"Product Designer"}],"all":"all","default":"pmo","lease_s":1800,"max_len":4000,"v":1},"events":[{"agent":"pmo","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"step_started"},{"agent":"pmo","billing":"plan","cache_read":31000,"cache_write":4200,"input":8200,"model":"claude-sonnet-4-5","output":1400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"usage"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":54000,"cache_write":6100,"input":12400,"model":"claude-sonnet-4-5","output":3100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"usage"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":72000,"cache_write":9000,"input":15800,"model":"claude-opus-4-5","output":4200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"usage"},{"agent":"designer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"step_started"},{"agent":"designer","billing":"plan","cache_read":38000,"cache_write":3000,"input":9100,"model":"claude-sonnet-4-5","output":2600,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"usage"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":96000,"cache_write":11000,"input":21000,"model":"claude-sonnet-4-5","output":6800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"usage"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":28000,"cache_write":2000,"input":7400,"model":"claude-opus-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"usage"},{"agent":"compliance","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"step_started"},{"agent":"compliance","billing":"plan","cache_read":17000,"cache_write":1200,"input":5600,"model":"claude-sonnet-4-5","output":900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"usage"},{"agent":"curator","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"step_started"},{"agent":"curator","billing":"plan","cache_read":9000,"cache_write":800,"input":3300,"model":"claude-sonnet-4-5","output":700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"usage"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":18,"task":"T-901","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":19,"task":"T-901","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":41000,"cache_write":1800,"input":6400,"model":"claude-sonnet-4-5","output":2200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":24,"task":"T-901","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":30,"task":"T-901","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":31,"task":"T-901","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":66000,"cache_write":7400,"input":14200,"model":"claude-opus-4-5","output":5100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"usage"},{"agents":["architect","designer"],"lines":[{"agent":"architect","text":"Badge goes on the name tag."},{"agent":"designer","text":"Two lines, provider chip first."}],"src":"engine/app/fixtures/models-synthetic.jsonl","t":43,"task":"T-901","type":"discussion"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":49,"task":"T-901","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":50,"task":"T-901","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":120000,"cache_write":14000,"input":18800,"model":"claude-sonnet-4-5","output":9400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":64,"task":"T-901","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":65,"task":"T-901","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":52000,"cache_write":3300,"input":9800,"model":"claude-opus-4-5","output":2300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"usage"},{"agent":"reviewer","note":"Synthetic pass","src":"engine/app/fixtures/models-synthetic.jsonl","t":76,"task":"T-901","type":"review_pass"},{"pr":901,"src":"engine/app/fixtures/models-synthetic.jsonl","t":79,"task":"T-901","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":82,"task":"T-902","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":83,"task":"T-902","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":33000,"cache_write":1500,"input":5200,"model":"claude-sonnet-4-5","output":1900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":97,"task":"T-902","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":98,"task":"T-902","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":58000,"cache_write":5000,"input":11300,"model":"claude-opus-4-5","output":3800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":106,"task":"T-902","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":112,"task":"T-902","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":113,"task":"T-902","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"gpt-5","provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":61000,"cache_write":0,"input":24500,"model":"gpt-5","output":11200,"provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"usage"},{"agent":"pmo","reason":"Which provider for the big refactor?","src":"engine/app/fixtures/models-synthetic.jsonl","t":124,"task":"T-903","type":"needs_merwyn"},{"agent":"pmo","answer":"Try DeepSeek for the build step","src":"engine/app/fixtures/models-synthetic.jsonl","t":136,"task":"T-903","type":"merwyn_answered"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":140,"task":"T-902","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":141,"task":"T-902","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"step_started"},{"agent":"reviewer","billing":"per_token","cache_read":47000,"cache_write":6200,"input":13400,"model":"claude-opus-4-5","output":3600,"provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":152,"task":"T-902","type":"review_pass"},{"pr":902,"src":"engine/app/fixtures/models-synthetic.jsonl","t":155,"task":"T-902","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":158,"task":"T-903","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":159,"task":"T-903","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":29000,"cache_write":1100,"input":4800,"model":"claude-sonnet-4-5","output":1700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":167,"task":"T-903","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":173,"task":"T-903","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":174,"task":"T-903","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":49000,"cache_write":4100,"input":10100,"model":"claude-opus-4-5","output":3300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":182,"task":"T-903","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":188,"task":"T-903","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":189,"task":"T-903","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"deepseek-chat","provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":88000,"cache_write":0,"input":31800,"model":"deepseek-chat","output":14600,"provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":201,"task":"T-903","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":202,"task":"T-903","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":36000,"cache_write":2400,"input":8600,"model":"claude-opus-4-5","output":2000,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":213,"task":"T-903","type":"review_pass"},{"pr":903,"src":"engine/app/fixtures/models-synthetic.jsonl","t":216,"task":"T-903","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":219,"task":"T-904","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":220,"task":"T-904","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":25000,"cache_write":900,"input":4100,"model":"claude-sonnet-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":228,"task":"T-904","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":234,"task":"T-904","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":235,"task":"T-904","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":44000,"cache_write":3600,"input":9400,"model":"claude-opus-4-5","output":2900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":243,"task":"T-904","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":249,"task":"T-904","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":250,"task":"T-904","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":92000,"cache_write":8800,"input":16400,"model":"claude-sonnet-4-5","output":7200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":262,"task":"T-904","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":263,"task":"T-904","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","billing":"plan","cache_read":31000,"cache_write":2100,"input":7900,"model":"claude-opus-4-5","output":1800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":271,"task":"T-904","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":274,"task":"T-904","type":"review_pass"},{"pr":904,"src":"engine/app/fixtures/models-synthetic.jsonl","t":277,"task":"T-904","type":"merged"}],"log":{"clock":"synthetic","log":"office-events","office":"ai-office","title":"SYNTHETIC model and usage demo (T-056): invented numbers, not a real run","usage_source":"synthetic","v":1},"office":{"id":"ai-office","name":"AI Office — Build Office"},"providers":{"anthropic-api":{"billing":"per_token","code":"API","colour":"#5b8def","label":"Anthropic API","models":{"claude-opus-4-5":{"cache_read":null,"cache_write":null,"family":"opus","input":null,"output":null,"short":"opus"},"claude-sonnet-4-5":{"cache_read":null,"cache_write":null,"family":"sonnet","input":null,"output":null,"short":"sonnet"}},"prices":{"checked":null,"source":null}},"claude-code":{"billing":"plan","code":"CC","colour":"#8e9bf5","label":"Claude Code subagents (Max plan)","models":{"claude-opus-4-5":{"family":"opus","short":"opus"},"claude-sonnet-4-5":{"family":"sonnet","short":"sonnet"}}},"claude-sdk":{"billing":"plan","code":"SDK","colour":"#c084fc","label":"Claude Agent SDK (Max plan)","models":{"claude-opus-4-5":{"family":"opus","short":"opus"},"claude-sonnet-4-5":{"family":"sonnet","short":"sonnet"}}},"deepseek":{"billing":"per_token","code":"DSK","colour":"#3fd0e0","label":"DeepSeek","models":{"deepseek-chat":{"cache_read":null,"cache_write":null,"family":"deepseek","input":null,"output":null,"short":"v3"}},"prices":{"checked":null,"source":null}},"openai":{"billing":"per_token","code":"OAI","colour":"#f472b6","label":"OpenAI","models":{"gpt-5":{"cache_read":null,"cache_write":null,"family":"gpt","input":null,"output":null,"short":"gpt-5"}},"prices":{"checked":null,"source":null}}},"skipped":[],"stages":["todo","spec","design","build","review","done","parked"],"theme":{"desks":[{"agent":"pmo","at":[3,12],"label":"Janice","room":"lobby","sprite":"chief"},{"agent":"pm","at":[2.5,3.5],"label":"Emmy","room":"product","sprite":"pm"},{"agent":"architect","at":[6.5,3.5],"label":"Fang","room":"whiteboard","sprite":"architect"},{"agent":"engineer","at":[16.5,3.5],"label":"Sebastian","room":"workshop","sprite":"engineer"},{"agent":"reviewer","at":[21.5,3.5],"label":"Cahyani","room":"lab","sprite":"qa"},{"agent":"compliance","at":[13.2,4.8],"label":"Wulan","room":"corner","sprite":"officer"},{"agent":"curator","at":[20,12.5],"label":"April","room":"archive","sprite":"librarian"},{"agent":"designer","at":[8.8,3.5],"label":"Dinda","room":"whiteboard","sprite":"designer"}],"door":[12,0],"hub":"lobby","palette":{"accent":"#53BA7E","bad":"#e63946","bad_tag":"#c1121f","bad_text":"#ff6b6b","floor":"#2b2d42","near":"#f0e04a","panel":"#1d1e2c","paper":"#efe6d2","rug":"#353850","skin_dark":"#8d5a3c","skin_light":"#e0b48f","skin_mid":"#c68e65","text":"#f2ede4","text_dim":"#9aa0b4","wall":"#8d99ae","warn":"#f4a261","wood":"#7d6650"},"rooms":[{"id":"lobby","label":"Backlog","rect":[0,9,9,16],"stage":"todo"},{"id":"product","label":"Product room","rect":[0,0,5,7],"stage":"spec"},{"id":"whiteboard","label":"Design wall","rect":[5,0,10,7],"stage":"design"},{"id":"workshop","label":"Workshop","rect":[14,0,19,7],"stage":"build"},{"id":"lab","label":"QA lab","rect":[19,0,24,7],"stage":"review"},{"id":"archive","label":"Archive","rect":[15,9,24,16],"stage":"done"},{"id":"corner","label":"Merwyn's door","rect":[10,0,14,7],"stage":null},{"id":"meeting","label":"Meeting table","rect":[9,9,15,16],"stage":null}],"style":"pixel-startup"},"v":1,"warnings":[]}</script>
 <script id="office-core">
-/* Pure logic: no DOM, no THREE. Runs in a browser and under node (tests). */
 (function (root) {
   'use strict';
   var LINE_MIN = 1.6, LINE_MAX = 3.5, GAP_MAX = 3, GAP_TO = 1.5;
   function lineDur(text) { return Math.min(LINE_MAX, Math.max(LINE_MIN, 0.05 * String(text).length)); }
   function talkDur(ev) { return (ev.lines || []).reduce(function (s, l) { return s + lineDur(l.text); }, 0); }
-  /* estimated animation length at 1x, used to space events so one agent never has two at once */
   var DUR = { step_started: 0.6, stage_changed: 0.8, handoff: 9, needs_merwyn: 5, merwyn_answered: 5,
     review_pass: 1.2, review_reject: 1.2, compliance_result: 1.2, blocked: 0.6, merged: 12, usage: 0 };
   function evDur(ev) { return ev.type === 'discussion' ? 7 + talkDur(ev) : (ev.type in DUR ? DUR[ev.type] : 0.4); }
@@ -530,6 +515,8 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, rec: {}, runlog: {}, lastSwitch: null };
     data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle', model: null, prevModel: null, switchedAt: null }; });
     data.events.forEach(function (e) { if (e.task && e.type !== 'usage' && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
+    var sd = data.usage && data.usage.seed;   /* T-069: the built-in copy has no run events; its per-agent totals seed the state instead */
+    if (sd) Object.keys(sd).forEach(function (id) { var q = sd[id], l = q.last; s.rec[id] = { runs: q.runs, nr: q.nr, tokens: q.tokens, tools: q.tools, notes: [], last: l ? { run: l.run, total: l.total, tool_uses: l.tool_uses, note: null } : null }; });
     return s;
   }
   function add(list, x) { if (list.indexOf(x) < 0) list.push(x); }
@@ -549,7 +536,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     if (Object.keys(a.blocked).length) return 'Blocked';
     return a.holds.some(function (t) { return s.tasks[t] && s.tasks[t].mark === 'reject'; }) ? 'Rejected' : '';
   }
-  /* ----- model and usage (event log v1, T-056). Pure: costs come from the catalogue passed in, never from literals ----- */
   var TOK = ['input', 'output', 'cache_read', 'cache_write'];
   function setModel(s, ev, at) {
     var a = s.agents[ev.agent], cur = a.model;
@@ -577,7 +563,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var pr = providers && providers[b.provider] && providers[b.provider].prices;
     if (c.state === 'usd' && pr && pr.checked && r.dates.indexOf(pr.checked) < 0) r.dates.push(pr.checked);
   }
-  /* whole-number percentages that add up to exactly 100 (largest remainder; ties go to the earlier item); all 0 when the total is 0 */
   function shares(vals) {
     var T = vals.reduce(function (a, v) { return a + v; }, 0);
     if (!T) return vals.map(function () { return 0; });
@@ -603,7 +588,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     pctify(out.providers); pctify(out.agents);
     return out;
   }
-  /* inside each provider: its models and the agents that used it, tokens and whole-number share of that provider (largest remainder, adds to 100) */
   function providerBreakdown(s) {
     var acc = {};
     Object.keys(s.usage).forEach(function (k) {
@@ -618,7 +602,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     Object.keys(acc).forEach(function (pid) { out[pid] = { models: rows(acc[pid].models), agents: rows(acc[pid].agents) }; });
     return out;
   }
-  /* recorded totals so far: per agent and overall; share is of the recorded session total */
   function recTotals(s) {
     var out = { total: { runs: 0, nr: 0, tokens: 0, tools: 0 }, agents: {} };
     Object.keys(s.rec).forEach(function (id) {
@@ -630,12 +613,8 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     ids.forEach(function (k, i) { out.agents[k].pct = p[i]; });
     return out;
   }
-  /* ----- budgets (T-060). Pure: a budget is a number from office config (budgets.yaml, or the synthetic fixture header); nothing here invents one ----- */
   var MODE_KEY = 'office.usage.mode.v1';
   function parseMode(text) { return text === 'detail' ? 'detail' : 'summary'; }
-  /* used vs budget. unset = no usable budget (never 0%). over = used > budget: the bar is full, the overflow (capped at half the bar) is drawn after it.
-     pct is the real figure rounded (104), barPct is capped at 100; a budget of 0 has no percentage. */
-  /* level (T-062): unset | ok | near | alert | over, from the rounded % the text shows (so "70%" is always yellow) against th = { warn_at, alert_at } (default 70, 90). Over is red too. */
   var TH_DEFAULT = { warn_at: 70, alert_at: 90 };
   function budgetLevel(pct, over, th) {
     var t = th && pnum(th.warn_at) && pnum(th.alert_at) ? th : TH_DEFAULT;
@@ -650,7 +629,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     return { state: over > 0 ? 'over' : 'ok', level: budgetLevel(pct, over, th), used: used, budget: budget, pct: pct, over: over,
       barPct: over > 0 ? 100 : Math.min(100, pct || 0), hatch: over > 0 ? (budget ? Math.min(over / budget, 0.5) : 0.5) * 100 : 0, ratio: budget ? used / budget : (used > 0 ? Infinity : 0) };
   }
-  /* Detail order: budgeted agents by share of their budget, highest first; then agents without a budget (most tokens first); main session last. Ties by name. */
   function sortDetail(rows) {
     var rank = function (r) { return r.kind === 'main' ? 2 : (r.row.state === 'unset' ? 1 : 0); };
     return rows.slice().sort(function (a, b) {
@@ -660,7 +638,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
       return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
     });
   }
-  /* everything the Summary and Detail views show at this moment: per provider, used tokens vs its budget, and per agent inside it */
   function budgetView(s, data) {
     var TH = data.budgets && data.budgets.thresholds;
     var rec = !!(data.log && data.log.v === 1 && data.log.usage_source === 'recorded'), B = data.budgets, bp = (B && B.providers) || {}, prov = data.providers || {};
@@ -690,7 +667,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     });
     return out;
   }
-  /* the only place a currency sign is built, and only from micro-USD */
   function costText(r) {
     var parts = [], n = r.usd + r.plan + r.unset + r.none;
     if (!n) return '--';
@@ -711,7 +687,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     return !(m && m.family === planned);
   }
   var tcache = new WeakMap();
-  /* ticker items: usage events add no line; a model switch adds one (after the event that caused it) */
   function tickerItems(data) {
     if (tcache.has(data.events)) return tcache.get(data.events);
     var s = initState(data), tl = timeline(data.events), out = [];
@@ -832,19 +807,15 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     t = Math.max(0, Math.floor(t));
     return '+' + String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
   }
-  /* ---------- movable panels (T-059): pure layout maths, numbers only ---------- */
   var PANEL = { MIN_W: 240, MIN_H: 120, MAX_W: 520, MARGIN: 8, SNAP: 12, STEP: 8, STEP_BIG: 32, OPACITY: 92, KEY: 'office.layout.v1', IDS: ['usage', 'ticker'] };
   function pnum(v) { return typeof v === 'number' && isFinite(v); }
   function pclamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
-  /* the box a panel may occupy: 8px from the sides, never above the top bar (the needs-you pill and strip) or under the bottom bar and the chat dock (T-066) */
   function panelBounds(winW, winH, barH, dockH) { return { left: PANEL.MARGIN, right: winW - PANEL.MARGIN, top: barH, bottom: winH - barH - (pnum(dockH) ? dockH : 0) - PANEL.MARGIN }; }
   function panelMax(b) { return { w: Math.max(PANEL.MIN_W, Math.min(PANEL.MAX_W, b.right - b.left)), h: Math.max(PANEL.MIN_H, b.bottom - b.top) }; }
-  /* size first (down to its minimum), then position; a window too small for the minimum overflows at the top-left corner, never hides */
   function clampRect(r, b) {
     var m = panelMax(b), w = pclamp(r.w, PANEL.MIN_W, m.w), h = pclamp(r.h, PANEL.MIN_H, m.h);
     return { x: Math.round(Math.max(b.left, Math.min(r.x, b.right - w))), y: Math.round(Math.max(b.top, Math.min(r.y, b.bottom - h))), w: Math.round(w), h: Math.round(h) };
   }
-  /* a move never changes the size (a panel that starts below its minimum stays as it is until it is resized) */
   function moveRect(r, dx, dy, b) {
     return { x: Math.round(Math.max(b.left, Math.min(r.x + dx, b.right - r.w))), y: Math.round(Math.max(b.top, Math.min(r.y + dy, b.bottom - r.h))), w: r.w, h: r.h };
   }
@@ -852,7 +823,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var m = panelMax(b), c = clampRect(r, b);
     return clampRect({ x: c.x, y: c.y, w: pclamp(w, PANEL.MIN_W, Math.max(PANEL.MIN_W, Math.min(m.w, b.right - c.x))), h: pclamp(h, PANEL.MIN_H, Math.max(PANEL.MIN_H, Math.min(m.h, b.bottom - c.y))) }, b);
   }
-  /* within 12px of an edge margin the position snaps onto it (all four edges); no snapping to other panels */
   function snapRect(r, b) {
     var x = r.x, y = r.y, S = PANEL.SNAP;
     if (Math.abs(x - b.left) <= S) x = b.left; else if (Math.abs(b.right - (x + r.w)) <= S) x = b.right - r.w;
@@ -863,12 +833,10 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var s = big ? PANEL.STEP_BIG : PANEL.STEP;
     return { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[key] || null;
   }
-  /* background opacity 0..100: blur holds at 8px down to 30% and fades to 0 below it; dim text rises to full text colour under 60% */
   function opacityStep(o) { return pnum(o) && o >= 0 && o <= 100 ? Math.round(o) : PANEL.OPACITY; }   // the slider moves in 1s, so today's 92 is reachable
   function blurFor(o) { return o >= 30 ? 8 : Math.round(8 * Math.max(0, o) / 30 * 10) / 10; }
   function textMode(o) { return { shadow: o < 100, dim: o <= 60, edge: o <= 0 }; }
   function rectSentence(name, r) { return name + ' panel at ' + r.x + ', ' + r.y + ', size ' + r.w + ' by ' + r.h + '.'; }
-  /* saved state: every number validated, a bad panel falls back alone (null = default), a bad opacity falls back to 92; never throws */
   function parseLayout(text) {
     var out = { usage: null, ticker: null }, raw;
     if (typeof text !== 'string' || !text) return out;
@@ -888,8 +856,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     PANEL.IDS.forEach(function (id) { var p = l[id]; if (p) o[id] = { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(p.w), h: Math.round(p.h), o: opacityStep(p.o) }; });
     return JSON.stringify(o);
   }
-  /* no overlap (T-067): parts in priority order; a lower part yields to every higher one (slide, shrink, collapse, chip). Pure: numbers in, numbers out.
-     part {id, r:{x,y,w,h} wanted, min, col (collapsed h), axis 'xy'|'y'|'', fixed, collapsible, chip, off, after}; out[id] {x,y,w,h,s} s: full|shrunk|col|chip */
   function hit(a, c) { return a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h; }
   function place(b, parts) {
     var M = PANEL.MARGIN, m = panelMax(b), bh = b.bottom - b.top, chip = {}, col = {}, order = parts.filter(function (p) { return p.collapsible; }), k = 0;
@@ -935,7 +901,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
       chip[low] = 1;
     }
   }
-  /* a drag or resize: x (w) then y (h), each stopped at the first obstacle edge; the neighbour is never pushed */
   function sweep(f, t, obs) {
     var r = { x: f.x, y: f.y, w: f.w, h: f.h };
     if (obs.some(function (o) { return hit(r, o); })) return r;
@@ -950,17 +915,13 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     });
     return r;
   }
-  /* chat dock (T-066) */
   var DOCK = { MIN: 180, LINES: 58, DEF_D: 0.38, DEF_P: 0.40, MIN_STAGE_D: 240, MIN_STAGE_P: 160, STEP: 16, STEP_BIG: 64 };
-  /* want: saved px or anything else (default); chrome: top strip + bar + tone; kb: keyboard px */
-  /* need: px the fixed parts (grip, header, notice, composer) take plus two thread lines; the minimum is never below it */
   function chatH(want, vh, chrome, phone, kb, need) {
     var mn = pnum(need) && need > DOCK.MIN ? Math.round(need) : DOCK.MIN, def = Math.round(vh * (phone ? DOCK.DEF_P : DOCK.DEF_D)), max = vh - chrome - (phone ? DOCK.MIN_STAGE_P : DOCK.MIN_STAGE_D);
     if (pnum(kb) && kb > 0) return Math.max(mn, vh - kb - chrome);
     max = Math.max(mn, max);
     return Math.round(pclamp(pnum(want) && want > 0 ? want : def, mn, max));
   }
-  /* ----- office chat (T-063): pure helpers; the same rules as engine/runtime/chat.py (shared fixtures keep them equal) ----- */
   var CH = {};
   CH.TRANSITIONS = { 'new': ['picked'], picked: ['replying', 'new', 'answered', 'needs_merwyn'], replying: ['answered', 'needs_merwyn', 'new'], needs_merwyn: ['answered'], answered: [] };
   CH.parseSt = function (text) {
@@ -973,7 +934,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
   };
   CH.canMove = function (a, b) { return Object.prototype.hasOwnProperty.call(CH.TRANSITIONS, a) && CH.TRANSITIONS[a].indexOf(b) >= 0; };
   var MRE = /(^|[^\w@])@([A-Za-z][A-Za-z-]{0,23})/g;
-  /* names come from user text: a null-prototype map, so @constructor or @__proto__ is never an agent */
   function hmap(agents) { var h = Object.create(null); agents.forEach(function (a) { h[a.name.toLowerCase()] = a.id; }); return h; }
   CH.parseMentions = function (text, agents) {
     var h = hmap(agents), ids = [], unk = [], all = false, m, re = new RegExp(MRE.source, 'g');
@@ -987,14 +947,12 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     if (all) ids = agents.map(function (a) { return a.id; });
     return { ids: ids, all: all, unknown: unk };
   };
-  /* db error code: the code field, else a known code word in the message */
   CH.errCode = function (e) {
     var c = e && typeof e === 'object' ? e.code : null;
     if (typeof c === 'string' && c) return c.toLowerCase().replace(/^[a-z]+\//, '').replace(/-/g, '_');
     var m = e && /(unavailable|quota_exceeded|revoked|not_granted)/i.exec(String(e.message || ''));
     return m ? m[1].toLowerCase() : null;
   };
-  /* a write that fails with `unavailable` is tried once more after a short random delay; any other error goes straight up */
   CH.retryOnce = function (fn, rnd, sleep) {
     return Promise.resolve().then(fn).catch(function (e) {
       if (CH.errCode(e) !== 'unavailable') throw e;
@@ -1002,7 +960,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     });
   };
   CH.route = function (p, def) { return p.ids.length ? p.ids.slice() : [def || 'pmo']; };
-  /* the @ must start the text or follow whitespace; returns null or { start, query, items } */
   CH.completions = function (text, caret, agents) {
     text = String(text || ''); caret = Math.min(caret == null ? text.length : caret, text.length);
     var i = text.lastIndexOf('@', caret - 1);
@@ -1043,7 +1000,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     });
     return out;
   };
-  /* in place: strips old chat waits, adds the live ones. withLive returns a copy and leaves the replay state alone. */
   CH.setLive = function (s, live) {
     Object.keys(s.agents).forEach(function (id) {
       var a = s.agents[id], w = a.waiting.filter(function (t) { return t.indexOf('chat:') !== 0; });
@@ -1074,7 +1030,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var t = meta && Date.parse(meta.last_inbox_at || '');
     return { running: !!(meta && meta.running && t && nowMs - t < 900000), last: t ? iso(t) : null };
   };
-  /* text -> parts, never markup: { t: 'text'|'link'|'men'|'code', s, href?, id? }; links only when they start with https:// */
   CH.inline = function (text, agents) {
     var h = hmap(agents), out = [];
     String(text).split(/(https:\/\/[^\s<>"'`)]+)/).forEach(function (seg, i) {
@@ -1098,12 +1053,10 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     });
     return out;
   };
-  /* the personal-data scan (C1): same kinds as engine/runtime/chat.py; a hit names the kind, never the text */
   var SCAN = [[/[\w.+-]+@[\w-]+\.[\w.-]+/, 'email address'], [/(?<!\d)\d{16}(?!\d)/, '16-digit run'], [/\d{10,}/, 'run of 10+ digits'],
     [/(?<![\w])(?:\+62|62|0)[\s-]?8\d{1,3}[\s.-]?\d{3,4}[\s.-]?\d{2,5}(?!\d)/, 'phone number'], [/(?<!\d)\d{3,}(?:[ .-]\d{3,}){2,}(?!\d)/, 'long number with separators'],
     [/\b(?:sk|pk|ghp|gho|ghs|xox[abp])[-_][A-Za-z0-9_-]{16,}|\bAKIA[0-9A-Z]{12,}|\bAIza[0-9A-Za-z_-]{20,}/, 'secret-like token'],
     [/\b(?:password|passwd|secret|api[_ -]?key|token)\s*[:=]\s*\S{6,}/i, 'secret-like token'], [/\bbearer\s+[A-Za-z0-9._~+\/-]{16,}/i, 'secret-like token'], [/-----BEGIN [A-Z ]*PRIVATE KEY/, 'secret-like token']];
-  /* non-ASCII decimal digits (Arabic-Indic, fullwidth, ...) become ASCII first, as chat.py does; value = offset in its contiguous run of Nd, mod 10 */
   var ND = /\p{Nd}/u;
   CH.asciiDigits = function (s) {
     return s.replace(/\p{Nd}/gu, function (ch) {
@@ -1123,7 +1076,28 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     while ((m = re.exec(s))) { if (/\d/.test(m[0]) && /[A-Za-z]/.test(m[0]) && !/^[0-9a-f]{40}$/.test(m[0])) return 'secret-like token'; }
     return null;
   };
-  root.OfficeCore = { chat: CH, withLive: withLive, DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
+  function toEvents(runs, ref) {
+    var out = [];
+    runs.forEach(function (r) {
+      if (!r.tasks.length) return;   /* a chat run has no task: it stays in the totals only */
+      var ev = { t: 2 * (r.n - 1), type: 'usage', src: ref + '#n=' + r.n, agent: r.agent, task: r.tasks[0], tasks: r.tasks, total: r.tokens, tool_uses: r.tool_uses, run: r.n, sprint: r.sprint, step: r.step };
+      if (r.note !== undefined) ev.note = r.note;
+      out.push(ev);
+    });
+    return out;
+  }
+  function usagePick(b, meta, chunks, err) {
+    var pick = function (why) { return { src: 'builtin', why: why, at: meta && meta.synced_at || null, runs: null }; };
+    if (err) return pick('unavailable');
+    if (!meta || typeof meta !== 'object') return pick('never');
+    if (meta.session !== b.session) return pick('other');
+    if (!(meta.last_n >= b.last_n)) return pick('stale');
+    var runs = [], ok = Array.isArray(meta.chunks);
+    if (ok) meta.chunks.forEach(function (c) { var d = chunks && chunks[c.id]; if (!d || !Array.isArray(d.runs) || d.last_n !== c.last_n) ok = false; else runs = runs.concat(d.runs); });
+    if (!ok || runs.length !== meta.runs || (runs.length ? runs[runs.length - 1].n : 0) !== meta.last_n) return pick('incomplete');
+    return { src: 'db', why: null, at: meta.synced_at || null, runs: runs };
+  }
+  root.OfficeCore = { ledger: { toEvents: toEvents }, usagePick: usagePick, chat: CH, withLive: withLive, DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
     eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
@@ -1150,7 +1124,6 @@ D.theme.rooms.forEach(function (r) { ROOM[r.id] = r; if (r.stage) STAGE_ROOM[r.s
 var STAGE_LABEL = {}; D.theme.rooms.forEach(function (r) { if (r.stage) STAGE_LABEL[r.stage] = r.label; });
 Object.keys(P).forEach(function (k) { document.documentElement.style.setProperty('--' + k.replace(/_/g, '-'), P[k]); });
 
-/* ---------- motion preference: the OS setting always wins ---------- */
 var mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 var REDUCED = false, SYSTEM_RM = !!(mq && mq.matches), followOn = true;
 function loadMotion() {
@@ -1171,7 +1144,6 @@ function setMotion(m, save) {
 }
 if (mq && mq.addEventListener) mq.addEventListener('change', function (e) { SYSTEM_RM = e.matches; setMotion(loadMotion(), false); });
 
-/* ---------- small helpers ---------- */
 function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 var ICON = {
@@ -1193,7 +1165,6 @@ var STCOL = { waiting: 'var(--warn)', blocked: 'var(--bad-text)', bad: 'var(--ba
   walking: 'var(--wall)', walk: 'var(--wall)', working: 'var(--accent)', work: 'var(--accent)', idle: 'var(--wall)', done: 'var(--accent)', unknown: 'var(--text-dim)' };
 var STWORD = { waiting: 'Waiting for you', blocked: 'Blocked', discussing: 'In a discussion', walking: 'On the move', working: 'Working', idle: 'Idle' };
 
-/* ---------- playback state ---------- */
 var S = C.stateAt(D, 0), next = 0, T = 0, playing = false, speed = 1, ended = false;
 var hist = [], lastAction = -99, tNow = 0, scene = null;
 var walkingSet = {};
@@ -1221,7 +1192,6 @@ function setPlaying(p) {
   b.setAttribute('aria-label', p ? 'Pause' : (ended ? 'Replay' : 'Play'));
 }
 
-/* ---------- HUD ---------- */
 var segs = {}, lastOrder = '', lastSort = 0, stripDirty = true;
 D.agents.forEach(function (a) {
   var b = el('button', 'seg');
@@ -1300,13 +1270,11 @@ function updateTone(n) {
 }
 $('tone').addEventListener('click', function () { var on = !document.body.classList.contains('tk'); document.body.classList.toggle('tk', on); if (on) layer('tk'); reqFit(true); });
 function announce(t) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = t; }, 30); }
-/* usage panel: one renderer feeds the docked panel and the phone sheet */
 function fmtTok(n) {
   if (n < 1000) return String(n);
   if (n < 1e6 && Math.round(n / 1000) < 1000) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
   return (Math.round(n / 1e5) / 10).toFixed(1) + 'M';
 }
-/* "used / budget" that reads like the %: both in the budget's unit, with the fewest decimals at which the shown ratio rounds to the shown % */
 function fmtPair(used, budget, pct) {
   var u = budget >= 1e6 ? 1e6 : (budget >= 1000 ? 1000 : 1), sfx = u === 1e6 ? 'M' : (u === 1000 ? 'k' : '');
   if (u === 1 || pct === null || pct === undefined || !budget) return fmtTok(used) + ' / ' + fmtTok(budget);
@@ -1325,7 +1293,6 @@ function figs(r) {
     '</span><span title="' + exact(r.cache_read) + ' cache read, ' + exact(r.cache_write) + ' cache write tokens">cache ' + fmtTok(c) + '</span>' + (SYN ? '<span class="syn">synthetic</span>' : '');
 }
 var NOSPLIT = 'Input, output and cache split not reported';
-/* ----- Summary and Detail (T-060): used tokens against the budget Merwyn sets; amounts come from OfficeCore.budgetView ----- */
 var USAGE_MODE = 'summary', fadeNext = false, lastBars = {};
 function tokWords(n) {
   if (n >= 1e6) return (Math.round(n / 1e5) / 10) + ' million';
@@ -1334,7 +1301,6 @@ function tokWords(n) {
 }
 function shortLabel(l) { return String(l).replace(/\s*\([^)]*\)\s*$/, ''); }
 function periodLabel(v) { return v.period === 'session' ? 'This session' : String(v.period); }
-/* the budget part of a row: bar (or dashed track), text, and the exact states in words (over and unset never rely on colour or hatch) */
 var LVWORD = { near: 'near budget', alert: 'at limit' };
 function budgetBar(r, key) {
   if (r.state === 'unset') return '<div class="bt"><div class="bar unset" aria-hidden="true"></div></div>';
@@ -1367,7 +1333,8 @@ function rowHTML(name, r, o) {
 }
 function budgetsHTML() {
   var v = C.budgetView(S, D);
-  if (v.none) return '<div class="uempty">No usage yet</div><div class="ufoot">' + 'Tokens appear as the replay runs.' + '</div>';
+  var note = D.usage ? '<div class="ufoot usync">' + esc(usageNote()) + '</div>' : '';
+  if (v.none) return '<div class="uempty">No usage yet</div><div class="ufoot">' + 'Tokens appear as the replay runs.' + '</div>' + note;
   var h = '', syn = v.synthetic || SYN;
   if (USAGE_MODE === 'summary') {
     v.providers.forEach(function (p) {
@@ -1389,7 +1356,7 @@ function budgetsHTML() {
       });
     });
   }
-  h += '<div class="ufoot">' + (syn ? 'Synthetic budgets, not a real run. ' : '') + 'Budgets are yours to set. Anthropic does not publish the Max plan&rsquo;s limit in tokens.</div>';
+  h += '<div class="ufoot">' + (syn ? 'Synthetic budgets, not a real run. ' : '') + 'Budgets are yours to set. Anthropic does not publish the Max plan&rsquo;s limit in tokens.</div>' + note;
   return '<div class="umode' + (fadeNext ? ' ufade' : '') + '">' + h + '</div>';
 }
 function usageSummary() {
@@ -1440,7 +1407,6 @@ function renderUsage() {
   if (keep) { var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), nb = box.querySelector('[data-mode="' + keep + '"]'); if (nb) nb.focus(); }
   reqFit();
 }
-/* bars grow from where they were (160ms, off in reduced motion): the panel is redrawn as HTML, so the old width is carried over by hand */
 function growBars(box) {
   var now = {}, todo = [];
   box.querySelectorAll('i[data-k]').forEach(function (i) {
@@ -1476,9 +1442,68 @@ function initUsage() {
   });
   document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
 }
+var DBP = null, US = { shown: 'builtin', why: 'wait', at: null, chunks: {}, budgets: null, bsha: null, seq: 0, key: '' }, UB = null;
+function getDb() {   /* the one place that opens the db: chat and usage share it */
+  if (!DBP) { var c = typeof claude !== 'undefined' ? claude : null; DBP = c && c.use ? withTimeout(c.use('db'), 10000).then(function (db) { if (!db) throw new Error('no db'); return db; }) : Promise.reject(new Error('no claude')); }
+  return DBP;
+}
+function usageStore(db) {
+  function get(p) { return Promise.resolve(db.doc(p).get()).then(function (s) { return s && s.data ? s.data() || null : null; }); }
+  return {
+    meta: function (cb, err) { return db.doc('usage/office').onSnapshot(function (s) { cb(s && s.data ? s.data() || null : null); }, err); },
+    chunk: function (id) { return get('usage/office/chunks/' + id); },
+    budgets: function () { return get('usage/budgets'); }
+  };
+}
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function wib(iso) { var d = new Date(Date.parse(iso) + 7 * 36e5); return isNaN(d) ? '' : d.getUTCDate() + ' ' + MON[d.getUTCMonth()] + ' ' + ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2) + ' WIB'; }
+function usageNote() {
+  if (!D.usage) return '';
+  if (US.shown === 'db') return 'Synced ' + wib(US.at);
+  var b = D.usage.builtin, w = { wait: 'checking for a synced copy', never: 'never synced', stale: 'synced copy is older', other: 'synced copy is another session', incomplete: 'sync incomplete', unavailable: 'synced data not available' }[US.why];
+  return 'Built-in copy' + (b.last_n ? ' as of run #' + b.last_n + ' (' + b.last_date + ')' : '') + ': ' + w + (US.why === 'stale' && US.at ? ' (synced ' + wib(US.at) + ')' : '') + '.';
+}
+function usageApply(pk, m) {
+  var key = [pk.src, pk.why, pk.at, m && m.runs, m && m.budgets_sha256].join('|');
+  if (key === US.key) return;
+  US.key = key; US.shown = pk.src; US.why = pk.why; US.at = pk.at;
+  var b = D.usage.builtin, atEnd = ended || T >= TOTAL, had = EV.length > 0, oldT = T;
+  if (pk.src === 'db') {
+    D.usage.seed = null; D.events = C.ledger.toEvents(pk.runs, 'offices/' + D.office.id + '/usage/' + m.session + '.jsonl');
+    D.budgets = m.budgets_sha256 ? US.budgets : null; D.ledger = { main: m.main };
+  } else { D.usage.seed = b.agents; D.events = []; D.budgets = UB; D.ledger = { main: b.main }; }
+  EV = D.events; TL = C.timeline(EV); TOTAL = TL.total; TI = C.tickerItems(D); TI_AT = {};
+  TI.forEach(function (it) { (TI_AT[it.i] = TI_AT[it.i] || []).push(it); });
+  buildMarks();
+  $('play').disabled = $('scrub').disabled = !EV.length;
+  seek(pk.src === 'db' && (atEnd || !had) ? TOTAL : Math.min(oldT, TOTAL));   /* a first copy shows its final totals; a later one keeps the viewer's place */
+}
+function usageFail() { if (US.shown === 'db') return; usageApply({ src: 'builtin', why: 'unavailable', at: null }, null); }
+function usageSync(st, m) {
+  var b = D.usage.builtin, seq = ++US.seq, cs = (m && Array.isArray(m.chunks)) ? m.chunks : [];
+  var jobs = cs.filter(function (c) { var h = US.chunks[c.id]; return !h || h.sha !== c.sha256; }).map(function (c) {
+    return st.chunk(c.id).then(function (d) { if (d) US.chunks[c.id] = { sha: c.sha256, doc: d }; else delete US.chunks[c.id]; });
+  });
+  if (m && m.budgets_sha256 && US.bsha !== m.budgets_sha256) jobs.push(st.budgets().then(function (d) { US.budgets = d; US.bsha = d ? m.budgets_sha256 : null; }));
+  Promise.all(jobs).then(function () {
+    if (seq !== US.seq) return;
+    var map = {}; cs.forEach(function (c) { map[c.id] = US.chunks[c.id] && US.chunks[c.id].doc; });
+    var pk = C.usagePick(b, m, map);
+    if (pk.src === 'db' && m.budgets_sha256 && !US.budgets) pk = { src: 'builtin', why: 'incomplete', at: m.synced_at || null };
+    usageApply(pk, m);
+  }).catch(function () { if (seq === US.seq) usageFail(); });
+}
+function initUsageDb() {
+  if (!D.usage) return;
+  var b = D.usage.builtin; UB = D.budgets; D.usage.seed = b.agents; D.ledger = { main: b.main };
+  var done = false, tm = setTimeout(function () { if (!done) usageFail(); }, 10000);
+  getDb().then(function (db) {
+    var st = usageStore(db);
+    st.meta(function (m) { done = true; clearTimeout(tm); usageSync(st, m); }, function () { done = true; clearTimeout(tm); usageFail(); });
+  }).catch(function () { done = true; usageFail(); });
+}
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
 
-/* one transient layer (T-067); on desktop the usage sheet and event list are layers, the card and menu are parts */
 function closeLayer(n) {
   if (n === 'focus') { if (focused) focusAgent(null); }
   else if (n === 'usheet') closeSheet();
@@ -1489,7 +1514,6 @@ function layer(n) {
   var a = document.activeElement; LY.opener = a && a !== document.body ? a : LY.opener;
   ['focus', 'usheet', 'msheet', 'tk'].forEach(function (o) { if (o !== n && (innerWidth < 900 || n === 'usheet' || n === 'tk' || o === 'usheet' || o === 'tk')) closeLayer(o); });
 }
-/* focus card */
 var focused = null;
 function focusAgent(id, fromHud) {
   focused = focused === id && fromHud ? null : id;
@@ -1536,13 +1560,16 @@ $('pill').addEventListener('click', function () {
 });
 $('banner').addEventListener('click', function () { $('pill').click(); });
 
-/* playback bar */
-D.events.forEach(function (ev, i) {
+function buildMarks() {
+  $('marks').innerHTML = '';
+  D.events.forEach(function (ev, i) {
   var k = ev.type, c = k === 'needs_merwyn' ? 'var(--warn)' : (k === 'review_reject' || k === 'blocked' || (k === 'compliance_result' && ev.verdict === 'BLOCK') ? 'var(--bad-text)' : (k === 'merged' ? 'var(--accent)' : null));
   if (!c || !TOTAL) return;
   var m = el('i', k === 'needs_merwyn' ? '' : 'rd'); m.style.left = (TL[i].start / TOTAL * 100) + '%'; m.style.setProperty('--c', c);
   $('marks').appendChild(m);
-});
+  });
+}
+buildMarks();
 $('play').addEventListener('click', function () {
   if (!EV.length) return;
   if (ended) { seek(0); ended = false; }
@@ -1582,7 +1609,6 @@ function stepEv(d) {
   seek(n === 0 ? 0 : TL[n - 1].start + 0.001);
 }
 
-/* ---------- event dispatch and seek ---------- */
 function dispatch(i) {
   var ev = EV[i];
   C.apply(S, ev, TL[i].start);
@@ -1610,7 +1636,6 @@ function seek(t) {
   setPlaying(playing);
 }
 
-/* ---------- loop ---------- */
 var last = 0, fpsN = 0, fpsT = 0, lowT = 0, lowRes = false, lastDt = 0, dockBusy = false;
 function frame(ms) {
   var dt = Math.min(0.1, (ms - last) / 1000 || 0); last = ms; lastDt = dt; tNow = ms / 1000;
@@ -1638,7 +1663,6 @@ function frame(ms) {
 var lastStrip = 0;
 function stripTick(ms) { if (ms - lastStrip > 500) { lastStrip = ms; renderStrip(false); } }
 
-/* ---------- scene (three.js r128 classic build) ---------- */
 function initScene() {
   var T3 = window.THREE, V3 = T3.Vector3;
   var stage = $('stage'), canvas = $('gl'), renderer;
@@ -1656,7 +1680,6 @@ function initScene() {
   function lambert(c, o) { var k = c + (o ? JSON.stringify(o) : ''); return mats[k] || (mats[k] = new T3.MeshLambertMaterial(Object.assign({ color: new T3.Color(c) }, o || {}))); }
   var VCOL = new T3.MeshLambertMaterial({ vertexColors: true });
 
-  /* geometry baker: many primitives -> one vertex-coloured mesh */
   var M4 = new T3.Matrix4(), Q = new T3.Quaternion(), E = new T3.Euler(), P3 = new V3(), S3 = new V3();
   function mx(x, y, z, rx, ry, rz, sx, sy, sz) {
     E.set(rx || 0, ry || 0, rz || 0); Q.setFromEuler(E); P3.set(x, y, z); S3.set(sx == null ? 1 : sx, sy == null ? 1 : sy, sz == null ? 1 : sz);
@@ -1680,17 +1703,14 @@ function initScene() {
     sph: new T3.SphereGeometry(1, 10, 7), hemi: new T3.SphereGeometry(1, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), ico: new T3.IcosahedronGeometry(1, 1),
     torus: new T3.TorusGeometry(1, 0.16, 6, 14), cone: new T3.ConeGeometry(1, 1, 8)
   };
-  /* helpers: all in world units; boxes sit on y0, centred on x,z */
   function bx(b, x, y0, z, w, h, d, col, ry) { b.add(G.box, col, mx(x, y0 + h / 2, z, 0, ry || 0, 0, w, h, d)); }
   function cy(b, x, y0, z, r, h, col, g, rx, ry, rz) { b.add(g || G.cyl, col, mx(x, y0 + h / 2, z, rx || 0, ry || 0, rz || 0, r, h, r)); }
   function sp(b, x, y, z, r, col, sx, sy, sz) { b.add(G.sph, col, mx(x, y, z, 0, 0, 0, r * (sx || 1), r * (sy || 1), r * (sz || 1))); }
 
-  /* palette shortcuts */
   var WOOD = P.wood, PAPER = P.paper, WALL = P.wall, FLOOR = P.floor, RUG = P.rug;
   var DARK = '#3b3f58', METAL = '#c9ccd6';
   function mixHex(a, b, k) { return '#' + new T3.Color(a).lerp(new T3.Color(b), k).getHexString(); }
 
-  /* ----- static office ----- */
   var st = new Baker(), DOORX = D.theme.door[0];
   function buildStatic() {
     var b = st;
@@ -1762,7 +1782,6 @@ function initScene() {
     });
   }
 
-  /* ----- layout: desks, seats, doorways, routes ----- */
   var DESK_SEAT = {}, ROOMOF = {};
   D.theme.desks.forEach(function (d) {
     var x = d.at[0], z = d.at[1], r = ROOM[d.room], cx = (r.rect[0] + r.rect[2]) / 2, side = x > cx ? -1 : 1;
@@ -1800,7 +1819,6 @@ function initScene() {
     return pts;
   }
 
-  /* ----- rugs / room labels ----- */
   var rugs = {}, roomLb = {}, glow, doorStrip, lbRoot = $('labels');
   function buildRugs() {
     D.theme.rooms.forEach(function (r) {
@@ -1816,7 +1834,6 @@ function initScene() {
     doorStrip = new T3.Mesh(new T3.BoxGeometry(2.0, 0.2, 0.1), new T3.MeshBasicMaterial({ color: new T3.Color('#4a3f3a') })); doorStrip.position.set(DOORX, 2.3, 0.2); sc.add(doorStrip);
   }
 
-  /* ----- avatars ----- */
   var SPR = {
     chief:     { body: BODY.chief, skin: 'skin_mid',   h: 1.15, hair: '#2a2030' },
     pm:        { body: BODY.pm, skin: 'skin_light', h: 1.10, hair: '#5a3a2e' },
@@ -1914,7 +1931,6 @@ function initScene() {
     A[id] = a; agentList.push(a); return a;
   }
 
-  /* ----- effects: blob shadows, flying card, confetti, shelf spines ----- */
   var blobs, fly, flyEl, conf, confD = [], confT = -1, spines = [];
   function buildFx() {
     var bg = new T3.CircleGeometry(0.42, 16); bg.rotateX(-Math.PI / 2);
@@ -1930,7 +1946,6 @@ function initScene() {
     }
   }
 
-  /* ----- camera ----- */
   var cam = new T3.OrthographicCamera(-10, 10, 10, -10, 0.1, 200), DIR = new V3(-0.383, 0.643, 0.663).normalize();
   var home = { t: new V3(12, 0, 8), half: 10 }, camT = new V3(12, 0, 8), camZ = 1, userT = new V3(12, 0, 8), userZ = 1, userAt = -99, focusId = null, focusAt = -99;
   var fwd = new V3(), right = new V3(), up = new V3(), curAz = -1;
@@ -1957,7 +1972,6 @@ function initScene() {
     W = Math.max(1, stage.clientWidth); H = Math.max(1, stage.clientHeight); aspect = W / H; setAz(aspect < 0.8 ? 62 : 30);
     renderer.setSize(W, H, false); fitHome(); if (camZ === 1 && !focusId) camT.copy(home.t); userT.copy(camT); applyCam();
   }
-  /* T-066: one resize per frame; on slow frames while the dock moves, only the final size */
   var rsF = 0;
   function reqResize(force) {
     if (!force && dockBusy && lastDt > 0.05 && lowRes) return;
@@ -2032,7 +2046,6 @@ function initScene() {
   });
   canvas.addEventListener('wheel', function (e) { e.preventDefault(); if (userAt < tNow - 10) { userT.copy(camT); userZ = camZ; } userZ = Math.max(1, Math.min(2.5, userZ * (e.deltaY < 0 ? 1.12 : 0.89))); userAt = tNow; }, { passive: false });
 
-  /* ----- animation: tweens, per-agent job queue (generators) ----- */
   function ease(k, u) { u = Math.max(0, Math.min(1, u)); switch (k) {
     case 'outCubic': return 1 - Math.pow(1 - u, 3);
     case 'inCubic': return u * u * u;
@@ -2102,7 +2115,6 @@ function initScene() {
     });
   }
 
-  /* ----- places, cards, decor ----- */
   var slotOf = {}, shelved = {}, bubbleEl = el('div', 'lb bubble'), bubbleA = null;
   bubbleEl.hidden = true; lbRoot.appendChild(bubbleEl);
   function allocSlot(id) { if (slotOf[id] != null) return slotOf[id]; var used = Object.keys(slotOf).map(function (k) { return slotOf[k]; }); for (var i = 0; i < 4; i++) if (used.indexOf(i) < 0) { slotOf[id] = i; return i; } return 3; }
@@ -2235,7 +2247,6 @@ function initScene() {
     for (; n < spines.length; n++) spines[n].visible = false;
   }
 
-  /* ----- jobs for each event ----- */
   function say(a, text, dur, listeners) {
     var started = false;
     return { dur: dur, fn: function (u) {
@@ -2359,7 +2370,6 @@ function initScene() {
     }
   }
 
-  /* ----- build everything ----- */
   buildStatic(); buildRugs();
   var sm = new T3.Mesh(st.geo(), VCOL); sc.add(sm);
   buildFx();
@@ -2388,7 +2398,6 @@ function initScene() {
   hudRefresh(true);
 }
 
-/* ---------- movable panels (T-059): usage and ticker float at 900px+; layout maths is in OfficeCore ---------- */
 var PN = C.PANEL, PNAME = { usage: 'Usage', ticker: 'Latest events' }, PIDS = PN.IDS.filter(function (id) { return !!$(id); });
 var PL = { free: false, r: { usage: null, ticker: null }, o: { usage: PN.OPACITY, ticker: PN.OPACITY }, pending: null }, pdrag = null, pTimers = {}, resetTimer = 0, animTimers = {};
 var GRIP = '<svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/><circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/><circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/></g></svg>';
@@ -2549,7 +2558,6 @@ function initPanels() {
   }
   reqFit(true);
 }
-/* ---------- no overlap (T-067): fit() builds the parts and asks C.place; flow keeps its CSS geometry and takes only the states ---------- */
 function others(id) {   /* what a dragged panel may not enter: the other panel, the card, an open sheet or menu, the events chip */
   var o = []; pids().forEach(function (x) { if (x !== id && !$(x).classList.contains('xc')) o.push(shown(x)); });
   ['focus', 'msheet', 'usheet', 'tone'].forEach(function (x) { var e = $(x); if (e.offsetWidth) { var r = e.getBoundingClientRect(); o.push({ x: r.left, y: r.top, w: r.width, h: r.height }); } });
@@ -2572,7 +2580,6 @@ function fit() {
   B.classList.toggle('nost', $('stage').offsetHeight < 72);   // desktop too
   var free = PL.free, b = pbounds(), M = PN.MARGIN, cx = innerWidth - 12 - COLW, flow = !free, tk = B.classList.contains('tk'), usePl = !u.hidden;
   var sbot = b.bottom + M, bb = b;
-  /* natural heights, measured with the auto classes off (sync, no paint in between) */
   var uc0 = u.classList.contains('col'), ua0 = u.classList.contains('ac'), th0 = t.classList.contains('hd'), nat = {};
   var ux = u.classList.contains('xc'), tx = t.classList.contains('xc'); u.classList.remove('ac', 'xc'); t.classList.remove('hd', 'xc'); u.style.minHeight = t.style.minHeight = '';
   u.classList.remove('col'); nat.un = u.querySelector('.uh').offsetHeight + $('useg').offsetHeight + $('ubody').scrollHeight + 2;
@@ -2621,7 +2628,6 @@ function fit() {
   var uac = u.classList.contains('ac') || usageCol; $('ucol').setAttribute('aria-expanded', String(!uac)); $('ucol').setAttribute('aria-label', uac ? 'Expand usage' : 'Collapse usage');
 }
 
-/* ---------- office chat (T-063): a shared inbox in the artifact's own database; only built when D.chat exists ---------- */
 var CS = null, CHAT_LIVE = {};
 var BODY = { chief: '#4361ee', pm: '#c77dd9', architect: '#1f7a99', engineer: '#4b3f72', qa: '#eceae4', officer: '#8f9a62', librarian: '#7b5e57', designer: '#e7a3c4' };
 function agCol(id) { return BODY[(DESK[id] || {}).sprite] || '#8d99ae'; }
@@ -2634,8 +2640,6 @@ function cDocs() {
   return CS.docs.concat(Object.keys(CS.pending).filter(function (k) { return !have[k]; }).map(function (k) { return CS.pending[k].doc; }));
 }
 function withTimeout(p, ms) { return Promise.race([Promise.resolve(p), new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
-/* the only place that touches the artifact db API. Shapes confirmed from the server's type definitions (T-063 rework 1): doc/collection paths,
-   get/set/update/delete/acquire/onSnapshot, error codes. `unavailable` is transient (one retry on writes); other codes are shown as not available. */
 function chatStore(db) {
   return {
     set: function (path, doc) { return C.chat.retryOnce(function () { return db.doc(path).set(doc); }); },
@@ -2654,8 +2658,7 @@ function chatInit() {
   }
   function fail(ph) { if (CS.phase === 'loading') { CS.phase = ph; renderChat(); } }
   if (!c || !c.use) { fail('nodb'); return; }
-  withTimeout(c.use('db'), 10000).then(function (db) {
-    if (!db) throw new Error('no db');
+  getDb().then(function (db) {
     return withTimeout(c.use('user'), 10000).then(function (u) { return withTimeout(u && u.id ? u.id() : null, 10000); }).then(function (uid) {
       if (!uid) { fail('signedout'); return; }
       CS.uid = uid; CS.store = chatStore(db);
@@ -2866,7 +2869,6 @@ function renderChat() {
   var last = cDocs().filter(function (d) { return d.kind === 'reply'; }).map(function (d) { return d.created_at; }).sort().pop();
   if (last && last > CS.st.seen_at) { CS.st.seen_at = last; saveChatSt(); renderBadge(); }
 }
-/* @mention combobox */
 var comp = null, compI = 0;
 function closeList() { comp = null; $('clist').hidden = true; var t = $('ctext'); t.setAttribute('aria-expanded', 'false'); t.removeAttribute('aria-activedescendant'); }
 function paintList() {
@@ -2953,7 +2955,6 @@ function initChat() {
   if (CS.st.open) { CS.booting = true; openChat(); CS.booting = false; }
 }
 
-/* ---------- boot ---------- */
 function fail(reason) {
   $('loading').hidden = true; $('failed').hidden = false; $('freason').textContent = reason;
 }
@@ -2976,6 +2977,7 @@ function loadThree() {
 function boot() {
   setMotion(loadMotion(), false);
   initUsage();
+  initUsageDb();
   setSpeed([1, 2, 4].indexOf(+params.get('speed')) >= 0 ? +params.get('speed') : 1);
   var skipped = D.skipped || [];
   if (!EV.length) { $('play').disabled = true; $('scrub').disabled = true; }
