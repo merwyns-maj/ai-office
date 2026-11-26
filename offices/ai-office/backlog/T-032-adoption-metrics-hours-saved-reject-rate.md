@@ -2,9 +2,9 @@
 id: T-032
 title: "Adoption metrics (hours saved, reject rate, turnaround)"
 phase: 7-ways-of-working
-status: review
+status: done
 priority: P2
-owner: reviewer
+owner: pmo
 where: chat
 project: ai-office
 depends_on: []
@@ -186,6 +186,10 @@ REJECT, Review 1 of PR #30 (head 8c1994e), 26 Nov 2026. Fails Done-when 2: Sprin
 Fix: with no Review log, derive REJECTs from review → build transitions (T-048 = 2, consistent); BLOCKs 0 when Design says "Compliance: not flagged"; escalations from "escalated to Merwyn" lines or the sprint Close. Add a real-file test for the Sprint 2 row; regenerate metrics/2026-11.md; correct the Build notes line.
 Passing: 214 tests OK; validate and build_agents clean; scratch-clone rerun matches (bar PR ref count); shallow run exits 0 with notice; T-040 0/1/1 and T-048 2/0/1 by hand; sprint counts 2/3/3/3; T-012 footnote; hours saved "not set"; no data hits.
 Notes: the engineer set status review himself (only PMO/Reviewer write status).
+— Cahyani (reviewer), recorded by Janice (pmo)
+
+PASS, Review 2 of PR #30 (head 6d55f19), 26 Nov 2026, after Rework 1. Sprint 2 row 0 | 0 | 0 from sprint-02.md Close and "Compliance: not flagged"; T-048 2/0/1 and T-040 0/1/1; no invented zeros (removing the sources gives "not recorded"); real-file tests pass; full-clone regen matches bar header sha; 216 tests OK; validate, build_agents clean; shallow run exits 0 with notice; no data hits; Build notes corrected.
+Notes: (1) the old "Deviations and limits" bullet about "not recorded" cells is superseded by Rework 1; (2) agg() sums known values when only some tasks are unrecorded; follow-up so a partial sum is marked partial.
 — Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
