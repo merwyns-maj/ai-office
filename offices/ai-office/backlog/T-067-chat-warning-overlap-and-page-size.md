@@ -2,9 +2,9 @@
 id: T-067
 title: "No overlapping parts: panels, chat and bar never cover each other; composer warning; page-size headroom"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-066]
@@ -127,6 +127,75 @@ Dinda's UX accepted, with the chip answer below. Only `engine/app/office.templat
 — Sebastian (engineer)
 
 ## Review log
+### Review 1 (Cahyani, 26 Nov 2026): REJECT
+
+I wrote my own headless harness and a stub `claude` under /tmp/cah67 before using any part of Sebastian's method. Nothing from it is committed, and there are no screenshots in the repo. Note: I had read the Build notes before my own check because they are in the same file, but every result below comes from my own runs.
+
+**Merge with main.** The branch predates T-068 (#64) and #63. `git merge-tree --write-tree HEAD origin/main` gives exit 0, so the merge is clean. Neither of those PRs touches the four files this PR changes. On a merged copy (/tmp/merged): `unittest` ran 415 tests, OK. `validate ai-office` gave `OK — 8 agents, 5 stages, 71 tasks, 18 skills`, and `--chat --check` said `up to date (230 KB, 84 events)`.
+
+**Runs on the branch (87266e5)**
+- `python -m unittest discover -s tests` printed `Ran 393 tests in 16.008s`, `OK`, exit 0.
+- `python -m engine.runtime validate ai-office` printed `ai-office: OK — 8 agents, 5 stages, 67 tasks, 18 skills`, exit 0.
+- `python scripts/office_app.py ai-office --chat --check` printed `engine/app/office.html: up to date (230 KB, 84 events)`, exit 0.
+- Size: the committed page is 235,796 B. Main's page is 221,168 B, so the PR adds 14,628 B. The limit is 237,568 B, which leaves 1,772 B. The published build (`--ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`) printed `written, 239 KB, 8 agents, 78 events` and is 245,071 B.
+
+**Headless check (own harness).** Playwright with Chrome at dpr 1, served over http from a copy, with a stub `claude` (db and user). Sizes: 1280x800, 1024x640, 390x844 and 1280x460, plus a follow-up run at 1280x560, 1280x520, 1024x500, 1280x480 and 390x600. Chat states: closed, default, min (after ack), min before ack, and max. Layouts: the default flow layout, "moved" (the two panels overlap each other and reach into the chat area), and "roomy" (saved apart, with room). In each case I opened these in turn: the focus card (first strip agent), the gear menu, the usage panel `...` menu, the usage sheet (Usage button, or the gear's Usage on a phone), the events layer (tone strip), the offline warning (`set_offline`), and a blocked send of a 16-digit run.
+
+At every snapshot I checked:
+- the rects of `#top`, `#focus`, `#usage`, `#ticker`, `#usheet`, `#msheet`, `#tone`, `#bar`, `#chat` and every open `.pm`, pairwise, skipping ancestor pairs and excluding the canvas;
+- that every part is inside the window;
+- that there is no page scroll and no console errors or 4xx;
+- that the `office.layout.v1` text is unchanged.
+
+For the warnings I also checked that `#cmid` ends at or above the `#cform` top, that `#cwarn` is inside `#chat`, that `elementFromPoint` hits `#cwarn` at points 5 px in from its corners and at its centre, that its background is solid, that its text is not clipped, and that the send made 0 db writes.
+
+Control: on main's page, at 1280x800 alone, the harness reports 48 failing snapshots out of 73 (focus card over usage, panels over each other, ticker over the menu). So the check detects the bug.
+
+| Page | Snapshots | Failures | Where |
+|---|---|---|---|
+| Committed | 301 | 24 | all at 1280x460 (19 overlaps; 5 are my false positive, see Notes) |
+| Published (ledger + chat) | 301 | 24 | the same cases |
+
+At 1280x800, 1024x640 and 390x844 the results are clean for every state and layout:
+- no overlap and nothing outside the window;
+- no page scroll and no console errors;
+- the saved layout text is never rewritten;
+- the saved rects are used when there is room, and they come back after the chat closes (25 cases);
+- the composer warning passes every check;
+- the blocked send writes nothing.
+
+This is a large improvement on main.
+
+**Done when, checked**
+1. No overlap at any height and window size, in the flow layout and with moved or resized panels: **FAIL**, three defects.
+   - **(a) Main size.** At 1280x800 with chat at default, I saved the usage panel at `{x:300,y:620,w:360,h:300}`, collapsed it with its chevron, and opened its `...` menu. The usage rect became `300,358,360,105` and `pm-usage` became `435,403,216,59`, while the bar is at `0,440`. Both cover the bar by 23 px. This repeats at 1024x500 and 1280x480 (even with chat closed) and at 1280x460. Cause: in `fit()` → `build()`, a viewer-collapsed usage panel gets `min: usageCol ? nat.uc : um` and `h: usageCol ? nat.uc : ur.h`, so `C.place` never sees the open menu's height. `fit()` then sets `style.minHeight` to the menu height, and the panel grows past its placed rect.
+   - **(b) Loop that never settles (Fang's risk 1).** At 1280x520, chat at min before ack, with the "moved" layout, the focus card open and the usage `...` menu open, `body.uchip` and the usage panel flip between chip and shown every 100 to 200 ms. I sampled for 3 s and it never stopped. In the shown phase, usage overlaps the ticker (227x50) and the bar (360x23). The Design promised "a test asserts one pass", but none is committed.
+   - **(c) Short desktop window.** At 1280x460 and 1280x480 the stage is 40 px or less in two cases: chat at min before ack (chat 324 px), and with the offline warning (chat 360 px). Then the gear menu (`1143,26,125,22`), the usage sheet (`1004,34,264,14`), the events layer (`1004,8,264,40`) and the events chip `#tone` (`1004,18,264,34`) all overlap `#top`. The phone has `body.nost` (deviation 2) for this case; the desktop has no equivalent.
+2. Composer warning clipped at min, on 1280x800 and 390x844: **PASS**. At 1280x800 min, `#cwarn` is at `13,686,1254,30` with background `rgb(29, 30, 44)`, which is solid. `#cmid` ends above `#cform` (top 665). All five hit points land on `#cwarn`. The 16-digit run made 0 writes and showed the "personal data" warning. The same holds at 390x844, in the default and max states, and before ack (composer disabled).
+3. Size decision recorded and the page fits it: **PASS on the letter, needs a note** (see deviations).
+
+**The deviations**
+- **T-066 test relaxed from no `overflow` to no `overflow:auto|scroll` on `#cmid`: accepted.** The T-066 risk was an inner scroll box hiding the notice. `overflow:hidden` cannot scroll, and the same test still asserts that `#cnotice` is outside `#cmid` and is `flex:none`. My headless runs before ack showed the notice and the button inside `#chat`. A clip is what Fang's Design asks for.
+- **Size: the numbers are honest, but the decision needs an Architect note.** Sebastian states the overrun plainly: +14.6 KB against an estimate of 3.5 KB, and 1,772 B of headroom against the 7.5 KB the Design expected. My byte counts match. But the 232 KB decision was made on the 3.5 KB estimate, so it was based on the wrong number. The fixes above will add code and may use up the 1,772 B. The decision is Fang's (Done when 3), so it needs a dated Architect note with the real numbers: confirm 232 KB, or trim, or apply the "next raise needs a split or minify" rule now. Two smaller points:
+  - The `test_size_limit` comment says "about 13 KB of page code" while the Build notes say 14.6 KB.
+  - The comment says "the published ledger page loads at 222 KB", but today's published build is 245,071 B (239 KB). Neither number has been republished or checked.
+- **Deviations 1 to 4 and 6** (card `min` 56 and chippable, `nost` on phone and tablet, `.xc` removed while measuring, ticker `min-height:40px`, golden unchanged): reasonable and in the spirit of the Design. Deviation 2 is exactly what the desktop is missing in 1(c).
+
+**C1 to C8 (T-063 Compliance): not weakened.** The diff touches only the four listed files. No changed line in the template mentions `scan`, `cnotice`, the ack, `sendChat`, `newAsk`, purge or `claude.use`. There are no changes in `engine/runtime` or the playbooks. Headless evidence: before ack the composer is disabled (C3); the 16-digit send is blocked, names only the kind, and writes 0 docs (C1); the notice and footnote are unchanged (the T-063 and T-066 tests pass).
+
+**Fixes needed (back to build)**
+1. In `fit()` → `build()`, a usage panel collapsed by the viewer (`usageCol`) must still count its open `.pm` menu in `min` and `h`, as the expanded case does with `um`. The panel and menu must then stay inside the bounds and off the bar. Repro: 1280x800, chat default, usage saved at y=620, collapse it, open its `...` menu.
+2. Stop the chip/shown loop. The likely fix is to close a panel's `.pm` menu when the panel is chipped, or to leave the menu out of `min` once the panel is chipped. Add the "one pass" test that Fang's risk 1 calls for: running `fit()` twice gives the same classes and rects. Repro: 1280x520, chat min before ack, saved overlapping layout, focus card open, usage `...` menu open.
+3. On the desktop, when the stage is below what a layer or the events chip needs (1280x460 or 1280x480 before ack, or with the offline warning), the gear menu, usage sheet, events layer and `#tone` must not enter `#top`. This is the desktop equivalent of `nost`, or clamp them into the stage. The Chat button and bar must stay usable.
+4. Fang adds a dated note to the size decision with the real numbers: 221,168 B → 235,796 B (+14.6 KB), 1,772 B headroom, published build 245,071 B. In it, Fang confirms or changes the limit, taking into account the bytes these fixes add. Make the `test_size_limit` comment match.
+
+**Notes (non-blocking)**
+- My "saved place" check flagged usage at h 74 in windows under 520 px tall. This is T-056's `usageCol = innerHeight < 520`, a viewer-level collapse that predates this PR, and x, y and w match the saved rect. I do not count it.
+- The headless rect check is still /tmp-only. Defects 1(a) to 1(c) suggest the node grid does not model a collapsed panel with an open menu, or a stage under 72 px on the desktop. Adding those two cases to `PLACE_CHECK` would catch fixes 1 and 3 without Chrome.
+- The `PLACE_CHECK` comment "a card that cannot fit at all ... has no chip (96px min)" is out of date: the card min is 56 and the card is chippable (deviation 1).
+- External skills `design:accessibility-review` and `data:validate-data` were not available in this session; not used.
+
+— Cahyani (reviewer)
 
 ## Decision
 
