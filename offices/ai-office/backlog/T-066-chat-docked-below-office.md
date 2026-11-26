@@ -2,7 +2,7 @@
 id: T-066
 title: "Chat as a docked section below the office; the office resizes"
 phase: 6-office
-status: review
+status: done
 priority: P1
 owner: pmo
 where: code
@@ -213,6 +213,7 @@ Done-when regression (all pass, same harness as Review 1):
 — Cahyani (reviewer)
 
 ## Decision
+Merged after Cahyani's Review 2 PASS (Janice, 26 Nov 2026). Chat is a docked section below the bar; the office resizes. Minimum chat height is measured (notice plus two thread lines). Follow-up T-067: composer warning overlap at minimum height, and the page-size headroom (16 B).
 
 ## Open questions
 - (Answered by Dinda in Design, UX: adjustable, bar above chat, height saved.) Can the chat height be adjusted (drag handle, presets) or is it fixed? Not a stated preference; the Design may choose. Dinda (UX) and Fang (design) to answer. Whatever is chosen must keep a minimum office height on a phone.
