@@ -1,0 +1,74 @@
+{
+  "skill": "document-assessment",
+  "rules": [
+    "Document",
+    "Gaps",
+    "Risks",
+    "Questions",
+    "Not reviewed",
+    "No approval",
+    "Data"
+  ],
+  "input": "Assess this invented tech doc. Vendor B, Daily Batch File Transfer Spec v1.1. One CSV file per day, dropped on the vendor SFTP server by 02:00. File name pattern given; column list given. Encryption: 'per agreement'. No checksum or row count trailer. If the file is late or missing, 'the vendor will do its best'. No retry or re-send procedure. Retention of the file on the SFTP server: not stated. Appendix 2 (key exchange) is marked 'internal'.",
+  "expected_output": "## Document\nVendor B Daily Batch File Transfer Spec v1.1: one CSV per day over SFTP by 02:00, with file name and column list.\n## Gaps\n- G1 Encryption is \"per agreement\" and no cipher or key owner is named (encryption section).\n- G2 No checksum or row count trailer, so a partial file cannot be detected.\n- G3 No late or missing file procedure and no re-send process.\n- G4 File retention on the SFTP server is not stated.\n## Risks\n- R1 [high] A truncated or corrupted file may be loaded as complete. Why: G2, no checksum or row count.\n- R2 [high] Files may sit unencrypted on the SFTP server. Why: G1, encryption is left to a later agreement and the file may hold personal data.\n- R3 [medium] A late file may block the day's processing with no agreed fix. Why: G3, \"best effort\" only.\n- R4 [low] Old files may stay on the server longer than needed. Why: G4.\n## Questions for the partner\n1. Will each file carry a checksum or a row count trailer? (G2, R1)\n2. Which encryption applies to the file at rest and in transit, and who holds the keys? (G1, R2)\n3. What is the process and the time limit for a late or missing file, and can you re-send one? (G3)\n4. How long do you keep files on the SFTP server? (G4)\n## Not reviewed\n- Appendix 2 (key exchange), marked internal and not shared.\n- Performance and file size limits, which the document does not give.\nThis assessment flags risks for a human decision. It is not legal review or approval.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^## Document$",
+      "rule": "Document"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Gaps$",
+      "rule": "Gaps"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Risks$",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Questions for the partner$",
+      "rule": "Questions"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed$",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^- R\\d+ \\[(?:high|medium|low)\\] .+Why: ",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^- R\\d+(?! \\[(?:high|medium|low)\\] )",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed\\n- \\S",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)\\b(?:legally (?:approved|compliant|sound)|approved for sign(?:ing|ature)|safe to sign|no legal risk)\\b",
+      "rule": "No approval"
+    },
+    {
+      "type": "must_contain",
+      "text": "It is not legal review or approval.",
+      "rule": "No approval"
+    },
+    {
+      "type": "max_lines",
+      "max": 40,
+      "rule": "Document"
+    }
+  ],
+  "bad_output": "## Document\nVendor B Daily Batch File Transfer Spec v1.1.\n## Gaps\n- G1 No checksum.\n## Risks\n- R1 [high] A partial file may be loaded. Why: G1.\n## Questions for the partner\n1. Will files carry a checksum? (G1)\nThis assessment flags risks for a human decision. It is not legal review or approval.",
+  "human_note": "Judge that the two high risks follow the data exposure and mis-load rules, and that Not reviewed names the real omissions, not a filler line.",
+  "why": "Every assessment must say what was left out. The bad output drops the Not reviewed section, so a reader would assume the whole spec was read."
+}

@@ -40,6 +40,7 @@ Before your step, read and follow:
 - base/skills/working-standard/SKILL.md
 - offices/ai-office/skills/architect-playbook/SKILL.md
 - offices/ai-office/skills/decision-record/SKILL.md
+- offices/ai-office/skills/document-assessment/SKILL.md
 - offices/ai-office/skills/handoff/SKILL.md
 
 ## External skills (use when available)

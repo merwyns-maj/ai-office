@@ -1,0 +1,74 @@
+{
+  "skill": "document-assessment",
+  "rules": [
+    "Document",
+    "Gaps",
+    "Risks",
+    "Questions",
+    "Not reviewed",
+    "No approval",
+    "Data"
+  ],
+  "input": "Assess this invented API doc. Partner A, Payment Status API v0.3 (draft). Two endpoints: GET /payments/{id} returns status (pending, paid, failed); POST /payments creates a payment from amount, currency and a reference. Auth: static API key in a header. Rate limit: 'reasonable use, contact us if blocked'. No error code list. No mention of retries or duplicate requests. Webhooks: 'planned'. Sandbox: 'available on request'. Annex B (data model) is referenced but not attached.",
+  "expected_output": "## Document\nPartner A Payment Status API v0.3 (draft): two REST endpoints to create a payment and read its status, API key auth.\n## Gaps\n- G1 No error codes or error body format (endpoints section).\n- G2 No idempotency key on POST /payments; duplicate handling not stated.\n- G3 Rate limit is \"reasonable use\" with no figure.\n- G4 Webhooks only \"planned\"; no way to learn status except polling.\n- G5 Annex B (data model) is referenced but not attached.\n## Risks\n- R1 [high] A retried POST /payments may create a duplicate payment. Why: G2, no idempotency key and no stated duplicate rule.\n- R2 [medium] Clients cannot tell a failed call from a timeout. Why: G1, no error codes.\n- R3 [medium] Polling may hit an unknown limit and be blocked at peak. Why: G3 and G4.\n- R4 [low] Static API key with no stated rotation. Why: auth section gives no rotation or expiry.\n## Questions for the partner\n1. Does POST /payments accept an idempotency key, and what happens on a repeated reference? (G2, R1)\n2. Can you share the full list of error codes and the error body format? (G1)\n3. What is the rate limit per minute, and what happens when it is exceeded? (G3)\n4. When will webhooks be available, and is polling supported until then? (G4)\n5. Can you send Annex B? (G5)\n## Not reviewed\n- Annex B (not attached) and the sandbox, which is only available on request.\nThis assessment flags risks for a human decision. It is not legal review or approval.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^## Document$",
+      "rule": "Document"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Gaps$",
+      "rule": "Gaps"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Risks$",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Questions for the partner$",
+      "rule": "Questions"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed$",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^- R\\d+ \\[(?:high|medium|low)\\] .+Why: ",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^- R\\d+(?! \\[(?:high|medium|low)\\] )",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed\\n- \\S",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)\\b(?:legally (?:approved|compliant|sound)|approved for sign(?:ing|ature)|safe to sign|no legal risk)\\b",
+      "rule": "No approval"
+    },
+    {
+      "type": "must_contain",
+      "text": "It is not legal review or approval.",
+      "rule": "No approval"
+    },
+    {
+      "type": "max_lines",
+      "max": 40,
+      "rule": "Document"
+    }
+  ],
+  "bad_output": "## Document\nPartner A Payment Status API v0.3.\n## Gaps\n- G1 No error codes.\n## Questions for the partner\n1. Can you share error codes? (G1)\n## Not reviewed\n- Annex B.\nThis assessment flags risks for a human decision. It is not legal review or approval.",
+  "human_note": "Judge that R1 is high under the money rule (duplicate payment), that the other severities fit the fixed levels, and that each question closes the gap it names.",
+  "why": "The API doc case shows gaps becoming risks with severity. The bad output has no Risks section, so nothing tells a human what matters."
+}

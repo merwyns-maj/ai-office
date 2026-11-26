@@ -30,7 +30,7 @@ class RealFiles(unittest.TestCase):
     def test_frontmatter_agent_and_task(self):
         meta, body = split_frontmatter((O / "agents" / "architect.md").read_text(), "a.md")
         self.assertEqual(meta["external_skills"], ["claude:diagram-design"])
-        self.assertEqual(meta["office_skills"], ["architect-playbook", "decision-record", "handoff"])
+        self.assertEqual(meta["office_skills"], ["architect-playbook", "decision-record", "document-assessment", "handoff"])
         self.assertIn("Fang", body)
         t001 = sorted((O / "backlog").glob("T-001-*.md"))[0]
         meta, _ = split_frontmatter(t001.read_text(), str(t001))

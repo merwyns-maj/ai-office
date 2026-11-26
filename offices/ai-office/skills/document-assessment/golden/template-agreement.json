@@ -1,0 +1,74 @@
+{
+  "skill": "document-assessment",
+  "rules": [
+    "Document",
+    "Gaps",
+    "Risks",
+    "Questions",
+    "Not reviewed",
+    "No approval",
+    "Data"
+  ],
+  "input": "Assess this invented template agreement. Services Agreement template from Vendor B, undated. Term: 12 months, auto-renews each year unless notice is given 90 days before the end. Liability cap: clause 9.2 says 'limited to [amount]' and the amount is blank. Fees: schedule 1 lists a monthly fee, price changes 'on notice'. Data processing: 'Annex 3 to follow'. Termination for convenience: vendor only. Governing law: left blank. Annex 3 and Schedule 2 are not attached.",
+  "expected_output": "## Document\nVendor B Services Agreement template, undated: 12-month term, fees, liability, data processing and termination clauses.\n## Gaps\n- G1 Liability cap amount in clause 9.2 is blank.\n- G2 Annex 3 (data processing) is \"to follow\".\n- G3 Governing law is blank.\n- G4 Price changes \"on notice\" with no notice period or limit (schedule 1).\n- G5 Termination for convenience is for the vendor only.\n## Risks\n- R1 [high] Personal data may be handled with no agreed terms. Why: G2, the data processing annex does not exist yet.\n- R2 [high] Liability may be uncapped or set later in the vendor's favour. Why: G1, clause 9.2 has no amount.\n- R3 [medium] Auto-renewal can lock in a year unnoticed. Why: term clause, 90 days notice before the end.\n- R4 [medium] Fees can rise without a cap. Why: G4.\n- R5 [low] No governing law named. Why: G3, which should be settled before signing.\n## Questions for the partner\n1. Can you share Annex 3 and Schedule 2 before we review further? (G2, R1)\n2. What amount or formula do you propose for clause 9.2? (G1, R2)\n3. What notice period and cap apply to fee changes? (G4)\n4. Which governing law do you propose, and can termination for convenience be mutual? (G3, G5)\n## Not reviewed\n- Annex 3 and Schedule 2, which are not attached.\n- Whether the clauses meet Indonesian law: for KlikA2C legal or compliance to answer, through Merwyn.\nThis assessment flags risks for a human decision. It is not legal review or approval.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^## Document$",
+      "rule": "Document"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Gaps$",
+      "rule": "Gaps"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Risks$",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Questions for the partner$",
+      "rule": "Questions"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed$",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^- R\\d+ \\[(?:high|medium|low)\\] .+Why: ",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^- R\\d+(?! \\[(?:high|medium|low)\\] )",
+      "rule": "Risks"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^## Not reviewed\\n- \\S",
+      "rule": "Not reviewed"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)\\b(?:legally (?:approved|compliant|sound)|approved for sign(?:ing|ature)|safe to sign|no legal risk)\\b",
+      "rule": "No approval"
+    },
+    {
+      "type": "must_contain",
+      "text": "It is not legal review or approval.",
+      "rule": "No approval"
+    },
+    {
+      "type": "max_lines",
+      "max": 40,
+      "rule": "Document"
+    }
+  ],
+  "bad_output": "## Document\nVendor B Services Agreement template.\n## Gaps\n- G1 Liability cap is blank.\n## Risks\n- R1 [high] Liability may be uncapped. Why: G1.\n## Questions for the partner\n1. What is the cap? (G1)\n## Not reviewed\n- Annex 3.\nThis agreement is safe to sign.",
+  "human_note": "Judge that R1 and R2 are high under the data and money rules, and that legal points are handed to a named human, not decided in the assessment.",
+  "why": "The skill flags risks and never approves. The bad output says the agreement is safe to sign, which the No approval check must catch."
+}
