@@ -12,7 +12,7 @@
   --panel:#1d1e2c;--text:#f2ede4;--text-dim:#9aa0b4;--rug:#353850;--wood:#7d6650;--paper:#efe6d2;
   --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --bar:56px;--side:288px;--bb:calc(var(--bar) + var(--chat-h));
+  --bar:56px;--side:288px;--st:var(--bar);--bb:calc(var(--bar) + var(--chat-h));
 }
 @property --chat-h{syntax:'<length>';inherits:true;initial-value:0px}
 *{box-sizing:border-box}
@@ -83,9 +83,12 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 .seg[aria-pressed=true]{background:#2a2c42;border-color:rgba(255,255,255,.35)}
 
 /* ticker */
-#side{position:absolute;right:12px;top:var(--bar);bottom:var(--bb);width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
-#ticker{flex:1 1 0;min-height:96px;padding:0 12px 12px;overflow:visible;position:relative;display:flex;flex-direction:column;gap:2px}
+#side{position:absolute;right:12px;top:calc(var(--bar) + var(--fh,0px));bottom:calc(var(--bb) + var(--fb,0px));width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
+#ticker{flex:1 1 0;min-height:40px;padding:0 12px 12px;overflow:visible;position:relative;display:flex;flex-direction:column;gap:2px}
 #ticker .uh{padding:10px 0 8px}
+#ticker.hd{flex:none;min-height:0;padding-bottom:0}
+#ticker.hd #tlist{display:none}
+#usage.xc,#ticker.xc,#focus.xc{display:none!important}
 #nomodel{color:var(--text-dim);font-size:12px;margin:0 0 6px}
 
 /* usage panel (T-056) */
@@ -97,8 +100,8 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 .ucol svg{width:12px;height:12px;transition:rotate .16s ease-out}
 .ucol[aria-expanded=false] svg{rotate:-90deg}
 body.rm .ucol svg{transition:none}
-.ubody{overflow:auto;padding:0 12px 10px;scrollbar-width:thin}
-#usage.col .ubody,#usage:not(.col) .usum{display:none}
+.ubody{flex:1 1 auto;min-height:0;overflow:auto;padding:0 12px 10px;scrollbar-width:thin}
+#usage.col .ubody,#usage.ac .ubody,#usage:not(.col):not(.ac) .usum{display:none}
 .usum{padding:0 12px 10px;font-size:12px;color:var(--text)}
 .ubody h4{margin:10px 0 3px;font:700 10px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
 .ur{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;padding:4px 6px;margin:0 -6px;border-radius:6px;border-top:1px solid rgba(255,255,255,.05)}
@@ -148,7 +151,7 @@ body.rm .bar i{transition:none}
 .dhead .syn{font:italic 400 10px/1.3 var(--ui);color:var(--text-dim)}
 .useg{padding:0 12px 8px;flex:none}
 #usheet .useg{padding:0 0 8px}
-#usage.col .useg{display:none}
+#usage.col .useg,#usage.ac .useg{display:none}
 .vseg{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:7px;overflow:hidden}
 .vseg button{flex:1;height:28px;border:0;background:transparent;color:var(--text-dim);font:500 11px/1 var(--ui);padding:0 8px}
 .vseg button + button{border-left:1px solid rgba(255,255,255,.12)}
@@ -164,7 +167,7 @@ body.rm .umode.ufade{animation:none}
 #usheet .dhead{font-size:13px}
 .ufoot.rec{font-size:11px}
 #ubtn{display:none}
-#usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bb) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
+#usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bb) + 40px);overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
 #usheet.open{display:flex}
 #usheet .uh{position:sticky;top:0;background:var(--panel);padding:10px 0 8px;z-index:1}
 #usheet .ucol{width:44px;height:44px;font-size:20px}
@@ -248,12 +251,16 @@ body.rm .tl.new{animation:none}
 .synpill{text-shadow:none}
 @media (min-width:900px){
   #gear{display:inline-flex}
+  body.uchip #ubtn{display:inline-flex}
+  #usheet{left:auto;right:12px;width:calc(var(--side) - 24px);bottom:calc(var(--bb) + 4px);max-height:calc(100% - var(--bar) - var(--bb) - 8px)}
+  body.echip #tone{display:block;position:absolute;right:12px;width:calc(var(--side) - 24px);bottom:var(--bb);height:34px;padding:0 12px;text-align:left;font-size:12px;overflow:hidden;white-space:nowrap;border:0}
+  body.echip #msheet,body.echip #usheet{bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--bar) - var(--bb) - 48px)}
   #msheet{position:absolute;right:12px;bottom:calc(var(--bb) + 4px);padding:10px;gap:8px;flex-direction:column;z-index:9}
   #msheet.open{display:flex}
   body.free #side{display:block;left:0;right:0;top:0;bottom:0;width:auto;margin:0;pointer-events:none}
   body.free #usage,body.free #ticker{position:absolute;pointer-events:auto;left:var(--px);top:var(--py);width:var(--pw);height:var(--ph);max-height:none;min-height:0;margin:0;flex:none;z-index:var(--pz,2)}
-  body.free #usage.col{height:auto}
-  body.free #tlist{overflow:auto;flex:1 1 auto;min-height:0;scrollbar-width:thin}
+  body.free #usage.col,body.free #usage.ac{height:auto}
+  #tlist{overflow:auto;flex:1 1 auto;min-height:0;scrollbar-width:thin}
   body.free .pp{background:var(--pbg);border-color:var(--pbd)}
   @supports (backdrop-filter:blur(1px)){body.free .pp{backdrop-filter:blur(var(--pblur));-webkit-backdrop-filter:blur(var(--pblur))}}
   body.free .pp.tp{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6)}
@@ -298,6 +305,7 @@ body.rm .tl.new{animation:none}
   .seg .ini{display:block;font:700 11px/1 var(--ui)}
   #stage{top:112px;bottom:calc(var(--bb) + 36px)}
   #bar{padding:8px;gap:6px}
+  :root{--st:112px}
   #bar .seg2{display:none}
   #bar .opt{display:none}
   #bar #clock{display:none}
@@ -310,7 +318,12 @@ body.rm .tl.new{animation:none}
   #tone{left:8px;right:8px}
 }
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
-body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bb) + 40px);z-index:7}
+body.tk #ticker{display:flex!important;position:fixed;margin:0;left:8px;right:8px;width:auto;top:auto;height:auto;z-index:7}
+body.tk #ticker.hd #tlist{display:block}
+/* phone and tablet (T-067): card, usage sheet, menu and event list share one slot in the stage and scroll inside */
+@media (max-width:899px){body.nost #tone,body.nost #focus,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}
+#focus,#usheet,#msheet,body.tk #ticker{top:auto;bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--st) - var(--bb) - 48px);overflow:auto}}
+@media (min-width:900px){body.nost #tone,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}body.tk #ticker{left:auto;right:12px;width:calc(var(--side) - 24px);bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--bar) - var(--bb) - 48px);overflow:auto}}
 @media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
 /* office chat (T-063) */
 #chat[hidden],#chatbtn[hidden]{display:none}
@@ -324,7 +337,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 #chgrip:after{content:'';position:absolute;left:50%;top:5px;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:rgba(255,255,255,.3)}
 #chgrip:hover:after,#chgrip.on:after{background:rgba(255,255,255,.6)}
 #chgrip:focus-visible{outline:2px solid var(--text);outline-offset:-2px}
-#cmid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+#cmid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 #chat .uh h2{white-space:nowrap}
 #chat .cb{max-width:min(88%,720px)}
 #chat .uh .ucol{font-size:18px}
@@ -388,7 +401,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 #clist li[aria-selected=true]{background:rgba(255,255,255,.12)}
 #clist li i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--text-dim));flex:none}
 #clist li small{color:var(--text-dim);font-size:11px}
-#cwarn{font-size:12px;color:var(--text);background:rgba(244,162,97,.16);border:1px solid var(--warn);border-radius:8px;padding:6px 9px}
+#cwarn{font-size:12px;color:var(--text);background:var(--panel);border:1px solid var(--warn);border-radius:8px;padding:6px 9px}
 #cwarn[hidden]{display:none}
 .cfoot button{white-space:nowrap;flex:none}
 .cfoot{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--text-dim);line-height:1.35}
@@ -875,6 +888,68 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     PANEL.IDS.forEach(function (id) { var p = l[id]; if (p) o[id] = { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(p.w), h: Math.round(p.h), o: opacityStep(p.o) }; });
     return JSON.stringify(o);
   }
+  /* no overlap (T-067): parts in priority order; a lower part yields to every higher one (slide, shrink, collapse, chip). Pure: numbers in, numbers out.
+     part {id, r:{x,y,w,h} wanted, min, col (collapsed h), axis 'xy'|'y'|'', fixed, collapsible, chip, off, after}; out[id] {x,y,w,h,s} s: full|shrunk|col|chip */
+  function hit(a, c) { return a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h; }
+  function place(b, parts) {
+    var M = PANEL.MARGIN, m = panelMax(b), bh = b.bottom - b.top, chip = {}, col = {}, order = parts.filter(function (p) { return p.collapsible; }), k = 0;
+    parts.forEach(function (p) { if (p.off) chip[p.id] = 1; });
+    function run() {
+      var out = {}, obs = [], bad = [];
+      parts.forEach(function (p) {
+        if (chip[p.id]) { out[p.id] = { s: 'chip' }; return; }
+        var c = col[p.id], R = p.r, w = Math.round(pclamp(R.w, PANEL.MIN_W, m.w)), h = c ? p.col : R.h, mn = c ? p.col : p.min, fail = function () { out[p.id] = { x: R.x, y: R.y, w: w, h: h, s: 'full' }; bad.push(p.id); };
+        if (p.fixed) { out[p.id] = { x: R.x, y: R.y, w: R.w, h: R.h, s: 'full' }; obs.push(out[p.id]); return; }
+        var hh = Math.min(h, bh), x = Math.round(Math.max(b.left, Math.min(R.x, b.right - w))), y0 = p.after && out[p.after] && out[p.after].x !== undefined ? out[p.after].y + out[p.after].h + M : R.y;
+        var y = Math.round(Math.max(b.top, Math.min(y0, b.bottom - hh))), r = { x: x, y: y, w: w, h: Math.round(hh) }, s = c ? 'col' : (hh < h ? 'shrunk' : 'full');
+        function free(q) { return !obs.some(function (o) { return hit(q, o); }); }
+        if (hh < mn) { fail(); return; }
+        if (!free(r)) {
+          var best = null, d0, cand = [];
+          obs.forEach(function (o) { cand.push([x, o.y - M - r.h], [x, o.y + o.h + M]); if (p.axis === 'xy') cand.push([o.x - M - w, y], [o.x + o.w + M, y]); });
+          cand.push([x, b.top], [x, b.bottom - r.h]);
+          if (p.axis) cand.forEach(function (q) {
+            var t = { x: Math.round(q[0]), y: Math.round(q[1]), w: w, h: r.h }, d = Math.abs(t.y - y) + Math.abs(t.x - x) * 1000;
+            if (t.x >= b.left && t.x + w <= b.right && t.y >= b.top && t.y + r.h <= b.bottom && free(t) && (!best || d < d0)) { best = t; d0 = d; }
+          });
+          if (best) r = best;
+          else {   /* shrink into the largest free gap of its column band */
+            var band = obs.filter(function (o) { return o.x < x + w && x < o.x + o.w; }).sort(function (a, c2) { return a.y - c2.y; }), gs = b.top, gaps = [];
+            band.forEach(function (o) { if (o.y - M > gs) gaps.push([gs, o.y - M]); gs = Math.max(gs, o.y + o.h + M); });
+            if (b.bottom > gs) gaps.push([gs, b.bottom]);
+            var g = null; gaps.forEach(function (q) { var L = q[1] - q[0]; if (!g || L > g[1] - g[0]) g = q; });
+            if (!g || g[1] - g[0] < Math.max(mn, 1)) { fail(); return; }
+            var h2 = Math.min(r.h, g[1] - g[0]); r = { x: x, y: Math.round(Math.max(g[0], Math.min(y, g[1] - h2))), w: w, h: Math.round(h2) }; s = c ? 'col' : 'shrunk';
+          }
+        }
+        r.s = s; out[p.id] = r; obs.push(r);
+      });
+      return { out: out, bad: bad };
+    }
+    for (;;) {
+      var q = run();
+      if (!q.bad.length) return q.out;
+      if (k < order.length) { col[order[k++].id] = 1; continue; }
+      var low = null; parts.forEach(function (p) { if (p.chip && q.bad.indexOf(p.id) >= 0) low = p.id; });
+      if (!low) return q.out;
+      chip[low] = 1;
+    }
+  }
+  /* a drag or resize: x (w) then y (h), each stopped at the first obstacle edge; the neighbour is never pushed */
+  function sweep(f, t, obs) {
+    var r = { x: f.x, y: f.y, w: f.w, h: f.h };
+    if (obs.some(function (o) { return hit(r, o); })) return r;
+    [['x', 'w'], ['y', 'h']].forEach(function (k) {
+      var a = k[0], z = k[1], da = t[a] - r[a], dz = t[z] - r[z], n = Math.max(Math.abs(da), Math.abs(dz)), last = r;
+      for (var i = 1; i <= n; i++) {
+        var q = { x: r.x, y: r.y, w: r.w, h: r.h }; q[a] = Math.round(r[a] + da * i / n); q[z] = Math.round(r[z] + dz * i / n);
+        if (obs.some(function (o) { return hit(q, o); })) break;
+        last = q;
+      }
+      r = last;
+    });
+    return r;
+  }
   /* chat dock (T-066) */
   var DOCK = { MIN: 180, LINES: 58, DEF_D: 0.38, DEF_P: 0.40, MIN_STAGE_D: 240, MIN_STAGE_P: 160, STEP: 16, STEP_BIG: 64 };
   /* want: saved px or anything else (default); chrome: top strip + bar + tone; kb: keyboard px */
@@ -1055,7 +1130,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     MODE_KEY: MODE_KEY, parseMode: parseMode, budgetRow: budgetRow, budgetLevel: budgetLevel, sortDetail: sortDetail, budgetView: budgetView,
     tickerItems: tickerItems, switchSentence: switchSentence,
     PANEL: PANEL, chatDock: DOCK, chatH: chatH, panelBounds: panelBounds, clampRect: clampRect, moveRect: moveRect, resizeRect: resizeRect, snapRect: snapRect, keyDelta: keyDelta,
-    opacityStep: opacityStep, blurFor: blurFor, textMode: textMode, rectSentence: rectSentence, parseLayout: parseLayout, serializeLayout: serializeLayout };
+    place: place, sweep: sweep, opacityStep: opacityStep, blurFor: blurFor, textMode: textMode, rectSentence: rectSentence, parseLayout: parseLayout, serializeLayout: serializeLayout };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
 <script id="office-view">
@@ -1223,7 +1298,7 @@ function updateTone(n) {
   var last = TI.filter(function (it) { return it.i < n; }).pop();
   t.innerHTML = last ? '<span class="mono" style="color:var(--text-dim)">' + C.clock(TL[last.i].start) + '</span> ' + esc(last.kind === 'switch' ? C.switchSentence(last.sw, NAME, D.providers) : C.sentence(EV[last.i], NAME)) : 'The office is quiet.';
 }
-$('tone').addEventListener('click', function () { document.body.classList.toggle('tk'); });
+$('tone').addEventListener('click', function () { var on = !document.body.classList.contains('tk'); document.body.classList.toggle('tk', on); if (on) layer('tk'); reqFit(true); });
 function announce(t) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = t; }, 30); }
 /* usage panel: one renderer feeds the docked panel and the phone sheet */
 function fmtTok(n) {
@@ -1359,6 +1434,7 @@ function renderUsage() {
   growBars($('ubody'));
   if ($('usheet').classList.contains('open')) fillSheet(html);
   if (keep) { var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), nb = box.querySelector('[data-mode="' + keep + '"]'); if (nb) nb.focus(); }
+  reqFit();
 }
 /* bars grow from where they were (160ms, off in reduced motion): the panel is redrawn as HTML, so the old width is carried over by hand */
 function growBars(box) {
@@ -1375,7 +1451,7 @@ function fillSheet(html) {
   $('usx').addEventListener('click', closeSheet);
 }
 function openSheet() {
-  var sh = $('usheet'); sh.hidden = false; sh.classList.add('open'); $('ubtn').setAttribute('aria-expanded', 'true');
+  layer('usheet'); var sh = $('usheet'); sh.hidden = false; sh.classList.add('open'); $('ubtn').setAttribute('aria-expanded', 'true');
   fillSheet(budgetsHTML()); usageKey = '';
   $('usx').focus();
 }
@@ -1388,7 +1464,7 @@ function initUsage() {
   if (!HAS_MODELS) return;
   USAGE_MODE = loadMode();
   usageCol = innerHeight < 520 || params.get('usage') === 'collapsed';
-  $('ucol').addEventListener('click', function () { usageCol = !usageCol; usageKey = ''; renderUsage(); });
+  $('ucol').addEventListener('click', function () { if ($('usage').classList.contains('ac')) acPin = true; else usageCol = !usageCol; usageKey = ''; renderUsage(); reqFit(); });   // while auto-collapsed the click pins it open until the next layout change
   $('ubtn').addEventListener('click', function () { if ($('usheet').classList.contains('open')) closeSheet(); else openSheet(); });
   [$('usage'), $('usheet')].forEach(function (box) {
     box.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('.vseg [role=radio]'); if (t) setMode(t.dataset.mode, true); });
@@ -1398,12 +1474,23 @@ function initUsage() {
 }
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
 
+/* one transient layer (T-067); on desktop the usage sheet and event list are layers, the card and menu are parts */
+function closeLayer(n) {
+  if (n === 'focus') { if (focused) focusAgent(null); }
+  else if (n === 'usheet') closeSheet();
+  else if (n === 'msheet') { $('msheet').classList.remove('open'); $('gear').setAttribute('aria-expanded', 'false'); }
+  else if (n === 'tk') document.body.classList.remove('tk');
+}
+function layer(n) {
+  var a = document.activeElement; LY.opener = a && a !== document.body ? a : LY.opener;
+  ['focus', 'usheet', 'msheet', 'tk'].forEach(function (o) { if (o !== n && (innerWidth < 900 || n === 'usheet' || n === 'tk' || o === 'usheet' || o === 'tk')) closeLayer(o); });
+}
 /* focus card */
 var focused = null;
 function focusAgent(id, fromHud) {
   focused = focused === id && fromHud ? null : id;
   $('focus').hidden = !focused;
-  if (focused) renderFocus();
+  if (focused) { layer('focus'); renderFocus(); }
   if (scene) scene.focus(focused);
   renderStrip(true);
 }
@@ -1463,6 +1550,7 @@ $('motion').addEventListener('click', function () { setMotion(REDUCED ? 'full' :
 $('follow').addEventListener('click', function () { followOn = !followOn; setMotion(REDUCED ? 'reduced' : 'full', false); });
 $('gear').addEventListener('click', function () {
   var m = $('msheet'), open = !m.classList.contains('open');
+  if (open) layer('msheet');
   m.classList.toggle('open', open); $('gear').setAttribute('aria-expanded', String(open));
   if (open && innerWidth >= 900) { m.innerHTML = ''; var rb = el('button', 'btn', 'Reset layout'); rb.addEventListener('click', function () { m.classList.remove('open'); $('gear').setAttribute('aria-expanded', 'false'); resetLayout(); $('gear').focus(); }); m.appendChild(rb); }
   else if (open) { m.innerHTML = ''; m.appendChild(el('div', 'seg2')); Array.prototype.forEach.call($('speed').children, function (b) { var c = b.cloneNode(true); c.addEventListener('click', function () { setSpeed(+b.dataset.s); Array.prototype.forEach.call(m.firstChild.children, function (x) { x.setAttribute('aria-pressed', String(x.dataset.s == speed)); }); }); c.setAttribute('aria-pressed', String(+b.dataset.s === speed)); m.firstChild.appendChild(c); });
@@ -1482,7 +1570,7 @@ document.addEventListener('keydown', function (e) {
   else if (k === '1' || k === '2' || k === '4') setSpeed(+k);
   else if (k === 'm' || k === 'M') { if (!SYSTEM_RM) $('motion').click(); }
   else if (k === 'f' || k === 'F') { if (!REDUCED) $('follow').click(); }
-  else if (k === 'Escape') { if (!$('usheet').hidden) closeSheet(); else if (focused) focusAgent(null); }
+  else if (k === 'Escape') { var op = LY.opener; if (!$('usheet').hidden) closeSheet(); else if ($('msheet').classList.contains('open')) closeLayer('msheet'); else if (document.body.classList.contains('tk')) closeLayer('tk'); else if (focused) focusAgent(null); else return; if (op && op.isConnected && op.focus) op.focus(); }
 });
 function stepEv(d) {
   setPlaying(false);
@@ -2304,7 +2392,8 @@ var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><g fill="currentColor"><
 var RZ = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M14 4L4 14M14 9L9 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 function floatOK() { return innerWidth >= 900; }
 function pbounds() { return C.panelBounds(innerWidth, innerHeight, $('bar').offsetHeight || 56, (chatOpen() ? DK.h : 0)); }
-function shown(id) { return C.clampRect(PL.r[id], pbounds()); }
+var PLACED = {}, FLAST = {}, fitReq = 0, acPin = false, COLW = 264, LY = { opener: null };   /* T-067: PLACED = shown rects from C.place; PL.r stays what the viewer saved */
+function shown(id) { return PLACED[id] || C.clampRect(PL.r[id], pbounds()); }
 function pids() { return PIDS.filter(function (id) { return !$(id).hidden; }); }
 function readStore() { try { return localStorage.getItem(PN.KEY); } catch (e) { return null; } }   // storage blocked: default layout, silently
 function writeStore() { try { localStorage.setItem(PN.KEY, C.serializeLayout(layoutObj())); } catch (e) { /* ignore */ } }
@@ -2330,7 +2419,7 @@ function paintOpacity(id) {
   e.classList.toggle('tp', m.shadow); e.classList.toggle('tpd', m.dim);
   if (inp) { inp.value = o; inp.setAttribute('aria-valuetext', o + ' percent'); $('ov-' + id).textContent = o + '%'; }
 }
-function settle(id, r, ms) { PL.r[id] = r; animPaint(id, ms); }
+function settle(id, r, ms) { PL.r[id] = PLACED[id] = r; animPaint(id, ms); }
 function animPaint(id, ms) {   // short position settle; none under reduced motion
   var e = $(id);
   if (REDUCED) { paintRect(id); return; }
@@ -2343,7 +2432,8 @@ function freeze() {
   if (!floatOK()) return false;
   var m = measureDefaults(), b = pbounds();
   pids().forEach(function (id) {
-    var r = m[id]; if (id === 'usage' && usageCol) r.h = Math.min(360, Math.max(PN.MIN_H, b.bottom - b.top));   // collapsed: remember a usable expanded height
+    var r = m[id]; if (id === 'usage' && (usageCol || $(id).classList.contains('ac'))) r.h = Math.min(360, Math.max(PN.MIN_H, b.bottom - b.top));   // collapsed: remember a usable expanded height
+    r.h = Math.max(r.h, PN.MIN_H);   // a shrunk or collapsed events panel keeps a saveable height
     PL.r[id] = C.moveRect(r, 0, 0, b);   // today's size, kept
   });
   setFree(true); pids().forEach(function (id) { paintRect(id); }); front(null);
@@ -2354,7 +2444,7 @@ function applySaved() {
   var saved = PL.pending; if (!saved || PL.free || !floatOK() || !(saved.usage || saved.ticker)) return;
   var d = measureDefaults(), b = pbounds();
   pids().forEach(function (id) { var s = saved[id]; PL.r[id] = s || C.clampRect(d[id], b); PL.o[id] = s ? s.o : PN.OPACITY; });
-  setFree(true); PIDS.forEach(function (id) { paintRect(id); paintOpacity(id); });
+  setFree(true); PIDS.forEach(function (id) { paintRect(id); paintOpacity(id); }); fit();
 }
 function closeMenus(report) {
   var any = false;
@@ -2375,7 +2465,7 @@ function resetLayout() {
   announce('Layout reset');
 }
 function clearFree() {
-  PL.r = { usage: null, ticker: null }; setFree(false);
+  PL.r = { usage: null, ticker: null }; PLACED = {}; FLAST = {}; setFree(false);
   PIDS.forEach(function (id) { var e = $(id); e.classList.remove('anim', 'drag', 'placed'); ['--px', '--py', '--pw', '--ph', '--pz'].forEach(function (v) { e.style.removeProperty(v); }); });
 }
 function beginDrag(id, mode, e, host) {
@@ -2389,27 +2479,27 @@ function beginDrag(id, mode, e, host) {
 function dragMove(e) {
   var d = pdrag; if (!d || e.pointerId !== d.pid) return;
   var dx = e.clientX - d.sx, dy = e.clientY - d.sy, b = pbounds();
-  PL.r[d.id] = d.mode === 'move' ? C.moveRect(d.r, dx, dy, b) : C.resizeRect(d.r, d.r.w + dx, d.r.h + dy, b);
+  PL.r[d.id] = PLACED[d.id] = C.sweep(d.r, d.mode === 'move' ? C.moveRect(d.r, dx, dy, b) : C.resizeRect(d.r, d.r.w + dx, d.r.h + dy, b), others(d.id));   // stops at a neighbour's edge, never pushes it
   paintRect(d.id);
 }
 function dragEnd(e, cancel) {
   var d = pdrag; if (!d || e.pointerId !== d.pid) return;
   pdrag = null; $(d.id).classList.remove('drag');
   try { d.host.releasePointerCapture(d.pid); } catch (x) { /* ignore */ }
-  if (d.mode === 'move' && !cancel) { var sn = C.snapRect(PL.r[d.id], pbounds()), c = PL.r[d.id]; if (sn.x !== c.x || sn.y !== c.y) settle(d.id, sn, 120); }
-  writeStore();
+  if (d.mode === 'move' && !cancel) { var c = PL.r[d.id], sn = C.sweep(c, C.snapRect(c, pbounds()), others(d.id)); if (sn.x !== c.x || sn.y !== c.y) settle(d.id, sn, 120); }
+  writeStore(); reqFit();
 }
 function keyAct(id, e, isGrip) {
   var k = e.key, r, b;
   if (k === 'Home' && isGrip) {
     e.preventDefault(); if (!freeze()) return;
     var d = measureDefaults()[id]; if (!d) return;
-    b = pbounds(); front(id); r = shown(id); PL.r[id] = C.moveRect(r, d.x - r.x, d.y - r.y, b); paintRect(id); keyEnd(id); return;
+    b = pbounds(); front(id); r = shown(id); PL.r[id] = PLACED[id] = C.sweep(r, C.moveRect(r, d.x - r.x, d.y - r.y, b), others(id)); paintRect(id); keyEnd(id); return;
   }
   var dl = C.keyDelta(k, e.shiftKey); if (!dl) return;
   e.preventDefault(); if (!freeze() || !PL.r[id]) return;
   b = pbounds(); r = shown(id); front(id); clearTimeout(resetTimer);
-  PL.r[id] = (isGrip && !e.altKey) ? C.moveRect(r, dl[0], dl[1], b) : C.resizeRect(r, r.w + dl[0], r.h + dl[1], b);
+  PL.r[id] = PLACED[id] = C.sweep(r, (isGrip && !e.altKey) ? C.moveRect(r, dl[0], dl[1], b) : C.resizeRect(r, r.w + dl[0], r.h + dl[1], b), others(id));
   paintRect(id); keyEnd(id);
 }
 function attachPanel(id) {
@@ -2445,11 +2535,86 @@ function initPanels() {
     if (!(t.closest && t.closest('.pm,.pmb'))) closeMenus(false);
     var ms = $('msheet'); if (ms.classList.contains('open') && floatOK() && !(t.closest && t.closest('#msheet,#gear'))) { ms.classList.remove('open'); $('gear').setAttribute('aria-expanded', 'false'); }
   });
-  window.addEventListener('resize', function () {
-    if (!floatOK()) return;
-    if (!PL.free) { applySaved(); return; }
-    pids().forEach(function (id) { if (PL.r[id]) animPaint(id, 160); });
+  window.addEventListener('resize', function () { if (floatOK() && !PL.free) applySaved(); reqFit(true); });
+  if (window.ResizeObserver) { var ro = new ResizeObserver(function () { reqFit(); }); ['focus', 'usage', 'ticker'].forEach(function (i) { ro.observe($(i)); }); }
+  if (window.MutationObserver) {
+    var mo = new MutationObserver(function () { reqFit(true); });
+    ['focus', 'usheet', 'msheet'].forEach(function (i) { mo.observe($(i), { attributes: true, attributeFilter: ['class', 'hidden'] }); });
+    ['usage', 'ticker'].forEach(function (i) { mo.observe($(i), { attributes: true, subtree: true, attributeFilter: ['hidden'] }); });
+    new MutationObserver(function () { reqFit(); }).observe($('tlist'), { childList: true });
+  }
+  reqFit(true);
+}
+/* ---------- no overlap (T-067): fit() builds the parts and asks C.place; flow keeps its CSS geometry and takes only the states ---------- */
+function others(id) {   /* what a dragged panel may not enter: the other panel, the card, an open sheet or menu, the events chip */
+  var o = []; pids().forEach(function (x) { if (x !== id && !$(x).classList.contains('xc')) o.push(shown(x)); });
+  ['focus', 'msheet', 'usheet', 'tone'].forEach(function (x) { var e = $(x); if (e.offsetWidth) { var r = e.getBoundingClientRect(); o.push({ x: r.left, y: r.top, w: r.width, h: r.height }); } });
+  return o;
+}
+function reqFit(clear) {
+  if (clear) acPin = false;
+  if (!fitReq) fitReq = requestAnimationFrame(function () { fitReq = 0; fit(); });
+}
+function rectOf(e) { var r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }
+function fit() {
+  var B = document.body, u = $('usage'), t = $('ticker'), f = $('focus'), side = $('side');
+  if (pdrag) return;
+  if (!floatOK()) {
+    ['xc', 'ac', 'hd'].forEach(function (c) { u.classList.remove(c); t.classList.remove(c); }); f.classList.remove('xc');
+    B.classList.toggle('nost', $('stage').offsetHeight < 72);   // no room for a layer: it waits
+    B.classList.remove('uchip', 'echip'); f.style.maxHeight = ''; side.style.removeProperty('--fh'); side.style.removeProperty('--fb'); u.style.minHeight = t.style.minHeight = ''; PLACED = {};
+    return;
+  }
+  B.classList.toggle('nost', $('stage').offsetHeight < 72);   // desktop too
+  var free = PL.free, b = pbounds(), M = PN.MARGIN, cx = innerWidth - 12 - COLW, flow = !free, tk = B.classList.contains('tk'), usePl = !u.hidden;
+  var sbot = b.bottom + M, bb = b;
+  /* natural heights, measured with the auto classes off (sync, no paint in between) */
+  var uc0 = u.classList.contains('col'), ua0 = u.classList.contains('ac'), th0 = t.classList.contains('hd'), nat = {};
+  var ux = u.classList.contains('xc'), tx = t.classList.contains('xc'); u.classList.remove('ac', 'xc'); t.classList.remove('hd', 'xc'); u.style.minHeight = t.style.minHeight = '';
+  u.classList.remove('col'); nat.un = u.querySelector('.uh').offsetHeight + $('useg').offsetHeight + $('ubody').scrollHeight + 2;
+  u.classList.add('col'); nat.uc = u.querySelector('.uh').offsetHeight + $('usum').offsetHeight + 2;
+  u.classList.toggle('col', uc0); u.classList.toggle('ac', ua0);
+  var tuh = t.querySelector('.uh').offsetHeight; nat.tc = tuh + 2; nat.tn = tuh + $('tlist').scrollHeight + 16;
+  nat.pu = pmH('usage'); nat.pt = pmH('ticker');   // measured while unchipped (else 0 and a flip)
+  t.classList.toggle('hd', th0); u.classList.toggle('xc', ux); t.classList.toggle('xc', tx);
+  var fmh = f.style.maxHeight, fh0 = 0, fx = f.classList.contains('xc'); f.classList.remove('xc'); f.style.maxHeight = 'none'; if (!f.hidden) fh0 = f.offsetHeight; f.style.maxHeight = fmh; f.classList.toggle('xc', fx);
+  function pmH(id) { var pm = $('pm-' + id); return pm && !pm.hidden ? pm.offsetTop + pm.offsetHeight + 2 : 0; }
+  function sheets() {
+    var a = [];
+    ['msheet', 'usheet'].forEach(function (i) { var e = $(i); if (e.classList.contains('open') && e.offsetWidth) a.push({ id: i, fixed: true, r: rectOf(e) }); });
+    if (tk) a.push({ id: 'tk', fixed: true, r: rectOf(t) });
+    return a;
+  }
+  function build(sh, tone) {
+    var P = sh.slice(), top = b.top + 4;
+    if (tone) P.push({ id: 'tone', fixed: true, r: { x: cx, y: sbot - 34, w: COLW, h: 34 } });
+    if (fh0) { var h = Math.min(fh0, Math.max(56, Math.floor((sbot - b.top) * 0.45))); P.push({ id: 'focus', r: { x: cx, y: b.top + 4, w: COLW, h: h }, min: 56, axis: '', chip: true }); top = b.top + 4 + h + M; }
+    if (usePl) {
+      var ur = free ? PL.r.usage : { x: cx, y: top, w: COLW, h: nat.un }, um = Math.max(PN.MIN_H, nat.pu), uh = Math.max(nat.uc, nat.pu);
+      P.push({ id: 'usage', r: { x: ur.x, y: ur.y, w: ur.w, h: usageCol ? uh : ur.h }, min: usageCol ? uh : um, col: uh, axis: free ? 'xy' : 'y', collapsible: !usageCol && !acPin, chip: true });
+    }
+    if (!tk) { var tr = free ? PL.r.ticker : { x: cx, y: top, w: COLW, h: nat.tn }; P.push({ id: 'ticker', r: { x: tr.x, y: tr.y, w: tr.w, h: tr.h }, min: Math.max(40, nat.tc, nat.pt), col: Math.max(nat.tc, nat.pt), axis: free ? 'xy' : 'y', collapsible: true, chip: true, off: !!tone, after: flow && usePl ? 'usage' : undefined }); }
+    return P;
+  }
+  function bounds(sh, tone) {   /* flow: the column ends 4px above the stage floor, or 8px above the highest sheet, menu or chip in it */
+    if (!flow) return b;
+    var y = sbot - 4 + M; sh.forEach(function (q) { y = Math.min(y, q.r.y); }); if (tone) y = Math.min(y, sbot - 34);
+    return { left: b.left, right: b.right, top: b.top, bottom: y - M };
+  }
+  B.classList.remove('echip');
+  var sh1 = sheets(), out = C.place(bb = bounds(sh1, false), build(sh1, false)), ech = tk || (out.ticker && out.ticker.s === 'chip');
+  if (ech) { B.classList.add('echip'); sh1 = sheets(); out = C.place(bb = bounds(sh1, true), build(sh1, true)); }
+  if (flow) side.style.setProperty('--fb', (sbot - bb.bottom - 4) + 'px'); else side.style.removeProperty('--fb');
+  B.classList.toggle('uchip', !!(out.usage && out.usage.s === 'chip'));
+  [['usage', u, 'ac'], ['ticker', t, 'hd']].forEach(function (q) {
+    var o = out[q[0]], e = q[1], on = !!o && o.s !== 'chip'; if (!o && !(q[0] === 'ticker' && tk)) return;
+    e.classList.toggle('xc', !!o && o.s === 'chip'); e.classList.toggle(q[2], !!o && o.s === 'col');
+    var pm = q[0] === 'usage' ? nat.pu : nat.pt; e.style.minHeight = on && pm ? pm + 'px' : '';
+    if (free && o) { PLACED[q[0]] = o.s === 'chip' ? null : o; if (on) { var k = JSON.stringify(o); if (FLAST[q[0]] !== k) { var first = FLAST[q[0]] === undefined; FLAST[q[0]] = k; if (first || pdrag) paintRect(q[0]); else animPaint(q[0], 160); } } }
   });
+  f.classList.toggle('xc', !!out.focus && out.focus.s === 'chip');   // no room beside an open menu: the card waits and returns when the menu closes
+  if (fh0 && out.focus && out.focus.s !== 'chip') { f.style.maxHeight = out.focus.h + 'px'; side.style.setProperty('--fh', (out.focus.h + M) + 'px'); } else { f.style.maxHeight = ''; side.style.removeProperty('--fh'); }
+  var uac = u.classList.contains('ac') || usageCol; $('ucol').setAttribute('aria-expanded', String(!uac)); $('ucol').setAttribute('aria-label', uac ? 'Expand usage' : 'Collapse usage');
 }
 
 /* ---------- office chat (T-063): a shared inbox in the artifact's own database; only built when D.chat exists ---------- */
@@ -2529,7 +2694,7 @@ function dockLayout(anim) {
   var move = anim && !REDUCED; r.classList.toggle('nt', !move);
   if (move) { dockBusy = true; r.classList.add('cm'); clearTimeout(dockT); dockT = setTimeout(dockEnd, 260); }
   r.style.setProperty('--chat-h', (open ? px + kb : 0) + 'px');
-  if (PL.free && floatOK()) pids().forEach(function (id) { if (PL.r[id]) animPaint(id, 160); });
+  reqFit(true);
   if (!move && scene && !dockBusy) scene.resize();
 }
 function initGrip() {
@@ -2725,7 +2890,10 @@ function pick(i) {
   closeList(); t.focus(); renderTo(); autosize();
 }
 function autosize() { var t = $('ctext'); t.style.height = 'auto'; t.style.height = Math.min(110, t.scrollHeight + 2) + 'px'; }
-function showWarn(msg) { var w = $('cwarn'); w.hidden = !msg; w.textContent = msg || ''; }
+function showWarn(msg) {   // the warning is part of the composer: re-measure the dock minimum when it appears, grows or goes (T-067)
+  var w = $('cwarn'), old = w.hidden ? '' : w.textContent; w.hidden = !msg; w.textContent = msg || '';
+  if ((msg || '') !== old && chatOpen()) dockLayout(false);
+}
 function writeAsk(ask) {
   CS.pending[ask.id] = { doc: ask, state: 'sending' };
   Promise.resolve().then(function () { return CS.store.set('chat/office/messages/' + ask.id, ask); }).then(function () { if (CS.pending[ask.id]) CS.pending[ask.id].state = 'sent'; }, function () { if (CS.pending[ask.id]) CS.pending[ask.id].state = 'failed'; renderChat(); });

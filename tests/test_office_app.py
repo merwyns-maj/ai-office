@@ -143,7 +143,11 @@ class PageRules(unittest.TestCase):
     def test_size_limit(self):
         # 200 KB until T-063. The chat (panel, phone sheet, combobox, notice, status chips, parser, scan) is about 40 KB of
         # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 216 KB by Fang (about 6 KB headroom).
-        self.assertLessEqual(len(self.html.encode("utf-8")), 216 * 1024)
+        # Raised to 232 KB (237,568 B) by Fang for T-067: the no-overlap placement (C.place, C.sweep, the fit glue, the chip and layer CSS)
+        # added about 14.6 KB of page code (3.5 KB estimated). Size note 26 Nov 2026: 232 KB confirmed; committed page 235,833 B (1,735 B headroom);
+        # the published ledger page (250,543 B) is not covered here and grows with runs. The limit is our creep guard, not a platform limit;
+        # trimming comments again costs reviewability and a split breaks the one-file artifact. The next raise needs a split or minify decision.
+        self.assertLessEqual(len(self.html.encode("utf-8")), 232 * 1024)
 
     def test_three_min_js_is_not_committed(self):
         r = subprocess.run(["git", "ls-files", "engine/app/three.min.js"], cwd=REPO, capture_output=True, text=True)
@@ -654,7 +658,7 @@ class CoreUnderNode(unittest.TestCase):
         self.assertNotIn('id="cnotice"', chat[chat.index('id="cmid"'):chat.index('id="cform"')])
         css = html[:html.index("</style>")]
         self.assertRegex(css, r"\.cnotice\{[^}]*flex:none")
-        self.assertNotRegex(re.search(r"#cmid\{[^}]*\}", css).group(0), r"overflow")   # no inner scroll that could hide the notice
+        self.assertNotRegex(re.search(r"#cmid\{[^}]*\}", css).group(0), r"overflow:(auto|scroll)")   # no inner scroll that could hide the notice (T-067: it clips, overflow:hidden, so the thread never runs under the composer)
         self.assertRegex(css, r"\.cwrap\{[^}]*min-height:56px")                         # two thread lines at least
         self.assertIn("C.chatH(CS.st.h, innerHeight, chrome, phone, kb, need)", html)       # the dock minimum follows the measured parts
 
@@ -1063,3 +1067,172 @@ class ChatBuild(unittest.TestCase):
     def test_page_without_chat_has_no_chat_data_or_button_after_removal(self):
         data = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
         self.assertIn("chat", data)
+
+
+PLACE_CHECK = r'''
+const fs = require('fs'), assert = require('assert');
+const h = fs.readFileSync(process.argv[2], 'utf8');
+eval(h.match(/<script[^>]*id="office-core"[^>]*>([\s\S]*?)<\/script>/)[1]);
+const C = OfficeCore, M = C.PANEL.MARGIN, COLW = 264;
+const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+const inb = (r, b) => r.x >= b.left && r.y >= b.top && r.x + r.w <= b.right && r.y + r.h <= b.bottom;
+let n = 0;
+// a tiny seeded generator keeps the grid stable
+const sizes = { W: [900, 1024, 1280, 1920], H: [480, 560, 640, 800, 1080], chat: ['closed', 'min', 'default', 'max'], focus: [0, 96, 0.45], menu: [0, 1], nat: [80, 300, 600] };
+const layouts = ['flow', 'same', 'inchat', 'half', 'tiny', 'huge', 'off'];
+function dock(W, H, mode) {
+  if (mode === 'closed') return 0;
+  const want = mode === 'min' ? 1 : mode === 'max' ? 1e5 : undefined;
+  return C.chatH(want, H, 56 + 56, false, 0, 212);
+}
+function parts(W, H, dk, lay, foc, menu, nat, collapsedUsage) {
+  const b = C.panelBounds(W, H, 56, dk), stage = b.bottom + M - 56, cx = W - 12 - COLW, P = [];
+  const flow = lay === 'flow', bb = flow ? { left: b.left, right: b.right, top: b.top, bottom: b.bottom + 4 } : b;
+  if (menu) P.push({ id: 'menu', fixed: true, r: { x: W - 12 - 150, y: bb.bottom - 56, w: 150, h: 56 } });
+  let top = b.top + 4;
+  if (foc) { const h = Math.min(foc === 0.45 ? 900 : 96, Math.max(96, Math.floor(stage * 0.45))); P.push({ id: 'focus', r: { x: cx, y: b.top + 4, w: COLW, h }, min: 56, axis: '' }); top = b.top + 4 + h + M; }
+  const uc = 64, tc = 34, ur = { usage: null, ticker: null };
+  const sv = { flow: [null, null], same: [{ x: 400, y: 120, w: 300, h: 300 }, { x: 400, y: 120, w: 300, h: 200 }], inchat: [{ x: 300, y: H - 200, w: 300, h: 250 }, { x: 700, y: H - 150, w: 300, h: 150 }],
+    half: [{ x: 400, y: 120, w: 300, h: 300 }, { x: 550, y: 250, w: 300, h: 300 }], tiny: [{ x: 10, y: 60, w: 240, h: 120 }, { x: 20, y: 80, w: 240, h: 120 }], huge: [{ x: 0, y: 0, w: 520, h: 5000 }, { x: 0, y: 0, w: 520, h: 5000 }], off: [{ x: -900, y: 9000, w: 300, h: 200 }, { x: 9000, y: -50, w: 300, h: 200 }] }[lay];
+  const mk = (i) => flow ? { x: cx, y: top, w: COLW, h: nat } : sv[i];
+  P.push({ id: 'usage', r: mk(0), min: 120, col: uc, axis: flow ? 'y' : 'xy', collapsible: true, chip: true });
+  P.push({ id: 'ticker', r: mk(1), min: 40, col: tc, axis: flow ? 'y' : 'xy', collapsible: true, chip: true, after: flow ? 'usage' : undefined });
+  return { b: bb, P };
+}
+const ids = ['usage', 'ticker'];
+for (const W of sizes.W) for (const H of sizes.H) for (const cm of sizes.chat) for (const foc of sizes.focus) for (const menu of sizes.menu) for (const lay of layouts) for (const nat of sizes.nat) {
+  const dk = dock(W, H, cm), { b, P } = parts(W, H, dk, lay, foc, menu, nat);
+  const before = JSON.stringify(P), out = C.place(b, P);
+  assert.strictEqual(JSON.stringify(P), before, 'inputs mutated');
+  const live = P.filter(p => out[p.id].s !== 'chip').map(p => ({ id: p.id, r: out[p.id], p }));
+  const tag = [W, H, cm, foc, menu, lay, nat].join('/');
+  for (const a of live) {
+    if (!a.p.fixed) {
+      const mustFit = !(a.p.id === 'focus');
+      if (mustFit) { assert.ok(inb(a.r, b), 'outside ' + tag + ' ' + a.p.id + JSON.stringify(a.r)); }
+      if (a.r.s !== 'col' && mustFit) assert.ok(a.r.h >= a.p.min, 'below min ' + tag + ' ' + a.p.id);
+      if (a.r.s === 'col') assert.strictEqual(a.r.h, a.p.col, 'a collapsed part never shrinks ' + tag + ' ' + a.p.id);
+    }
+  }
+  const real = live.filter(a => a.p.id !== 'focus' || out.focus.h <= 0 || true);
+  for (let i = 0; i < real.length; i++) for (let j = i + 1; j < real.length; j++) {
+    const A = real[i], B = real[j];
+    if (A.p.fixed && B.p.fixed) continue;
+    // the card has min 56 and can chip when beside an open menu there is no room (deviation 1)
+    assert.ok(!hit(A.r, B.r), 'overlap ' + tag + ' ' + A.p.id + ' ' + B.p.id + ' ' + JSON.stringify([A.r, B.r]));
+  }
+  // placing the output again changes nothing
+  const P2 = P.map(p => (out[p.id].s === 'chip' || p.fixed) ? p : Object.assign({}, p, { r: { x: out[p.id].x, y: out[p.id].y, w: out[p.id].w, h: out[p.id].h }, after: undefined }));
+  const o2 = C.place(b, P2);
+  for (const p of P) if (out[p.id].s !== 'chip') { const a = out[p.id], c = o2[p.id]; assert.deepStrictEqual([c.x, c.y, c.w, c.h], [a.x, a.y, a.w, a.h], 'not idempotent ' + tag + ' ' + p.id); }
+  // with room: equal to clampRect(saved)
+  if (lay !== 'flow' && !foc && !menu) {
+    const hits = P.some((p, i) => P.some((q, j) => j > i && hit(C.clampRect(p.r, b), C.clampRect(q.r, b))));
+    if (!hits) for (const p of P) { const c = C.clampRect(p.r, b), a = out[p.id]; assert.deepStrictEqual([a.x, a.y, a.w, a.h], [c.x, c.y, c.w, c.h], 'moved without need ' + tag + ' ' + p.id); }
+  }
+  n++;
+}
+// ladder order, on a hand-made column: 200px free
+{
+  const b = { left: 8, right: 1272, top: 60, bottom: 260 };   // 200 tall
+  const mk = (uh, th) => [
+    { id: 'usage', r: { x: 1000, y: 60, w: 264, h: uh }, min: 120, col: 64, axis: 'y', collapsible: true, chip: true },
+    { id: 'ticker', r: { x: 1000, y: 60, w: 264, h: th }, min: 40, col: 34, axis: 'y', collapsible: true, chip: true, after: 'usage' }];
+  let o = C.place(b, mk(130, 300));   // events gets the gap and shrinks first
+  assert.strictEqual(o.usage.s, 'full'); assert.strictEqual(o.ticker.s, 'shrunk'); assert.ok(o.ticker.h >= 40);
+  o = C.place(b, mk(180, 300));       // events cannot keep 40 beside 180: usage collapses before events does
+  assert.strictEqual(o.usage.s, 'col'); assert.notStrictEqual(o.ticker.s, 'col'); assert.ok(o.ticker.h >= 40);
+  const tiny = { left: 8, right: 1272, top: 60, bottom: 130 };   // 70 tall: both collapsed (64 + 8 + 34 = 106) do not fit; the lowest becomes a chip
+  o = C.place(tiny, mk(180, 300));
+  assert.strictEqual(o.usage.s, 'col'); assert.strictEqual(o.ticker.s, 'chip');
+  const mini = { left: 8, right: 1272, top: 60, bottom: 100 };   // 40 tall: usage cannot even collapse in: chip, then the events header fits
+  o = C.place(mini, mk(180, 300));
+  assert.strictEqual(o.usage.s, 'chip'); assert.notStrictEqual(o.ticker.s, 'chip');
+}
+// sweep: never ends intersecting, never passes the target, stops at the neighbour's edge
+{
+  const o = [{ x: 400, y: 100, w: 100, h: 100 }];
+  let r = C.sweep({ x: 100, y: 100, w: 100, h: 100 }, { x: 700, y: 100, w: 100, h: 100 }, o);
+  assert.deepStrictEqual(r, { x: 300, y: 100, w: 100, h: 100 });
+  r = C.sweep({ x: 100, y: 100, w: 100, h: 100 }, { x: 150, y: 300, w: 100, h: 100 }, o);
+  assert.deepStrictEqual(r, { x: 150, y: 300, w: 100, h: 100 });
+  r = C.sweep({ x: 100, y: 100, w: 100, h: 100 }, { x: 100, y: 100, w: 600, h: 100 }, o);   // resize stops at the edge
+  assert.deepStrictEqual(r, { x: 100, y: 100, w: 300, h: 100 });
+  let seed = 7; const rnd = (k) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % k; };
+  for (let i = 0; i < 3000; i++) {
+    const obs = [{ x: rnd(900), y: rnd(600), w: 50 + rnd(250), h: 50 + rnd(250) }, { x: rnd(900), y: rnd(600), w: 50 + rnd(250), h: 50 + rnd(250) }];
+    const f = { x: rnd(900), y: rnd(600), w: 60 + rnd(200), h: 60 + rnd(200) }; if (obs.some(q => hit(f, q))) continue;
+    const t = { x: rnd(1200) - 100, y: rnd(900) - 100, w: f.w + rnd(100) - 30, h: f.h + rnd(100) - 30 };
+    const s = C.sweep(f, t, obs);
+    assert.ok(!obs.some(q => hit(s, q)), 'sweep ends intersecting');
+    const between = (v, a, z) => v >= Math.min(a, z) && v <= Math.max(a, z);
+    assert.ok(between(s.x, f.x, t.x) && between(s.y, f.y, t.y) && between(s.w, f.w, t.w) && between(s.h, f.h, t.h), 'sweep past the target');
+    const free = C.sweep(f, t, []); assert.deepStrictEqual(free, { x: t.x, y: t.y, w: t.w, h: t.h });
+  }
+}
+// T-067 rework 1 (a, b): a usage panel collapsed by the viewer with its menu open counts the menu in min, col and h; place applied to its own
+// output, and to the same input, is a fixed point (the fit() loop settles in one pass); a chipped part keeps its menu height, so it cannot flip
+{
+  let k = 0;
+  for (const H of [420, 480, 520, 560, 800]) for (const dkm of ['closed', 'min', 'default']) for (const pm of [0, 60, 150]) for (const lay of ['flow', 'moved', 'low']) for (const foc of [0, 96]) {
+    const dk = dock(1280, H, dkm), b = C.panelBounds(1280, H, 56, dk), cx = 1280 - 12 - COLW, uh = Math.max(64, pm), saved = lay === 'low' ? { x: 300, y: 620, w: 360, h: 300 } : lay === 'moved' ? { x: 300, y: 330, w: 360, h: 420 } : { x: cx, y: b.top + 4 + (foc ? 104 : 0), w: COLW, h: uh };
+    const mk = () => { const P = []; if (foc) P.push({ id: 'focus', r: { x: cx, y: b.top + 4, w: COLW, h: 96 }, min: 56, axis: '', chip: true });
+      P.push({ id: 'usage', r: { x: saved.x, y: saved.y, w: saved.w, h: uh }, min: uh, col: uh, axis: lay === 'flow' ? 'y' : 'xy', chip: true });
+      P.push({ id: 'ticker', r: { x: 420, y: 380, w: 300, h: 360 }, min: 40, col: 34, axis: lay === 'flow' ? 'y' : 'xy', collapsible: true, chip: true }); return P; };
+    const o1 = C.place(b, mk()), o1b = C.place(b, mk());
+    assert.deepStrictEqual(o1, o1b, 'place is not deterministic');
+    const u = o1.usage, tag = [H, dkm, pm, lay, foc].join('/');
+    if (u.s !== 'chip') { assert.ok(inb(u, b), 'collapsed usage with its menu outside the bounds ' + tag + JSON.stringify(u)); assert.ok(u.h >= uh, 'menu height lost ' + tag); }
+    const P2 = mk().map(p => o1[p.id].s === 'chip' ? p : Object.assign({}, p, { r: { x: o1[p.id].x, y: o1[p.id].y, w: o1[p.id].w, h: o1[p.id].h } }));
+    const o2 = C.place(b, P2);
+    for (const id of Object.keys(o1)) assert.strictEqual(o2[id].s === 'chip', o1[id].s === 'chip', 'chip flips on the second pass ' + tag + ' ' + id);
+    for (const id of Object.keys(o1)) if (o1[id].s !== 'chip') assert.deepStrictEqual([o2[id].x, o2[id].y, o2[id].w, o2[id].h], [o1[id].x, o1[id].y, o1[id].w, o1[id].h], 'second pass moves ' + tag + ' ' + id);
+    k++;
+  }
+  assert.ok(k > 200);
+}
+console.log('place ok ' + n);
+'''
+
+
+class NoOverlap(unittest.TestCase):
+    """T-067: HUD parts never cover each other. The placement rule is pure maths (node); the headless rect check lives in the Build notes."""
+
+    def test_place_and_sweep_invariants_under_node(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "place.js"
+            f.write_text(PLACE_CHECK, encoding="utf-8")
+            r = subprocess.run(["node", str(f), str(HTML)], capture_output=True, text=True, timeout=120)
+        self.assertEqual(r.returncode, 0, r.stderr[-3000:] + r.stdout)
+        self.assertIn("place ok", r.stdout)
+
+    def test_page_uses_the_placement_rule(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("C.place(", html)
+        self.assertIn("C.sweep(", html)
+        self.assertIn("function layer(n)", html)
+        self.assertEqual(html.count("function fit()"), 1)
+        self.assertIn("PL.r[d.id] = PLACED[d.id] = C.sweep(", html)           # a drag stops at the neighbour
+        self.assertNotIn("max-height:60vh", html)                             # the sheet stays inside the stage
+
+    def test_saved_layout_is_written_only_by_the_viewer(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        a = html.index("function fit()")
+        b = html.index("\n}", a)
+        self.assertNotIn("writeStore", html[a:b])                             # placement never rewrites office.layout.v1
+        self.assertNotIn("PL.r[", html[a:b].replace("PL.r.usage", "").replace("PL.r.ticker", ""))
+
+    def test_short_desktop_window_has_no_layer_in_the_top_strip(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        self.assertRegex(html, r"@media \(min-width:900px\)\{body\.nost #tone,body\.nost #usheet,body\.nost #msheet,body\.nost\.tk #ticker\{display:none!important\}")
+        a = html.index("function fit()")
+        self.assertLess(html.index("B.classList.toggle('nost'", a), html.index("var free = PL.free", a))   # set on the desktop path too
+        b = html[html.index("function build(", a):html.index("function bounds(", a)]
+        self.assertNotIn("pmH(", b)                                           # menu heights come from the one measuring pass (no flip when chipped)
+        self.assertIn("h: usageCol ? uh : ur.h }, min: usageCol ? uh : um", b)  # a collapsed panel counts its open menu
+
+    def test_composer_warning_is_solid_clipped_and_counted_in_the_minimum(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        self.assertRegex(html, r"#cwarn\{[^}]*background:var\(--panel\)")
+        self.assertRegex(html, r"#cmid\{[^}]*overflow:hidden")
+        self.assertIn("if ((msg || '') !== old && chatOpen()) dockLayout(false);", html)
