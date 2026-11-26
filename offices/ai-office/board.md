@@ -2,13 +2,13 @@
 
 _Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**56 tasks** — todo: 34 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 22 · parked: 0
+**56 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 25 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (34)
+## todo (31)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -31,10 +31,8 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-024](backlog/T-024-engine-runtime-load-an-office-folder-and.md) | P1 | Engine runtime: load an office folder and run its agents on the Agent SDK | pmo | — |
 | [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024, T-002 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
-| [T-050](backlog/T-050-document-assessment-skill.md) | P1 | Partner or vendor document assessment skill | pmo | — |
 | [T-051](backlog/T-051-patch-hand-off-skill.md) | P1 | Data patch hand-off skill (Bytebase-ready scripts + ITH ticket) | pmo | T-002 |
 | [T-052](backlog/T-052-prod-investigation-skill.md) | P1 | Read-only prod investigation skill (new and legacy platforms) | pmo | T-002 |
-| [T-056](backlog/T-056-model-and-usage-in-the-3d-office.md) | P1 | Show which model each agent uses, and usage, in the 3D office (multi-provider) | pmo | — |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
@@ -45,7 +43,6 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-053](backlog/T-053-recon-regulatory-figures-workflow.md) | P2 | Reconciliation and regulatory figures workflow | pmo | T-002, T-016 |
-| [T-054](backlog/T-054-tooling-follow-ups-golden-and-metrics.md) | P2 | Follow-ups: golden zero-case exit, per-line owner check, metrics partial sums | pmo | — |
 
 ## spec (0)
 
@@ -63,7 +60,7 @@ _empty_
 
 _empty_
 
-## done (22)
+## done (25)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -85,10 +82,13 @@ _empty_
 | [T-047](backlog/T-047-hire-product-designer-agent.md) | P1 | Hire a product designer agent (Dinda) with a researched playbook | pmo | — |
 | [T-048](backlog/T-048-3d-animated-office-prototype.md) | P1 | 3D animated office: design and three.js prototype (slice of T-027) | pmo | — |
 | [T-049](backlog/T-049-golden-examples-for-office-skills-slice-of-t-016.md) | P1 | Golden examples and evals for the office's own skills (slice of T-016) | pmo | — |
+| [T-050](backlog/T-050-document-assessment-skill.md) | P1 | Partner or vendor document assessment skill | pmo | — |
+| [T-056](backlog/T-056-model-and-usage-in-the-3d-office.md) | P1 | Show which model each agent uses, and usage, in the 3D office (multi-provider) | pmo | — |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
 | [T-032](backlog/T-032-adoption-metrics-hours-saved-reject-rate.md) | P2 | Adoption metrics (hours saved, reject rate, turnaround) | pmo | — |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 | [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | curator | — |
+| [T-054](backlog/T-054-tooling-follow-ups-golden-and-metrics.md) | P2 | Follow-ups: golden zero-case exit, per-line owner check, metrics partial sums | pmo | — |
 
 ## parked (0)
 
