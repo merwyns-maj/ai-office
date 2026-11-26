@@ -18,7 +18,7 @@ Status: scope Green, schedule Green, budget Green.
 
 **Finished:** T-057 token usage per agent per session — PR #40 (one REJECT on the provider label reading as a Max-plan share, fixed; Reviewer PASS). Includes Merwyn's 11:31 request: provider bars with % of session, per-agent accordion expanded by default.
 
-**Ledger:** runs 36–40 (Sprint 7 design, build, review, rework, re-review) appended to usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl: 40 runs, 1 not reported, 3,218,310 tokens as reported. Runs 39 and 40 were resumed agents; the harness figure may include their earlier run, so the session total may count up to about 307k twice (noted on each line).
+**Ledger:** runs 36–40 (Sprint 7 design, build, review, rework, re-review) appended to usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl: 40 runs, 1 not reported, 3,218,310 tokens as reported. Runs 39 and 40 were resumed agents; the harness figure may include their earlier run, so the session total may count up to 285,812 tokens twice (runs 37 and 38) (noted on each line).
 
 **Published:** recorded usage page https://claude.ai/artifact/YL5g2LV4MgWL9n2PHQ6eP3; 3D office (synthetic demo) republished with the same bars and accordion.
 
