@@ -2,9 +2,9 @@
 id: T-056
 title: "Show which model each agent uses, and usage, in the 3D office (multi-provider)"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-048]
@@ -402,6 +402,9 @@ Fixed after looking: wrapping "cache" figure (spans no longer split), focus-card
 — Sebastian (engineer)
 
 ## Review log
+PASS (26 Nov 2026, head 8ce2141). 271 tests OK; office_app --check up to date (128 KB, 84 events); v0 fixture 45/0/0; v1 fixture 84/0/0; edge fixture fails by design; validate and build_agents clean. Breaks all caught: cost_usd on a plan step errors; undated or plan-model prices fail the build; dated price shows "$0.15 est." checked by hand; unknown provider/model warns and renders a dashed chip; v0 log hides chips and panel; 10-digit tokens, emails in model fields rejected without echo. No price numbers, provider ids or "$" outside costText in template or office_app. Headless renders at 1280x800 and 390x844: all 8 models readable without colour; model switch in ticker and focus card; needs-Merwyn still loudest; "synthetic" beside every usage figure; panel totals equal a Python sum of the fixture over 9 renders, scrubbing back included; no page errors.
+Notes: events CLI ignores providers.yaml problems (build still fails on them); panel collapse instant, not animated; small tag overlap at 1280x800; chip contrast judged by eye.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
