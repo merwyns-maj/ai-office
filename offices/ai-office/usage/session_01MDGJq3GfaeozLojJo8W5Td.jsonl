@@ -77,3 +77,21 @@
 {"n": 76, "sprint": 7, "agent": "reviewer", "tasks": ["T-066"], "step": "review", "tokens": 107708, "tool_uses": 39, "duration_ms": 483471, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 77, "sprint": 7, "agent": "engineer", "tasks": ["T-066"], "step": "rework", "tokens": 79547, "tool_uses": 23, "duration_ms": 437057, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 78, "sprint": 7, "agent": "reviewer", "tasks": ["T-066"], "step": "review", "tokens": 94806, "tool_uses": 27, "duration_ms": 532279, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 79, "sprint": 7, "agent": "pm", "tasks": ["T-067"], "step": "spec", "tokens": 38103, "tool_uses": 5, "duration_ms": 16493, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 80, "sprint": 7, "agent": "designer", "tasks": ["T-067"], "step": "ux", "tokens": 41351, "tool_uses": 5, "duration_ms": 39814, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 81, "sprint": 7, "agent": "architect", "tasks": ["T-067"], "step": "design", "tokens": 86943, "tool_uses": 16, "duration_ms": 235065, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 82, "sprint": 7, "agent": "pm", "tasks": ["T-024", "T-068", "T-070", "T-071"], "step": "spec", "tokens": 35958, "tool_uses": 22, "duration_ms": 31787, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 83, "sprint": 7, "agent": "pm", "tasks": ["T-024", "T-068", "T-070", "T-071"], "step": "spec", "tokens": 88173, "tool_uses": 37, "duration_ms": 80647, "date": "2026-11-26", "note": "resumed run; harness figure may include run 82"}
+{"n": 84, "sprint": 7, "agent": "architect", "tasks": ["T-024", "T-068", "T-070", "T-071"], "step": "design", "tokens": 82253, "tool_uses": 18, "duration_ms": 225524, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 85, "sprint": 7, "agent": "engineer", "tasks": ["T-068"], "step": "build", "tokens": 50393, "tool_uses": 12, "duration_ms": 80708, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 86, "sprint": 7, "agent": "compliance", "tasks": ["T-024"], "step": "compliance", "tokens": 51023, "tool_uses": 5, "duration_ms": 25165, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 87, "sprint": 7, "agent": "reviewer", "tasks": ["T-068"], "step": "review", "tokens": 38283, "tool_uses": 7, "duration_ms": 170048, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 88, "sprint": 7, "agent": "engineer", "tasks": ["T-068"], "step": "rework", "tokens": 33071, "tool_uses": 7, "duration_ms": 69519, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 89, "sprint": 7, "agent": "reviewer", "tasks": ["T-068"], "step": "review", "tokens": 47563, "tool_uses": 15, "duration_ms": 147782, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 90, "sprint": 7, "agent": "engineer", "tasks": ["T-071"], "step": "build", "tokens": 30785, "tool_uses": 4, "duration_ms": 55818, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 91, "sprint": 7, "agent": "reviewer", "tasks": ["T-071", "T-024"], "step": "review", "tokens": 53396, "tool_uses": 16, "duration_ms": 143325, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 92, "sprint": 7, "agent": "engineer", "tasks": ["T-071"], "step": "rework", "tokens": 37484, "tool_uses": 8, "duration_ms": 55015, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 93, "sprint": 7, "agent": "reviewer", "tasks": ["T-071"], "step": "review", "tokens": 55526, "tool_uses": 17, "duration_ms": 144032, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 94, "sprint": 7, "agent": "engineer", "tasks": ["T-071"], "step": "rework", "tokens": 23625, "tool_uses": 7, "duration_ms": 54501, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 95, "sprint": 7, "agent": "reviewer", "tasks": ["T-071"], "step": "review", "tokens": 36334, "tool_uses": 8, "duration_ms": 67697, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 96, "sprint": 7, "agent": "engineer", "tasks": ["T-067"], "step": "build", "tokens": 202344, "tool_uses": 85, "duration_ms": 4987258, "date": "2026-11-26", "note": "after the Sprint 7 close"}
