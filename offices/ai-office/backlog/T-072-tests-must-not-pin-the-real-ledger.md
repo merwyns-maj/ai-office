@@ -2,7 +2,7 @@
 id: T-072
 title: "Tests must not pin the live session ledger's contents"
 phase: 6-office
-status: review
+status: done
 priority: P1
 owner: pmo
 where: code
@@ -108,6 +108,7 @@ Notes (not rejections):
 — Cahyani (reviewer)
 
 ## Decision
+Merged after Cahyani's PASS (Janice, 26 Nov 2026). Janice confirms the lean note's comma-to-semicolon change (a wording fix, one surface). Tests read the live ledger only for properties that survive a valid append; exact values come from `tests/fixtures/session_FIXTURE072.jsonl`. Follow-ups noted, not tasks yet: the lean surface check is punctuation-only (compare with the PR's files); test_metrics and test_budgets have no appended-ledger guard; page budget leaves out chat-run tokens.
 
 ## Open questions
 - For the PMO, not in T-072: the page's used-vs-budget figure leaves out chat-run tokens (events only), so it shows 22,320 fewer than `ledger.totals` on the pending ledger. Is that intended? If not, open a follow-up task for the page. T-072 pins what the page does today in one helper (`page_totals`), so a fix changes one place. — Fang (architect)
