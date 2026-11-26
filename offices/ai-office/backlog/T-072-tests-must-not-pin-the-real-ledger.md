@@ -2,7 +2,7 @@
 id: T-072
 title: "Tests must not pin the live session ledger's contents"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
