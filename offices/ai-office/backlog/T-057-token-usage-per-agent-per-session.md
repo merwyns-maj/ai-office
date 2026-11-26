@@ -4,7 +4,7 @@ title: "Record and show real token usage per agent, per session"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-056]
