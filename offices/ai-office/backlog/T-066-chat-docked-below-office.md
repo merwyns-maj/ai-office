@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-065]
-pr: null
+pr: 60
 ---
 
 > Merwyn, 26 Nov 2026 17:48 WIB: "for chat, i prefer a dedicated section (not in the front) when chat expanded (horizontal below) it will resize the office"
