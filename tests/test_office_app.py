@@ -29,10 +29,11 @@ def block(html, sid):
 
 class Generator(unittest.TestCase):
     def test_committed_page_is_up_to_date(self):
-        data, probs = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE)
+        data, probs = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE, chat=True)   # the AI Office artifact has chat (T-063)
         self.assertEqual(probs, [])
         self.assertEqual(HTML.read_text(encoding="utf-8"), office_app.render(TEMPLATE.read_text(encoding="utf-8"), data))
-        self.assertEqual(office_app.main(["ai-office", "--check"]), 0)
+        self.assertEqual(office_app.main(["ai-office", "--chat", "--check"]), 0)
+        self.assertEqual(office_app.main(["ai-office", "--check"]), 1)   # without the flag it is a different page
 
     def test_placeholder_must_appear_exactly_once(self):
         data, _ = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE)
@@ -140,7 +141,9 @@ class PageRules(unittest.TestCase):
             self.assertIsNone(p.search(scrubbed), p.pattern)
 
     def test_size_limit(self):
-        self.assertLessEqual(len(self.html.encode("utf-8")), 200 * 1024)
+        # 200 KB until T-063. The chat (panel, phone sheet, combobox, notice, status chips, parser, scan) is about 40 KB of
+        # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 216 KB by Fang (about 6 KB headroom).
+        self.assertLessEqual(len(self.html.encode("utf-8")), 216 * 1024)
 
     def test_three_min_js_is_not_committed(self):
         r = subprocess.run(["git", "ls-files", "engine/app/three.min.js"], cwd=REPO, capture_output=True, text=True)
@@ -452,10 +455,10 @@ if (mode === 'sprint3') {
   assert.strictEqual(C.opacityStep(40), 40); assert.strictEqual(C.opacityStep(150), 92); assert.strictEqual(C.opacityStep('9'), 92); assert.strictEqual(C.opacityStep(NaN), 92);
   assert.strictEqual(C.rectSentence('Usage', { x: 120, y: 80, w: 300, h: 240 }), 'Usage panel at 120, 80, size 300 by 240.');
   // saved state: valid, then every kind of corrupt storage falls back without throwing
-  const good = { usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, ticker: { x: 900, y: 500, w: 260, h: 150, o: 0 } };
+  const good = { usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, ticker: { x: 900, y: 500, w: 260, h: 150, o: 0 }, chat: null };
   assert.deepStrictEqual(C.parseLayout(JSON.stringify(good)), good);
   assert.deepStrictEqual(C.parseLayout(C.serializeLayout(good)), good);
-  const none = { usage: null, ticker: null };
+  const none = { usage: null, ticker: null, chat: null };   // T-063 added the chat panel id
   [null, undefined, '', 'null', '{', '[1,2]', '"x"', '42', 'true', '{"usage":5}', '{"usage":[]}', '{"usage":{}}', '\u0000￾'].forEach(x => assert.deepStrictEqual(C.parseLayout(x), none, String(x)));
   const bad = v => JSON.stringify({ usage: Object.assign({}, good.usage, v), ticker: good.ticker });
   [{ x: 'a' }, { y: null }, { w: 239 }, { w: 521 }, { h: 119 }, { x: 1e9 }, { w: NaN }, { h: -5 }].forEach(v => {
@@ -467,6 +470,82 @@ if (mode === 'sprint3') {
   const big = C.parseLayout(JSON.stringify({ usage: { x: 5000, y: 5000, w: 520, h: 9000 } })).usage;
   assert.ok(inside(C.clampRect(big, C.panelBounds(1000, 600, 56)), C.panelBounds(1000, 600, 56)));
   console.log('layout ok');
+} else if (mode === 'chat') {
+  /* T-063: pure chat logic; the same fixtures are read by tests/test_chat.py */
+  const X = JSON.parse(fs.readFileSync(process.argv[4], 'utf8')), K = C.chat, A = D.chat.agents;
+  assert.strictEqual(A.length, 8);
+  X.mentions.forEach(c => { const p = K.parseMentions(c.text, A); assert.deepStrictEqual([p.ids, p.all, p.unknown], [c.ids, c.all, c.unknown], c.text); });
+  assert.strictEqual(K.errCode({ code: 'unavailable' }), 'unavailable'); assert.strictEqual(K.errCode({ message: 'db is Unavailable now' }), 'unavailable'); assert.strictEqual(K.errCode(null), null);
+  assert.strictEqual(K.canMove('constructor', 'new'), false); assert.strictEqual(K.newAsk('@constructor please check', D.chat, 1, () => 0.5, 'u').recipients.pmo.status, 'new');
+  { let n = 0, slept = 0; K.retryOnce(() => (++n === 1 ? Promise.reject({ code: 'unavailable' }) : Promise.resolve('ok')), () => 0, (f, ms) => { slept = ms; f(); }).then(v => { assert.strictEqual([v, n, slept].join(), 'ok,2,400'); });
+    let m = 0; K.retryOnce(() => { m++; return Promise.reject({ code: 'revoked' }); }).catch(e => { assert.strictEqual(m, 1); });
+    let q = 0; K.retryOnce(() => { q++; return Promise.reject({ code: 'unavailable' }); }, () => 0, (f) => f()).catch(e => { assert.strictEqual(q, 2); }); }
+  X.scan.forEach(c => assert.strictEqual(K.scan(c.text), c.hit, JSON.stringify(c.hit)));
+  assert.deepStrictEqual(K.route(K.parseMentions('hello', A), 'pmo'), ['pmo']);
+  assert.deepStrictEqual(K.route(K.parseMentions('@Fang @Dinda', A), 'pmo'), ['architect', 'designer']);
+  // completions: trigger at the start or after whitespace only, caret decides the query
+  let c = K.completions('hi @fa', 6, A); assert.deepStrictEqual([c.start, c.query, c.items.map(i => i.name)], [3, 'fa', ['Fang']]);
+  c = K.completions('@', 1, A); assert.strictEqual(c.items.length, 9); assert.strictEqual(c.items[8].id, 'all');
+  c = K.completions('@a', 2, A); assert.deepStrictEqual(c.items.map(i => i.name), ['April', 'all']);
+  assert.strictEqual(K.completions('mail x@fa', 9, A), null);
+  assert.strictEqual(K.completions('@fang and', 9, A), null);
+  assert.strictEqual(K.completions('@fang', 2, A).query, 'f');
+  assert.strictEqual(K.completions('no at', 5, A), null);
+  assert.strictEqual(K.completions('@zzz', 4, A).items.length, 0);
+  // newAsk shape
+  const seq = [0.1, 0.5, 0.9, 0.3]; let q = 0; const ask = K.newAsk('@Fang and @Dinda, look', D.chat, 1764165240000, () => seq[q++ % 4], 'u-test', 'r-x');
+  assert.deepStrictEqual(Object.keys(ask), ['v', 'kind', 'id', 'author', 'author_uid', 'text', 'created_at', 'mentions', 'all', 'unknown', 'in_reply_to', 'recipients']);
+  assert.ok(/^m-[0-9a-z]{6,12}-[0-9a-z]{4}$/.test(ask.id), ask.id);
+  assert.deepStrictEqual([ask.mentions, ask.all, ask.unknown, ask.in_reply_to, ask.author], [['architect', 'designer'], false, [], 'r-x', 'merwyn']);
+  assert.deepStrictEqual(Object.keys(ask.recipients), ['architect', 'designer']);
+  assert.deepStrictEqual(ask.recipients.architect, { status: 'new', reply_id: null, at: ask.created_at, by: 'page' });
+  assert.ok(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(ask.created_at));
+  assert.deepStrictEqual(Object.keys(K.newAsk('plain', D.chat, 1e12, Math.random, 'u').recipients), ['pmo']);
+  assert.strictEqual(Object.keys(K.newAsk('@all go', D.chat, 1e12, Math.random, 'u').recipients).length, 8);
+  assert.strictEqual(K.newAsk('   ', D.chat, 1e12, Math.random, 'u'), null);
+  assert.strictEqual(K.newAsk('x'.repeat(4001), D.chat, 1e12, Math.random, 'u'), null);
+  assert.ok(K.valid(ask)); assert.ok(!K.valid({ kind: 'ask' })); assert.ok(!K.valid(null));
+  // transitions (same table as chat.py)
+  const S5 = ['new', 'picked', 'replying', 'answered', 'needs_merwyn'], ok = new Set(['new>picked', 'picked>replying', 'picked>new', 'picked>answered', 'picked>needs_merwyn', 'replying>answered', 'replying>needs_merwyn', 'replying>new', 'needs_merwyn>answered']);
+  S5.forEach(a => S5.forEach(b => assert.strictEqual(K.canMove(a, b), ok.has(a + '>' + b), a + b)));
+  assert.strictEqual(K.label('new', 'Janice'), 'waiting for Janice to pick up'); assert.strictEqual(K.label('replying', 'Fang'), 'Fang is replying');
+  assert.strictEqual(K.label('answered', 'x'), 'answered'); assert.strictEqual(K.label('needs_merwyn', 'x'), 'needs you'); assert.strictEqual(K.label('picked', 'Janice'), 'Janice picked this up');
+  // threads: asks by time then id, replies grouped under their ask by time, skewed clocks, invalid docs dropped
+  const mk = (id, t, extra) => Object.assign({ v: 1, kind: 'ask', id, text: 'x', created_at: t, recipients: { architect: { status: 'new' } } }, extra);
+  const rp = (id, to, t, extra) => Object.assign({ v: 1, kind: 'reply', id, reply_to: to, author: 'architect', text: 'r', created_at: t }, extra);
+  const th = K.threads([rp('r2', 'a2', '2026-11-26T10:00:05Z'), mk('a2', '2026-11-26T10:00:00Z'), mk('a1', '2026-11-26T10:00:00Z'), rp('r1', 'a2', '2026-11-26T09:59:00Z'), rp('lost', 'zzz', '2026-11-26T10:00:00Z'), { kind: 'ask' }, mk('a0', '2026-11-26T10:01:00.500Z')]);
+  assert.deepStrictEqual(th.map(t => t.ask.id), ['a1', 'a2', 'a0']);
+  assert.deepStrictEqual(th[1].replies.map(r => r.id), ['r1', 'r2']);   // the reply with the earlier clock sorts first inside its ask, and never leaves it
+  // live waiting and the overlay
+  const docs = [mk('a1', '2026-11-26T10:00:00Z', { recipients: { architect: { status: 'needs_merwyn' }, designer: { status: 'answered' } } }), mk('a2', '2026-11-26T10:05:00Z', { recipients: { architect: { status: 'needs_merwyn' }, pmo: { status: 'new' } } })];
+  const live = K.liveWaiting(docs); assert.deepStrictEqual(live, { architect: ['a1', 'a2'] });
+  const st = C.stateAt(D, 0), before = JSON.stringify(st), w = C.withLive(st, live);
+  assert.strictEqual(JSON.stringify(st), before);   // the replay state is untouched
+  assert.deepStrictEqual(w.agents.architect.waiting, ['chat:a1', 'chat:a2']); assert.strictEqual(C.needs(w), C.needs(st) + 2); assert.strictEqual(C.agentStatus(w, 'architect'), 'waiting');
+  const s2 = C.stateAt(D, 40); K.setLive(s2, live); const n1 = C.needs(s2); K.setLive(s2, live); assert.strictEqual(C.needs(s2), n1);   // idempotent
+  K.setLive(s2, {}); assert.strictEqual(C.needs(s2), C.needs(C.stateAt(D, 40)));   // cleared when the chat wait ends
+  assert.strictEqual(C.needs(C.withLive(C.stateAt(D, 0), {})), 0);
+  // office status and unseen replies
+  assert.deepStrictEqual(K.officeStatus({ running: true, last_inbox_at: '2026-11-26T10:00:00Z' }, Date.parse('2026-11-26T10:14:00Z')).running, true);
+  assert.strictEqual(K.officeStatus({ running: true, last_inbox_at: '2026-11-26T10:00:00Z' }, Date.parse('2026-11-26T10:16:00Z')).running, false);
+  assert.strictEqual(K.officeStatus({ running: false, last_inbox_at: '2026-11-26T10:00:00Z' }, Date.parse('2026-11-26T10:01:00Z')).running, false);
+  assert.deepStrictEqual(K.officeStatus(null, 0), { running: false, last: null });
+  assert.strictEqual(K.unseen([rp('r1', 'a', '2026-11-26T10:00:00Z'), rp('r2', 'a', '2026-11-26T11:00:00Z'), mk('a', '2026-11-26T12:00:00Z')], '2026-11-26T10:30:00Z').length, 1);
+  // markup injection: text only, https links only
+  const evil = '<script>alert(1)</script> <img src=x onerror=1> javascript:alert(1) [x](javascript:alert(2)) http://plain.test https://good.test/a?b=1 and @Fang';
+  const parts = K.blocks(evil, A)[0].parts;
+  assert.deepStrictEqual(parts.filter(p => p.t === 'link'), [{ t: 'link', s: 'good.test', href: 'https://good.test/a?b=1' }]);
+  assert.deepStrictEqual(parts.filter(p => p.t === 'men'), [{ t: 'men', s: '@Fang', id: 'architect' }]);
+  assert.strictEqual(parts.map(p => p.s === undefined ? '' : (p.t === 'link' ? p.href : p.s)).join(''), evil);   // nothing is dropped or rewritten
+  assert.ok(parts.every(p => ['text', 'link', 'men'].includes(p.t)));
+  const code = K.blocks('before\n```js\n<b>x</b>\n```\nafter', A); assert.deepStrictEqual(code.map(b => b.t), ['p', 'code', 'p']); assert.strictEqual(code[1].s, '<b>x</b>');
+  // the avatar colours: every written name reaches 4.5:1 on the bubble fill
+  const BODY = new Function('return ' + h.match(/var BODY = (\{[^}]*\})/)[1])();
+  assert.strictEqual(Object.keys(BODY).length, 8);
+  Object.keys(BODY).forEach(k => assert.ok(K.contrast(K.nameCol(BODY[k]), K.FILL) >= 4.5, k));
+  assert.strictEqual(K.nameCol('#eceae4'), '#eceae4');
+  assert.notStrictEqual(K.nameCol('#4b3f72'), '#4b3f72');
+  console.log('chat ok');
 }
 """
 
@@ -501,6 +580,14 @@ class CoreUnderNode(unittest.TestCase):
 
     def test_panel_layout_maths(self):
         self.assertIn("layout ok", self.node(str(HTML), "layout"))
+
+    def test_chat_logic_under_node(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fx = REPO / "tests/fixtures"
+            scan = [{"text": "".join(p if isinstance(p, str) else p[1] * p[2] for p in c["parts"]), "hit": c["hit"]}
+                    for c in json.loads((fx / "chat-scan.json").read_text(encoding="utf-8"))["cases"]]
+            x = {"mentions": json.loads((fx / "chat-mentions.json").read_text(encoding="utf-8"))["cases"], "scan": scan}
+            self.assertIn("chat ok", self.node(str(HTML), "chat", self.json_file(tmp, "chat.json", x)))
 
     def test_layout_storage_is_always_inside_try_and_the_key_is_versioned(self):
         html = HTML.read_text(encoding="utf-8")
@@ -839,3 +926,46 @@ class Providers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ChatBuild(unittest.TestCase):
+    """T-063: the chat is a build flag; the recorded usage page and the default build never have it."""
+
+    def test_flag_adds_data_chat_from_org(self):
+        data, _ = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE, chat=True)
+        self.assertEqual([a["name"] for a in data["chat"]["agents"]], ["Janice", "Emmy", "Fang", "Sebastian", "Cahyani", "Wulan", "April", "Dinda"])
+        self.assertEqual((data["chat"]["default"], data["chat"]["all"], data["chat"]["max_len"], data["chat"]["lease_s"]), ("pmo", "all", 4000, 1800))
+        committed = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
+        self.assertEqual(committed["chat"], data["chat"])
+
+    def test_default_build_has_no_chat_key(self):
+        data, _ = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE)
+        self.assertNotIn("chat", data)
+
+    def test_chat_with_ledger_exits_2_and_the_library_refuses(self):
+        self.assertEqual(office_app.main(["ai-office", "--chat", "--ledger", str(LEDGER), "--out", "/tmp/never.html"]), 2)
+        with self.assertRaises(office_app.BuildError):
+            office_app.build_data(OFFICE, None, LEDGER, chat=True)
+        data, _ = office_app.build_data(OFFICE, None, LEDGER)
+        self.assertNotIn("chat", data)
+
+    def test_claude_is_only_reached_through_chat_init_which_needs_the_flag(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html)), 2)
+        a, b = html.index("function chatInit()"), html.index("function onChatDocs()")
+        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html[a:b])), 2)
+        self.assertIn("if (CFG) initChat();", html)
+        self.assertEqual(html.count("initChat()"), 2)   # its definition and the one guarded call
+        self.assertIn("if (!CFG) { ['chat', 'chatbtn']", html)   # no flag: panel and button are removed
+
+    def test_chat_text_is_never_html(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        a, b = html.index("/* ---------- office chat (T-063)"), html.index("/* ---------- boot ---------- */")
+        view = html[a:b]
+        self.assertNotIn("innerHTML", view.replace("st.innerHTML = '<i></i>'", ""))   # the one fixed string, no db text
+        self.assertNotIn("esc(", view)
+        self.assertNotIn("insertAdjacentHTML", view)
+
+    def test_page_without_chat_has_no_chat_data_or_button_after_removal(self):
+        data = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
+        self.assertIn("chat", data)

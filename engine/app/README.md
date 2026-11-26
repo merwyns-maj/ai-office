@@ -14,8 +14,8 @@ Files
 ## Regenerate
 
 ```bash
-python scripts/office_app.py ai-office            # writes engine/app/office.html
-python scripts/office_app.py ai-office --check    # exit 1 if the committed file is stale
+python scripts/office_app.py ai-office --chat            # writes engine/app/office.html (the AI Office artifact, with chat)
+python scripts/office_app.py ai-office --chat --check    # exit 1 if the committed file is stale
 ```
 
 ## Run
@@ -34,6 +34,7 @@ URL parameters: `?t=<seconds>` open paused at that replay time (`&play=1` to pla
 
 Model and usage (T-056): every name tag shows a provider chip (code plus colour) and a short model name; the right column has a collapsible Usage panel (total, by provider, by agent) above the ticker; under 900 px it is a sheet opened from the Usage button (the gear menu on phones). Every usage figure carries the word "synthetic" while the log header says `usage_source: synthetic`. Cost is `tokens x config price`, an estimate with the config's date; with no price in the config a per-token row says "price not set". A log without model data (v0) shows no chips and no panel.
 Movable panels (T-059): at 900 px and wider the Usage and Latest events panels can be moved (drag the header grip) and resized (bottom-right corner), each with its own background opacity (the "..." button, 0 to 100 in steps of 5). Keyboard: Tab to the grip, arrows move 8 px (Shift 32 px), Alt+arrow resizes, Home restores the default position; on the resize handle arrows resize. The layout is kept per browser in `localStorage` key `office.layout.v1` (the page works when storage is blocked) and the gear menu has "Reset layout". Under 900 px the layout is the same as before and a saved layout is ignored, not deleted. The 3D stage runs full width behind the panels. The layout maths is in `OfficeCore` (`clampRect`, `moveRect`, `resizeRect`, `snapRect`, `parseLayout`) and tested under node.
+Office chat (T-063): the committed `office.html` is built with `--chat` and has a Chat button in the bottom bar. At 900 px and wider the chat is a floating panel on the T-059 model (move, resize, opacity, saved in `office.layout.v1`); under 900 px it is a full-height sheet. Type `@Janice`, `@Fang @Dinda` or `@all`; no mention goes to Janice. The page writes each message into the artifact's own database (`db` capability, owner-only rules) and shows each agent's reply and a per-recipient status (waiting for pickup, replying, answered, needs you). Replies come only while an office session runs the inbox (pmo-playbook section 9); the header says "Office running" or "Office not running" from a meta document the session writes. A reply that needs Merwyn shows the agent in the waiting state in the 3D office. Before a message is sent the page checks it for personal data and secrets (number patterns, emails, tokens: a hit blocks the send and names only the kind), and a one-time notice must be acknowledged. "Clear chat" deletes the thread; messages older than 30 days are purged by the inbox run. Chat text is company data: it is stored on claude.ai in the artifact database and never in this repo. **The artifact stays private. Sharing it needs a new compliance check (T-063, C7).** The recorded usage page (`--ledger`) never has chat (`--chat` with `--ledger` exits 2). Schema: `engine/schema/chat.md`. Publish order: `declare_capabilities` with `db` and `user` first, then publish the page; the db tools work only after that.
 Keys: Space play/pause, Left/Right step one event, 1/2/4 speed, M motion, F follow, Esc close.
 
 ## Screenshots (headless Chrome, software GL)

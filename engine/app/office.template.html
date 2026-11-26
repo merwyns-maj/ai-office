@@ -311,6 +311,91 @@ body.rm .tl.new{animation:none}
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
 body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bar) + 40px);z-index:7}
 @media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
+/* office chat (T-063) */
+#chat[hidden],#chatbtn[hidden]{display:none}
+#chat{position:absolute;right:calc(var(--side) + 4px);bottom:calc(var(--bar) + 12px);width:360px;height:480px;max-height:calc(100% - var(--bar) - 70px);z-index:6;display:flex;flex-direction:column;padding:0}
+#chat .uh h2{white-space:nowrap}
+#chat .uh .ucol{font-size:18px}
+.chst{display:inline-flex;align-items:center;gap:5px;font:500 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
+.chst i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--text-dim);display:inline-block}
+.chst.on{color:var(--text)}.chst.on i{background:var(--accent);border-color:var(--accent)}
+.cnote{padding:0 12px 6px;font-size:11px;color:var(--text-dim);flex:none}
+.cthread{flex:1 1 auto;min-height:0;overflow:auto;padding:4px 12px 8px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;position:relative}
+.cempty{margin:auto;text-align:center;color:var(--text-dim);font-size:12px;display:flex;flex-direction:column;gap:8px;align-items:center;padding:8px 0}
+.cempty b{color:var(--text);font-size:14px}
+.cempty button{border:1px solid rgba(255,255,255,.14);background:transparent;border-radius:8px;padding:7px 10px;font-size:12px;color:var(--text);min-height:32px}
+.cempty button:hover{background:rgba(255,255,255,.06)}
+.cerr{margin:auto;text-align:center;color:var(--text);font-size:13px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.cb{max-width:88%;display:flex;flex-direction:column;gap:3px;min-width:0}
+.cb.me{align-self:flex-end;align-items:flex-end}
+.cb.ag{align-self:flex-start}
+.cb.new{animation:cbin .16s ease-out}
+@keyframes cbin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cbt{border-radius:10px;padding:7px 10px;font-size:13px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;min-width:0}
+.cb.me .cbt{background:var(--paper);color:var(--panel)}
+.cb.ag .cbt{background:#2a2c42;border-left:3px solid var(--ac,#888);color:var(--text)}
+.cb.ag.need .cbt{border-left-color:var(--warn)}
+.cbt.clip{max-height:15.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.cbt pre{margin:6px 0 0;padding:24px 8px 6px;background:#14151f;border-radius:6px;overflow:auto;font:12px/1.4 var(--mono);white-space:pre;max-width:100%;position:relative}
+.cbt a{color:var(--text);text-decoration:underline}
+.cbt a small{color:var(--text-dim)}
+.cm{border-radius:5px;padding:0 4px;font-weight:600;background:rgba(255,255,255,.12);color:inherit}
+.cb.me .cm{background:rgba(29,30,44,.14)}
+.cmeta{font-size:11px;color:var(--text-dim);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cmeta b{font-weight:700;color:var(--nc,var(--text))}
+.cmeta .needl{color:var(--warn);font-weight:700}
+.cchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.cchip{display:inline-flex;align-items:center;gap:4px;font:500 11px/1 var(--ui);padding:3px 7px;border-radius:9px;border:1px solid rgba(255,255,255,.16);color:var(--text-dim);min-height:20px}
+.cchip i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--text-dim);display:inline-block}
+.cchip.answered{color:var(--accent);border-color:rgba(83,186,126,.5)}.cchip.answered i{border:0;width:auto;height:auto;font-style:normal}
+.cchip.needs{background:var(--warn);color:var(--panel);border-color:var(--warn);font-weight:700}
+.cchip.replying i{border:0;background:currentColor;animation:cpulse 1.2s ease-in-out infinite}
+@keyframes cpulse{50%{opacity:.25}}
+.cbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.cbtns button,.cmore,.ccopy,#cnew,#cclear,.cack{border:1px solid rgba(255,255,255,.18);background:transparent;border-radius:7px;padding:4px 9px;font-size:11px;color:var(--text);min-height:26px}
+.cbtns button:hover,.cmore:hover,#cnew:hover{background:rgba(255,255,255,.08)}
+.ccopy{position:absolute;right:4px;top:4px;padding:1px 6px;min-height:20px;background:#2a2c42}
+#cnew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% - 0px);z-index:2}
+.cwrap{position:relative;flex:none}
+#cnew{bottom:6px;background:var(--paper);color:var(--panel);border:0;font-weight:700}
+.cnotice{margin:0 12px 6px;font-size:11px;line-height:1.4;color:var(--text-dim);flex:none}
+.cnotice.need{padding:8px 10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:var(--text)}
+.cnotice summary{cursor:pointer}
+.cack{margin-top:6px;background:var(--paper);color:var(--panel);border:0;font-weight:700;padding:6px 12px}
+.cform{position:relative;padding:0 12px 10px;flex:none;display:flex;flex-direction:column;gap:6px}
+.cto{font-size:11px;color:var(--text-dim);display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.cto .cm{background:rgba(255,255,255,.1);color:var(--text)}
+.cin{display:flex;gap:6px;align-items:flex-end}
+#ctext{flex:1;min-width:0;resize:none;background:#14151f;color:var(--text);border:1px solid rgba(255,255,255,.18);border-radius:9px;padding:8px 10px;font:13px/1.35 var(--ui);max-height:110px;min-height:36px}
+#ctext:disabled,#csend:disabled{opacity:.5}
+#csend{height:36px}
+#clist{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);margin:0;padding:4px;list-style:none;background:var(--panel);border:1px solid rgba(255,255,255,.2);border-radius:9px;max-height:188px;overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:4}
+#clist[hidden]{display:none}
+#clist li{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;font-size:13px;min-height:36px;cursor:pointer}
+#clist li[aria-selected=true]{background:rgba(255,255,255,.12)}
+#clist li i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--text-dim));flex:none}
+#clist li small{color:var(--text-dim);font-size:11px}
+#cwarn{font-size:12px;color:var(--text);background:rgba(244,162,97,.16);border:1px solid var(--warn);border-radius:8px;padding:6px 9px}
+#cwarn[hidden]{display:none}
+.cfoot button{white-space:nowrap;flex:none}
+.cfoot{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--text-dim);line-height:1.35}
+#chatbtn{position:relative}
+.cbadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--paper);color:var(--panel);font:700 11px/18px var(--ui);text-align:center}
+.cbadge.need{background:var(--warn)}
+#chatbtn .cl{display:inline}
+body.free #chat.placed{left:var(--px);top:var(--py);width:var(--pw);height:var(--ph);right:auto;bottom:auto;max-height:none;z-index:var(--pz,6)}
+@media (max-width:899px){
+  #chat{position:absolute;inset:0;width:auto;height:auto;max-height:none;border-radius:0;z-index:12;padding-top:env(safe-area-inset-top);padding-bottom:max(env(safe-area-inset-bottom),var(--kb,0px));bottom:var(--kb,0px)}
+  #chat .uh{padding:10px 12px}
+  #chat .ucol{width:44px;height:44px}
+  #clist li{min-height:44px}
+  #ctext{font-size:16px}
+  #csend{height:44px;min-width:56px}
+  .cb{max-width:94%}
+}
+@media (max-width:599px){#chatbtn .cl{display:none}#chatbtn{width:44px;height:44px}}
+@media (prefers-reduced-motion:reduce){.cb.new,.cchip.replying i{animation:none}}
+body.rm .cb.new,body.rm .cchip.replying i{animation:none}
 </style>
 </head>
 <body>
@@ -336,6 +421,19 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     <aside id="ticker" class="panel pp" aria-label="Event ticker"><div class="uh"><h2>Latest events</h2></div><div id="nomodel" hidden>This log has no model data.</div><div id="tlist"></div></aside>
   </div>
   <section id="usheet" class="panel" role="dialog" aria-label="Usage" hidden></section>
+  <section id="chat" class="panel pp" aria-label="Office chat" hidden>
+    <div class="uh"><h2>Office chat</h2><span id="chst" class="chst"></span><button id="chx" class="ucol" type="button" aria-label="Close chat">×</button></div>
+    <div id="cnote" class="cnote"></div>
+    <div class="cwrap" style="flex:1 1 auto;min-height:0;display:flex;flex-direction:column"><div id="cthread" class="cthread" role="log" aria-label="Chat messages" aria-live="polite" tabindex="0"></div><button id="cnew" type="button" hidden>New replies</button></div>
+    <div id="cnotice" class="cnotice"></div>
+    <form id="cform" class="cform" autocomplete="off">
+      <ul id="clist" role="listbox" aria-label="Agents" hidden></ul>
+      <div id="cto" class="cto"></div>
+      <div id="cwarn" role="alert" hidden></div>
+      <div class="cin"><textarea id="ctext" rows="1" maxlength="4000" placeholder="Message the office. @ to mention" aria-label="Message" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="clist"></textarea><button id="csend" class="btn" type="submit">Send</button></div>
+      <div class="cfoot"><span>Chat does not approve anything that needs a gate. Those are confirmed in the session.</span><button id="cclear" type="button">Clear chat</button></div>
+    </form>
+  </section>
   <button id="tone" class="panel" type="button" aria-label="Latest event; open the event list"></button>
   <section id="focus" class="panel" hidden aria-label="Agent details"><button id="fx" type="button" aria-label="Close">×</button><div id="fbody"></div></section>
   <div id="msheet" class="panel"></div>
@@ -347,6 +445,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     <button id="motion" class="btn opt" type="button">Motion: Full</button>
     <button id="follow" class="btn opt" type="button" aria-pressed="true">Follow: On</button>
     <button id="ubtn" class="btn opt" type="button" aria-expanded="false">Usage</button>
+    <button id="chatbtn" class="btn" type="button" aria-expanded="false" aria-controls="chat"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 2h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8l-3.5 3v-3H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg><span class="cl">Chat</span><span id="cbadge" class="cbadge" hidden></span></button>
     <button id="gear" class="btn" type="button" aria-label="Settings" aria-expanded="false"><svg viewBox="0 0 16 16"><path fill="currentColor" d="M8 5.2A2.8 2.8 0 1 0 8 10.8 2.8 2.8 0 0 0 8 5.2zM6.9.8h2.2l.4 1.9 1.2.5 1.6-1.1 1.6 1.6-1.1 1.6.5 1.2 1.9.4v2.2l-1.9.4-.5 1.2 1.1 1.6-1.6 1.6-1.6-1.1-1.2.5-.4 1.9H6.9l-.4-1.9-1.2-.5-1.6 1.1-1.6-1.6 1.1-1.6-.5-1.2L.8 9.1V6.9l1.9-.4.5-1.2L2.1 3.7l1.6-1.6 1.6 1.1 1.2-.5z" opacity=".9"/></svg></button>
     <span id="fps" aria-label="Frames per second">-- fps</span>
   </footer>
@@ -705,7 +804,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     return '+' + String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
   }
   /* ---------- movable panels (T-059): pure layout maths, numbers only ---------- */
-  var PANEL = { MIN_W: 240, MIN_H: 120, MAX_W: 520, MARGIN: 8, SNAP: 12, STEP: 8, STEP_BIG: 32, OPACITY: 92, KEY: 'office.layout.v1', IDS: ['usage', 'ticker'] };
+  var PANEL = { MIN_W: 240, MIN_H: 120, MAX_W: 520, MARGIN: 8, SNAP: 12, STEP: 8, STEP_BIG: 32, OPACITY: 92, KEY: 'office.layout.v1', IDS: ['usage', 'ticker', 'chat'] };
   function pnum(v) { return typeof v === 'number' && isFinite(v); }
   function pclamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
   /* the box a panel may occupy: 8px from the sides, never above the top bar (the needs-you pill and strip) or under the bottom bar */
@@ -742,7 +841,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   function rectSentence(name, r) { return name + ' panel at ' + r.x + ', ' + r.y + ', size ' + r.w + ' by ' + r.h + '.'; }
   /* saved state: every number validated, a bad panel falls back alone (null = default), a bad opacity falls back to 92; never throws */
   function parseLayout(text) {
-    var out = { usage: null, ticker: null }, raw;
+    var out = { usage: null, ticker: null, chat: null }, raw;
     if (typeof text !== 'string' || !text) return out;
     try { raw = JSON.parse(text); } catch (e) { return out; }
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
@@ -760,7 +859,162 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     PANEL.IDS.forEach(function (id) { var p = l[id]; if (p) o[id] = { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(p.w), h: Math.round(p.h), o: opacityStep(p.o) }; });
     return JSON.stringify(o);
   }
-  root.OfficeCore = { DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
+  /* ----- office chat (T-063): pure helpers; the same rules as engine/runtime/chat.py (shared fixtures keep them equal) ----- */
+  var CH = {};
+  CH.TRANSITIONS = { 'new': ['picked'], picked: ['replying', 'new', 'answered', 'needs_merwyn'], replying: ['answered', 'needs_merwyn', 'new'], needs_merwyn: ['answered'], answered: [] };
+  CH.canMove = function (a, b) { return Object.prototype.hasOwnProperty.call(CH.TRANSITIONS, a) && CH.TRANSITIONS[a].indexOf(b) >= 0; };
+  var MRE = /(^|[^\w@])@([A-Za-z][A-Za-z-]{0,23})/g;
+  /* names come from user text: a null-prototype map, so @constructor or @__proto__ is never an agent */
+  function hmap(agents) { var h = Object.create(null); agents.forEach(function (a) { h[a.name.toLowerCase()] = a.id; }); return h; }
+  CH.parseMentions = function (text, agents) {
+    var h = hmap(agents), ids = [], unk = [], all = false, m, re = new RegExp(MRE.source, 'g');
+    text = String(text || '');
+    while ((m = re.exec(text))) {
+      var n = m[2].replace(/-+$/, '').toLowerCase();
+      if (n === 'all') all = true;
+      else if (n in h) { if (ids.indexOf(h[n]) < 0) ids.push(h[n]); }
+      else if (n && unk.indexOf(n) < 0) unk.push(n);
+    }
+    if (all) ids = agents.map(function (a) { return a.id; });
+    return { ids: ids, all: all, unknown: unk };
+  };
+  /* db error code: the code field, else a known code word in the message */
+  CH.errCode = function (e) {
+    var c = e && typeof e === 'object' ? e.code : null;
+    if (typeof c === 'string' && c) return c.toLowerCase().replace(/^[a-z]+\//, '').replace(/-/g, '_');
+    var m = e && /(unavailable|quota_exceeded|revoked|not_granted)/i.exec(String(e.message || ''));
+    return m ? m[1].toLowerCase() : null;
+  };
+  /* a write that fails with `unavailable` is tried once more after a short random delay; any other error goes straight up */
+  CH.retryOnce = function (fn, rnd, sleep) {
+    return Promise.resolve().then(fn).catch(function (e) {
+      if (CH.errCode(e) !== 'unavailable') throw e;
+      return new Promise(function (r) { (sleep || setTimeout)(r, 400 + Math.floor((rnd || Math.random)() * 800)); }).then(fn);
+    });
+  };
+  CH.route = function (p, def) { return p.ids.length ? p.ids.slice() : [def || 'pmo']; };
+  /* the @ must start the text or follow whitespace; returns null or { start, query, items } */
+  CH.completions = function (text, caret, agents) {
+    text = String(text || ''); caret = Math.min(caret == null ? text.length : caret, text.length);
+    var i = text.lastIndexOf('@', caret - 1);
+    if (i < 0 || (i > 0 && !/\s/.test(text.charAt(i - 1)))) return null;
+    var q = text.slice(i + 1, caret);
+    if (!/^[A-Za-z-]{0,24}$/.test(q)) return null;
+    var low = q.toLowerCase(), items = agents.filter(function (a) { return a.name.toLowerCase().indexOf(low) === 0; }).map(function (a) { return { id: a.id, name: a.name, role: a.role }; });
+    if ('all'.indexOf(low) === 0) items.push({ id: 'all', name: 'all', role: 'everyone' });
+    return { start: i, query: q, items: items };
+  };
+  function iso(ms) { return new Date(ms).toISOString(); }
+  CH.newAsk = function (text, cfg, nowMs, rnd, uid, inReplyTo) {
+    text = String(text || '');
+    if (!text.trim() || text.length > cfg.max_len) return null;
+    var p = CH.parseMentions(text, cfg.agents), ids = CH.route(p, cfg.default), at = iso(nowMs), rec = {}, r = '';
+    ids.forEach(function (a) { rec[a] = { status: 'new', reply_id: null, at: at, by: 'page' }; });
+    for (var k = 0; k < 4; k++) r += Math.floor(rnd() * 36).toString(36);
+    return { v: 1, kind: 'ask', id: 'm-' + Math.floor(nowMs).toString(36) + '-' + r, author: 'merwyn', author_uid: String(uid), text: text, created_at: at,
+      mentions: p.ids, all: p.all, unknown: p.unknown, in_reply_to: inReplyTo || null, recipients: rec };
+  };
+  CH.valid = function (d) {
+    if (!d || typeof d !== 'object' || d.v !== 1 || typeof d.id !== 'string' || typeof d.text !== 'string' || typeof d.created_at !== 'string' || isNaN(Date.parse(d.created_at))) return false;
+    if (d.kind === 'ask') return !!d.recipients && typeof d.recipients === 'object' && Object.keys(d.recipients).every(function (a) { return d.recipients[a] && d.recipients[a].status in CH.TRANSITIONS; });
+    return d.kind === 'reply' && typeof d.reply_to === 'string' && typeof d.author === 'string';
+  };
+  function byTime(a, b) { return (Date.parse(a.created_at) - Date.parse(b.created_at)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); }
+  CH.threads = function (docs) {
+    var ok = docs.filter(CH.valid), asks = ok.filter(function (d) { return d.kind === 'ask'; }).sort(byTime);
+    return asks.map(function (a) { return { ask: a, replies: ok.filter(function (d) { return d.kind === 'reply' && d.reply_to === a.id; }).sort(byTime) }; });
+  };
+  CH.label = function (st, name) {
+    return { 'new': 'waiting for ' + name + ' to pick up', picked: name + ' picked this up', replying: name + ' is replying', answered: 'answered', needs_merwyn: 'needs you' }[st] || st;
+  };
+  CH.liveWaiting = function (docs) {
+    var out = {};
+    docs.filter(function (d) { return CH.valid(d) && d.kind === 'ask'; }).sort(byTime).forEach(function (a) {
+      Object.keys(a.recipients).forEach(function (g) { if (a.recipients[g].status === 'needs_merwyn') (out[g] = out[g] || []).push(a.id); });
+    });
+    return out;
+  };
+  /* in place: strips old chat waits, adds the live ones. withLive returns a copy and leaves the replay state alone. */
+  CH.setLive = function (s, live) {
+    Object.keys(s.agents).forEach(function (id) {
+      var a = s.agents[id], w = a.waiting.filter(function (t) { return t.indexOf('chat:') !== 0; });
+      (live[id] || []).forEach(function (q) { w.push('chat:' + q); });
+      a.waiting = w;
+    });
+    return s;
+  };
+  function withLive(s, live) {
+    var c = Object.assign({}, s, { agents: {} });
+    Object.keys(s.agents).forEach(function (id) { c.agents[id] = Object.assign({}, s.agents[id], { waiting: s.agents[id].waiting.slice() }); });
+    return CH.setLive(c, live);
+  }
+  function lum(h) { var v = [1, 3, 5].map(function (i) { var c = parseInt(h.substr(i, 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
+  CH.contrast = function (a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  CH.FILL = '#2a2c42';
+  CH.nameCol = function (h) {   // the avatar colour, lightened until the written name reads at 4.5:1 on the bubble fill
+    var k = 0, c = h;
+    function mix(p) { return '#' + [1, 3, 5].map(function (i) { var x = parseInt(h.substr(i, 2), 16); return ('0' + Math.round(x + (255 - x) * p).toString(16)).slice(-2); }).join(''); }
+    while (CH.contrast(c, CH.FILL) < 4.5 && k < 10) { k++; c = mix(k / 10); }
+    return c;
+  };
+  CH.unseen = function (docs, seenAt) {
+    var t = Date.parse(seenAt || '') || 0;
+    return docs.filter(function (d) { return d.kind === 'reply' && CH.valid(d) && Date.parse(d.created_at) > t; });
+  };
+  CH.officeStatus = function (meta, nowMs) {
+    var t = meta && Date.parse(meta.last_inbox_at || '');
+    return { running: !!(meta && meta.running && t && nowMs - t < 900000), last: t ? iso(t) : null };
+  };
+  /* text -> parts, never markup: { t: 'text'|'link'|'men'|'code', s, href?, id? }; links only when they start with https:// */
+  CH.inline = function (text, agents) {
+    var h = hmap(agents), out = [];
+    String(text).split(/(https:\/\/[^\s<>"'`)]+)/).forEach(function (seg, i) {
+      if (i % 2) { var host = ''; try { host = new URL(seg).host; } catch (e) { host = ''; } out.push(host ? { t: 'link', s: host, href: seg } : { t: 'text', s: seg }); return; }
+      var re = new RegExp(MRE.source, 'g'), at = 0, m;
+      while ((m = re.exec(seg))) {
+        var n = m[2].replace(/-+$/, '').toLowerCase(), id = n === 'all' ? 'all' : (n in h ? h[n] : null), st = m.index + m[1].length, len = 1 + n.length;
+        if (!id) continue;
+        if (st > at) out.push({ t: 'text', s: seg.slice(at, st) });
+        out.push({ t: 'men', s: seg.substr(st, len), id: id }); at = st + len;
+      }
+      if (at < seg.length) out.push({ t: 'text', s: seg.slice(at) });
+    });
+    return out;
+  };
+  CH.blocks = function (text, agents) {
+    var out = [];
+    String(text).split(/```[^\n]*\n?/).forEach(function (seg, i) {
+      if (i % 2) { if (seg.replace(/\n$/, '')) out.push({ t: 'code', s: seg.replace(/\n$/, '') }); }
+      else if (seg) out.push({ t: 'p', parts: CH.inline(seg, agents) });
+    });
+    return out;
+  };
+  /* the personal-data scan (C1): same kinds as engine/runtime/chat.py; a hit names the kind, never the text */
+  var SCAN = [[/[\w.+-]+@[\w-]+\.[\w.-]+/, 'email address'], [/(?<!\d)\d{16}(?!\d)/, '16-digit run'], [/\d{10,}/, 'run of 10+ digits'],
+    [/(?<![\w])(?:\+62|62|0)[\s-]?8\d{1,3}[\s.-]?\d{3,4}[\s.-]?\d{2,5}(?!\d)/, 'phone number'], [/(?<!\d)\d{3,}(?:[ .-]\d{3,}){2,}(?!\d)/, 'long number with separators'],
+    [/\b(?:sk|pk|ghp|gho|ghs|xox[abp])[-_][A-Za-z0-9_-]{16,}|\bAKIA[0-9A-Z]{12,}|\bAIza[0-9A-Za-z_-]{20,}/, 'secret-like token'],
+    [/\b(?:password|passwd|secret|api[_ -]?key|token)\s*[:=]\s*\S{6,}/i, 'secret-like token'], [/\bbearer\s+[A-Za-z0-9._~+\/-]{16,}/i, 'secret-like token'], [/-----BEGIN [A-Z ]*PRIVATE KEY/, 'secret-like token']];
+  /* non-ASCII decimal digits (Arabic-Indic, fullwidth, ...) become ASCII first, as chat.py does; value = offset in its contiguous run of Nd, mod 10 */
+  var ND = /\p{Nd}/u;
+  CH.asciiDigits = function (s) {
+    return s.replace(/\p{Nd}/gu, function (ch) {
+      var c = ch.codePointAt(0);
+      if (c < 128) return ch;
+      var b = c; while (b > 0 && ND.test(String.fromCodePoint(b - 1))) b--;
+      return String((c - b) % 10);
+    });
+  };
+  CH.scan = function (text) {
+    var s = CH.asciiDigits(String(text || '')), i, m;
+    for (i = 0; i < SCAN.length; i++) {
+      m = SCAN[i][0].exec(s);
+      if (m && (SCAN[i][1] !== 'long number with separators' || m[0].replace(/\D/g, '').length >= 10)) return SCAN[i][1];
+    }
+    var re = /(?<![\w\/+=-])[A-Za-z0-9+\/_-]{32,}(?![\w\/+=-])/g;
+    while ((m = re.exec(s))) { if (/\d/.test(m[0]) && /[A-Za-z]/.test(m[0]) && !/^[0-9a-f]{40}$/.test(m[0])) return 'secret-like token'; }
+    return null;
+  };
+  root.OfficeCore = { chat: CH, withLive: withLive, DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
     eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
@@ -778,6 +1032,8 @@ var D = JSON.parse(document.getElementById('office-data').textContent);
 var P = D.theme.palette, EV = D.events, TL = C.timeline(EV), TOTAL = TL.total;
 var $ = function (id) { return document.getElementById(id); };
 var params = new URLSearchParams(location.search);
+var CFG = D.chat || null;   // T-063: no chat data (the recorded usage page, a default build) means no chat panel and no button
+if (!CFG) { ['chat', 'chatbtn'].forEach(function (i) { var e = $(i); if (e) e.remove(); }); }
 var NAME = {}, AG = {}, DESK = {}, ROOM = {}, STAGE_ROOM = {};
 D.agents.forEach(function (a) { NAME[a.id] = a.name; AG[a.id] = a; });
 D.theme.desks.forEach(function (d) { DESK[d.agent] = d; });
@@ -880,10 +1136,10 @@ function updatePill() {
   ban.hidden = !n;
   if (n) {
     var w = who[0], tk = S.agents[w.id].waiting;
-    ban.innerHTML = ICON.waiting + '<span>' + esc(w.name) + ' is waiting · ' + esc(tk[0]) + (tk.length > 1 ? ' +' + (tk.length - 1) : '') + '</span>';
+    ban.innerHTML = ICON.waiting + '<span>' + esc(w.name) + ' is waiting · ' + esc(wl(tk[0])) + (tk.length > 1 ? ' +' + (tk.length - 1) : '') + '</span>';
   }
   document.title = (n ? '(' + n + ') needs you · ' : '') + 'AI Office';
-  var lab = n ? 'AI office. ' + who.map(function (w2) { return w2.name + ' (' + S.agents[w2.id].waiting.join(', ') + ')'; }).join('; ') + ' waiting for you.' : 'AI office. Nobody is waiting for you.';
+  var lab = n ? 'AI office. ' + who.map(function (w2) { return w2.name + ' (' + S.agents[w2.id].waiting.map(wl).join(', ') + ')'; }).join('; ') + ' waiting for you.' : 'AI office. Nobody is waiting for you.';
   $('gl').setAttribute('aria-label', lab);
 }
 function renderStrip(force) {
@@ -1146,11 +1402,12 @@ function renderFocus() {
     '<div class="row"><span class="mono">' + (h.length ? esc(h.join(', ')) : 'No task in hand') + '</span>' +
     (h.length ? '<span style="color:var(--text-dim)">for ' + Math.max(0, Math.round(S.now - S.agents[id].since)) + 's</span>' : '') + '</div>' +
     (last.length ? '<ol>' + last.map(function (x) { return '<li>' + esc(C.sentence(x.ev, NAME)) + '</li>'; }).join('') + '</ol>' : '<ol><li>No events yet</li></ol>');
+  if (CFG && chatOpen()) { var mb = el('button', 'btn'); mb.type = 'button'; mb.textContent = 'Message ' + a.name; mb.style.marginTop = '8px'; mb.addEventListener('click', function () { var ta = $('ctext'); if (ta.disabled) return; ta.value += (ta.value && !/\s$/.test(ta.value) ? ' ' : '') + '@' + a.name + ' '; renderTo(); ta.focus(); }); $('fbody').appendChild(mb); }
 }
 $('fx').addEventListener('click', function () { focusAgent(null); });
 $('pill').addEventListener('click', function () {
   var w = D.agents.filter(function (a) { return S.agents[a.id].waiting.length; })[0];
-  if (w) focusAgent(w.id);
+  if (w) { var wt = S.agents[w.id].waiting; if (CFG && String(wt[0]).indexOf('chat:') === 0) openChat(true); focusAgent(w.id); }
 });
 $('banner').addEventListener('click', function () { $('pill').click(); });
 
@@ -1179,11 +1436,12 @@ $('gear').addEventListener('click', function () {
     ['motion', 'follow'].forEach(function (id) { var b = el('button', 'btn', $(id).textContent); b.disabled = $(id).disabled; b.addEventListener('click', function () { $(id).click(); b.textContent = $(id).textContent; }); m.appendChild(b); }); }
 });
 document.addEventListener('keydown', function (e) {
-  if (e.target && (e.target.tagName === 'INPUT' && e.target.type !== 'range')) return;
+  if (e.target && ((e.target.tagName === 'INPUT' && e.target.type !== 'range') || e.target.tagName === 'TEXTAREA')) return;
   var k = e.key;
   if (e.target && e.target.classList && (e.target.classList.contains('grip') || e.target.classList.contains('rz') || e.target.classList.contains('oprange')) && (k.indexOf('Arrow') === 0 || k === ' ' || k === 'Home' || k === 'Enter')) return;   // panel controls own these keys
   if (e.target && e.target.closest && e.target.closest('[role=radiogroup]') && (k.indexOf('Arrow') === 0 || k === ' ' || k === 'Home' || k === 'End' || k === 'Enter')) return;   // the Summary | Detail switch owns these keys
   if (k === 'Escape' && closeMenus(true)) return;
+  if (k === 'Escape' && CFG && chatOpen() && e.target && e.target.closest && e.target.closest('#chat')) return;
   if (k === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('play').click(); }
   else if (k === 'ArrowRight' && e.target.id !== 'scrub') { stepEv(1); }
   else if (k === 'ArrowLeft' && e.target.id !== 'scrub') { stepEv(-1); }
@@ -1216,6 +1474,7 @@ function dispatch(i) {
 function seek(t) {
   t = Math.max(0, Math.min(TOTAL, t)); T = t;
   S = C.stateAt(D, t); next = C.countDue(D, t);
+  if (CFG) C.chat.setLive(S, CHAT_LIVE);   // a live chat wait is never cleared by scrubbing the replay
   hist = []; for (var i = 0; i < next; i++) if (EV[i].type !== 'usage') hist.push({ ev: EV[i], start: TL[i].start });
   walkingSet = {}; ended = false;
   rebuildTicker(next);
@@ -1433,14 +1692,14 @@ function initScene() {
 
   /* ----- avatars ----- */
   var SPR = {
-    chief:     { body: '#4361ee', skin: 'skin_mid',   h: 1.15, hair: '#2a2030' },
-    pm:        { body: '#c77dd9', skin: 'skin_light', h: 1.10, hair: '#5a3a2e' },
-    architect: { body: '#1f7a99', skin: 'skin_light', h: 1.18, hair: '#1d1d2b' },
-    engineer:  { body: '#4b3f72', skin: 'skin_dark',  h: 1.12, hair: '#241c18' },
-    qa:        { body: '#eceae4', skin: 'skin_mid',   h: 1.08, hair: '#2b2118' },
-    officer:   { body: '#8f9a62', skin: 'skin_light', h: 1.12, hair: '#2b2118' },
-    librarian: { body: '#7b5e57', skin: 'skin_dark',  h: 1.06, hair: '#3d2f2b' },
-    designer:  { body: '#e7a3c4', skin: 'skin_mid',   h: 1.04, hair: '#2a1f2e' }
+    chief:     { body: BODY.chief, skin: 'skin_mid',   h: 1.15, hair: '#2a2030' },
+    pm:        { body: BODY.pm, skin: 'skin_light', h: 1.10, hair: '#5a3a2e' },
+    architect: { body: BODY.architect, skin: 'skin_light', h: 1.18, hair: '#1d1d2b' },
+    engineer:  { body: BODY.engineer, skin: 'skin_dark',  h: 1.12, hair: '#241c18' },
+    qa:        { body: BODY.qa, skin: 'skin_mid',   h: 1.08, hair: '#2b2118' },
+    officer:   { body: BODY.officer, skin: 'skin_light', h: 1.12, hair: '#2b2118' },
+    librarian: { body: BODY.librarian, skin: 'skin_dark',  h: 1.06, hair: '#3d2f2b' },
+    designer:  { body: BODY.designer, skin: 'skin_mid',   h: 1.04, hair: '#2a1f2e' }
   };
   function capsule(r, y0, y1) {
     var pts = [], i, a;
@@ -1997,18 +2256,18 @@ function initScene() {
 }
 
 /* ---------- movable panels (T-059): usage and ticker float at 900px+; layout maths is in OfficeCore ---------- */
-var PN = C.PANEL, PNAME = { usage: 'Usage', ticker: 'Latest events' };
-var PL = { free: false, r: { usage: null, ticker: null }, o: { usage: PN.OPACITY, ticker: PN.OPACITY }, pending: null }, pdrag = null, pTimers = {}, resetTimer = 0, animTimers = {};
+var PN = C.PANEL, PNAME = { usage: 'Usage', ticker: 'Latest events', chat: 'Chat' }, PIDS = PN.IDS.filter(function (id) { return !!$(id); });
+var PL = { free: false, r: { usage: null, ticker: null, chat: null }, o: { usage: PN.OPACITY, ticker: PN.OPACITY, chat: PN.OPACITY }, pending: null }, pdrag = null, pTimers = {}, resetTimer = 0, animTimers = {};
 var GRIP = '<svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/><circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/><circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/></g></svg>';
 var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></g></svg>';
 var RZ = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M14 4L4 14M14 9L9 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 function floatOK() { return innerWidth >= 900; }
 function pbounds() { return C.panelBounds(innerWidth, innerHeight, $('bar').offsetHeight || 56); }
-function pids() { return PN.IDS.filter(function (id) { return !$(id).hidden; }); }
+function pids() { return PIDS.filter(function (id) { return !$(id).hidden; }); }
 function readStore() { try { return localStorage.getItem(PN.KEY); } catch (e) { return null; } }   // storage blocked: default layout, silently
 function writeStore() { try { localStorage.setItem(PN.KEY, C.serializeLayout(layoutObj())); } catch (e) { /* ignore */ } }
 function removeStore() { try { localStorage.removeItem(PN.KEY); } catch (e) { /* ignore */ } }
-function layoutObj() { var l = {}; PN.IDS.forEach(function (id) { if (PL.r[id]) l[id] = { x: PL.r[id].x, y: PL.r[id].y, w: PL.r[id].w, h: PL.r[id].h, o: PL.o[id] }; }); return l; }
+function layoutObj() { var l = {}; PIDS.forEach(function (id) { if (PL.r[id]) l[id] = { x: PL.r[id].x, y: PL.r[id].y, w: PL.r[id].w, h: PL.r[id].h, o: PL.o[id] }; }); return l; }
 function measure() {
   var m = {}; pids().forEach(function (id) { var b = $(id).getBoundingClientRect(); m[id] = { x: Math.round(b.left), y: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height) }; });
   return m;
@@ -2019,7 +2278,7 @@ function measureDefaults() {   // today's flow layout, read without a repaint in
 }
 function paintRect(id) {
   var r = PL.r[id], e = $(id); if (!r) return;
-  e.style.setProperty('--px', r.x + 'px'); e.style.setProperty('--py', r.y + 'px'); e.style.setProperty('--pw', r.w + 'px'); e.style.setProperty('--ph', r.h + 'px');
+  e.classList.add('placed'); e.style.setProperty('--px', r.x + 'px'); e.style.setProperty('--py', r.y + 'px'); e.style.setProperty('--pw', r.w + 'px'); e.style.setProperty('--ph', r.h + 'px');
 }
 function paintOpacity(id) {
   var e = $(id), o = PL.o[id], m = C.textMode(o), inp = $('o-' + id);
@@ -2047,16 +2306,16 @@ function freeze() {   // first action: both panels leave the flow column at exac
   setFree(true); pids().forEach(function (id) { paintRect(id); }); front(null);
   return true;
 }
-function front(id) { if (!PL.free) return; PN.IDS.forEach(function (o) { $(o).style.setProperty('--pz', o === id ? 3 : 2); }); }
+function front(id) { if (!PL.free) return; PIDS.forEach(function (o) { $(o).style.setProperty('--pz', o === id ? 3 : 2); }); }
 function applySaved() {
-  var saved = PL.pending; if (!saved || PL.free || !floatOK() || !(saved.usage || saved.ticker)) return;
+  var saved = PL.pending; if (!saved || PL.free || !floatOK() || !(saved.usage || saved.ticker || saved.chat)) return;
   var d = measureDefaults(), b = pbounds();
   pids().forEach(function (id) { var s = saved[id]; PL.r[id] = C.clampRect(s || d[id], b); PL.o[id] = s ? s.o : PN.OPACITY; });
-  setFree(true); PN.IDS.forEach(function (id) { paintRect(id); paintOpacity(id); });   // clamped in memory only: storage is untouched until the viewer acts
+  setFree(true); PIDS.forEach(function (id) { paintRect(id); paintOpacity(id); });   // clamped in memory only: storage is untouched until the viewer acts
 }
 function closeMenus(report) {
   var any = false;
-  PN.IDS.forEach(function (id) { var pm = $('pm-' + id); if (pm && !pm.hidden) { any = true; pm.hidden = true; var b = $('pmb-' + id); b.setAttribute('aria-expanded', 'false'); if (report) b.focus(); } });
+  PIDS.forEach(function (id) { var pm = $('pm-' + id); if (pm && !pm.hidden) { any = true; pm.hidden = true; var b = $('pmb-' + id); b.setAttribute('aria-expanded', 'false'); if (report) b.focus(); } });
   return any;
 }
 function keyEnd(id) {   // one announcement and one save, 600 ms after the last key
@@ -2065,7 +2324,7 @@ function keyEnd(id) {   // one announcement and one save, 600 ms after the last 
 }
 function resetLayout() {
   removeStore(); clearTimeout(resetTimer);
-  PN.IDS.forEach(function (id) { PL.o[id] = PN.OPACITY; paintOpacity(id); });
+  PIDS.forEach(function (id) { PL.o[id] = PN.OPACITY; paintOpacity(id); });
   if (PL.free) {
     if (!floatOK() || REDUCED) clearFree();
     else { var d = measureDefaults(); pids().forEach(function (id) { if (d[id]) settle(id, d[id], 160); }); resetTimer = setTimeout(clearFree, 200); }
@@ -2073,8 +2332,8 @@ function resetLayout() {
   announce('Layout reset');
 }
 function clearFree() {
-  PL.r = { usage: null, ticker: null }; setFree(false);
-  PN.IDS.forEach(function (id) { var e = $(id); e.classList.remove('anim', 'drag'); ['--px', '--py', '--pw', '--ph', '--pz'].forEach(function (v) { e.style.removeProperty(v); }); });
+  PL.r = { usage: null, ticker: null, chat: null }; setFree(false);
+  PIDS.forEach(function (id) { var e = $(id); e.classList.remove('anim', 'drag', 'placed'); ['--px', '--py', '--pw', '--ph', '--pz'].forEach(function (v) { e.style.removeProperty(v); }); });
 }
 function beginDrag(id, mode, e, host) {
   if (pdrag || !floatOK() || (e.pointerType === 'mouse' && e.button !== 0)) return;
@@ -2136,7 +2395,7 @@ function attachPanel(id) {
   inp.addEventListener('change', function () { if (PL.free) writeStore(); });
 }
 function initPanels() {
-  PN.IDS.forEach(attachPanel); PN.IDS.forEach(paintOpacity);
+  PIDS.forEach(attachPanel); PIDS.forEach(paintOpacity);
   PL.pending = C.parseLayout(readStore()); applySaved();
   document.addEventListener('pointerdown', function (e) {
     var t = e.target;
@@ -2149,6 +2408,286 @@ function initPanels() {
     var b = pbounds();
     pids().forEach(function (id) { var r = PL.r[id], c = r && C.clampRect(r, b); if (c && (c.x !== r.x || c.y !== r.y || c.w !== r.w || c.h !== r.h)) settle(id, c, 160); });
   });
+}
+
+/* ---------- office chat (T-063): a shared inbox in the artifact's own database; only built when D.chat exists ---------- */
+var CS = null, CHAT_LIVE = {};
+var BODY = { chief: '#4361ee', pm: '#c77dd9', architect: '#1f7a99', engineer: '#4b3f72', qa: '#eceae4', officer: '#8f9a62', librarian: '#7b5e57', designer: '#e7a3c4' };
+function agCol(id) { return BODY[(DESK[id] || {}).sprite] || '#8d99ae'; }
+function wl(t) { return String(t).indexOf('chat:') === 0 ? 'chat' : t; }
+function hhmm(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+function loadChatSt() { try { var o = JSON.parse(localStorage.getItem('office.chat.v1') || '{}'); return { open: !!o.open, seen_at: typeof o.seen_at === 'string' ? o.seen_at : '', ack: !!o.ack }; } catch (e) { return { open: false, seen_at: '', ack: false }; } }
+function saveChatSt() { try { localStorage.setItem('office.chat.v1', JSON.stringify(CS.st)); } catch (e) { /* storage blocked: session only */ } }
+function cDocs() {
+  var have = {}; CS.docs.forEach(function (d) { have[d.id] = 1; });
+  return CS.docs.concat(Object.keys(CS.pending).filter(function (k) { return !have[k]; }).map(function (k) { return CS.pending[k].doc; }));
+}
+function withTimeout(p, ms) { return Promise.race([Promise.resolve(p), new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
+/* the only place that touches the artifact db API. Shapes confirmed from the server's type definitions (T-063 rework 1): doc/collection paths,
+   get/set/update/delete/acquire/onSnapshot, error codes. `unavailable` is transient (one retry on writes); other codes are shown as not available. */
+function chatStore(db) {
+  return {
+    set: function (path, doc) { return C.chat.retryOnce(function () { return db.doc(path).set(doc); }); },
+    del: function (path) { return C.chat.retryOnce(function () { return db.doc(path).delete(); }); },
+    messages: function (cb, err) { return db.collection('chat/office/messages').orderBy('created_at', 'desc').limit(200).onSnapshot(function (s) { cb(s.docs.map(function (d) { return d.data(); }).reverse()); }, err); },
+    meta: function (cb, err) { return db.doc('chat/office').onSnapshot(function (s) { cb(s && s.data ? s.data() || null : null); }, function (e) { cb(null); if (err) err(e); }); }
+  };
+}
+function chatInit() {
+  if (CS.phase !== 'idle') return;
+  CS.phase = 'loading'; renderChat();
+  var c = typeof claude !== 'undefined' ? claude : null, first = true;
+  function onDbErr(e) {
+    if (C.chat.errCode(e) === 'unavailable') { CS.reconn = true; renderChat(); renderChatStatus(); return; }   /* transient: keep what is shown, the listener resumes */
+    CS.phase = 'nodb'; renderChat();
+  }
+  function fail(ph) { if (CS.phase === 'loading') { CS.phase = ph; renderChat(); } }
+  if (!c || !c.use) { fail('nodb'); return; }
+  withTimeout(c.use('db'), 10000).then(function (db) {
+    if (!db) throw new Error('no db');
+    return withTimeout(c.use('user'), 10000).then(function (u) { return withTimeout(u && u.id ? u.id() : null, 10000); }).then(function (uid) {
+      if (!uid) { fail('signedout'); return; }
+      CS.uid = uid; CS.store = chatStore(db);
+      CS.store.meta(function (m) { CS.meta = m; renderChatStatus(); }, onDbErr);
+      CS.store.messages(function (docs) {
+        var known = {}; CS.docs.forEach(function (d) { known[d.id] = 1; });
+        var fresh = docs.filter(function (d) { return d.kind === 'reply' && C.chat.valid(d) && !known[d.id]; });
+        CS.docs = docs.filter(C.chat.valid); CS.limited = docs.length >= 200;
+        Object.keys(CS.pending).forEach(function (k) { if (CS.docs.some(function (d) { return d.id === k; })) delete CS.pending[k]; });
+        CS.phase = 'ready'; CS.reconn = false;
+        if (!first) fresh.forEach(function (d) { var n = NAME[d.author] || d.author; announce(d.needs_merwyn ? n + ' needs you: ' + (d.question || '') : n + ' replied'); CS.newReplies = true; });
+        first = false; onChatDocs();
+      }, onDbErr);
+      setTimeout(function () { fail('nodb'); }, 10000);
+    });
+  }).catch(function () { fail('nodb'); });
+}
+function onChatDocs() {
+  CHAT_LIVE = C.chat.liveWaiting(cDocs());
+  C.chat.setLive(S, CHAT_LIVE);
+  renderChat(); hudRefresh(false);
+}
+function chatOpen() { return CFG && !$('chat').hidden; }
+function openChat(scrollTo) {
+  var p = $('chat'); p.hidden = false; CS.st.open = true; saveChatSt();
+  $('chatbtn').setAttribute('aria-expanded', 'true');
+  if (PL.free && floatOK() && !PL.r.chat) { var sv = PL.pending && PL.pending.chat; PL.r.chat = C.clampRect(sv || measure().chat, pbounds()); PL.o.chat = sv ? sv.o : PN.OPACITY; paintRect('chat'); paintOpacity('chat'); }
+  chatInit(); CS.stick = true; CS.scrollTo = scrollTo || null; renderChat();
+  if (focused) renderFocus();
+  setTimeout(function () { if (!$('ctext').disabled) $('ctext').focus(); }, 0);
+}
+function closeChat(refocus) {
+  $('chat').hidden = true; CS.st.open = false; saveChatSt(); $('chatbtn').setAttribute('aria-expanded', 'false'); closeList();
+  if (refocus) $('chatbtn').focus();
+  renderBadge(); if (focused) renderFocus();
+}
+function renderBadge() {
+  var b = $('cbadge'), live = Object.keys(CHAT_LIVE).length, n = chatOpen() ? 0 : C.chat.unseen(cDocs(), CS.st.seen_at).length;
+  b.hidden = !(live || n); b.className = 'cbadge' + (live ? ' need' : '');
+  b.textContent = live ? '?' : String(n);
+  $('chatbtn').setAttribute('aria-label', live ? 'Chat, a reply needs you' : (n ? 'Chat, ' + n + ' new ' + (n === 1 ? 'reply' : 'replies') : 'Chat'));
+}
+function renderChatStatus() {
+  var o = C.chat.officeStatus(CS.meta, Date.now()), st = $('chst');
+  st.className = 'chst' + (o.running && !CS.reconn ? ' on' : ''); st.innerHTML = '<i></i>'; st.appendChild(document.createTextNode(CS.reconn ? 'Reconnecting…' : (o.running ? 'Office running' : 'Office not running')));
+  $('cnote').textContent = o.running ? '' : (CFG.agents[0].name + ' picks this up when the office is running' + (o.last ? ' (last checked ' + hhmm(Date.parse(o.last)) + ')' : '') + '.');
+}
+function addText(box, parts) {
+  parts.forEach(function (p) {
+    if (p.t === 'link') { var a = document.createElement('a'); a.href = p.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.title = p.href; a.textContent = p.s; box.appendChild(a); }
+    else if (p.t === 'men') { var m = el('span', 'cm'); m.textContent = p.s; box.appendChild(m); }
+    else box.appendChild(document.createTextNode(p.s));
+  });
+}
+function bodyNode(text, cls) {
+  var box = el('div', cls);
+  C.chat.blocks(text, CFG.agents).forEach(function (b) {
+    if (b.t === 'code') { var pre = document.createElement('pre'); pre.textContent = b.s; var cp = el('button', 'ccopy'); cp.type = 'button'; cp.textContent = 'Copy'; cp.addEventListener('click', function () { try { navigator.clipboard.writeText(b.s); cp.textContent = 'Copied'; } catch (e) { cp.textContent = 'Not copied'; } }); pre.appendChild(cp); box.appendChild(pre); }
+    else addText(box, b.parts);
+  });
+  return box;
+}
+function chipsNode(ask) {
+  var box = el('div', 'cchips'), order = { needs_merwyn: 0, replying: 1, picked: 2, 'new': 3, answered: 4 };
+  Object.keys(ask.recipients).sort(function (a, b) { return order[ask.recipients[a].status] - order[ask.recipients[b].status]; }).forEach(function (id) {
+    var st = ask.recipients[id].status, n = NAME[id] || id, c = el('span', 'cchip ' + (st === 'needs_merwyn' ? 'needs' : st));
+    var ic = el('i'); if (st === 'answered') ic.textContent = '✓'; if (st === 'needs_merwyn') ic.textContent = '!'; c.appendChild(ic);
+    c.appendChild(document.createTextNode((st === 'answered' || st === 'needs_merwyn' ? n + ' · ' : '') + C.chat.label(st, n)));
+    if (st === 'needs_merwyn') { c.firstChild.style.border = '0'; c.firstChild.style.width = 'auto'; c.firstChild.style.height = 'auto'; }
+    box.appendChild(c);
+  });
+  return box;
+}
+function askNode(t, fresh) {
+  var a = t.ask, pend = CS.pending[a.id], w = el('div', 'cb me' + (fresh && !REDUCED ? ' new' : '')); w.dataset.id = a.id;
+  w.appendChild(bodyNode(a.text, 'cbt'));
+  var meta = el('div', 'cmeta'); meta.textContent = hhmm(Date.parse(a.created_at)) + (a.unknown.length ? ' · No agent called ' + a.unknown[0].replace(/^./, function (x) { return x.toUpperCase(); }) + (a.mentions.length ? '' : '; this goes to ' + NAME[CFG.default]) : '');
+  w.appendChild(meta);
+  if (pend && pend.state === 'failed') {
+    var r = el('div', 'cbtns'), b = el('button'); b.type = 'button'; b.textContent = 'Not sent. Retry'; b.addEventListener('click', function () { writeAsk(a); }); r.appendChild(b); w.appendChild(r);
+  } else w.appendChild(chipsNode(a));
+  return w;
+}
+function replyNode(rp, ask, fresh) {
+  var id = rp.author, n = NAME[id] || id, w = el('div', 'cb ag' + (rp.needs_merwyn && ask.recipients[id] && ask.recipients[id].status === 'needs_merwyn' ? ' need' : '') + (fresh && !REDUCED ? ' new' : ''));
+  w.dataset.id = rp.id; w.style.setProperty('--ac', agCol(id)); w.style.setProperty('--nc', C.chat.nameCol(agCol(id)));
+  var meta = el('div', 'cmeta'), nm = el('b'); nm.textContent = n; meta.appendChild(nm);
+  var live = rp.needs_merwyn && ask.recipients[id] && ask.recipients[id].status === 'needs_merwyn';
+  if (live) { var nl = el('span', 'needl'); nl.textContent = '! Needs you'; meta.appendChild(nl); }
+  var tm = el('span'); tm.textContent = hhmm(Date.parse(rp.created_at)); meta.appendChild(tm);
+  if (rp.task) { var tk = el('span', 'mono'); tk.textContent = rp.task; meta.appendChild(tk); }
+  w.appendChild(meta);
+  var body = bodyNode(rp.text, 'cbt'); body.dataset.k = rp.id; w.appendChild(body);
+  if (live) {
+    var q = el('div', 'cmeta'); q.style.color = 'var(--text)'; q.textContent = rp.question || ''; w.appendChild(q);
+    var bt = el('div', 'cbtns'), s = el('button'); s.type = 'button'; s.textContent = 'Show ' + n + ' in the office'; s.addEventListener('click', function () { focusAgent(id, false); });
+    var r = el('button'); r.type = 'button'; r.textContent = 'Reply'; r.addEventListener('click', function () { CS.replyTo = { id: rp.id, agent: id }; var ta = $('ctext'); ta.value = '@' + n + ' ' + ta.value.replace(/^@\S+ /, ''); ta.focus(); renderTo(); });
+    bt.appendChild(s); bt.appendChild(r); w.appendChild(bt);
+  }
+  return w;
+}
+function collapse(th) {
+  Array.prototype.forEach.call(th.querySelectorAll('.cb.ag .cbt[data-k]'), function (b) {
+    var k = b.dataset.k, open = CS.exp[k];
+    if (b.scrollHeight > 230 || open) {
+      if (!open) b.classList.add('clip');
+      var m = el('button', 'cmore'); m.type = 'button'; m.setAttribute('aria-expanded', String(!!open)); m.textContent = open ? 'Show less' : 'Show more';
+      m.addEventListener('click', function () { CS.exp[k] = !CS.exp[k]; renderChat(); });
+      b.parentNode.insertBefore(m, b.nextSibling);
+    }
+  });
+}
+function renderTo() {
+  var ta = $('ctext'), p = C.chat.parseMentions(ta.value, CFG.agents), box = $('cto'); box.textContent = '';
+  var ids = C.chat.route(p, CFG.default), lead = el('span'); lead.textContent = 'To:'; box.appendChild(lead);
+  (p.all ? ['everyone'] : ids.map(function (i) { return NAME[i]; })).forEach(function (n) { var c = el('span', 'cm'); c.textContent = n; box.appendChild(c); });
+  if (!p.ids.length) { var d = el('span'); d.textContent = '(default)'; box.appendChild(d); }
+  if (p.unknown.length) { var u = el('span'); u.textContent = '· No agent called ' + p.unknown[0].replace(/^./, function (x) { return x.toUpperCase(); }) + (p.ids.length ? '' : '; this goes to ' + NAME[CFG.default]); box.appendChild(u); }
+  if (CS.replyTo) { var r = el('span'); r.textContent = '· answering ' + NAME[CS.replyTo.agent]; box.appendChild(r); }
+}
+function renderNotice() {
+  var box = $('cnotice'), txt = 'Do not type borrower, lender or staff personal data (names, NIK, phone, email, account numbers), production rows or credentials here. Chat is stored on claude.ai and sent to AI agents. Use a loan ID or a link instead. The check catches number patterns, not names.';
+  box.textContent = '';
+  if (!CS.st.ack) {
+    box.className = 'cnotice need'; box.appendChild(document.createTextNode(txt));
+    var b = el('button', 'cack'); b.type = 'button'; b.textContent = 'I understand'; b.addEventListener('click', function () { CS.st.ack = true; saveChatSt(); renderChat(); $('ctext').focus(); }); box.appendChild(document.createElement('br')); box.appendChild(b);
+  } else {
+    box.className = 'cnotice'; var d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'No personal data or credentials here. Details'; d.appendChild(s); d.appendChild(document.createTextNode(txt)); box.appendChild(d);
+  }
+}
+function renderChat() {
+  if (!CFG) return;
+  renderBadge();
+  if (!chatOpen()) return;
+  var th = $('cthread'), ready = CS.phase === 'ready', ta = $('ctext'), ok = ready && CS.st.ack;
+  renderChatStatus(); renderNotice(); renderTo();
+  ta.disabled = !ok; $('csend').disabled = !ok; $('cclear').disabled = !ready;
+  var atBottom = CS.stick || th.scrollHeight - th.scrollTop - th.clientHeight < 40, seen = CS.rendered || (CS.rendered = {}), added = false;
+  th.textContent = '';
+  if (CS.phase === 'idle' || CS.phase === 'loading') { var l = el('div', 'cerr'); l.textContent = CS.reconn ? 'Reconnecting…' : 'Opening chat…'; th.appendChild(l); return; }
+  if (CS.phase === 'nodb') { var e = el('div', 'cerr'); e.textContent = 'Chat storage is not available in this view'; th.appendChild(e); return; }
+  if (CS.phase === 'signedout') { var s = el('div', 'cerr'), b = el('button', 'btn'); s.textContent = 'Chat needs you signed in'; b.type = 'button'; b.textContent = 'Try again'; b.addEventListener('click', function () { CS.phase = 'idle'; chatInit(); }); s.appendChild(b); th.appendChild(s); return; }
+  var ts = C.chat.threads(cDocs());
+  if (CS.limited) { var lm = el('div', 'cmeta'); lm.style.justifyContent = 'center'; lm.textContent = 'Showing the last 200'; th.appendChild(lm); }
+  if (!ts.length) {
+    var em = el('div', 'cempty'), h = el('b'); h.textContent = 'Ask the office anything.'; em.appendChild(h);
+    ['@Janice what is next on the board?', '@Fang @Dinda is T-063 ready to build?', '@all anything blocked?'].forEach(function (x) { var b = el('button'); b.type = 'button'; b.textContent = x; b.addEventListener('click', function () { ta.value = x + ' '; ta.focus(); renderTo(); }); em.appendChild(b); });
+    th.appendChild(em);
+  }
+  ts.forEach(function (t) {
+    var f = !seen[t.ask.id]; if (f && CS.rendered_any) added = true; seen[t.ask.id] = 1; th.appendChild(askNode(t, f && CS.rendered_any));
+    t.replies.forEach(function (rp) { var g = !seen[rp.id]; seen[rp.id] = 1; if (g && CS.rendered_any) added = true; th.appendChild(replyNode(rp, t.ask, g && CS.rendered_any)); });
+  });
+  CS.rendered_any = true; collapse(th);
+  if (CS.scrollTo) { var tgt = th.querySelector('.cb.ag.need'); if (tgt) { th.scrollTop = tgt.offsetTop - 20; CS.stick = false; atBottom = false; } CS.scrollTo = null; }
+  else if (atBottom) { th.scrollTop = th.scrollHeight; CS.newReplies = false; }
+  $('cnew').hidden = atBottom || !(added || CS.newReplies);
+  CS.stick = false;
+  var last = cDocs().filter(function (d) { return d.kind === 'reply'; }).map(function (d) { return d.created_at; }).sort().pop();
+  if (last && last > CS.st.seen_at) { CS.st.seen_at = last; saveChatSt(); renderBadge(); }
+}
+/* @mention combobox */
+var comp = null, compI = 0;
+function closeList() { comp = null; $('clist').hidden = true; var t = $('ctext'); t.setAttribute('aria-expanded', 'false'); t.removeAttribute('aria-activedescendant'); }
+function paintList() {
+  var ul = $('clist'), t = $('ctext'); ul.textContent = '';
+  comp.items.forEach(function (it, i) {
+    var li = el('li'); li.id = 'co' + i; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', String(i === compI));
+    var d = el('i'); d.style.setProperty('--c', it.id === 'all' ? 'var(--paper)' : agCol(it.id)); li.appendChild(d);
+    var n = el('span'); n.textContent = it.name === 'all' ? '@all' : it.name; li.appendChild(n);
+    var r = el('small'); r.textContent = it.id === 'all' ? 'everyone' : it.role; li.appendChild(r);
+    li.addEventListener('mousedown', function (e) { e.preventDefault(); pick(i); });
+    ul.appendChild(li);
+  });
+  ul.hidden = false; t.setAttribute('aria-expanded', 'true'); t.setAttribute('aria-activedescendant', 'co' + compI);
+  var act = ul.children[compI]; if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest' });
+}
+function updateList() {
+  var t = $('ctext'), c = C.chat.completions(t.value, t.selectionStart, CFG.agents);
+  if (!c || !c.items.length) { closeList(); return; }
+  if (!comp || comp.start !== c.start) compI = 0;
+  comp = c; compI = Math.min(compI, c.items.length - 1); paintList();
+}
+function pick(i) {
+  var t = $('ctext'), it = comp.items[i], end = t.selectionStart, ins = '@' + (it.id === 'all' ? 'all' : it.name) + ' ';
+  t.value = t.value.slice(0, comp.start) + ins + t.value.slice(end); t.selectionStart = t.selectionEnd = comp.start + ins.length;
+  closeList(); t.focus(); renderTo(); autosize();
+}
+function autosize() { var t = $('ctext'); t.style.height = 'auto'; t.style.height = Math.min(110, t.scrollHeight + 2) + 'px'; }
+function showWarn(msg) { var w = $('cwarn'); w.hidden = !msg; w.textContent = msg || ''; }
+function writeAsk(ask) {
+  CS.pending[ask.id] = { doc: ask, state: 'sending' };
+  Promise.resolve().then(function () { return CS.store.set('chat/office/messages/' + ask.id, ask); }).then(function () { if (CS.pending[ask.id]) CS.pending[ask.id].state = 'sent'; }, function () { if (CS.pending[ask.id]) CS.pending[ask.id].state = 'failed'; renderChat(); });
+  onChatDocs();
+}
+function sendChat() {
+  var t = $('ctext'), text = t.value;
+  if (!text.trim() || CS.phase !== 'ready' || !CS.st.ack) return;
+  var kind = C.chat.scan(text);
+  if (kind) { showWarn('This looks like personal data or a secret (' + kind + '). Not sent. Use a loan ID or a link instead.'); t.focus(); return; }
+  var ask = C.chat.newAsk(text, CFG, Date.now(), Math.random, CS.uid, CS.replyTo ? CS.replyTo.id : null);
+  if (!ask) { showWarn('A message is 1 to ' + CFG.max_len + ' characters.'); return; }
+  showWarn(''); t.value = ''; CS.replyTo = null; closeList(); autosize(); CS.stick = true; writeAsk(ask); renderTo();
+}
+function clearChat() {
+  var b = $('cclear');
+  if (b.dataset.arm !== '1') { b.dataset.arm = '1'; b.textContent = 'Delete all chat?'; setTimeout(function () { b.dataset.arm = ''; b.textContent = 'Clear chat'; }, 4000); return; }
+  b.dataset.arm = ''; b.textContent = 'Clear chat';
+  var docs = cDocs(); CS.pending = {};
+  Promise.all(docs.map(function (d) { return CS.store.del('chat/office/messages/' + d.id); })).then(function () { CS.docs = []; CS.rendered = {}; CS.rendered_any = false; onChatDocs(); announce('Chat cleared'); }, function () { showWarn('Could not clear the chat. Try again.'); });
+}
+function initChat() {
+  CS = { st: loadChatSt(), phase: 'idle', docs: [], pending: {}, meta: null, exp: {}, rendered: null, store: null };
+  var t = $('ctext');
+  $('chatbtn').addEventListener('click', function () { if (chatOpen()) closeChat(false); else openChat(); });
+  $('chx').addEventListener('click', function () { closeChat(true); });
+  $('cform').addEventListener('submit', function (e) { e.preventDefault(); sendChat(); });
+  $('cclear').addEventListener('click', clearChat);
+  $('cnew').addEventListener('click', function () { var th = $('cthread'); th.scrollTop = th.scrollHeight; $('cnew').hidden = true; CS.newReplies = false; });
+  $('cthread').addEventListener('scroll', function () { var th = $('cthread'); if (th.scrollHeight - th.scrollTop - th.clientHeight < 40) { $('cnew').hidden = true; CS.newReplies = false; } });
+  t.addEventListener('input', function () { showWarn(''); updateList(); renderTo(); autosize(); });
+  t.addEventListener('click', updateList);
+  t.addEventListener('blur', function () { setTimeout(closeList, 120); });
+  t.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (comp && (k === 'ArrowDown' || k === 'ArrowUp')) { e.preventDefault(); compI = (compI + (k === 'ArrowDown' ? 1 : comp.items.length - 1)) % comp.items.length; paintList(); }
+    else if (comp && (k === 'Enter' || k === 'Tab') && !e.isComposing) { e.preventDefault(); pick(compI); }
+    else if (k === 'Escape' && comp) { e.preventDefault(); e.stopPropagation(); closeList(); }
+    else if (k === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendChat(); }
+    else if (k === 'Backspace' && t.selectionStart === t.selectionEnd) {   // a mention goes whole, like a chip
+      var m = /(^|\s)@([A-Za-z-]+) $/.exec(t.value.slice(0, t.selectionStart));
+      if (m && (m[2].toLowerCase() === 'all' || CFG.agents.some(function (a) { return a.name.toLowerCase() === m[2].toLowerCase(); }))) {
+        e.preventDefault(); var at = t.selectionStart - m[2].length - 2; t.value = t.value.slice(0, at) + t.value.slice(t.selectionStart); t.selectionStart = t.selectionEnd = at; renderTo(); autosize();
+      }
+    }
+  });
+  $('chat').addEventListener('keydown', function (e) { if (e.key === 'Escape' && !e.defaultPrevented) { e.stopPropagation(); closeChat(true); } });
+  window.addEventListener('online', function () { showWarn(''); });
+  window.addEventListener('offline', function () { showWarn('You are offline; messages send when you are back'); });
+  if (window.visualViewport) { var kb = function () { var v = window.visualViewport; document.documentElement.style.setProperty('--kb', Math.max(0, Math.round(innerHeight - v.height - v.offsetTop)) + 'px'); }; window.visualViewport.addEventListener('resize', kb); kb(); }
+  renderBadge(); renderTo();
+  chatInit();   // at load: the badge and the needs-you link need the live messages even while the panel is closed
+  if (CS.st.open) openChat();
 }
 
 /* ---------- boot ---------- */
@@ -2183,6 +2722,7 @@ function boot() {
   initPanels();
   if (skipped.length) { var d = el('div', 'tl bad', '<time></time><span>' + ICON.bad + '</span><span>' + skipped.length + ' lines skipped (' + skipped.slice(0, 3).map(function (s) { return 'line ' + s.line; }).join(', ') + ')</span>'); $('tlist').insertBefore(d, $('tlist').firstChild); skipped.forEach(function (s) { console.warn('skipped line ' + s.line + ': ' + s.message); }); }
   setPlaying(EV.length > 0 && (t0 === null || params.get('play') === '1'));
+  if (CFG) initChat();
   if (HAS_MODELS && params.get('usage') === 'open' && innerWidth < 900) openSheet();
   requestAnimationFrame(frame);
   loadThree();

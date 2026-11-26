@@ -11,6 +11,14 @@ python -m engine.runtime dry-run  <office>   # validates first, then prints the 
 
 Dry-run picks the highest priority (P0 first), then the lowest task number. It skips terminal tasks, tasks whose `depends_on` are not `done` (a cross-office dependency counts as not done), and tasks owned by `human`.
 
+## Office chat helper (T-063)
+
+```bash
+python -m engine.runtime chat plan|reply|status|purge|rules|mentions ai-office   # JSON or text on stdin, JSON on stdout
+```
+
+`chat.py` is pure (no file or network access). Chat text is company data: the CLI reads stdin and prints to stdout, never write its output into this repo. Format and procedure: `engine/schema/chat.md` and pmo-playbook section 9.
+
 ## Tests
 
 ```bash
