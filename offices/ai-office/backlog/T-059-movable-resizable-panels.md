@@ -120,10 +120,34 @@ Headless Chromium (playwright, swiftshader), 1280x800 on the recorded page, scri
 
 Decision (Merwyn, 26 Nov 2026 ~14:20 WIB, recorded by Janice): below 60% opacity, each text line keeps a soft dark backing so it stays readable; the panel itself stays see-through as set. Rework to add it, then review.
 
+### Rework 1 (Merwyn's decision: soft dark backing per text line)
+
+**What changed**
+- `engine/app/office.template.html` (and regenerated `office.html`): at 60% opacity and below (`.pp.tpd`, was "below 60"), every leaf text element in the usage and latest-events panels gets `rgba(12,13,22,.8)` backing, 4px radius, 3px side and 2px top and bottom padding (offset by equal negative margin so layout does not move), `box-decoration-break:clone`, `width:fit-content`. The panel fill, blur, border and handles are unchanged; the backing hugs each line, so the scene still shows between lines. Excluded: the "recorded" pill (own fill), bars, grip, handle, "..." button and menu. Phone sheet untouched (it cannot go transparent).
+- Threshold moved from `<60` to `<=60` (`textMode(60).dim` is now true) because Dinda's target includes 60% and Merwyn's backing is part of the same readable-text state; test updated, plus one CSS assertion that the backing rule exists.
+- First attempt used alpha .66 and 0 vertical padding: 0% worst was 1.4:1 (the 2px measuring ring fell outside the box over a yellow note); .8 with 2px vertical padding fixed it.
+
+**Contrast, same method as the first build** (`/tmp/t059-scripts/contrast.py`: usage panel 300x420 on the lightest 300x420 footprint of the scene, lightest 10% of the pixels within 2px of each glyph, shadow and backing included):
+
+| Opacity | Worst run | Typical (median) | Lowest typical | Before (worst) |
+|---|---|---|---|---|
+| 0% | 6.99:1 | 15.79 | 12.17 | 1.28 |
+| 30% | 8.71:1 | 16.03 | 13.67 | 3.17 |
+| 60% | 11.19:1 | 16.33 | 14.13 | 2.84 |
+| 92% | 5.52:1 (unchanged, no backing) | 13.15 | 5.95 | 5.52 |
+
+All at or above 4.5:1. Shots: `/tmp/t059-shots/rework-00.png`, `-30`, `-60`, `-92` (1280x800, panel over the whiteboard and pinboards). Latest events uses the same selector; not separately measured (empty at that replay time).
+
+**Verify:** same commands as above; unittest Ran 314 OK, --check up to date, golden 13 cases 0 problems, board.py 59 tasks (board.md discarded).
+
+**Known limit:** the visual look (dark pills behind each line at 60% and below) is a change in the default feel when set transparent; the Reviewer should look at `rework-30.png`.
+
+— Sebastian (engineer)
+
 ## Review log
 
 ## Decision
 
 ## Open questions
-- Worst-case contrast over light scene objects is below 4.5:1 at 0%, 30% and 60% opacity (numbers in Build notes). Add a minimum scrim, a stronger shadow, or accept? Who can answer: Dinda (designer), Merwyn for the see-through versus legibility trade-off.
+- (Resolved by Merwyn's decision and Rework 1: per-line dark backing; worst case now 6.99:1 or better at 0, 30, 60%.)
 - Deviation 1 (top limit is under the top bar) and 2 (gear shown at 900px and wider): accept? Who can answer: Dinda (designer) or Janice (pmo).

@@ -378,11 +378,12 @@ if (mode === 'sprint3') {
   assert.deepStrictEqual(C.keyDelta('ArrowLeft', false), [-8, 0]);
   assert.deepStrictEqual(C.keyDelta('ArrowDown', true), [0, 32]);
   assert.strictEqual(C.keyDelta('a', false), null);
-  // opacity: blur holds at 8px down to 30% then fades to 0; shadow under 100; dim text rises under 60; edge at 0
+  // opacity: blur holds at 8px down to 30% then fades to 0; shadow under 100; dim text and the dark text backing apply at 60 and below; edge at 0
   assert.deepStrictEqual([100, 92, 30, 15, 0].map(C.blurFor), [8, 8, 8, 4, 0]);
   assert.deepStrictEqual(C.textMode(100), { shadow: false, dim: false, edge: false });
   assert.deepStrictEqual(C.textMode(92), { shadow: true, dim: false, edge: false });
-  assert.deepStrictEqual(C.textMode(59), { shadow: true, dim: true, edge: false });
+  assert.deepStrictEqual(C.textMode(61), { shadow: true, dim: false, edge: false });
+  assert.deepStrictEqual(C.textMode(60), { shadow: true, dim: true, edge: false });
   assert.deepStrictEqual(C.textMode(0), { shadow: true, dim: true, edge: true });
   assert.strictEqual(C.opacityStep(40), 40); assert.strictEqual(C.opacityStep(150), 92); assert.strictEqual(C.opacityStep('9'), 92); assert.strictEqual(C.opacityStep(NaN), 92);
   assert.strictEqual(C.rectSentence('Usage', { x: 120, y: 80, w: 300, h: 240 }), 'Usage panel at 120, 80, size 300 by 240.');
@@ -450,6 +451,8 @@ class CoreUnderNode(unittest.TestCase):
         for needle in ("'Move ' + nm + ' panel'", "'Resize ' + nm + ' panel'", "Background opacity", "Reset layout", "Layout reset"):
             self.assertIn(needle, html)
         self.assertRegex(html, r"#stage\{position:absolute;left:0;right:0;")   # the stage runs full width behind the panels
+        # at 60% and below each text line keeps a dark backing; the panel fill is not touched by it
+        self.assertRegex(html, r"\.pp\.tpd :is\([^)]*\)[^{]*\{background:rgba\(12,13,22,\.8\)")
 
     def test_percentage_maths(self):
         self.assertIn("shares ok", self.node(str(HTML), "shares"))

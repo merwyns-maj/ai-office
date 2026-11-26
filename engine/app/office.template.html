@@ -252,6 +252,8 @@ body.rm .tl.new{animation:none}
   @supports (backdrop-filter:blur(1px)){body.free .pp{backdrop-filter:blur(var(--pblur));-webkit-backdrop-filter:blur(var(--pblur))}}
   body.free .pp.tp{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6)}
   body.free .pp.tpd{--text-dim:var(--text)}
+  /* at 60% and below: every text line keeps a soft dark backing so it stays readable; the panel fill itself stays as set */
+  body.free .pp.tpd :is(h2,h3,h4,p,span,div,b,i,em,strong,small,a,label,li,td,th,code):not(:has(*)):not(:empty):not(.bar):not(.synpill):not(.pmb):not(.grip):not(.rz):not(.pm *){background:rgba(12,13,22,.8);border-radius:4px;padding:2px 3px;margin:-2px -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;width:fit-content;max-width:100%}
   body.free .pp.anim{transition:left var(--pdur,.16s) ease-out,top var(--pdur,.16s) ease-out,width var(--pdur,.16s) ease-out,height var(--pdur,.16s) ease-out}
   body.free .pp.drag{box-shadow:0 16px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.2);transition:box-shadow .1s}
   body.rm.free .pp,body.rm.free .pp.anim,body.rm.free .pp.drag{transition:none}
@@ -670,7 +672,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   /* background opacity 0..100: blur holds at 8px down to 30% and fades to 0 below it; dim text rises to full text colour under 60% */
   function opacityStep(o) { return pnum(o) && o >= 0 && o <= 100 ? Math.round(o) : PANEL.OPACITY; }   // the slider moves in 5s; today's 92 is kept as it is
   function blurFor(o) { return o >= 30 ? 8 : Math.round(8 * Math.max(0, o) / 30 * 10) / 10; }
-  function textMode(o) { return { shadow: o < 100, dim: o < 60, edge: o <= 0 }; }
+  function textMode(o) { return { shadow: o < 100, dim: o <= 60, edge: o <= 0 }; }
   function rectSentence(name, r) { return name + ' panel at ' + r.x + ', ' + r.y + ', size ' + r.w + ' by ' + r.h + '.'; }
   /* saved state: every number validated, a bad panel falls back alone (null = default), a bad opacity falls back to 92; never throws */
   function parseLayout(text) {
