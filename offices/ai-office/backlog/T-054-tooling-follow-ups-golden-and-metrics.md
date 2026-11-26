@@ -2,9 +2,9 @@
 id: T-054
 title: "Follow-ups: golden zero-case exit, per-line owner check, metrics partial sums"
 phase: 3-skills
-status: review
+status: done
 priority: P2
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: []
@@ -144,6 +144,8 @@ python scripts/board.py ai-office            -> 56 tasks (board.md discarded)
 — Sebastian (engineer)
 
 ## Review log
+PR #36 at 3fed2df, 26 Nov 2026: PASS. Empty office exit 1, unknown office exit 2; one ownerless open-question line fails check 4; partial marker "0 (partial, 1 not recorded)" with a Sprint 2 task removed; report regenerated from a full clone is identical; no data hits; build_agents no diff; 246 tests OK; case totals not hard-coded.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
