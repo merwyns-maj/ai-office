@@ -64,7 +64,7 @@ def build_data(office_root, fixture, ledger=None):
     forbidden = events.forbidden_terms(office.repo_root)
     lprobs, totals = [], None
     if ledger is not None:
-        lh, runs, lprobs = ledger_mod.load_ledger(ledger, agents=ids, office=office.id, forbidden=forbidden)
+        lh, runs, lprobs = ledger_mod.load_ledger(ledger, agents=ids, office=office.id, forbidden=forbidden, providers=set(catalogue))
         if lh is None:
             return {"log": None, "skipped": [{"line": p.line, "message": p.message} for p in lprobs]}, lprobs
         log_text = ledger_mod.to_event_log(lh, runs)

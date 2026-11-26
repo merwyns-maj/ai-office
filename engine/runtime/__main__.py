@@ -57,8 +57,9 @@ def _ledger(args):
         _report(root, problems)
         return 1
     ids = {a.get("id") for a in office.org.get("agents", []) if isinstance(a, dict)}
+    catalogue, _ = providers_mod.load_providers(root)
     header, runs, probs = ledger.load_ledger(args.file, agents=ids, office=office.id,
-                                             forbidden=events.forbidden_terms(office.repo_root))
+                                             forbidden=events.forbidden_terms(office.repo_root), providers=set(catalogue))
     for p in probs:
         print(p)
     errors = sum(1 for p in probs if p.level == "error")

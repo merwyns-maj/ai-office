@@ -161,6 +161,18 @@ class Parser(unittest.TestCase):
         self.assertIn("covers", probs[0].message)
         self.assertNotIn("acmecorp", probs[0].message)
 
+    def test_header_provider_must_be_in_providers_yaml(self):
+        hdr = HDR.replace('"date"', '"provider":"claude-code","date"')
+        self.assertIsNotNone(parse(run_line(1), header=hdr, providers={"claude-code"})[0])
+        h, runs, probs = parse(run_line(1), header=hdr, providers={"claude-sdk"})
+        self.assertEqual((h, runs), (None, []))
+        self.assertIn("providers.yaml", errs(probs)[0].message)
+        self.assertIsNotNone(parse(run_line(1), header=hdr)[0])                  # no catalogue given: not checked
+        real = ledger.load_ledger(REAL, agents=AGENTS, office="ai-office", providers={"anthropic-api"})
+        self.assertIsNone(real[0])
+        code, out, _ = run("ledger", "ai-office", str(REAL))
+        self.assertEqual(code, 0)                                               # the real catalogue has claude-code
+
     def test_file_stem_must_equal_session(self):
         with tempfile.TemporaryDirectory() as tmp:
             f = Path(tmp) / "session_OTHER000.jsonl"

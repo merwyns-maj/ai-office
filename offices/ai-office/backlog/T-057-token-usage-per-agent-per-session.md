@@ -249,6 +249,13 @@ Screenshots (read and fixed until clean; no console errors, only swiftshader INF
 
 Janice (pmo), 26 Nov: moved to review. On deviation 2 (header `provider`): these runs were Claude Code subagents in a claude.ai session on Merwyn's Max plan, not the Agent SDK runtime (T-024 is not built). Plan billing is right; the label "Claude Agent SDK" is not. Reviewer: judge whether the recorded page must say so. Merwyn's 11:31 request (provider bars with %, agent accordion expanded) is part of this task's scope.
 
+### Rework 1 (after Cahyani's REJECT, round 1)
+- Provider: new `claude-code` entry in `offices/ai-office/providers.yaml` (label "Claude Code subagents (Max plan)", code CC, billing plan, models opus and sonnet; colour #8e9bf5, chosen to pass the provider-colour test). The ledger header now says `"provider":"claude-code"` (header only; the 35 run lines are still byte-identical to the seed, checked with `diff`). The provider bar % now reads "100% of session" on the recorded page and "NN% of session" on the synthetic page, so it cannot be read as a plan share.
+- Parser: `parse_ledger` / `load_ledger` take `providers` (ids from providers.yaml); a header provider outside them rejects the file with an error. The CLI, `office_app --ledger` and `metrics.py` pass the catalogue. Test: `test_header_provider_must_be_in_providers_yaml`.
+- Polish: recorded clock reads "(replay)"; `planned*` and its title use only model notes (a note on a not-reported run is a usage note, documented in usage.md); workflow.yaml and pr-workflow say "existing lines never edited or deleted; a new session file starts with its header line"; task ids in the run list no longer wrap (each id is nowrap, the run label and "not reported" too).
+- Left for later (Open questions): unknown-agent error echoes the value; phone sheet is cramped.
+- Output: 310 tests OK; golden 13 cases, 75 checks, 0 problems; validate OK; office_app --check up to date; ledger CLI 35 runs, 0 errors; board.py clean (board.md discarded); report regenerated from the full clone (head b04bbd9, 39 PR refs); screenshots re-taken in /tmp/t057-shots/ (no console errors).
+
 ## Review log
 REJECT (round 1), 26 Nov 2026, PR #40 head 2de5b8c. Pass: ledger runs byte-identical to the seed; hand totals 2,520,926 per agent, per sprint and solo + shared; run 22 "not reported"; page shares sum to 100; 309 tests; report from a full clone matches; 17 break cases caught without echo; process rules and T-024/T-026 notes present; synthetic page unchanged; headless renders clean, accordion works by keyboard.
 Fail (no Max-plan share claim; ledger states facts only): header provider "claude-sdk" shows as "Claude Agent SDK (Max plan) 100%"; the runs were Claude Code subagents, and "(Max plan) 100%" reads as plan share. Fix: a providers.yaml entry for Claude Code subagents (Max plan), header points at it, bar % labelled as share of session; check header provider against providers.yaml ids, with a test.
@@ -258,4 +265,5 @@ Notes: clock "(synth)" on recorded page; "planned*" set by a usage note; plannin
 ## Decision
 
 ## Open questions
+- Later (Cahyani, round 1 notes): the ledger parser's unknown-agent error echoes the offending value; the phone usage sheet is cramped. (Sebastian)
 - Done-when 1-2 say 33 runs / 32 with usage; the seed now has 35 / 34. Count every run in the file? Janice (pmo). (Fang, Design)

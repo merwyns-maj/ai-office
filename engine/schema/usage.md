@@ -12,7 +12,7 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 ```json
 {"log":"agent-runs","v":1,"office":"ai-office","session":"session_01ABC...","source":"harness subagent report ...","recorded_by":"Janice (pmo)","covers":"...","date":"2026-11-26","provider":"claude-sdk","not_reported":["split","model","main_session"]}
 ```
-`log` = agent-runs; `v` = 1; `office` = the office id; `session` matches `^session_[A-Za-z0-9]{8,64}$`; `source`, `recorded_by`, `covers`: 1-300 characters, no newline; `date` YYYY-MM-DD; `provider` (optional): the provider id from `providers.yaml` the runs went through, shown by the page as the one provider recorded; `not_reported`: list drawn from `split` (input/output/cache), `model` (the model actually used) and `main_session` (the main session's own tokens): what this whole file does not report.
+`log` = agent-runs; `v` = 1; `office` = the office id; `session` matches `^session_[A-Za-z0-9]{8,64}$`; `source`, `recorded_by`, `covers`: 1-300 characters, no newline; `date` YYYY-MM-DD; `provider` (optional): the provider id from `providers.yaml` the runs went through (an id not in the catalogue is an error), shown by the page as the one provider recorded; `not_reported`: list drawn from `split` (input/output/cache), `model` (the model actually used) and `main_session` (the main session's own tokens): what this whole file does not report.
 
 ## Run lines
 ```json
@@ -20,7 +20,7 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 ```
 - `n` integer >= 1, strictly increasing (a repeat or decrease is an error, a gap a warning); `sprint` integer >= 1; `agent` an `org.yaml` id; `tasks` 1-8 distinct `T-nnn`; `step` a lowercase slug (spec, ux, design, compliance, build, rework, review today).
 - `tokens`, `tool_uses`, `duration_ms`: integer 0 to 999,999,999, or `null` = **not reported**. A run whose harness report had no usage stays in the file with `null`, never 0.
-- `note` (optional, 1-200 characters): e.g. the model differed from the profile.
+- `note` (optional, 1-200 characters). On a run with `tokens: null` it explains the missing usage; on any other run it records a caveat such as the model differing from the profile (the page marks `planned*` only for the latter).
 - Later, written by the SDK runtime (T-024, T-026): `model`, `input`, `output`, `cache_read`, `cache_write`. If any of the four token fields is present, `input` and `output` are required and `tokens` must equal their sum.
 - An unknown field is a warning and is kept.
 - Data rule: the `events.py` rule (email, 16-digit run, 10+ digit run, forbidden term from `workspaces.yaml`) runs first on every string of the header and every line; a header hit rejects the file. Keys and numbers are not scanned.

@@ -25,7 +25,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _fm import split  # noqa: E402
 from board import stages as board_stages  # noqa: E402
-from engine.runtime import events as ev_mod, ledger as ledger_mod, loader  # noqa: E402
+from engine.runtime import events as ev_mod, ledger as ledger_mod, loader, providers as prov_mod  # noqa: E402
 
 NR = "not recorded"
 STAGE_COLS = ("spec", "design", "build", "review")
@@ -290,8 +290,9 @@ def usage_section(office_dir, repo):
     office, _ = loader.load_office(office_dir)
     ids = {a.get("id") for a in office.org.get("agents", []) if isinstance(a, dict)} if office else set()
     forbidden = ev_mod.forbidden_terms(repo)
+    catalogue = set(prov_mod.load_providers(office_dir)[0])
     for f in files:
-        header, runs, probs = ledger_mod.load_ledger(f, agents=ids, office=office_dir.name, forbidden=forbidden)
+        header, runs, probs = ledger_mod.load_ledger(f, agents=ids, office=office_dir.name, forbidden=forbidden, providers=catalogue)
         for p in probs:
             print(f"{f.name}: {p}", file=sys.stderr)
         errors = [p for p in probs if p.level == "error"]

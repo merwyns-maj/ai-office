@@ -117,6 +117,7 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur .l1 .pl{font:400 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
 .ur .bl{display:flex;align-items:center;gap:8px;margin:2px 0 1px}
 .ur .bl .bar{flex:1;margin:0}
+.ur .bl .pct.wide{width:auto}
 .ur .bl .pct{flex:none;width:34px;text-align:right;font:500 11px/1 var(--mono)}
 .ur .bar{position:relative;height:4px;border-radius:2px;overflow:hidden;margin:2px 0 1px}
 .acc{border-top:1px solid rgba(255,255,255,.05)}
@@ -129,7 +130,9 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ab{padding:0 0 6px 20px}
 .ab[hidden]{display:none}
 .rr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:11px;line-height:1.5;color:var(--text-dim)}
-.rr .rt{text-align:right;color:var(--text)}
+.tid{white-space:nowrap}
+.rr > span:first-child{white-space:nowrap}
+.rr .rt{white-space:nowrap;text-align:right;color:var(--text)}
 .lnk{background:none;border:0;color:var(--accent);font:600 11px/1.5 var(--ui);padding:2px 0;margin-top:2px;cursor:pointer;text-decoration:underline}
 #usheet .lnk{min-height:44px}
 #usheet .rr{font-size:12px}
@@ -487,7 +490,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
         if ('total' in ev) {   /* recorded ledger run (T-057): totals only, null = not reported */
           var q = s.rec[ev.agent] || (s.rec[ev.agent] = { runs: 0, nr: 0, tokens: 0, tools: 0, notes: [], last: null });
           q.runs++; if (ev.total === null) q.nr++; else q.tokens += ev.total;
-          q.tools += ev.tool_uses || 0; if (ev.note) q.notes.push({ run: ev.run, note: ev.note });
+          q.tools += ev.tool_uses || 0; if (ev.note) q.notes.push({ run: ev.run, note: ev.note, nr: ev.total === null });
           q.last = { run: ev.run, total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null };
           (s.runlog[ev.agent] = s.runlog[ev.agent] || []).push({ run: ev.run, sprint: ev.sprint, step: ev.step, tasks: ev.tasks || [ev.task], total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null });
           break;
@@ -764,8 +767,8 @@ function figs(r) {
 var NOSPLIT = 'Input, output and cache split not reported';
 var accOff = {};   /* agent ids whose accordion section is collapsed; default is expanded */
 var CHEV = '<svg class="chev" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg>';
-function barLine(pct, colour) {
-  return '<div class="bl"><div class="bar" aria-hidden="true"><i style="width:' + pct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div><span class="pct">' + pct + '%</span></div>';
+function barLine(pct, colour, of) {
+  return '<div class="bl"><div class="bar" aria-hidden="true"><i style="width:' + pct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div><span class="pct' + (of ? ' wide' : '') + '">' + pct + '%' + (of ? ' of session' : '') + '</span></div>';
 }
 function accHTML(id, head, body, label) {
   var open = !accOff[id];
@@ -773,7 +776,7 @@ function accHTML(id, head, body, label) {
     '<div class="ab"' + (open ? '' : ' hidden') + '>' + body + '</div></div>';
 }
 function recRunLine(r) {
-  return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + esc((r.tasks || []).join(', ')) + '</span>' +
+  return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + (r.tasks || []).map(function (t, i, a) { return '<span class="tid">' + esc(t) + (i < a.length - 1 ? ',' : '') + '</span>'; }).join(' ') + '</span>' +
     '<span class="rt" title="' + (r.note ? esc(r.note) : NOSPLIT) + '">' + (r.total === null ? 'not reported' : esc(fmtTok(r.total))) + (r.note ? '*' : '') + '</span></div>';
 }
 function synRunLine(r) {
@@ -794,14 +797,14 @@ function recHTML() {
     (tot.nr ? '<div class="l2 rec">Percentages exclude the ' + tot.nr + (tot.nr === 1 ? ' run' : ' runs') + ' with tokens not reported.</div>' : '') + '</div>';
   h += '<h4>By provider</h4>';
   var pid = D.log.provider, pr = pid && (D.providers || {})[pid];
-  if (pid) h += '<div class="ur"><div class="l1"><span class="nm">' + esc(pr ? pr.label : pid) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></div>' + barLine(100, pr && pr.colour) + '<div class="l2 rec">1 provider recorded</div></div>';
+  if (pid) h += '<div class="ur"><div class="l1"><span class="nm">' + esc(pr ? pr.label : pid) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></div>' + barLine(100, pr && pr.colour, true) + '<div class="l2 rec">1 provider recorded</div></div>';
   else h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Provider</span><span class="cost">not reported</span></div></div>';
   h += '<h4>By agent, most tokens first</h4>';
   x.rows.forEach(function (r) {
-    var a = r.a, q = r.q, pl = a.planned_model, noted = q.notes.length > 0, allnr = q.runs === q.nr;
+    var a = r.a, q = r.q, pl = a.planned_model, mnotes = q.notes.filter(function (n) { return !n.nr; }), noted = mnotes.length > 0, allnr = q.runs === q.nr;
     var runsTxt = q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses' + (q.nr ? ' · ' + q.nr + ' not reported' : '');
     var head = '<span class="l1"><span class="nm">' + esc(a.name) + '</span>' +
-      (pl ? '<span class="pl" title="' + esc('Model from the agent profile; the harness does not report the model used.' + (noted ? ' ' + q.notes.map(function (n) { return 'Run ' + n.run + ': ' + n.note; }).join(' ') : '')) + '">' + esc(pl) + ' planned' + (noted ? '*' : '') + '</span>' : '') +
+      (pl ? '<span class="pl" title="' + esc('Model from the agent profile; the harness does not report the model used.' + (noted ? ' ' + mnotes.map(function (n) { return 'Run ' + n.run + ': ' + n.note; }).join(' ') : '')) + '">' + esc(pl) + ' planned' + (noted ? '*' : '') + '</span>' : '') +
       '<span class="cost" title="' + NOSPLIT + (allnr ? '' : ': ' + exact(q.tokens) + ' tokens') + '">' + (allnr ? 'not reported' : esc(fmtTok(q.tokens))) + '</span></span>' +
       (allnr ? '' : barLine(q.pct)) + '<span class="l2 rec">' + esc(runsTxt) + '</span>';
     h += accHTML(a.id, head, (S.runlog[a.id] || []).map(recRunLine).join('') + focusBtn(a.id),
@@ -821,7 +824,7 @@ function usageHTML() {
   var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
   order.forEach(function (pid) {
     var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
-    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' + barLine(r.pct, pr && pr.colour) +
+    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' + barLine(r.pct, pr && pr.colour, true) +
       '<div class="l2">' + figs(r) + '</div>' + (r.dates.length ? '<div class="l3">prices checked ' + esc(r.dates.join(', ')) + '</div>' : '') + '</div>';
   });
   h += '<h4>By agent</h4>';
@@ -1011,7 +1014,7 @@ function frame(ms) {
     $('scrub').value = TOTAL ? Math.round(Math.min(1, T / TOTAL) * 1000) : 0;
     S.now = T;
   }
-  $('clock').textContent = C.clock(T) + ' (synth)';
+  $('clock').textContent = C.clock(T) + (REC ? ' (replay)' : ' (synth)');
   if (scene) { scene.frame(dt, dt * (playing ? speed : 0), tNow); }
   fpsN++; fpsT += dt;
   if (fpsT >= 0.5) {

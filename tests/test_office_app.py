@@ -460,7 +460,7 @@ class NoLiterals(unittest.TestCase):
         self.assertEqual(data["log"]["usage_source"], "synthetic")
         self.assertEqual(data["warnings"], [])
         self.assertEqual(data["v"], 1)
-        self.assertEqual(sorted(data["providers"]), ["anthropic-api", "claude-sdk", "deepseek", "openai"])
+        self.assertEqual(sorted(data["providers"]), ["anthropic-api", "claude-code", "claude-sdk", "deepseek", "openai"])
         planned = {a["id"]: a["planned_model"] for a in data["agents"]}
         self.assertEqual(planned, {"architect": "opus", "reviewer": "opus", "pm": "sonnet", "pmo": "sonnet", "engineer": "sonnet",
                                    "compliance": "sonnet", "curator": "sonnet", "designer": "sonnet"})
@@ -480,7 +480,8 @@ class Recorded(unittest.TestCase):
         self.assertEqual(probs, [])
         self.assertEqual(data["log"]["usage_source"], "recorded")
         self.assertEqual(data["log"]["not_reported"], ["split", "model", "main_session"])
-        self.assertEqual(data["log"]["provider"], "claude-sdk")
+        self.assertEqual(data["log"]["provider"], "claude-code")
+        self.assertEqual(data["providers"]["claude-code"]["label"], "Claude Code subagents (Max plan)")
         self.assertEqual(data["ledger"]["session"]["tokens"], sum(e["total"] or 0 for e in data["events"]))
         self.assertTrue(all(e["type"] == "usage" and "total" in e for e in data["events"]))
         self.assertNotIn("$", json.dumps(data["events"]))
@@ -512,6 +513,9 @@ class Recorded(unittest.TestCase):
         for fn in ("function recHTML", "function recRows", "function focusRec", "function recRunLine", "function barLine", "function accHTML"):
             body = re.search(re.escape(fn) + r".*?\n}\n", text, re.S).group(0)
             self.assertNotIn("synth", body.lower(), fn)
+        self.assertIn("' of session'", text)                                   # provider bar % is a share of the session
+        self.assertIn("(REC ? ' (replay)' : ' (synth)')", text)                # clock label
+        self.assertIn("filter(function (n) { return !n.nr; })", text)          # planned* only for model notes, not usage notes
         summary = re.search(r"function usageSummary.*?\n}\n", text, re.S).group(0)
         self.assertIn("recorded", summary)
         self.assertIn("(SYN ?", re.search(r"function fillSheet.*?\n}\n", text, re.S).group(0))   # synthetic pill only when SYN

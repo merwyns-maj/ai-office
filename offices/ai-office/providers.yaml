@@ -3,6 +3,14 @@
 # provider's pricing page and fills prices.source and prices.checked (YYYY-MM-DD). Never estimate a price.
 # Model ids below are the ones the synthetic fixture uses; T-024/T-026 will say which ids the office really runs.
 providers:
+  claude-code:
+    label: Claude Code subagents (Max plan)
+    code: CC
+    colour: "#8e9bf5"
+    billing: plan
+    models:
+      claude-opus-4-5: { short: opus, family: opus }
+      claude-sonnet-4-5: { short: sonnet, family: sonnet }
   claude-sdk:
     label: Claude Agent SDK (Max plan)
     code: SDK

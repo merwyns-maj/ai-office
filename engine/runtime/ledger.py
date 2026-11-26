@@ -30,7 +30,7 @@ def _text(v, lo=1, hi=300):
     return isinstance(v, str) and lo <= len(v) <= hi and "\n" not in v and "\r" not in v
 
 
-def _check_header(h, office):
+def _check_header(h, office, providers=None):
     if h.get("log") != "agent-runs":
         return "header: log must be 'agent-runs'"
     if h.get("v") != 1 or isinstance(h.get("v"), bool):
@@ -50,6 +50,8 @@ def _check_header(h, office):
         return "header: date must be YYYY-MM-DD"
     if "provider" in h and not (isinstance(h["provider"], str) and events.PROVIDER_RE.match(h["provider"])):
         return "header: provider must be a provider id"
+    if "provider" in h and providers is not None and h["provider"] not in providers:
+        return "header: provider is not an id in providers.yaml"
     nr = h.get("not_reported")
     if not isinstance(nr, list) or any(x not in NOT_REPORTED for x in nr) or len(set(nr)) != len(nr):
         return "header: not_reported must be a list drawn from " + ", ".join(NOT_REPORTED)
@@ -89,8 +91,10 @@ def _check_run(r, agents):
     return None
 
 
-def parse_ledger(text, *, agents, office=None, forbidden=()):
-    """Return (header or None, kept runs in file order, problems). A bad header rejects the file."""
+def parse_ledger(text, *, agents, office=None, forbidden=(), providers=None):
+    """Return (header or None, kept runs in file order, problems). A bad header rejects the file.
+
+    providers: optional ids from providers.yaml; with it, a header provider outside them is an error."""
     problems, runs, header = [], [], None
     seen_header, last_n = False, 0
     warned = set()
@@ -126,7 +130,7 @@ def parse_ledger(text, *, agents, office=None, forbidden=()):
             if hit:
                 err(n, hit)
                 return None, [], problems
-            bad = _check_header(obj, office)
+            bad = _check_header(obj, office, providers)
             if bad:
                 err(n, bad + ": file rejected")
                 return None, [], problems
@@ -159,10 +163,10 @@ def parse_ledger(text, *, agents, office=None, forbidden=()):
     return header, runs, problems
 
 
-def load_ledger(path, *, agents, office=None, forbidden=()):
+def load_ledger(path, *, agents, office=None, forbidden=(), providers=None):
     """parse_ledger on a file, plus the file-stem = session check. Raises OSError for an unreadable file."""
     path = Path(path)
-    header, runs, problems = parse_ledger(path.read_text(encoding="utf-8"), agents=agents, office=office, forbidden=forbidden)
+    header, runs, problems = parse_ledger(path.read_text(encoding="utf-8"), agents=agents, office=office, forbidden=forbidden, providers=providers)
     if header is not None and header["session"] != path.stem:
         problems.append(LogProblem(1, "error", f"file name {path.stem!r} must equal the header session {header['session']!r}"))
         problems.sort(key=lambda p: p.line)
