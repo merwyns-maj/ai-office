@@ -4,7 +4,7 @@ title: "Tests must not pin the live session ledger's contents"
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-070]
@@ -76,6 +76,36 @@ How to verify:
 — Sebastian (engineer)
 
 ## Review log
+Verdict: **PASS** (26 Nov 2026). Checked on head a7a76a1 before reading the Build notes' claims; every figure below is from my own runs.
+
+Done when:
+- [x] Live ledger read only for invariants; exact numbers from fixtures. PASS. `git diff main...HEAD`: every live-ledger assert in test_ledger/test_office_app is now an identity (event count == task runs, events + chat tokens == session tokens, not_reported == count of nulls, CLI regex `\(\d+ not reported\)`); exact values (7 runs, 1 not reported, 10,500 / 10,000 page tokens, shared 4,500) sit only in `FixtureTotals`, `Cli` fixture part and `CoreUnderNode` on `session_FIXTURE072.jsonl`. Remaining direct `REAL` reads (test_ledger.py:108, :220-222) are invariant-only.
+- [x] Suite passes on current and pending ledger. PASS.
+  - Worktree, current ledger: `Ran 454 tests ... OK`, exit 0.
+  - Temp copy with /home/claude/ledger-pending.jsonl (checked first: pure append, 101 -> 108 lines): CLI `106 runs kept (2 not reported), 7,654,148 tokens, 0 errors, 0 warnings`; suite `Ran 454 tests ... OK`, exit 0.
+  - Baseline: main with the same pending ledger, test_ledger + test_office_app: `FAILED (failures=10)`, so the fix is real.
+  - My own appends on top (n=107 null run, n=108 `pmo`/`merge` in sprint 8 (new agent+step), n=109 designer chat run, `main_session` window 2): CLI `109 runs kept (3 not reported), 7,667,270 tokens, 0 errors, 0 warnings`; suite `Ran 454 tests ... OK`, exit 0.
+- [x] Note in usage.md and a guard test. PASS: the "Tests (T-072)" paragraph in engine/schema/usage.md; guards `RealLedgerAppended`, `CliAppended`, `RecordedAppended`, `ChatBuildAppended`.
+
+Still catches real breakage (mutations to engine/runtime/ledger.py in throwaway copies, full suite each):
+- `total: tokens or 0` (null becomes 0): 5 failures (RealLedger/Appended convert, ChatBuild/Appended, CoreUnderNode rec).
+- Events drop not-reported runs: 6 failures (adds FixtureTotals).
+- not_reported counts 0-token runs: 2 failures (FixtureTotals, CoreUnderNode rec; the fixture's 0-token run earns its place).
+- Chat run left out of `shared`: 3 failures; on the live ledger only `RealLedgerAppended` caught it, so the guard adds real coverage.
+- Chat run leaks into events with a fake task: 7 failures.
+
+Lean path: legitimate. One surface (tests); the usage.md paragraph is required by done-when 3 and is documentation of the test rule, not a second code surface; nothing in engine/ code, scripts/ or the page changed (`git diff main...HEAD --stat`). No new data (synthetic fixture), no compliance flag, no human gate. The comma-to-semicolon change is a fair wording fix: `lean_problems` (engine/runtime/loader.py:40-42) takes text up to the first `;` as the surface clause, so a comma after "(tests)" pulled the three entry phrases into it and tripped "more than one surface". It hides no second surface.
+
+Checks: `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 72 tasks, 19 skills`, exit 0. `python scripts/office_app.py ai-office --chat --check`: `up to date (230 KB, 84 events)`, exit 0.
+
+Notes (not rejections):
+- Heuristic weakness: the surface check is punctuation-based. It false-positives on a normal comma list (this task), and it can be dodged by writing the surface clause briefly and listing other areas after the `;`. It never compares the note with the diff's touched paths. A follow-up could check `git diff --stat` top-level dirs against the declared surface.
+- The Build notes ask Janice to confirm the semicolon; commit a7a76a1's message says "lean note wording confirmed" but there is no dated confirmation line in the task file. PMO may want to add one.
+- test_metrics.py:232 and test_budgets.py:17 also read the live ledger. They compute expected values rather than pin them, and they passed with pending + my lines, but no `*Appended` guard covers them. Out of this task's In list; worth folding into the rule for new tests.
+- `RealLedgerAppended.test_the_appended_lines_were_read` assumes the helper's 2 runs are last; fine as written.
+- External skills design:accessibility-review and data:validate-data not used: not available in this session and not needed (no UI change; fixture is synthetic).
+
+— Cahyani (reviewer)
 
 ## Decision
 
