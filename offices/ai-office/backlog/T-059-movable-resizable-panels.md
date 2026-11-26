@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-058]
-pr: null
+pr: 45
 ---
 
 > Merwyn, 26 Nov 2026 13:49 WIB: "can the widget easily be rearranged and managed the height and width? also have the opacity so i want transparent background". Applies to the 3D office page and the recorded usage page (same template).
