@@ -1,0 +1,35 @@
+{
+  "skill": "consultant-slides",
+  "rules": [
+    "C9",
+    "C11",
+    "C12"
+  ],
+  "input": "Write the title for a chart slide showing that support tickets per customer fell from 4.0 to 2.6 after the help-centre relaunch.",
+  "expected_output": "Support tickets per customer fell 35% after the help-centre relaunch",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "\\d",
+      "rule": "C11"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^(Overview|Analysis|Support tickets)$",
+      "rule": "C9"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "\\.$",
+      "rule": "C12"
+    },
+    {
+      "type": "max_lines",
+      "max": 1,
+      "rule": "C12"
+    }
+  ],
+  "bad_output": "Support tickets",
+  "human_note": "Is it a full sentence a reader could repeat as the conclusion, and is the number right (4.0 to 2.6 is a 35% fall)?",
+  "why": "Topic labels instead of conclusions are the most common slip in a deck."
+}

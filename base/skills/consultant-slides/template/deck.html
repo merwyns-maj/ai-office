@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consulting Deck Template</title>
+<!-- Reference template for the consultant-slides skill. All company names and figures are invented. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* C30 colour */
+    --ink: #0B1F33;
+    --accent: #00857C;
+    --accent-soft: #E3F2F0;
+    --g1: #4A5560;   /* body text */
+    --g2: #8A949E;   /* muted, labels */
+    --g3: #C9D0D6;   /* context bars, rules */
+    --g4: #EEF1F4;   /* fills */
+    --neg: #B4442E;
+    --paper: #FFFFFF;
+    /* C31 type */
+    --sans: "Inter", Arial, Helvetica, sans-serif;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    /* C19 grid */
+    --mx: 56px; --mt: 40px; --mb: 32px; --gut: 24px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #DDE2E7; }
+  body { font-family: var(--sans); color: var(--g1); -webkit-font-smoothing: antialiased; padding: 32px 0; }
+
+  /* ---------- slide frame ---------- */
+  .slide {
+    width: 1280px; height: 720px; margin: 0 auto 32px; background: var(--paper);
+    position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(11,31,51,.12);
+    padding: var(--mt) var(--mx) var(--mb); display: flex; flex-direction: column;
+  }
+  .tracker { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); height: 16px; }
+  .status { position: absolute; top: var(--mt); right: var(--mx); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--g2); }
+  .title { font-size: 26px; line-height: 1.25; font-weight: 600; color: var(--ink); letter-spacing: -.01em; margin-top: 10px; max-width: 1060px; }
+  .lead { font-size: 14px; color: var(--g2); margin-top: 8px; }
+  .rule { height: 1px; background: var(--g3); margin-top: 18px; }
+  .body { flex: 1; margin-top: 24px; min-height: 0; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--gut); }
+  .footer { display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; line-height: 1.45; color: var(--g2); padding-top: 12px; }
+  .footer .src { max-width: 1000px; }
+  .footer .pg { font-variant-numeric: tabular-nums; }
+  .c8 { grid-column: span 8; } .c4 { grid-column: span 4; } .c12 { grid-column: span 12; } .c6 { grid-column: span 6; } .c3 { grid-column: span 3; }
+
+  /* ---------- takeaway (C17) ---------- */
+  .takeaway { background: var(--g4); border-left: 3px solid var(--accent); padding: 22px 22px; align-self: start; }
+  .takeaway h4 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .takeaway p { font-size: 15px; line-height: 1.5; color: var(--ink); }
+  .takeaway ul { list-style: none; margin-top: 10px; }
+  .takeaway li { font-size: 14px; line-height: 1.45; padding: 8px 0; border-top: 1px solid var(--g3); }
+  .takeaway b { color: var(--ink); }
+
+  /* ---------- title & divider ---------- */
+  .s-title { background: var(--ink); color: #fff; padding: 0; }
+  .s-title .band { position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: var(--accent); }
+  .s-title .inner { padding: 0 120px 0 96px; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+  .s-title .client { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #8FD3CC; }
+  .s-title h1 { font-family: var(--serif); font-weight: 500; font-size: 54px; line-height: 1.1; margin-top: 20px; max-width: 900px; letter-spacing: -.01em; }
+  .s-title .sub { font-size: 18px; color: #B8C4D0; margin-top: 22px; max-width: 760px; line-height: 1.45; }
+  .s-title .meta { position: absolute; left: 96px; bottom: 48px; font-size: 12px; color: #8D9BAA; letter-spacing: .04em; }
+  .s-title .status { color: #8D9BAA; top: 48px; right: 56px; }
+
+  .s-div { background: var(--g4); }
+  .s-div .num { font-family: var(--serif); font-size: 160px; line-height: 1; color: var(--accent); margin-top: 120px; }
+  .s-div h2 { font-family: var(--serif); font-weight: 500; font-size: 44px; color: var(--ink); margin-top: 16px; }
+  .s-div .agenda { position: absolute; right: 96px; top: 170px; width: 420px; list-style: none; }
+  .s-div .agenda li { font-size: 16px; padding: 16px 0; border-top: 1px solid var(--g3); color: var(--g2); display: flex; gap: 18px; }
+  .s-div .agenda li span { font-variant-numeric: tabular-nums; }
+  .s-div .agenda li.on { color: var(--ink); font-weight: 600; border-top: 2px solid var(--accent); }
+
+  /* ---------- exec summary (SCR) ---------- */
+  .scr { grid-column: span 12; display: grid; align-content: start; row-gap: 16px; }
+  .scr .row { display: grid; grid-template-columns: 180px 1fr; column-gap: 28px; padding-bottom: 14px; border-bottom: 1px solid var(--g3); }
+  .scr .row:last-child { border-bottom: 0; }
+  .scr .lab { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--g2); padding-top: 3px; }
+  .scr .row.res .lab { color: var(--accent); }
+  .scr p { font-size: 15px; line-height: 1.5; color: var(--g1); }
+  .scr ol { list-style: none; counter-reset: k; display: grid; row-gap: 14px; }
+  .scr ol li { counter-increment: k; font-size: 15px; line-height: 1.45; display: grid; grid-template-columns: 30px 1fr; }
+  .scr ol li::before { content: counter(k); font-family: var(--serif); font-size: 18px; color: var(--accent); }
+  .scr b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- charts ---------- */
+  svg text { font-family: var(--sans); }
+  .legend { display: flex; gap: 22px; font-size: 12px; color: var(--g1); margin-bottom: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 7px; vertical-align: -1px; }
+
+  /* ---------- KPI ---------- */
+  .kpi { grid-column: span 3; border-top: 3px solid var(--ink); padding-top: 22px; }
+  .kpi.hl { border-top-color: var(--accent); }
+  .kpi .v { font-family: var(--serif); font-size: 60px; line-height: 1; color: var(--ink); font-weight: 500; letter-spacing: -.02em; }
+  .kpi .v small { font-size: 26px; margin-left: 4px; color: var(--g1); }
+  .kpi .l { font-size: 15px; color: var(--ink); font-weight: 600; margin-top: 16px; }
+  .kpi .d { font-size: 13px; margin-top: 8px; color: var(--g2); line-height: 1.45; }
+  .kpi .d .up { color: var(--accent); font-weight: 600; } .kpi .d .dn { color: var(--neg); font-weight: 600; }
+  .kpi-note { grid-column: span 12; background: var(--g4); padding: 18px 22px; font-size: 15px; color: var(--ink); border-left: 3px solid var(--accent); }
+
+  /* ---------- 2x2 ---------- */
+  .mx { position: relative; height: calc(100% - 30px); margin-left: 30px; }
+  .mx .q { position: absolute; width: calc(50% - 3px); height: calc(50% - 3px); background: var(--g4); }
+  .mx .q.tl { top: 0; left: 0; } .mx .q.tr { top: 0; right: 0; background: var(--accent-soft); } .mx .q.bl { bottom: 0; left: 0; } .mx .q.br { bottom: 0; right: 0; }
+  .mx .ql { position: absolute; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--g2); }
+  .mx .q.tr .ql { color: var(--accent); }
+  .mx .q .ql { top: 12px; left: 14px; }
+  .mx .ax { position: absolute; font-size: 12px; color: var(--g1); font-weight: 600; }
+  .mx .ax.x { bottom: -26px; left: 0; right: 0; text-align: center; }
+  .mx .ax.y { left: -30px; top: 0; bottom: 0; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; }
+  .dot { position: absolute; display: flex; align-items: center; gap: 8px; transform: translate(-11px,-11px); font-size: 13px; color: var(--ink); white-space: nowrap; }
+  .dot b { width: 22px; height: 22px; border-radius: 50%; background: var(--g2); color: #fff; font-size: 11px; display: grid; place-items: center; font-weight: 600; }
+  .dot.hl b { background: var(--accent); }
+
+  /* ---------- options table ---------- */
+  table.opt { grid-column: span 12; border-collapse: collapse; width: 100%; font-size: 13px; align-self: start; }
+  table.opt th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--g2); padding: 0 12px 10px; border-bottom: 2px solid var(--ink); }
+  table.opt th.c, table.opt td.c { text-align: center; }
+  table.opt td { padding: 14px 12px; border-bottom: 1px solid var(--g3); vertical-align: middle; color: var(--g1); }
+  table.opt td.n { color: var(--ink); font-weight: 600; font-size: 14px; }
+  table.opt td.n span { display: block; font-weight: 400; color: var(--g2); font-size: 12px; margin-top: 2px; }
+  table.opt tr.rec td { background: var(--accent-soft); }
+  table.opt tr.rec td.n { color: var(--accent); }
+  table.opt td.n span.tag, .tag { display: inline-block; margin-top: 0; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--accent); padding: 3px 7px; margin-left: 8px; vertical-align: 1px; }
+  .hb { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ink); vertical-align: middle; background: conic-gradient(var(--ink) 0 var(--p), transparent var(--p) 100%); }
+  .hb-key { grid-column: span 12; align-self: start; font-size: 11px; color: var(--g2); margin-top: 12px; display: flex; gap: 18px; align-items: center; }
+  .hb-key .hb { width: 12px; height: 12px; border-width: 1px; margin-right: 5px; }
+
+  /* ---------- gantt ---------- */
+  .gantt { grid-column: span 12; display: grid; grid-template-columns: 230px repeat(8, 1fr); align-self: start; font-size: 13px; }
+  .gantt .h { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--g2); text-align: center; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+  .gantt .h.yr { border-bottom: 0; text-align: left; padding-bottom: 4px; color: var(--ink); }
+  .gantt .ws { padding: 12px 0; color: var(--ink); font-weight: 600; border-bottom: 1px solid var(--g4); }
+  .gantt .ws span { display: block; font-weight: 400; color: var(--g2); font-size: 12px; }
+  .gantt .track { grid-column: 2 / span 8; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; border-bottom: 1px solid var(--g4); position: relative; }
+  .bar { margin-right: 2px; height: 22px; background: var(--g3); color: var(--ink); font-size: 11px; font-weight: 600; display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+  .bar.a { background: var(--accent); color: #fff; } .bar.i { background: var(--ink); color: #fff; }
+  .ms { position: absolute; width: 12px; height: 12px; background: var(--neg); transform: rotate(45deg); top: calc(50% - 6px); }
+  .gantt-key { grid-column: span 12; align-self: start; display: flex; gap: 22px; font-size: 11px; color: var(--g2); margin-top: 14px; align-items: center; }
+  .gantt-key i { display: inline-block; width: 18px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+
+  /* ---------- next steps ---------- */
+  .decide { grid-column: span 5; background: var(--ink); color: #fff; padding: 26px 28px; align-self: start; }
+  .decide h4 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #8FD3CC; margin-bottom: 14px; }
+  .decide ol { list-style: none; counter-reset: d; }
+  .decide li { counter-increment: d; display: grid; grid-template-columns: 34px 1fr; padding: 14px 0; border-top: 1px solid rgba(255,255,255,.18); font-size: 15px; line-height: 1.45; }
+  .decide li::before { content: counter(d); font-family: var(--serif); font-size: 22px; color: #8FD3CC; line-height: 1.1; }
+  .decide li span { display: block; font-size: 12px; color: #A9B6C3; margin-top: 4px; }
+  table.act { grid-column: 6 / span 7; border-collapse: collapse; font-size: 13px; align-self: start; }
+  table.act th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--g2); font-weight: 600; padding: 0 10px 10px 0; border-bottom: 2px solid var(--ink); }
+  table.act td { padding: 13px 10px 13px 0; border-bottom: 1px solid var(--g3); color: var(--g1); line-height: 1.4; }
+  table.act td:first-child { color: var(--ink); font-weight: 500; }
+  table.act td.dt { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- appendix ---------- */
+  .apx { grid-column: span 6; }
+  .apx h4 { font-size: 13px; color: var(--ink); font-weight: 600; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--g3); }
+  .apx dl { display: grid; grid-template-columns: 150px 1fr; row-gap: 10px; column-gap: 16px; font-size: 13px; line-height: 1.45; margin-bottom: 26px; }
+  .apx dt { color: var(--g2); } .apx dd { color: var(--g1); }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { background: #fff; padding: 0; }
+    .slide { margin: 0; box-shadow: none; page-break-after: always; break-after: page; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 1. TITLE -->
+<section class="slide s-title">
+  <div class="band"></div>
+  <div class="status">Draft for discussion</div>
+  <div class="inner">
+    <div class="client">Northwind Foods · Margin programme</div>
+    <h1>A path to a 12% EBITDA margin by 2028</h1>
+    <div class="sub">Steering committee pre-read: diagnosis, value levers and a phased plan for decision</div>
+  </div>
+  <div class="meta">26 November 2026 &nbsp;·&nbsp; Strategy &amp; Transformation team</div>
+</section>
+
+<!-- 2. EXECUTIVE SUMMARY (SCR) -->
+<section class="slide">
+  <div class="tracker">Executive summary</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Five levers can lift EBITDA margin from 7.9% to 12.0% by 2028 if the steering committee approves phase 1 this month</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="scr">
+      <div class="row"><div class="lab">Situation</div><p>Northwind has grown revenue 13% since 2023 and holds the number two share in chilled foods. The board target is a 12% EBITDA margin by 2028.</p></div>
+      <div class="row"><div class="lab">Complication</div><p>Margin has fallen 1.6 pts in three years. Logistics cost grew twice as fast as revenue, and procurement is spread across 340 suppliers with no category ownership.</p></div>
+      <div class="row res"><div class="lab">Resolution</div>
+        <ol>
+          <li><span><b>Procurement and logistics close two thirds of the gap.</b> Category management and network redesign add 2.5 pts with proven playbooks.</span></li>
+          <li><span><b>Pricing, SKU and overhead levers add the last 1.6 pts</b> and need less capital, but depend on commercial buy-in.</span></li>
+          <li><span><b>A phased plan starts with quick wins in Q1 2027</b> and funds phase 2 from phase 1 savings. Peak investment is IDR 85 bn.</span></li>
+          <li><span><b>Decision required today:</b> approve phase 1 scope, budget and a full-time programme lead.</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="src">Note: margins are EBITDA as % of net revenue, FY basis. Source: Northwind management accounts FY2023 to FY2026 (illustrative); team analysis</div><div class="pg">2</div></div>
+</section>
+
+<!-- 3. SECTION DIVIDER -->
+<section class="slide s-div">
+  <div class="status">Draft for discussion</div>
+  <div class="num">01</div>
+  <h2>Where the margin is lost</h2>
+  <ol class="agenda">
+    <li class="on"><span>01</span>Where the margin is lost</li>
+    <li><span>02</span>Five levers to close the gap</li>
+    <li><span>03</span>Options and phased roadmap</li>
+    <li><span>04</span>Decisions and next steps</li>
+  </ol>
+</section>
+
+<!-- 4. CHART + TAKEAWAY -->
+<section class="slide">
+  <div class="tracker">01 · Where the margin is lost</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Logistics cost grew twice as fast as revenue since 2023</h2>
+  <div class="lead">Index, FY2023 = 100</div>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="c8">
+      <div class="legend"><span><i style="background:var(--g3)"></i>Net revenue</span><span><i style="background:var(--accent)"></i>Logistics cost</span></div>
+      <svg viewBox="0 0 760 380" width="100%" height="380" role="img" aria-label="Revenue index rises to 113 by FY2026 while logistics cost index rises to 127">
+        <line x1="20" y1="340" x2="740" y2="340" stroke="#4A5560" stroke-width="1"/>
+        <g font-size="13" font-weight="600" text-anchor="middle">
+          <!-- FY23 -->
+          <rect x="50" y="125.7" width="56" height="214.3" fill="#C9D0D6"/><text x="78" y="117" fill="#4A5560">100</text>
+          <rect x="114" y="125.7" width="56" height="214.3" fill="#00857C"/><text x="142" y="117" fill="#00857C">100</text>
+          <!-- FY24 -->
+          <rect x="230" y="117.1" width="56" height="222.9" fill="#C9D0D6"/><text x="258" y="108" fill="#4A5560">104</text>
+          <rect x="294" y="106.4" width="56" height="233.6" fill="#00857C"/><text x="322" y="97" fill="#00857C">109</text>
+          <!-- FY25 -->
+          <rect x="410" y="106.4" width="56" height="233.6" fill="#C9D0D6"/><text x="438" y="97" fill="#4A5560">109</text>
+          <rect x="474" y="85" width="56" height="255" fill="#00857C"/><text x="502" y="76" fill="#00857C">119</text>
+          <!-- FY26 -->
+          <rect x="590" y="97.9" width="56" height="242.1" fill="#C9D0D6"/><text x="618" y="89" fill="#4A5560">113</text>
+          <rect x="654" y="67.9" width="56" height="272.1" fill="#00857C"/><text x="682" y="59" fill="#00857C">127</text>
+        </g>
+        <g font-size="13" fill="#4A5560" text-anchor="middle">
+          <text x="110" y="362">FY2023</text><text x="290" y="362">FY2024</text><text x="470" y="362">FY2025</text><text x="650" y="362">FY2026</text>
+        </g>
+      </svg>
+    </div>
+    <div class="c4 takeaway">
+      <h4>So what</h4>
+      <p>Logistics cost rose <b>27%</b> against <b>13%</b> revenue growth, taking <b>1.1 pts</b> off margin on its own.</p>
+      <ul>
+        <li><b>Network:</b> 9 depots serve a footprint that 6 could cover</li>
+        <li><b>Drop size:</b> average drop fell 18% as small-format stores grew</li>
+        <li><b>Contracts:</b> 70% of freight is on spot rates</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><div class="src">Note: logistics cost includes warehousing, primary and secondary freight. Source: Northwind management accounts FY2023 to FY2026 (illustrative); team analysis</div><div class="pg">4</div></div>
+</section>
+
+<!-- 5. WATERFALL -->
+<section class="slide">
+  <div class="tracker">02 · Five levers to close the gap</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Five levers close the 4.1-point margin gap, led by procurement and logistics</h2>
+  <div class="lead">EBITDA margin, % of net revenue, FY2026 to FY2028 run-rate</div>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="c12">
+      <svg viewBox="0 0 1168 400" width="100%" height="400" role="img" aria-label="Waterfall from 7.9% to 12.0% margin">
+        <line x1="20" y1="330" x2="1150" y2="330" stroke="#4A5560"/>
+        <g stroke="#8A949E" stroke-width="1" stroke-dasharray="3 3">
+          <line x1="150" y1="147.7" x2="200" y2="147.7"/><line x1="310" y1="115.4" x2="360" y2="115.4"/>
+          <line x1="470" y1="90" x2="520" y2="90"/><line x1="630" y1="71.5" x2="680" y2="71.5"/>
+          <line x1="790" y1="60" x2="840" y2="60"/><line x1="950" y1="53" x2="1000" y2="53"/>
+        </g>
+        <rect x="40"   y="147.7" width="110" height="182.3" fill="#0B1F33"/>
+        <rect x="200"  y="115.4" width="110" height="32.3"  fill="#00857C"/>
+        <rect x="360"  y="90"    width="110" height="25.4"  fill="#00857C"/>
+        <rect x="520"  y="71.5"  width="110" height="18.5"  fill="#5FB3AC"/>
+        <rect x="680"  y="60"    width="110" height="11.5"  fill="#5FB3AC"/>
+        <rect x="840"  y="53"    width="110" height="7"     fill="#5FB3AC"/>
+        <rect x="1000" y="53"    width="110" height="277"   fill="#0B1F33"/>
+        <g font-size="15" font-weight="600" text-anchor="middle" fill="#0B1F33">
+          <text x="95" y="137">7.9</text><text x="255" y="105">+1.4</text><text x="415" y="80">+1.1</text>
+          <text x="575" y="61">+0.8</text><text x="735" y="50">+0.5</text><text x="895" y="43">+0.3</text><text x="1055" y="43">12.0</text>
+        </g>
+        <g font-size="13" fill="#4A5560" text-anchor="middle">
+          <text x="95" y="354">FY2026</text><text x="95" y="371">actual</text>
+          <text x="255" y="354">Procurement</text><text x="255" y="371">category mgmt</text>
+          <text x="415" y="354">Logistics</text><text x="415" y="371">network redesign</text>
+          <text x="575" y="354">Pricing</text><text x="575" y="371">and promo</text>
+          <text x="735" y="354">SKU</text><text x="735" y="371">rationalisation</text>
+          <text x="895" y="354">Overhead</text><text x="895" y="371">simplification</text>
+          <text x="1055" y="354">FY2028</text><text x="1055" y="371">target</text>
+        </g>
+        <!-- bracket over the two largest levers -->
+        <g fill="none" stroke="#00857C" stroke-width="1.5">
+          <path d="M200 30 V22 H470 V30"/>
+        </g>
+        <text x="335" y="14" font-size="12" font-weight="600" fill="#00857C" text-anchor="middle">2.5 pts, 61% of the gap</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer"><div class="src">Note: run-rate impact at full delivery, before one-off costs; lighter bars carry higher delivery risk. Source: supplier spend cube FY2026, freight invoices (illustrative); team analysis</div><div class="pg">5</div></div>
+</section>
+
+<!-- 6. KPI ROW -->
+<section class="slide">
+  <div class="tracker">02 · Five levers to close the gap</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">The programme pays back within 14 months on IDR 85 bn peak investment</h2>
+  <div class="rule"></div>
+  <div class="body" style="row-gap:56px; align-content:start;">
+    <div class="kpi hl"><div class="v">+4.1<small>pts</small></div><div class="l">EBITDA margin uplift</div><div class="d"><span class="up">7.9% to 12.0%</span> run-rate by FY2028</div></div>
+    <div class="kpi"><div class="v">312<small>bn</small></div><div class="l">Annual EBITDA impact</div><div class="d">IDR, at FY2028 revenue; <span class="up">+52%</span> vs FY2026</div></div>
+    <div class="kpi"><div class="v">85<small>bn</small></div><div class="l">Peak investment</div><div class="d">IDR, of which 60% is depot capex in FY2027</div></div>
+    <div class="kpi"><div class="v">14<small>mo</small></div><div class="l">Payback</div><div class="d">From phase 1 start; <span class="dn">+5 mo</span> if network move slips a quarter</div></div>
+    <div class="kpi-note"><b>Phase 1 funds phase 2:</b> quick wins in procurement and pricing release IDR 64 bn in FY2027, before depot capex peaks.</div>
+  </div>
+  <div class="footer"><div class="src">Note: IDR bn, nominal; payback on cumulative cash basis. Source: team financial model v3 (illustrative)</div><div class="pg">6</div></div>
+</section>
+
+<!-- 7. 2x2 MATRIX -->
+<section class="slide">
+  <div class="tracker">03 · Options and phased roadmap</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Four of eleven initiatives are high impact and quick to deliver, so they form phase 1</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="c8" style="padding-bottom:4px">
+      <div class="mx">
+        <div class="q tl"><span class="ql">Plan carefully</span></div>
+        <div class="q tr"><span class="ql">Phase 1: do now</span></div>
+        <div class="q bl"><span class="ql">Deprioritise</span></div>
+        <div class="q br"><span class="ql">Phase 2: fill in</span></div>
+        <div class="ax x">Ease of delivery (higher to the right)</div>
+        <div class="ax y">Margin impact (higher to the top)</div>
+        <div class="dot hl" style="left:66%;top:16%"><b>1</b>Category management</div>
+        <div class="dot hl" style="left:64%;top:30%"><b>2</b>Freight tendering</div>
+        <div class="dot hl" style="left:86%;top:38%"><b>3</b>Promo ROI rules</div>
+        <div class="dot hl" style="left:58%;top:44%"><b>4</b>Tail SKU delisting</div>
+        <div class="dot" style="left:10%;top:12%"><b>5</b>Depot consolidation</div>
+        <div class="dot" style="left:24%;top:28%"><b>6</b>Route optimisation</div>
+        <div class="dot" style="left:30%;top:42%"><b>7</b>Price architecture</div>
+        <div class="dot" style="left:72%;top:66%"><b>8</b>Shared services</div>
+        <div class="dot" style="left:60%;top:80%"><b>9</b>Indirect spend</div>
+        <div class="dot" style="left:14%;top:64%"><b>10</b>Plant automation</div>
+        <div class="dot" style="left:28%;top:84%"><b>11</b>New ERP</div>
+      </div>
+    </div>
+    <div class="c4 takeaway">
+      <h4>So what</h4>
+      <p>Initiatives 1 to 4 deliver <b>1.9 pts</b> within 12 months with no capex.</p>
+      <ul>
+        <li><b>Depot consolidation (5)</b> is the largest single lever but needs 18 months; start design in phase 1</li>
+        <li><b>Plant automation and ERP (10, 11)</b> are out of scope for this programme</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><div class="src">Note: impact is run-rate EBITDA; ease scores capex, time to value and change load (1 to 5). Source: initiative workshops, October 2026 (illustrative); team analysis</div><div class="pg">7</div></div>
+</section>
+
+<!-- 8. OPTIONS TABLE + HARVEY BALLS -->
+<section class="slide">
+  <div class="tracker">03 · Options and phased roadmap</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">A phased programme delivers 90% of the value at half the risk of a big-bang launch</h2>
+  <div class="rule"></div>
+  <div class="body" style="grid-template-rows:auto 1fr">
+    <table class="opt">
+      <thead><tr><th style="width:30%">Option</th><th class="c">Margin uplift</th><th class="c">Investment</th><th class="c">Time to value</th><th class="c">Delivery risk</th><th class="c">Org. change</th><th style="width:20%">Verdict</th></tr></thead>
+      <tbody>
+        <tr><td class="n">A. Quick wins only<span>Procurement and pricing levers</span></td><td class="c"><i class="hb" style="--p:25%"></i></td><td class="c"><i class="hb" style="--p:100%"></i></td><td class="c"><i class="hb" style="--p:100%"></i></td><td class="c"><i class="hb" style="--p:100%"></i></td><td class="c"><i class="hb" style="--p:75%"></i></td><td>Misses target by 2.2 pts</td></tr>
+        <tr class="rec"><td class="n">B. Phased programme <span class="tag">Recommended</span><span>Quick wins fund network redesign</span></td><td class="c"><i class="hb" style="--p:75%"></i></td><td class="c"><i class="hb" style="--p:50%"></i></td><td class="c"><i class="hb" style="--p:75%"></i></td><td class="c"><i class="hb" style="--p:75%"></i></td><td class="c"><i class="hb" style="--p:50%"></i></td><td>Meets 12.0% target in FY2028</td></tr>
+        <tr><td class="n">C. Big-bang transformation<span>All 11 initiatives at once</span></td><td class="c"><i class="hb" style="--p:100%"></i></td><td class="c"><i class="hb" style="--p:0%"></i></td><td class="c"><i class="hb" style="--p:25%"></i></td><td class="c"><i class="hb" style="--p:25%"></i></td><td class="c"><i class="hb" style="--p:0%"></i></td><td>Highest upside, IDR 210 bn capex</td></tr>
+        <tr><td class="n">D. Outsource logistics<span>3PL contract, keep procurement in-house</span></td><td class="c"><i class="hb" style="--p:50%"></i></td><td class="c"><i class="hb" style="--p:75%"></i></td><td class="c"><i class="hb" style="--p:50%"></i></td><td class="c"><i class="hb" style="--p:50%"></i></td><td class="c"><i class="hb" style="--p:25%"></i></td><td>Locks in 7-year contract</td></tr>
+      </tbody>
+    </table>
+    <div class="hb-key"><span>Better for Northwind:</span><span><i class="hb" style="--p:0%"></i>Low</span><span><i class="hb" style="--p:50%"></i>Medium</span><span><i class="hb" style="--p:100%"></i>High</span><span>Full ball = most favourable (low investment, low risk, fast)</span></div>
+  </div>
+  <div class="footer"><div class="src">Source: team assessment with Northwind finance and supply chain leads, November 2026 (illustrative)</div><div class="pg">8</div></div>
+</section>
+
+<!-- 9. ROADMAP -->
+<section class="slide">
+  <div class="tracker">03 · Options and phased roadmap</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Phase 1 starts in Q1 2027 and its savings fund the depot move in phase 2</h2>
+  <div class="rule"></div>
+  <div class="body" style="grid-template-rows:auto 1fr">
+    <div class="gantt">
+      <div class="h yr"></div>
+      <div class="h yr" style="grid-column:span 4">2027</div><div class="h yr" style="grid-column:span 4">2028</div>
+      <div class="h" style="text-align:left">Workstream</div>
+      <div class="h">Q1</div><div class="h">Q2</div><div class="h">Q3</div><div class="h">Q4</div><div class="h">Q1</div><div class="h">Q2</div><div class="h">Q3</div><div class="h">Q4</div>
+
+      <div class="ws">Procurement<span>Category management</span></div>
+      <div class="track"><div class="bar a" style="grid-column:1/4">Wave 1: top 6 categories</div><div class="bar" style="grid-column:4/7">Wave 2: tail categories</div></div>
+
+      <div class="ws">Pricing<span>Promo ROI and price packs</span></div>
+      <div class="track"><div class="bar a" style="grid-column:1/3">Promo rules</div><div class="bar" style="grid-column:3/6">Price architecture</div></div>
+
+      <div class="ws">Logistics<span>Network redesign</span></div>
+      <div class="track"><div class="bar a" style="grid-column:1/3">Tender</div><div class="bar" style="grid-column:3/5">Depot design</div><div class="bar i" style="grid-column:5/9">Consolidate 9 to 6 depots</div><span class="ms" style="left:calc(50% - 6px)"></span></div>
+
+      <div class="ws">Portfolio<span>SKU rationalisation</span></div>
+      <div class="track"><div class="bar a" style="grid-column:2/4">Delist tail SKUs</div><div class="bar" style="grid-column:5/7">Range reviews</div></div>
+
+      <div class="ws">Programme office<span>Tracking and governance</span></div>
+      <div class="track"><div class="bar i" style="grid-column:1/9">Monthly value tracking and steering committee</div><span class="ms" style="left:calc(50% - 6px)"></span><span class="ms" style="left:calc(100% - 12px)"></span></div>
+    </div>
+    <div class="gantt-key"><span><i style="background:var(--accent)"></i>Phase 1</span><span><i style="background:var(--g3)"></i>Phase 2</span><span><i style="background:var(--ink)"></i>Capex or ongoing</span><span><i class="ms" style="position:static;display:inline-block;width:9px;height:9px;margin-right:8px;transform:rotate(45deg)"></i>Steering committee gate</span></div>
+  </div>
+  <div class="footer"><div class="src">Note: dates are planning assumptions, to be confirmed by the programme lead. Source: team analysis</div><div class="pg">9</div></div>
+</section>
+
+<!-- 10. NEXT STEPS -->
+<section class="slide">
+  <div class="tracker">04 · Decisions and next steps</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Three decisions today let phase 1 start on 6 January 2027</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="decide">
+      <h4>Decisions required today</h4>
+      <ol>
+        <li><div>Approve phase 1 scope: initiatives 1 to 4<span>Run-rate 1.9 pts, no capex</span></div></li>
+        <li><div>Release IDR 12 bn phase 1 budget<span>Team, tools and freight tender</span></div></li>
+        <li><div>Appoint a full-time programme lead<span>Reports to the CFO; named by 15 December</span></div></li>
+      </ol>
+    </div>
+    <table class="act">
+      <thead><tr><th>Next step</th><th>Owner</th><th>Due</th></tr></thead>
+      <tbody>
+        <tr><td>Name programme lead and workstream owners</td><td>CFO</td><td class="dt">15 Dec 2026</td></tr>
+        <tr><td>Baseline spend and margin by category</td><td>Finance</td><td class="dt">20 Dec 2026</td></tr>
+        <tr><td>Issue freight tender to shortlisted carriers</td><td>Supply chain</td><td class="dt">10 Jan 2027</td></tr>
+        <tr><td>Agree promo ROI rules with top 5 retailers</td><td>Commercial</td><td class="dt">31 Jan 2027</td></tr>
+        <tr><td>First value-tracking report to steering committee</td><td>Programme office</td><td class="dt">28 Feb 2027</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="footer"><div class="src">Source: team analysis</div><div class="pg">10</div></div>
+</section>
+
+<!-- 11. APPENDIX -->
+<section class="slide">
+  <div class="tracker">Appendix</div>
+  <div class="status">Draft for discussion</div>
+  <h2 class="title">Methodology and definitions</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="apx">
+      <h4>Definitions</h4>
+      <dl>
+        <dt>EBITDA margin</dt><dd>EBITDA as % of net revenue, before one-off programme costs</dd>
+        <dt>Run-rate</dt><dd>Annualised impact once an initiative is fully delivered</dd>
+        <dt>Logistics cost</dt><dd>Warehousing, primary and secondary freight, excluding plant handling</dd>
+        <dt>Tail SKU</dt><dd>SKUs in the bottom 20% of contribution, together under 3% of revenue</dd>
+      </dl>
+    </div>
+    <div class="apx">
+      <h4>Method and data sources</h4>
+      <dl>
+        <dt>Spend analysis</dt><dd>FY2026 supplier spend cube, 340 suppliers, mapped to 22 categories</dd>
+        <dt>Benchmarks</dt><dd>Peer ranges from published annual reports; outliers removed</dd>
+        <dt>Impact sizing</dt><dd>Bottom-up by initiative, validated in six workshops</dd>
+        <dt>Financial model</dt><dd>Team model v3; nominal IDR, no inflation uplift</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="footer"><div class="src">All company names and figures in this template are invented for illustration.</div><div class="pg">11</div></div>
+</section>
+
+</body>
+</html>

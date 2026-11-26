@@ -1,0 +1,23 @@
+{
+  "skill": "consultant-slides",
+  "rules": [
+    "C10"
+  ],
+  "input": "A slide shows churn rose in Q3, and also that onboarding time doubled. Write the title for the churn slide only.",
+  "expected_output": "Churn rose to 6% in Q3, its highest level in two years",
+  "checks": [
+    {
+      "type": "must_not_contain",
+      "text": ";",
+      "rule": "C10"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)onboarding",
+      "rule": "C10"
+    }
+  ],
+  "bad_output": "Churn rose to 6% in Q3; onboarding time doubled",
+  "human_note": "Does the title carry one claim only, with the second claim left for its own slide?",
+  "why": "Two claims in one title make the body prove two things and the slide loses its point."
+}

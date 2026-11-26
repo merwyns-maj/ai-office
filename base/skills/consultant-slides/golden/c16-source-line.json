@@ -1,0 +1,24 @@
+{
+  "skill": "consultant-slides",
+  "rules": [
+    "C15",
+    "C16"
+  ],
+  "input": "Write the footer for a slide built on a public industry survey of 900 retailers from 2026 plus our own analysis.",
+  "expected_output": "Note: n = 900 retailers. Source: Industry retail survey (2026); team analysis",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "Source: .+\\(\\d{4}\\); team analysis",
+      "rule": "C16"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^Note: n = ",
+      "rule": "C16"
+    }
+  ],
+  "bad_output": "Data from survey and internal work",
+  "human_note": "Does the note come before the source, and is the base (n) stated for survey data?",
+  "why": "Unsourced numbers destroy a deck's credibility; a fixed format makes the check mechanical."
+}
