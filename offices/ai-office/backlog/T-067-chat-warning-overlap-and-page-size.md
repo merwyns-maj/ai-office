@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-066]
-pr: null
+pr: 66
 ---
 
 > From Cahyani's T-066 Review 2 (26 Nov 2026): at minimum chat height, when a composer warning shows (offline, blocked send), the thread runs under the composer; on a phone about 4 px of thread shows and the last message shows through the "Not sent" warning. The warning stays readable and the send stays blocked.
