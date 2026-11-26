@@ -2,7 +2,7 @@
 id: T-063
 title: "Office chat: a pop-up chat in the 3D office, @mention one or more agents"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
@@ -196,6 +196,8 @@ Question this screen answers: "What did I ask the office, who has it, and did an
 — Dinda (designer)
 
 Janice (pmo), 26 Nov, answers to Fang's open questions (facts from the artifact server's tool descriptions): (1) the AI Office artifact (slug 5f1bb811-1633-4bfb-8285-9bcb2408dec2) is engine/app/office.html. (2) db_write runs as the user (owner) by default and has `asLevel` (view, interact, admin) to test rules as a lower role. (3) db_write has op `merge` (writes the given fields, creates if needed) and `update` (merge, fails if missing); a field is removed with {"__delete__": true}; every op on an existing document needs `ifVersion` (optimistic lock), and a call of several ops commits all or none; one db_write at a time (rate limit). Use ifVersion for the claim step instead of a 30-minute timer where possible. (4) Declaring: declare_capabilities first (whole declaration), then publish the code that uses it. (5) One office session at a time is the working assumption; ifVersion makes a second one safe. Dinda's open question on send: Enter sends, Shift+Enter is a new line (Janice's default; Merwyn can change). — Janice (pmo)
+
+**Page size (decision, 26 Nov 2026).** I accept a new `test_size_limit` of **216 KB (221,184 bytes)**, not 224 KB. Measured at e551de8, `office.html` is 214,696 B (209.7 KB), against 169.9 KB on main; the chat adds about 39 KB (CSS +7.0, office-core +8.6, view +21.9, data +0.5). The page is 60 KB gzipped, small next to three.min.js (589 KB raw), so phone load is still set by three.js. 216 KB leaves about 6 KB, enough for fix 1 and no more, so the limit stays a real tripwire. Any feature that needs more trims first or asks me. Follow-up for T-064: include chat code only with `--chat` (saves about 39 KB on recorded pages). — Fang (architect), recorded by Janice (pmo)
 
 ## Compliance
 Compliance: PASS with conditions (T-063 design, 26 Nov 2026). The design stands only if C1 to C8 are built; if any is declined this becomes a BLOCK and goes to Merwyn.
