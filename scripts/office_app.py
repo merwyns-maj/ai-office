@@ -8,6 +8,7 @@ Exit 0 written or up to date; 1 data-rule problems (always), other log errors (u
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -41,6 +42,25 @@ def _planned_model(office, agent):
 
 CHAT_MAX_LEN = 4000
 CHAT_LEASE_S = 1800
+
+
+def builtin_snapshot(header, runs, main, office_id):
+    """The data built into the page when the db has nothing newer (T-069). Fixed size: bounded by the org, never by the number of runs.
+    Per agent it counts what the event replay counts (runs with a task; a chat run is in session_totals only)."""
+    agents = {}
+    for r in runs:
+        if not r["tasks"]:
+            continue
+        q = agents.setdefault(r["agent"], {"runs": 0, "nr": 0, "tokens": 0, "tools": 0, "last": None})
+        q["runs"] += 1
+        q["nr"] += 1 if r["tokens"] is None else 0
+        q["tokens"] += r["tokens"] or 0
+        q["tools"] += r["tool_uses"] or 0
+        q["last"] = {"run": r["n"], "total": r["tokens"], "tool_uses": r["tool_uses"]}
+    last = runs[-1] if runs else None
+    return {"v": 1, "session": header["session"], "builtin": {
+        "session": header["session"], "last_n": last["n"] if last else 0, "last_date": (last or {}).get("date") or header["date"], "runs": len(runs),
+        "not_reported": header["not_reported"], "session_totals": {k: ledger_mod.totals(runs)["session"][k] for k in ("runs", "not_reported", "tokens", "tool_uses")}, "agents": agents, "main": ledger_mod.main_totals(main)}}
 
 
 def build_data(office_root, fixture, ledger=None, chat=False):
@@ -109,16 +129,46 @@ def build_data(office_root, fixture, ledger=None, chat=False):
         "skipped": skipped,
     }
     if totals is not None:
-        data["ledger"] = dict(totals, main=ledger_mod.main_totals(main))
+        data["events"] = []   # T-069: run events come from the artifact db at view time; the build embeds only a fixed-size snapshot
+        data["usage"] = builtin_snapshot(lh, runs, main, office.id)
     if chat:
         data["chat"] = {"v": 1, "agents": [{k: a.get(k) for k in ("id", "name", "role")} for a in org_agents], "default": "pmo",
                         "all": "all", "max_len": CHAT_MAX_LEN, "lease_s": CHAT_LEASE_S}
     return data, probs
 
 
+_ONE_LINE = re.compile(r"^[ \t]*/\*.*\*/[ \t]*$")
+_OPENS = re.compile(r"^[ \t]*/\*")
+
+
+def strip_comments(text):
+    """T-069: drop whole-line block comments (a line that is only /* ... */, or a block that starts a line and ends one).
+    Comments after code, inside a line, and the data line are never touched. The template keeps them; only the built page loses them."""
+    lines, out, i = text.split("\n"), [], 0
+    while i < len(lines):
+        ln = lines[i]
+        if PLACEHOLDER_LINE in ln or ln.lstrip().startswith("<"):   # the data line and markup lines stay as they are
+            out.append(ln)
+        elif _ONE_LINE.match(ln):
+            pass
+        elif _OPENS.match(ln) and "*/" not in ln:
+            j = i
+            while j < len(lines) and "*/" not in lines[j]:
+                j += 1
+            if j < len(lines) and lines[j].rstrip().endswith("*/") and lines[j].count("*/") == 1:
+                i = j + 1
+                continue
+            out.append(ln)
+        else:
+            out.append(ln)
+        i += 1
+    return "\n".join(out)
+
+
 def render(template_text, data):
     if template_text.count(PLACEHOLDER_LINE) != 1:
         raise BuildError(f"template must contain exactly one line: {PLACEHOLDER_LINE}")
+    template_text = strip_comments(template_text)
     blob = json.dumps(data, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     blob = blob.replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
     return template_text.replace(PLACEHOLDER_LINE, PLACEHOLDER_LINE.replace("__OFFICE_DATA__", blob), 1)
@@ -178,7 +228,7 @@ def main(argv=None):
         print(f"{out}: up to date ({len(html.encode('utf-8')) // 1024} KB, {len(data['events'])} events)")
         return 0
     out.write_text(html, encoding="utf-8")
-    print(f"{out}: written, {len(html.encode('utf-8')) // 1024} KB, {len(data['agents'])} agents, {len(data['events'])} events")
+    print(f"{out}: written, {len(html.encode('utf-8')) // 1024} KB, {len(data['agents'])} agents, {len(data['events'])} events" + (f", {data['usage']['builtin']['runs']} runs built in" if "usage" in data else ""))
     return 0
 
 

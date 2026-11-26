@@ -530,6 +530,8 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, rec: {}, runlog: {}, lastSwitch: null };
     data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle', model: null, prevModel: null, switchedAt: null }; });
     data.events.forEach(function (e) { if (e.task && e.type !== 'usage' && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
+    var sd = data.usage && data.usage.seed;   /* T-069: the built-in copy has no run events; its per-agent totals seed the state instead */
+    if (sd) Object.keys(sd).forEach(function (id) { var q = sd[id], l = q.last; s.rec[id] = { runs: q.runs, nr: q.nr, tokens: q.tokens, tools: q.tools, notes: [], last: l ? { run: l.run, total: l.total, tool_uses: l.tool_uses, note: null } : null }; });
     return s;
   }
   function add(list, x) { if (list.indexOf(x) < 0) list.push(x); }
@@ -1123,7 +1125,30 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     while ((m = re.exec(s))) { if (/\d/.test(m[0]) && /[A-Za-z]/.test(m[0]) && !/^[0-9a-f]{40}$/.test(m[0])) return 'secret-like token'; }
     return null;
   };
-  root.OfficeCore = { chat: CH, withLive: withLive, DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
+  /* ----- usage from the artifact db (T-069). Pure. toEvents is the port of ledger.to_event_log; usagePick says which copy the page shows ----- */
+  function toEvents(runs, ref) {
+    var out = [];
+    runs.forEach(function (r) {
+      if (!r.tasks.length) return;   /* a chat run has no task: it stays in the totals only */
+      var ev = { t: 2 * (r.n - 1), type: 'usage', src: ref + '#n=' + r.n, agent: r.agent, task: r.tasks[0], tasks: r.tasks, total: r.tokens, tool_uses: r.tool_uses, run: r.n, sprint: r.sprint, step: r.step };
+      if (r.note !== undefined) ev.note = r.note;
+      out.push(ev);
+    });
+    return out;
+  }
+  /* b = the built-in snapshot, meta = usage/office or null, chunks = {id: doc}, err = an error from the db. Stale means older than the build (lower last_n): no clock. */
+  function usagePick(b, meta, chunks, err) {
+    var pick = function (why) { return { src: 'builtin', why: why, at: meta && meta.synced_at || null, runs: null }; };
+    if (err) return pick('unavailable');
+    if (!meta || typeof meta !== 'object') return pick('never');
+    if (meta.session !== b.session) return pick('other');
+    if (!(meta.last_n >= b.last_n)) return pick('stale');
+    var runs = [], ok = Array.isArray(meta.chunks);
+    if (ok) meta.chunks.forEach(function (c) { var d = chunks && chunks[c.id]; if (!d || !Array.isArray(d.runs) || d.last_n !== c.last_n) ok = false; else runs = runs.concat(d.runs); });
+    if (!ok || runs.length !== meta.runs || (runs.length ? runs[runs.length - 1].n : 0) !== meta.last_n) return pick('incomplete');
+    return { src: 'db', why: null, at: meta.synced_at || null, runs: runs };
+  }
+  root.OfficeCore = { ledger: { toEvents: toEvents }, usagePick: usagePick, chat: CH, withLive: withLive, DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
     eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
@@ -1367,7 +1392,8 @@ function rowHTML(name, r, o) {
 }
 function budgetsHTML() {
   var v = C.budgetView(S, D);
-  if (v.none) return '<div class="uempty">No usage yet</div><div class="ufoot">' + 'Tokens appear as the replay runs.' + '</div>';
+  var note = D.usage ? '<div class="ufoot usync">' + esc(usageNote()) + '</div>' : '';
+  if (v.none) return '<div class="uempty">No usage yet</div><div class="ufoot">' + 'Tokens appear as the replay runs.' + '</div>' + note;
   var h = '', syn = v.synthetic || SYN;
   if (USAGE_MODE === 'summary') {
     v.providers.forEach(function (p) {
@@ -1389,7 +1415,7 @@ function budgetsHTML() {
       });
     });
   }
-  h += '<div class="ufoot">' + (syn ? 'Synthetic budgets, not a real run. ' : '') + 'Budgets are yours to set. Anthropic does not publish the Max plan&rsquo;s limit in tokens.</div>';
+  h += '<div class="ufoot">' + (syn ? 'Synthetic budgets, not a real run. ' : '') + 'Budgets are yours to set. Anthropic does not publish the Max plan&rsquo;s limit in tokens.</div>' + note;
   return '<div class="umode' + (fadeNext ? ' ufade' : '') + '">' + h + '</div>';
 }
 function usageSummary() {
@@ -1476,6 +1502,68 @@ function initUsage() {
   });
   document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
 }
+/* ---------- usage from the artifact db (T-069): the repo ledger is the source, Janice syncs it one way; the page only reads ----------
+   Built-in copy (D.usage.builtin, the ledger as of the build) shows until a complete synced copy at least as new arrives. Never blank, never an error. */
+var DBP = null, US = { shown: 'builtin', why: 'wait', at: null, chunks: {}, budgets: null, bsha: null, seq: 0, key: '' }, UB = null;
+function getDb() {   /* the one place that opens the db: chat and usage share it */
+  if (!DBP) { var c = typeof claude !== 'undefined' ? claude : null; DBP = c && c.use ? withTimeout(c.use('db'), 10000).then(function (db) { if (!db) throw new Error('no db'); return db; }) : Promise.reject(new Error('no claude')); }
+  return DBP;
+}
+function usageStore(db) {
+  function get(p) { return Promise.resolve(db.doc(p).get()).then(function (s) { return s && s.data ? s.data() || null : null; }); }
+  return {
+    meta: function (cb, err) { return db.doc('usage/office').onSnapshot(function (s) { cb(s && s.data ? s.data() || null : null); }, err); },
+    chunk: function (id) { return get('usage/office/chunks/' + id); },
+    budgets: function () { return get('usage/budgets'); }
+  };
+}
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function wib(iso) { var d = new Date(Date.parse(iso) + 7 * 36e5); return isNaN(d) ? '' : d.getUTCDate() + ' ' + MON[d.getUTCMonth()] + ' ' + ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2) + ' WIB'; }
+function usageNote() {
+  if (!D.usage) return '';
+  if (US.shown === 'db') return 'Synced ' + wib(US.at);
+  var b = D.usage.builtin, w = { wait: 'checking for a synced copy', never: 'never synced', stale: 'synced copy is older', other: 'synced copy is another session', incomplete: 'sync incomplete', unavailable: 'synced data not available' }[US.why];
+  return 'Built-in copy' + (b.last_n ? ' as of run #' + b.last_n + ' (' + b.last_date + ')' : '') + ': ' + w + (US.why === 'stale' && US.at ? ' (synced ' + wib(US.at) + ')' : '') + '.';
+}
+function usageApply(pk, m) {
+  var key = [pk.src, pk.why, pk.at, m && m.runs, m && m.budgets_sha256].join('|');
+  if (key === US.key) return;
+  US.key = key; US.shown = pk.src; US.why = pk.why; US.at = pk.at;
+  var b = D.usage.builtin, atEnd = ended || T >= TOTAL, had = EV.length > 0, oldT = T;
+  if (pk.src === 'db') {
+    D.usage.seed = null; D.events = C.ledger.toEvents(pk.runs, 'offices/' + D.office.id + '/usage/' + m.session + '.jsonl');
+    D.budgets = m.budgets_sha256 ? US.budgets : null; D.ledger = { main: m.main };
+  } else { D.usage.seed = b.agents; D.events = []; D.budgets = UB; D.ledger = { main: b.main }; }
+  EV = D.events; TL = C.timeline(EV); TOTAL = TL.total; TI = C.tickerItems(D); TI_AT = {};
+  TI.forEach(function (it) { (TI_AT[it.i] = TI_AT[it.i] || []).push(it); });
+  buildMarks();
+  $('play').disabled = $('scrub').disabled = !EV.length;
+  seek(pk.src === 'db' && (atEnd || !had) ? TOTAL : Math.min(oldT, TOTAL));   /* a first copy shows its final totals; a later one keeps the viewer's place */
+}
+function usageFail() { if (US.shown === 'db') return; usageApply({ src: 'builtin', why: 'unavailable', at: null }, null); }
+function usageSync(st, m) {
+  var b = D.usage.builtin, seq = ++US.seq, cs = (m && Array.isArray(m.chunks)) ? m.chunks : [];
+  var jobs = cs.filter(function (c) { var h = US.chunks[c.id]; return !h || h.sha !== c.sha256; }).map(function (c) {
+    return st.chunk(c.id).then(function (d) { if (d) US.chunks[c.id] = { sha: c.sha256, doc: d }; else delete US.chunks[c.id]; });
+  });
+  if (m && m.budgets_sha256 && US.bsha !== m.budgets_sha256) jobs.push(st.budgets().then(function (d) { US.budgets = d; US.bsha = d ? m.budgets_sha256 : null; }));
+  Promise.all(jobs).then(function () {
+    if (seq !== US.seq) return;
+    var map = {}; cs.forEach(function (c) { map[c.id] = US.chunks[c.id] && US.chunks[c.id].doc; });
+    var pk = C.usagePick(b, m, map);
+    if (pk.src === 'db' && m.budgets_sha256 && !US.budgets) pk = { src: 'builtin', why: 'incomplete', at: m.synced_at || null };
+    usageApply(pk, m);
+  }).catch(function () { if (seq === US.seq) usageFail(); });
+}
+function initUsageDb() {
+  if (!D.usage) return;
+  var b = D.usage.builtin; UB = D.budgets; D.usage.seed = b.agents; D.ledger = { main: b.main };
+  var done = false, tm = setTimeout(function () { if (!done) usageFail(); }, 10000);
+  getDb().then(function (db) {
+    var st = usageStore(db);
+    st.meta(function (m) { done = true; clearTimeout(tm); usageSync(st, m); }, function () { done = true; clearTimeout(tm); usageFail(); });
+  }).catch(function () { done = true; usageFail(); });
+}
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
 
 /* one transient layer (T-067); on desktop the usage sheet and event list are layers, the card and menu are parts */
@@ -1537,12 +1625,16 @@ $('pill').addEventListener('click', function () {
 $('banner').addEventListener('click', function () { $('pill').click(); });
 
 /* playback bar */
-D.events.forEach(function (ev, i) {
+function buildMarks() {
+  $('marks').innerHTML = '';
+  D.events.forEach(function (ev, i) {
   var k = ev.type, c = k === 'needs_merwyn' ? 'var(--warn)' : (k === 'review_reject' || k === 'blocked' || (k === 'compliance_result' && ev.verdict === 'BLOCK') ? 'var(--bad-text)' : (k === 'merged' ? 'var(--accent)' : null));
   if (!c || !TOTAL) return;
   var m = el('i', k === 'needs_merwyn' ? '' : 'rd'); m.style.left = (TL[i].start / TOTAL * 100) + '%'; m.style.setProperty('--c', c);
   $('marks').appendChild(m);
-});
+  });
+}
+buildMarks();
 $('play').addEventListener('click', function () {
   if (!EV.length) return;
   if (ended) { seek(0); ended = false; }
@@ -2654,8 +2746,7 @@ function chatInit() {
   }
   function fail(ph) { if (CS.phase === 'loading') { CS.phase = ph; renderChat(); } }
   if (!c || !c.use) { fail('nodb'); return; }
-  withTimeout(c.use('db'), 10000).then(function (db) {
-    if (!db) throw new Error('no db');
+  getDb().then(function (db) {
     return withTimeout(c.use('user'), 10000).then(function (u) { return withTimeout(u && u.id ? u.id() : null, 10000); }).then(function (uid) {
       if (!uid) { fail('signedout'); return; }
       CS.uid = uid; CS.store = chatStore(db);
@@ -2976,6 +3067,7 @@ function loadThree() {
 function boot() {
   setMotion(loadMotion(), false);
   initUsage();
+  initUsageDb();
   setSpeed([1, 2, 4].indexOf(+params.get('speed')) >= 0 ? +params.get('speed') : 1);
   var skipped = D.skipped || [];
   if (!EV.length) { $('play').disabled = true; $('scrub').disabled = true; }

@@ -1,0 +1,9 @@
+{"log":"agent-runs","v":1,"office":"ai-office","session":"session_FIXTURE069","source":"SYNTHETIC ledger for exact-number tests (T-069), not a real run","recorded_by":"tests","covers":"SYNTHETIC","date":"2026-11-26","provider":"claude-code","not_reported":["split","model","main_session"]}
+{"n":1,"sprint":1,"agent":"pm","tasks":["T-901"],"step":"spec","tokens":1000,"tool_uses":1,"duration_ms":10}
+{"n":2,"sprint":1,"agent":"architect","tasks":["T-901"],"step":"design","tokens":2000,"tool_uses":2,"duration_ms":20}
+{"n":3,"sprint":1,"agent":"engineer","tasks":["T-902"],"step":"build","tokens":3000,"tool_uses":3,"duration_ms":30}
+{"n":4,"sprint":1,"agent":"engineer","tasks":["T-901","T-902"],"step":"build","tokens":4000,"tool_uses":4,"duration_ms":40}
+{"n":5,"sprint":1,"agent":"reviewer","tasks":["T-902"],"step":"review","tokens":null,"tool_uses":null,"duration_ms":null,"note":"SYNTHETIC: harness report had no usage figures"}
+{"n":6,"sprint":1,"agent":"curator","tasks":[],"step":"chat","tokens":500,"tool_uses":1,"duration_ms":5,"note":"chat message m-abcdef12-wxyz"}
+{"n":7,"sprint":1,"agent":"pm","tasks":["T-903"],"step":"spec","tokens":0,"tool_uses":0,"duration_ms":0}
+{"kind": "main_session", "window": 1, "date": "2026-11-26", "source": "SYNTHETIC reading", "since": "SYNTHETIC start", "requests": 3, "input": 10, "cache_write": 20, "cache_read": 30, "output": 40}

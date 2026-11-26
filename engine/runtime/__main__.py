@@ -1,4 +1,4 @@
-"""CLI: python -m engine.runtime validate|dry-run <office>, or events <office> <log>, or ledger <office> <file>, or chat <action> <office> (stdin only)"""
+"""CLI: python -m engine.runtime validate|dry-run <office>, or events <office> <log>, or ledger <office> <file>, or chat <action> <office> (stdin only), or usage plan <office> --ledger <file> (stdin only)"""
 import argparse
 import sys
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 import json
 from datetime import datetime, timezone
 
-from . import chat, dryrun, events, ledger, loader, providers as providers_mod
+from . import budgets as budgets_mod, chat, dryrun, events, ledger, loader, providers as providers_mod, usage_sync
 
 
 def _load_and_validate(arg):
@@ -151,6 +151,53 @@ def _chat(args):
     return 0
 
 
+def _usage(args):
+    """Usage sync plan (T-069). The db docs arrive on stdin and the plan leaves on stdout, never a file in the repo.
+    Exit 1 with no actions when anything is refused; the reason names a doc, a field or a kind, never a value."""
+    try:
+        root = loader.resolve_office(args.office, Path.cwd())
+        office, problems = loader.load_office(root)
+        Path(args.ledger).read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError) as e:
+        print(str(e), file=sys.stderr)
+        return 2
+    if office is None:
+        _report(root, problems)
+        return 1
+    try:
+        now = args.now or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        chat.parse_time(now)
+        data = json.loads(sys.stdin.read())
+    except (ValueError, OSError):
+        print("usage plan: stdin is not valid input", file=sys.stderr)
+        return 1
+    if not isinstance(data, dict) or not isinstance(data.get("docs"), list):
+        print('usage plan: stdin must be {"rules": [...], "docs": [...], "other_docs": <int>}', file=sys.stderr)
+        return 1
+
+    def refuse(msg, report=None):
+        print(msg, file=sys.stderr)
+        print(json.dumps({"actions": [], "error": msg, "report": report or {}}))
+        return 1
+    ids = {a.get("id") for a in office.org.get("agents", []) if isinstance(a, dict)}
+    catalogue, _ = providers_mod.load_providers(root)
+    forbidden = events.forbidden_terms(office.repo_root)
+    header, runs, main, probs = ledger.load_ledger_full(args.ledger, agents=ids, office=office.id, forbidden=forbidden, providers=set(catalogue))
+    errs = [p for p in probs if p.level == "error"]
+    if header is None or errs:
+        return refuse("usage plan: the ledger has errors, fix them first: " + "; ".join(str(p) for p in errs[:3]))
+    budgets, bprobs = budgets_mod.load_budgets(root, agents=ids, providers=set(catalogue))
+    if bprobs:
+        return refuse("usage plan: budgets.yaml has errors: " + "; ".join(bprobs[:3]))
+    try:
+        out = usage_sync.plan(header, runs, main, budgets, data["docs"], rules=data.get("rules"), other_docs=data.get("other_docs", 0),
+                              forbidden=forbidden, now=now)
+    except usage_sync.Refused as e:
+        return refuse(f"usage plan: {e}", e.report)
+    print(json.dumps(out))
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="python -m engine.runtime", description="Load, validate and dry-run an office folder.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -173,10 +220,17 @@ def main(argv=None):
     sp.add_argument("--task", help="T-nnn the reply opened as a task")
     sp.add_argument("--now", help="ISO UTC time (tests)")
     sp.add_argument("--lease", type=int, default=chat.LEASE_S)
+    sp = sub.add_parser("usage", help="sync the ledger and budgets to the artifact db (T-069): plan the db writes; stdin only")
+    sp.add_argument("action", choices=("plan",))
+    sp.add_argument("office", help="office id (offices/<id>) or path to an office folder")
+    sp.add_argument("--ledger", required=True, help="path to the session ledger .jsonl")
+    sp.add_argument("--now", help="ISO UTC time (tests)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as e:
         return int(e.code or 0)
+    if args.cmd == "usage":
+        return _usage(args)
     if args.cmd == "events":
         return _events(args)
     if args.cmd == "ledger":

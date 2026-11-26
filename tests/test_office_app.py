@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import office_app  # noqa: E402
 
-from engine.runtime import events, ledger as ledger_mod, providers  # noqa: E402
+from engine.runtime import budgets as budgets_mod, events, ledger as ledger_mod, providers, usage_sync  # noqa: E402
 from tests._helpers import REPO, appended_copy  # noqa: E402
 
 HTML = REPO / "engine/app/office.html"
@@ -40,6 +40,17 @@ def page_py(runs):
     t = page_totals(runs)
     return {"tokens": t["session"]["tokens"], "runs": t["session"]["runs"], "nr": t["session"]["not_reported"],
             "agents": {k: v["tokens"] for k, v in t["agents"].items()}}
+
+
+def db_docs(path, now="2026-11-27T01:00:00Z"):
+    """T-069: the docs the sync would write for a ledger, in the shape the page reads them: {meta, chunks: {id: doc}, budgets}."""
+    h, runs, main, probs = ledger_mod.load_ledger_full(path, agents=_AGENTS, office="ai-office")
+    cat, _ = providers.load_providers(OFFICE)
+    b, _ = budgets_mod.load_budgets(OFFICE, agents=_AGENTS, providers=set(cat))
+    rules = [{"path": "chat", "read": "owner", "write": "owner"}, {"path": "usage", "read": "owner", "write": "owner"}]
+    docs = {a["path"]: a["doc"] for a in usage_sync.plan(h, runs, main, b, [], rules=rules, now=now)["actions"]}
+    return {"meta": docs["usage/office"], "budgets": docs.get("usage/budgets"),
+            "chunks": {p.rsplit("/", 1)[1]: d for p, d in docs.items() if "/chunks/" in p}}
 
 
 def block(html, sid):
@@ -168,7 +179,9 @@ class PageRules(unittest.TestCase):
         # added about 14.6 KB of page code (3.5 KB estimated). Size note 26 Nov 2026: 232 KB confirmed; committed page 235,833 B (1,735 B headroom);
         # the published ledger page (250,543 B) is not covered here and grows with runs. The limit is our creep guard, not a platform limit;
         # trimming comments again costs reviewability and a split breaks the one-file artifact. The next raise needs a split or minify decision.
+        # T-069 size note: whole-line comments are stripped from the built page only (render), so the template keeps them and this limit is unchanged.
         self.assertLessEqual(len(self.html.encode("utf-8")), 232 * 1024)
+        self.assertEqual(232 * 1024, 237568)   # never raised for T-069
 
     def test_three_min_js_is_not_committed(self):
         r = subprocess.run(["git", "ls-files", "engine/app/three.min.js"], cwd=REPO, capture_output=True, text=True)
@@ -184,6 +197,11 @@ const C = OfficeCore, assert = require('assert');
 const D = JSON.parse(g('office-data'));
 const mode = process.argv[3] || 'sprint3', extra = process.argv[4] ? JSON.parse(fs.readFileSync(process.argv[4], 'utf8')) : null;
 const full = mode === 'all' ? extra : null;
+if (D.usage && extra && extra.db && mode !== 'builtin') {   /* T-069: the built ledger page has no run events; rebuild them from the synced docs, as the page does */
+  const pk = C.usagePick(D.usage.builtin, extra.db.meta, extra.db.chunks);
+  assert.strictEqual(pk.src, 'db');
+  D.events = C.ledger.toEvents(pk.runs, 'x'); D.budgets = extra.db.budgets; D.ledger = { main: extra.db.meta.main }; D.usage.seed = null;
+}
 if (mode === 'sprint3') D.events = extra.events;   // the page now defaults to the v1 synthetic log; Sprint 3 data comes in as JSON
 function run(D) {
   const tl = C.timeline(D.events), out = {};
@@ -356,6 +374,46 @@ if (mode === 'sprint3') {
     assert.ok(v.providers.every(p => p.agents.every(a => a.kind === 'agent')));   // synthetic runs report every agent
     console.log('budgets syn ok');
   }
+} else if (mode === 'builtin') {
+  /* T-069: the built-in copy seeds the same totals and budget bars as replaying every run of the synced copy */
+  const b = D.usage.builtin, py = extra;
+  assert.deepStrictEqual(D.events, []);
+  D.usage.seed = b.agents; D.ledger = { main: b.main };
+  const s0 = C.stateAt(D, 0), R = C.recTotals(s0);
+  assert.strictEqual(R.total.tokens, py.tokens); assert.strictEqual(R.total.runs, py.runs); assert.strictEqual(R.total.nr, py.nr);
+  Object.keys(py.agents).forEach(k => assert.strictEqual(R.agents[k].tokens, py.agents[k]));
+  assert.strictEqual(Object.values(R.agents).reduce((a, q) => a + q.pct, 0), 100);
+  const vb = C.budgetView(s0, D);
+  const D2 = JSON.parse(JSON.stringify(D)); D2.usage.seed = null; D2.budgets = py.db.budgets; D2.ledger = { main: py.db.meta.main };
+  D2.events = C.ledger.toEvents(py.db.meta.chunks.flatMap(c => py.db.chunks[c.id].runs), 'x');
+  const vd = C.budgetView(C.stateAt(D2, 1e9), D2);
+  assert.deepStrictEqual(vb, vd);   /* bars, percentages, levels, order, main row: identical */
+  assert.strictEqual(vb.none, py.runs === 0);
+  assert.strictEqual(s0.rec.engineer && s0.rec.engineer.notes.length, 0);
+  console.log('builtin ok');
+} else if (mode === 'toevents') {
+  const ev = C.ledger.toEvents(extra.runs, extra.ref);
+  assert.deepStrictEqual(ev, extra.events);
+  assert.ok(ev.every(e => e.type === 'usage' && 'total' in e));
+  console.log('toevents ok ' + ev.length);
+} else if (mode === 'pick') {
+  const b = { session: 's1', last_n: 5 }, ch = (id, n, last) => ({ runs: Array.from({ length: n }, (_, i) => ({ n: last - n + 1 + i })), last_n: last });
+  const meta = (o) => Object.assign({ session: 's1', runs: 5, last_n: 5, synced_at: '2026-11-27T01:00:00Z', chunks: [{ id: 'a', last_n: 5 }] }, o || {});
+  const chunks = { a: ch('a', 5, 5) };
+  let p = C.usagePick(b, meta(), chunks); assert.deepStrictEqual([p.src, p.why, p.at, p.runs.length], ['db', null, '2026-11-27T01:00:00Z', 5]);
+  const why = (m, c, e) => { const q = C.usagePick(b, m, c, e); assert.strictEqual(q.src, 'builtin'); assert.strictEqual(q.runs, null); return q.why; };
+  assert.strictEqual(why(null, null), 'never'); assert.strictEqual(why(undefined, {}), 'never');
+  assert.strictEqual(why(null, null, { code: 'unavailable' }), 'unavailable'); assert.strictEqual(why(meta(), chunks, 'not_granted'), 'unavailable');
+  assert.strictEqual(why(meta({ last_n: 4, runs: 4 }), chunks), 'stale');                    // older than the build: the built-in copy wins
+  assert.strictEqual(why(meta({ session: 'other' }), chunks), 'other');
+  assert.strictEqual(why(meta(), {}), 'incomplete'); assert.strictEqual(why(meta(), { a: null }), 'incomplete');
+  assert.strictEqual(why(meta({ runs: 6 }), chunks), 'incomplete');                           // counts must add up
+  assert.strictEqual(why(meta({ chunks: [{ id: 'a', last_n: 4 }] }), chunks), 'incomplete');
+  assert.strictEqual(why(meta({ chunks: 'x' }), chunks), 'incomplete');
+  p = C.usagePick(b, meta({ runs: 6, last_n: 6, chunks: [{ id: 'a', last_n: 5 }, { id: 'b', last_n: 6 }] }), { a: chunks.a, b: ch('b', 1, 6) }); assert.deepStrictEqual([p.src, p.runs.length], ['db', 6]);   // newer than the build
+  p = C.usagePick({ session: 's1', last_n: 0 }, meta({ runs: 0, last_n: 0, chunks: [] }), {}); assert.strictEqual(p.src, 'db');   // an empty ledger synced
+  assert.strictEqual(C.usagePick(b, meta(), chunks).at, '2026-11-27T01:00:00Z');
+  console.log('pick ok');
 } else if (mode === 'syn') {
   const E = D.events, tl = C.timeline(E);
   let s = C.initState(D);
@@ -722,14 +780,35 @@ class CoreUnderNode(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             page = Path(tmp) / "r.html"
             self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--out", str(page)]), 0)
-            self.assertIn("rec ok", self.node(str(page), "rec", self.json_file(tmp, "p.json", py)))
+            self.assertIn("rec ok", self.node(str(page), "rec", self.json_file(tmp, "p.json", dict(py, db=db_docs(FIXTURE)))))
 
     def test_budget_maths_and_views_recorded(self):
         py = page_py(ledger_runs(FIXTURE))
         with tempfile.TemporaryDirectory() as tmp:
             page = Path(tmp) / "r.html"
             self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--out", str(page)]), 0)
-            self.assertIn("budgets rec ok", self.node(str(page), "budgets", self.json_file(tmp, "p.json", {"tokens": py["tokens"], "agents": py["agents"]})))
+            self.assertIn("budgets rec ok", self.node(str(page), "budgets", self.json_file(tmp, "p.json", {"tokens": py["tokens"], "agents": py["agents"], "db": db_docs(FIXTURE)})))
+
+    def test_builtin_copy_equals_the_synced_copy_and_pick_cases(self):
+        py = page_py(ledger_runs(FIXTURE))
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp) / "r.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--chat", "--out", str(page)]), 0)
+            self.assertIn("builtin ok", self.node(str(page), "builtin", self.json_file(tmp, "p.json", dict(py, db=db_docs(FIXTURE)))))
+            live = Path(tmp) / LIVE.name
+            live.write_text(LIVE.read_text(encoding="utf-8"), encoding="utf-8")
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(live), "--chat", "--out", str(page)]), 0)
+            self.assertIn("builtin ok", self.node(str(page), "builtin", self.json_file(tmp, "l.json", dict(page_py(ledger_runs(live)), db=db_docs(live)))))
+        self.assertIn("pick ok", self.node(str(HTML), "pick"))
+
+    def test_to_events_matches_to_event_log(self):
+        h, runs, _, _ = ledger_mod.load_ledger_full(FIXTURE, agents=_AGENTS, office="ai-office")
+        ref = f"offices/ai-office/usage/{h['session']}.jsonl"
+        _, evs, probs = events.parse_log(ledger_mod.to_event_log(h, runs), agents=_AGENTS, stages=set())
+        self.assertEqual([p for p in probs if p.level == "error"], [])
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.node(str(HTML), "toevents", self.json_file(tmp, "e.json", {"runs": runs, "ref": ref, "events": json.loads(json.dumps(evs))}))
+        self.assertIn("toevents ok 6", out)   # 7 runs, the chat run is not an event
 
     def test_budget_maths_and_views_synthetic(self):
         self.assertIn("budgets syn ok", self.node(str(HTML), "budgets"))
@@ -844,10 +923,15 @@ class Recorded(unittest.TestCase):
         self.assertEqual(data["log"]["not_reported"], ["split", "model", "main_session"])
         self.assertEqual(data["log"]["provider"], "claude-code")
         self.assertEqual(data["providers"]["claude-code"]["label"], "Claude Code subagents (Max plan)")
-        chat = sum(r["tokens"] or 0 for r in ledger_runs(self.LEDGER) if not r["tasks"])   # chat runs are in the totals, not the events
-        self.assertEqual(data["ledger"]["session"]["tokens"], sum(e["total"] or 0 for e in data["events"]) + chat)
-        self.assertTrue(all(e["type"] == "usage" and "total" in e for e in data["events"]))
-        self.assertNotIn("$", json.dumps(data["events"]))
+        runs = ledger_runs(self.LEDGER)
+        b = data["usage"]["builtin"]   # T-069: no run events and no data.ledger in the build; a fixed-size snapshot instead
+        self.assertEqual(data["events"], [])
+        self.assertNotIn("ledger", data)
+        self.assertEqual((b["runs"], b["last_n"], b["session"]), (len(runs), runs[-1]["n"], data["usage"]["session"]))
+        self.assertEqual(b["session_totals"]["tokens"], ledger_mod.totals(runs)["session"]["tokens"])
+        self.assertEqual({k: v["tokens"] for k, v in b["agents"].items()}, {k: v["tokens"] for k, v in page_totals(runs)["agents"].items()})
+        self.assertEqual(sum(v["runs"] for v in b["agents"].values()), sum(1 for r in runs if r["tasks"]))   # chat runs: session total only
+        self.assertNotIn("$", json.dumps(data["usage"]))
 
     def _with_main(self, tmp):
         f = Path(tmp) / FIXTURE.name
@@ -857,12 +941,13 @@ class Recorded(unittest.TestCase):
 
     def test_main_session_totals_reach_the_page_data_not_the_events(self):
         base, _ = office_app.build_data(OFFICE, None, FIXTURE)
-        self.assertIsNone(base["ledger"]["main"])
+        self.assertIsNone(base["usage"]["builtin"]["main"])
         with tempfile.TemporaryDirectory() as tmp:
             data, probs = office_app.build_data(OFFICE, None, self._with_main(tmp))
         self.assertEqual(probs, [])
-        self.assertEqual(data["ledger"]["main"]["output"], 40)
-        self.assertEqual(data["ledger"]["session"], base["ledger"]["session"])   # agent totals untouched
+        self.assertEqual(data["usage"]["builtin"]["main"]["output"], 40)
+        self.assertEqual(data["usage"]["builtin"]["session_totals"], base["usage"]["builtin"]["session_totals"])   # agent totals untouched
+        self.assertEqual(data["usage"]["builtin"]["agents"], base["usage"]["builtin"]["agents"])
         self.assertEqual(data["events"], base["events"])
 
     def test_page_row_says_metered_with_lines_and_not_reported_without(self):
@@ -1101,15 +1186,18 @@ class ChatBuild(unittest.TestCase):
             if shutil.which("node"):
                 x = CoreUnderNode("test_recorded_replay_totals_and_percentages")
                 py = page_py(ledger_runs(self.LEDGER))        # the page replays events: chat runs are left out (page_totals)
-                self.assertIn("rec ok", x.node(str(out), "rec", x.json_file(tmp, "p.json", py)))
-                py = {"tokens": py["tokens"], "agents": py["agents"]}
+                db = db_docs(self.LEDGER)
+                self.assertIn("rec ok", x.node(str(out), "rec", x.json_file(tmp, "p.json", dict(py, db=db))))
+                py = {"tokens": py["tokens"], "agents": py["agents"], "db": db}
                 self.assertIn("budgets rec ok", x.node(str(out), "budgets", x.json_file(tmp, "b.json", py)))
 
     def test_claude_is_only_reached_through_chat_init_which_needs_the_flag(self):
         html = TEMPLATE.read_text(encoding="utf-8")
-        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html)), 2)
+        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html)), 2)   # T-069: use('db') once, in getDb, shared with the usage panel; use('user') once, in chatInit
         a, b = html.index("function chatInit()"), html.index("function onChatDocs()")
-        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html[a:b])), 2)
+        self.assertEqual(len(re.findall(r"\buse\('(db|user)'\)", html[a:b])), 1)
+        self.assertEqual(len(re.findall(r"\buse\('db'\)", html)), 1)
+        self.assertIn("getDb().then", html[a:b])
         self.assertIn("if (CFG) initChat();", html)
         self.assertEqual(html.count("initChat()"), 2)   # its definition and the one guarded call
         self.assertIn("if (!CFG) { ['chat', 'chatbtn']", html)   # no flag: panel and button are removed
@@ -1125,6 +1213,69 @@ class ChatBuild(unittest.TestCase):
     def test_page_without_chat_has_no_chat_data_or_button_after_removal(self):
         data = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
         self.assertIn("chat", data)
+
+
+class UsageFromDb(unittest.TestCase):
+    """T-069: the built page carries no run rows, so its size is flat in the number of runs; whole-line comments are stripped from the built page only."""
+
+    def _lines(self):
+        return LIVE.read_text(encoding="utf-8").splitlines()
+
+    def _build(self, tmp, name, lines):
+        f = Path(tmp) / LIVE.name
+        f.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        out = Path(tmp) / name
+        self.assertEqual(office_app.main(["ai-office", "--ledger", str(f), "--chat", "--out", str(out)]), 0)
+        return out.read_text(encoding="utf-8")
+
+    def test_page_size_is_flat_when_runs_are_added(self):
+        lines = self._lines()
+        runs = [l for l in lines[1:] if '"kind"' not in l]
+        few = [lines[0]] + [l for l in runs if json.loads(l)["n"] <= 67]
+        extra = [json.dumps({"n": 1000 + i, "sprint": 8, "agent": ("pm", "engineer", "reviewer")[i % 3], "tasks": ["T-9%02d" % (i % 40)], "step": "build",
+                             "tokens": 10000 + i, "tool_uses": 7, "duration_ms": 1000, "note": "SYNTHETIC run %d" % i}) for i in range(50)]
+        with tempfile.TemporaryDirectory() as tmp:
+            a, b = self._build(tmp, "a.html", few), self._build(tmp, "b.html", lines + extra)
+        self.assertGreater(len(runs), 96)
+        self.assertEqual(len(a.encode()) // 1024 > 0, True)
+        self.assertLess(abs(len(b.encode()) - len(a.encode())), 1024)
+        for h in (a, b):
+            data = json.loads(block(h, "office-data"))
+            self.assertEqual((data["events"], "ledger" in data), ([], False))
+            self.assertNotIn('"step"', block(h, "office-data"))   # no per-run rows
+
+    def test_whole_line_comments_are_stripped_from_the_page_only(self):
+        tpl = TEMPLATE.read_text(encoding="utf-8")
+        page = HTML.read_text(encoding="utf-8")
+        whole = re.compile(r"^[ \t]*/\*.*\*/[ \t]*$", re.M)
+        self.assertGreater(len(whole.findall(tpl)), 50)
+        self.assertEqual(whole.findall(page), [])
+        self.assertNotIn("Pure: costs come from the catalogue", page)
+        self.assertIn("Pure: costs come from the catalogue", tpl)
+        self.assertIn("/* ----- model and usage", tpl)
+        # a comment after code, and the data line, are untouched
+        out = office_app.strip_comments("a();\n  /* gone */\nb(); /* kept */\n/* two\n   lines */\nc();\n/* open\nd(); /* trap */ e();\n" + office_app.PLACEHOLDER_LINE)
+        self.assertEqual(out, "a();\nb(); /* kept */\nc();\n/* open\nd(); /* trap */ e();\n" + office_app.PLACEHOLDER_LINE)
+
+    @unittest.skipUnless(shutil.which("node"), "node not installed")
+    def test_every_script_in_the_built_pages_still_parses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pub = self._build(tmp, "p.html", self._lines())
+            for name, h in (("committed", HTML.read_text(encoding="utf-8")), ("published", pub)):
+                for i, m in enumerate(re.finditer(r"<script(?![^>]*(?:src|application/json))[^>]*>(.*?)</script>", h, re.S)):
+                    f = Path(tmp) / f"{name}{i}.js"
+                    f.write_text(m.group(1), encoding="utf-8")
+                    r = subprocess.run(["node", "--check", str(f)], capture_output=True, text=True)
+                    self.assertEqual(r.returncode, 0, name + r.stderr)
+
+    def test_the_page_reads_usage_only_through_the_db_store(self):
+        tpl = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("function usageStore(db)", tpl)
+        a, b = tpl.index("function usageStore(db)"), tpl.index("var MON =")
+        self.assertEqual(len(re.findall(r"usage/office|usage/budgets", tpl[a:b])), 3)
+        self.assertNotRegex(tpl[a:b], r"\.(set|delete|update)\(")   # the usage store only reads
+        for word in ("Built-in copy", "never synced", "synced copy is older", "sync incomplete", "synced data not available", "Synced "):
+            self.assertIn(word, tpl)
 
 
 class ChatBuildAppended(ChatBuild):
