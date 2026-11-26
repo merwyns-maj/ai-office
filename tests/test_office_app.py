@@ -265,6 +265,59 @@ if (mode === 'sprint3') {
   // the synthetic-style state is untouched by recorded events
   assert.deepStrictEqual(s.usage, {});
   console.log('rec ok');
+} else if (mode === 'budgets') {
+  /* T-060: used vs budget maths, Detail order, mode parsing, and the views on a recorded and a synthetic state */
+  const R = C.budgetRow;
+  let r = R(3813702, 5000000);
+  assert.deepStrictEqual([r.state, r.pct, r.barPct, r.over, r.hatch], ['ok', 76, 76, 0, 0]);
+  r = R(0, 5000000); assert.deepStrictEqual([r.state, r.pct, r.barPct], ['ok', 0, 0]);
+  r = R(5000000, 5000000); assert.deepStrictEqual([r.state, r.pct, r.barPct, r.over], ['ok', 100, 100, 0]);   // exactly at budget is not over
+  r = R(5000001, 5000000); assert.deepStrictEqual([r.state, r.over, r.barPct], ['over', 1, 100]);
+  r = R(5210000, 5000000); assert.deepStrictEqual([r.state, r.pct, r.over, r.barPct], ['over', 104, 210000, 100]);
+  assert.ok(Math.abs(r.hatch - 4.2) < 1e-9);                                  // overflow / budget, as a percent of the bar
+  assert.strictEqual(R(9000000, 5000000).hatch, 50);                          // capped at half the bar
+  assert.strictEqual(R(1e9, 5000000).pct, 20000);                             // the text keeps the real figure
+  r = R(10, 0); assert.deepStrictEqual([r.state, r.pct, r.over, r.hatch], ['over', null, 10, 50]);   // a zero budget has no percentage
+  r = R(0, 0); assert.deepStrictEqual([r.state, r.pct], ['ok', 0]);
+  for (const b of [null, undefined, -1, NaN, 'x', Infinity]) { r = R(123, b); assert.deepStrictEqual([r.state, r.pct, r.barPct, r.over, r.budget], ['unset', null, 0, 0, null], String(b)); }
+  assert.strictEqual(R(-5, 100).used, 0); assert.strictEqual(R(null, 100).pct, 0);
+  // Detail order: by share of budget (not by tokens), unset after, main session last, ties by name
+  const row = (name, used, budget, kind) => ({ name, kind: kind || 'agent', row: R(used, budget) });
+  const names = C.sortDetail([row('Z main', 0, null, 'main'), row('B', 900, null), row('A', 50, 100), row('C', 120, 100), row('D', 50, 100), row('E', 5000, 100000), row('F', 901, null)]).map(x => x.name);
+  assert.deepStrictEqual(names, ['C', 'A', 'D', 'E', 'F', 'B', 'Z main']);
+  assert.deepStrictEqual(C.sortDetail([row('x', 0, 0), row('y', 5, 0)]).map(x => x.name), ['y', 'x']);   // zero budget with use sorts first
+  // mode: anything but 'detail' is Summary, the key is versioned
+  assert.deepStrictEqual(['detail', 'summary', null, undefined, '', 'DETAIL', '{}'].map(C.parseMode), ['detail', 'summary', 'summary', 'summary', 'summary', 'summary', 'summary']);
+  assert.strictEqual(C.MODE_KEY, 'office.usage.mode.v1');
+  const E = D.events, tl = C.timeline(E), full = C.stateAt(D, 1e9);
+  const v = C.budgetView(full, D);
+  if (D.log.usage_source === 'recorded') {
+    const py = extra, B = D.budgets.providers[D.log.provider];
+    assert.strictEqual(v.providers.length, 1); const p = v.providers[0];
+    assert.strictEqual(p.row.used, py.tokens); assert.strictEqual(p.row.budget, B.tokens);
+    assert.strictEqual(p.row.pct, Math.round(100 * py.tokens / B.tokens));
+    assert.strictEqual(p.agents.filter(a => a.kind === 'agent').length, Object.keys(py.agents).length);
+    p.agents.filter(a => a.kind === 'agent').forEach(a => { assert.strictEqual(a.row.used, py.agents[a.id] || 0); assert.strictEqual(a.row.budget, B.agents[a.id].tokens); });
+    assert.strictEqual(p.agents[p.agents.length - 1].kind, 'main'); assert.strictEqual(p.agents[p.agents.length - 1].id, D.budgets.main_session);
+    const ratios = p.agents.filter(a => a.kind === 'agent').map(a => a.row.ratio); assert.deepStrictEqual(ratios.slice().sort((x, y) => y - x), ratios);
+    assert.strictEqual(C.budgetView(C.initState(D), D).none, true);   // nothing replayed yet
+    // no budgets in the data: everything is "unset", never 0% and no main-session row
+    const D2 = Object.assign({}, D, { budgets: null }), v2 = C.budgetView(full, D2);
+    assert.strictEqual(v2.providers[0].row.state, 'unset'); assert.ok(v2.providers[0].agents.every(a => a.row.state === 'unset' && a.kind === 'agent'));
+    // a budget smaller than the use is over, by exactly the difference
+    const D3 = JSON.parse(JSON.stringify(D)); D3.budgets.providers[D.log.provider].tokens = py.tokens - 1000;
+    const o = C.budgetView(full, D3).providers[0].row; assert.deepStrictEqual([o.state, o.over], ['over', 1000]);
+    console.log('budgets rec ok');
+  } else {
+    assert.strictEqual(v.synthetic, true);
+    const by = {}; v.providers.forEach(p => by[p.id] = p);
+    const U = C.usageTotals(full, D.providers);
+    Object.keys(U.providers).forEach(k => assert.strictEqual(by[k].row.used, U.providers[k].input + U.providers[k].output + U.providers[k].cache_read + U.providers[k].cache_write, k));
+    assert.strictEqual(by['deepseek'].row.state, 'unset');   // used, no budget: never 0%
+    assert.ok(v.providers.some(p => p.row.state === 'over'));
+    assert.ok(v.providers.every(p => p.agents.every(a => a.kind === 'agent')));   // synthetic runs report every agent
+    console.log('budgets syn ok');
+  }
 } else if (mode === 'syn') {
   const E = D.events, tl = C.timeline(E);
   let s = C.initState(D);
@@ -473,6 +526,18 @@ class CoreUnderNode(unittest.TestCase):
                   "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
             self.assertIn("rec ok", self.node(str(page), "rec", self.json_file(tmp, "p.json", py)))
 
+    def test_budget_maths_and_views_recorded(self):
+        data, _ = office_app.build_data(OFFICE, None, LEDGER)
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp) / "r.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(page)]), 0)
+            led = data["ledger"]
+            py = {"tokens": led["session"]["tokens"], "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+            self.assertIn("budgets rec ok", self.node(str(page), "budgets", self.json_file(tmp, "p.json", py)))
+
+    def test_budget_maths_and_views_synthetic(self):
+        self.assertIn("budgets syn ok", self.node(str(HTML), "budgets"))
+
     def test_synthetic_percentages_add_to_100(self):
         self.assertIn("syn ok", self.node(str(HTML), "syn"))
 
@@ -612,16 +677,31 @@ class Recorded(unittest.TestCase):
 
     def test_recorded_panel_code_never_says_synthetic(self):
         text = TEMPLATE.read_text(encoding="utf-8")
-        for fn in ("function recHTML", "function recRows", "function focusRec", "function recRunLine", "function barLine", "function accHTML"):
-            body = re.search(re.escape(fn) + r".*?\n}\n", text, re.S).group(0)
+        for fn in ("function focusRec", "function rowHTML", "function budgetBar", "function budgetText"):
+            body = re.search(re.escape(fn) + r".*?\n\s{0,2}}\n", text, re.S).group(0)
             self.assertNotIn("synth", body.lower(), fn)
-        self.assertIn("' of session'", text)                                   # provider bar % is a share of the session
         self.assertIn("(REC ? ' (replay)' : ' (synth)')", text)                # clock label
-        self.assertIn("filter(function (n) { return !n.nr; })", text)          # planned* only for model notes, not usage notes
         summary = re.search(r"function usageSummary.*?\n}\n", text, re.S).group(0)
-        self.assertIn("recorded", summary)
+        self.assertIn("SYN ?", summary)                                        # the synthetic tag only on the synthetic page
         self.assertIn("(SYN ?", re.search(r"function fillSheet.*?\n}\n", text, re.S).group(0))   # synthetic pill only when SYN
         self.assertIn("var SYN = !!(D.log && D.log.v === 1 && !REC);", text)
+
+    def test_budget_wording_is_the_users_budget_never_capacity_or_plan(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("of your budget", text)
+        self.assertIn("budget not set", text)
+        for bad in ("of capacity", "of the plan", "% of plan", "capacity"):
+            self.assertNotIn(bad, text)
+        self.assertIn("Anthropic does not publish the Max plan", text)
+        self.assertNotRegex(text, r"--warn[^;}]*;[^}]*\.hatch|\.hatch\{[^}]*(--warn|--bad)")   # over budget never uses the amber or red of needs-you
+
+    def test_mode_is_remembered_in_try_and_shown_as_a_radiogroup(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("office.usage.mode.v1", text)
+        for l in [l for l in text.splitlines() if "MODE_KEY" in l and "localStorage" in l]:
+            self.assertRegex(l, r"try\s*\{[^}]*localStorage")
+        self.assertIn('role="radiogroup" aria-label="Usage view"', text)
+        self.assertIn("aria-checked", text)
 
 
 class Providers(unittest.TestCase):

@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from engine.runtime import events, ledger as ledger_mod, loader, miniyaml, providers  # noqa: E402
+from engine.runtime import budgets as budgets_mod, events, ledger as ledger_mod, loader, miniyaml, providers  # noqa: E402
 import build_agents  # noqa: E402
 
 TEMPLATE = REPO / "engine" / "app" / "office.template.html"
@@ -75,6 +75,18 @@ def build_data(office_root, fixture, ledger=None):
     probs = lprobs + probs
     if totals is not None:
         header = dict(header, not_reported=lh["not_reported"])
+    budgets = None
+    if ledger is not None:
+        budgets, bprobs = budgets_mod.load_budgets(office_root, agents=ids, providers=set(catalogue))
+    elif header and header.get("budgets") is not None:   # the synthetic page carries its own budgets in the fixture header (T-060)
+        budgets, bprobs = budgets_mod.resolve(header["budgets"], agents=ids, providers=set(catalogue), synthetic=True)
+        bprobs = [f"fixture header: {m}" for m in bprobs]
+    else:
+        bprobs = []
+    if bprobs:
+        raise BuildError("; ".join(bprobs))
+    if header and "budgets" in header:
+        header = {k: v for k, v in header.items() if k != "budgets"}
     skipped = [{"line": p.line, "message": p.message} for p in probs if p.level == "error"]
     warnings = [{"line": p.line, "message": p.message} for p in probs if p.level == "warning"]
     data = {
@@ -87,6 +99,7 @@ def build_data(office_root, fixture, ledger=None):
         "warnings": warnings,
         "stages": stages,
         "log": header,
+        "budgets": budgets,
         "events": evs,
         "skipped": skipped,
     }

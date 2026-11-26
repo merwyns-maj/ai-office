@@ -1,0 +1,23 @@
+# Token budgets for the usage panel (T-060). Format and rules: engine/runtime/budgets.py.
+# The 100% is a budget Merwyn sets, not a limit Anthropic publishes (it publishes none for the Max plan in tokens).
+# Every value carries who set it and when. The page never invents a budget: a provider or agent without one says "budget not set".
+# period: session until run lines carry a date (ledger run lines may now have `date`).
+# main_session: the agent whose own tokens the harness does not report (the main Claude session); Detail shows it as "not reported".
+# Agents inside a provider are all `share` (percent, adding to 100, of that provider's tokens) or all `tokens` amounts.
+# Starting values by Janice (pmo), 26 Nov 2026, from this session's real use: 3,813,702 tokens over 48 recorded runs.
+period: session
+main_session: pmo
+providers:
+  claude-code:
+    tokens: 5000000
+    set_by: Janice (pmo)
+    set_on: "2026-11-26"
+    note: Starting values, Merwyn to adjust
+    agents:
+      engineer:   { share: 43, set_by: Janice (pmo), set_on: "2026-11-26" }
+      reviewer:   { share: 30, set_by: Janice (pmo), set_on: "2026-11-26" }
+      architect:  { share: 13, set_by: Janice (pmo), set_on: "2026-11-26" }
+      designer:   { share: 6, set_by: Janice (pmo), set_on: "2026-11-26" }
+      pm:         { share: 5, set_by: Janice (pmo), set_on: "2026-11-26" }
+      curator:    { share: 2, set_by: Janice (pmo), set_on: "2026-11-26" }
+      compliance: { share: 1, set_by: Janice (pmo), set_on: "2026-11-26" }

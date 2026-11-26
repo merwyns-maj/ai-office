@@ -62,6 +62,7 @@ A v1 header adds one required field and the file may then carry which model an a
 ```
 
 - `usage_source` is required in v1: `synthetic` (invented numbers; the page writes "synthetic" next to every usage figure) or `recorded` (measured by the runtime; T-026 will write this). A v1 header without it is rejected.
+- `budgets` (optional, T-060): the synthetic page's own demo budgets, same shape as `offices/<office>/budgets.yaml` (`engine/runtime/budgets.py`), validated when the page is built and carried to the page as `budgets` with `synthetic: true`. A recorded ledger page reads `budgets.yaml` instead; the synthetic page never does.
 - In a v0 file the fields and type below are not defined: a `usage` line gives today's "unknown type" warning and `provider`/`model` give "field not defined". Nothing in v0 behaviour changes.
 
 Field kinds: **PROVIDER** `^[a-z0-9][a-z0-9-]{0,31}$`; **MODEL** `^[A-Za-z0-9][A-Za-z0-9._:/-]{0,63}$`; **BILLING** `per_token` or `plan`; **TOKENS** integer 0 to 999,999,999 (a bool is rejected; nine digits at most, so a token count never looks like an account number); **USD** number 0 to 999,999 with at most 6 decimal places.

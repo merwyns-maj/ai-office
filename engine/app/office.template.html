@@ -114,49 +114,48 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur.tot .cost{font-size:12px}
 .ufoot{margin-top:8px;font-size:10.5px;line-height:1.35;color:var(--text-dim)}
 .uempty{color:var(--text-dim);font-size:12px;padding:2px 0 4px}
-/* recorded ledger rendering (T-057) */
-.ur .l1 .pl{font:400 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
-.ur .bl{display:flex;align-items:center;gap:8px;margin:2px 0 1px}
-.ur .bl .bar{flex:1;margin:0}
-.ur .bl .pct.wide{width:auto}
-.ur .bl .pct{flex:none;width:34px;text-align:right;font:500 11px/1 var(--mono)}
-.ur .bar{position:relative;height:4px;border-radius:2px;overflow:hidden;margin:2px 0 1px}
-.acc{border-top:1px solid rgba(255,255,255,.05)}
-.ur.ah{display:grid;grid-template-columns:14px 1fr;align-items:start;gap:4px;border-top:0}
-.ur.ah .chev{margin-top:4px;rotate:0deg}
-.ur.ah[aria-expanded=false] .chev{rotate:-90deg}
-.ur.ah .ahc{display:block;min-width:0}
-.ur.ah .ahc > span{display:block}
-.ur.ah .ahc > .l1{display:flex}
-.ab{padding:0 0 6px 20px}
-.ur.ah .l1 .nm{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ur.ah .l1 .cost{flex:none}
-.ab .note{font:400 11px/1.4 var(--ui);color:var(--text-dim);margin-top:4px}
-.sub{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);margin:4px 0 2px}
-.ab[hidden]{display:none}
-.rr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:11px;line-height:1.5;color:var(--text-dim)}
-.tid{white-space:nowrap}
-.rr > span:first-child{white-space:nowrap}
-.rr.sh{grid-template-columns:minmax(0,1fr) auto 4ch}
-.rr.sh > span:first-child{overflow:hidden;text-overflow:ellipsis}
-.rr .rt{white-space:nowrap;text-align:right;color:var(--text)}
-.lnk{background:none;border:0;color:var(--accent);font:600 11px/1.5 var(--ui);padding:2px 0;margin-top:2px;cursor:pointer;text-decoration:underline}
-#usheet .lnk{min-height:44px}
-#usheet .rr{font-size:12px}
-#usage.rec{max-height:calc(100% - 104px)}
+/* Summary and Detail rows (T-060) */
+.ur .bl{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;margin:3px 0 1px}
+.bt{flex:1 1 56px;min-width:56px;display:flex;gap:2px;align-items:center}
+.bar{position:relative;height:4px;border-radius:2px;overflow:hidden;flex:1 1 0;min-width:0}
+.bar::before{content:'';position:absolute;inset:0;background:var(--text-dim);opacity:.3}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width .16s ease-out}
+body.rm .bar i{transition:none}
+.bar.unset{border:1px dashed var(--text-dim);background:none;box-sizing:border-box}
+.bar.unset::before{display:none}
+.hatch{flex:0 1 0;min-width:4px;height:4px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--text) 0 2px,transparent 2px 4px)}
+.bx{font:500 11px/1.3 var(--ui);color:var(--text)}
+.bx.dim{color:var(--text-dim);font-style:italic;font-weight:400}
+.bx.over{font-weight:700}
+.bx.pc{min-width:4ch;text-align:right}
+.gl{font-size:9px;margin-right:4px;vertical-align:1px}
+.ur.brow{border-top:1px solid rgba(255,255,255,.05);padding:6px 6px}
+.ur.brow:first-child{border-top:0}
+.ur.brow.dim .cost{color:var(--text-dim);font-style:italic;font-weight:400}
+.ur .l1 .nm{flex:0 1 auto;min-width:0;overflow-wrap:anywhere}
+.ur .l1 .cost{flex:none}
+.ur .l3 .syn{font:italic 400 10px/1.3 var(--ui)}
+.dhead{display:flex;gap:8px;align-items:baseline;justify-content:space-between;margin:10px 0 2px;font:700 11px/1.3 var(--ui);color:var(--text)}
+.dhead:first-child{margin-top:2px}
+.dhead .dh{font-weight:500;color:var(--text);text-align:right;white-space:nowrap;flex:none}
+.dhead .syn{font:italic 400 10px/1.3 var(--ui);color:var(--text-dim)}
+.useg{padding:0 12px 8px;flex:none}
+#usheet .useg{padding:0 0 8px}
+#usage.col .useg{display:none}
+.vseg{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:7px;overflow:hidden}
+.vseg button{flex:1;height:28px;border:0;background:transparent;color:var(--text-dim);font:500 11px/1 var(--ui);padding:0 8px}
+.vseg button + button{border-left:1px solid rgba(255,255,255,.12)}
+.vseg button[aria-checked=true]{background:rgba(255,255,255,.12);color:var(--text);font-weight:700}
+.vseg button:focus-visible{outline:2px solid var(--text);outline-offset:-2px}
+#usheet .vseg button{height:44px;font-size:13px}
+.umode.ufade{animation:ufade .12s ease-out}
+@keyframes ufade{from{opacity:0}to{opacity:1}}
+body.rm .umode.ufade{animation:none}
 #usheet > *{flex:none}
-.ur.rowtap{padding-top:2px;padding-bottom:2px}
-#usage .ufoot.rec{margin-top:6px;line-height:1.3}
-.ur .bar::before{content:'';position:absolute;inset:0;background:var(--text-dim);opacity:.3}
-.ur .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width .2s ease-out}
-body.rm .ur .bar i{transition:none}
-.ur .l2.rec{font:400 11px/1.4 var(--ui)}
-.ur.dim,.ur.dim .l1{color:var(--text-dim);font-weight:400}
-.ur.dim .l1 .cost{color:var(--text-dim)}
-.ur.nrow{cursor:default}
+#usheet .ur.brow{padding:8px 6px}
+#usheet .ur .l3,#usheet .ufoot,#usheet .bx{font-size:12px}
+#usheet .dhead{font-size:13px}
 .ufoot.rec{font-size:11px}
-#usheet .ur.rowtap{min-height:44px}
-#usheet .ufoot.rec{position:sticky;bottom:-12px;background:var(--panel);padding:8px 0 12px;margin-top:4px}
 #ubtn{display:none}
 #usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bar) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
 #usheet.open{display:flex}
@@ -305,7 +304,7 @@ body.rm .tl.new{animation:none}
 }
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
 body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bar) + 40px);z-index:7}
-@media (prefers-reduced-motion:reduce){body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
+@media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
 </style>
 </head>
 <body>
@@ -324,6 +323,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   <div id="side">
     <section id="usage" class="panel pp" aria-label="Usage" hidden>
       <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><span class="synpill" data-rec hidden>recorded</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
+      <div id="useg" class="useg"></div>
       <div id="usum" class="usum"></div>
       <div id="ubody" class="ubody"></div>
     </section>
@@ -494,6 +494,57 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     var ids = Object.keys(out.agents).sort(function (a, b) { return out.agents[b].tokens - out.agents[a].tokens || (a < b ? -1 : 1); });
     var p = shares(ids.map(function (k) { return out.agents[k].tokens; }));
     ids.forEach(function (k, i) { out.agents[k].pct = p[i]; });
+    return out;
+  }
+  /* ----- budgets (T-060). Pure: a budget is a number from office config (budgets.yaml, or the synthetic fixture header); nothing here invents one ----- */
+  var MODE_KEY = 'office.usage.mode.v1';
+  function parseMode(text) { return text === 'detail' ? 'detail' : 'summary'; }
+  /* used vs budget. unset = no usable budget (never 0%). over = used > budget: the bar is full, the overflow (capped at half the bar) is drawn after it.
+     pct is the real figure rounded (104), barPct is capped at 100; a budget of 0 has no percentage. */
+  function budgetRow(used, budget) {
+    used = pnum(used) && used > 0 ? used : 0;
+    if (!pnum(budget) || budget < 0) return { state: 'unset', used: used, budget: null, pct: null, barPct: 0, over: 0, hatch: 0, ratio: null };
+    var over = Math.max(0, used - budget), pct = budget ? Math.round(100 * used / budget) : (over > 0 ? null : 0);
+    return { state: over > 0 ? 'over' : 'ok', used: used, budget: budget, pct: pct, over: over,
+      barPct: over > 0 ? 100 : Math.min(100, pct || 0), hatch: over > 0 ? (budget ? Math.min(over / budget, 0.5) : 0.5) * 100 : 0, ratio: budget ? used / budget : (used > 0 ? Infinity : 0) };
+  }
+  /* Detail order: budgeted agents by share of their budget, highest first; then agents without a budget (most tokens first); main session last. Ties by name. */
+  function sortDetail(rows) {
+    var rank = function (r) { return r.kind === 'main' ? 2 : (r.row.state === 'unset' ? 1 : 0); };
+    return rows.slice().sort(function (a, b) {
+      if (rank(a) !== rank(b)) return rank(a) - rank(b);
+      if (rank(a) === 0 && a.row.ratio !== b.row.ratio) return b.row.ratio > a.row.ratio ? 1 : -1;
+      if (rank(a) === 1 && a.row.used !== b.row.used) return b.row.used - a.row.used;
+      return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+    });
+  }
+  /* everything the Summary and Detail views show at this moment: per provider, used tokens vs its budget, and per agent inside it */
+  function budgetView(s, data) {
+    var rec = !!(data.log && data.log.v === 1 && data.log.usage_source === 'recorded'), B = data.budgets, bp = (B && B.providers) || {}, prov = data.providers || {};
+    var names = {}; data.agents.forEach(function (a) { names[a.id] = a.name; });
+    var used = {}, ag = {}, ids, mainId = null;
+    if (rec) {
+      var R = recTotals(s), pid = data.log.provider;
+      ids = pid ? [pid] : [];
+      if (pid && R.total.runs) { used[pid] = R.total.tokens; ag[pid] = {}; Object.keys(R.agents).forEach(function (a) { ag[pid][a] = R.agents[a].tokens; }); }
+      if (B && B.main_session && (data.log.not_reported || []).indexOf('main_session') >= 0) mainId = B.main_session;
+    } else {
+      var U = usageTotals(s, prov), PB = providerBreakdown(s);
+      Object.keys(U.providers).forEach(function (k) { var r = U.providers[k]; used[k] = r.input + r.output + r.cache_read + r.cache_write; ag[k] = {}; PB[k].agents.forEach(function (g) { ag[k][g.id] = g.tokens; }); });
+      ids = Object.keys(prov).filter(function (k) { return used[k] !== undefined || bp[k]; }).concat(Object.keys(used).filter(function (k) { return !prov[k]; }).sort());
+    }
+    var anyUse = ids.some(function (k) { return used[k] !== undefined; }), out = { period: B ? B.period : 'session', synthetic: !!(B && B.synthetic), providers: [], none: !anyUse };
+    ids.forEach(function (k) {
+      var p = bp[k] || {}, u = used[k] || 0, a = ag[k] || {}, ab = p.agents || {}, rows = [];
+      var ids2 = Object.keys(ab).concat(Object.keys(a).filter(function (x) { return !ab[x]; }));
+      ids2.forEach(function (x) {
+        if (x === mainId) return;
+        rows.push({ id: x, name: names[x] || x, kind: 'agent', row: budgetRow(a[x] || 0, ab[x] ? ab[x].tokens : null), set_by: ab[x] ? ab[x].set_by : null, set_on: ab[x] ? ab[x].set_on : null });
+      });
+      if (mainId) rows.push({ id: mainId, name: names[mainId] || mainId, kind: 'main', row: budgetRow(0, null) });
+      out.providers.push({ id: k, label: prov[k] ? prov[k].label : k, colour: prov[k] ? prov[k].colour : null, row: budgetRow(u, p.tokens === undefined ? null : p.tokens),
+        set_by: p.set_by || null, set_on: p.set_on || null, note: p.note || null, agents: sortDetail(rows) });
+    });
     return out;
   }
   /* the only place a currency sign is built, and only from micro-USD */
@@ -698,6 +749,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
     eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
+    MODE_KEY: MODE_KEY, parseMode: parseMode, budgetRow: budgetRow, sortDetail: sortDetail, budgetView: budgetView,
     tickerItems: tickerItems, switchSentence: switchSentence,
     PANEL: PANEL, panelBounds: panelBounds, clampRect: clampRect, moveRect: moveRect, resizeRect: resizeRect, snapRect: snapRect, keyDelta: keyDelta,
     opacityStep: opacityStep, blurFor: blurFor, textMode: textMode, rectSentence: rectSentence, parseLayout: parseLayout, serializeLayout: serializeLayout };
@@ -872,7 +924,7 @@ function announce(t) { $('live').textContent = ''; setTimeout(function () { $('l
 function fmtTok(n) {
   if (n < 1000) return String(n);
   if (n < 1e6) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
-  return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  return String(Math.round(n / 1e5) / 10) + 'M';   // 2,150,000 reads 2.2M (toFixed would say 2.1M)
 }
 function exact(n) { return Number(n).toLocaleString('en-US'); }
 function figs(r) {
@@ -882,125 +934,130 @@ function figs(r) {
     '</span><span title="' + exact(r.cache_read) + ' cache read, ' + exact(r.cache_write) + ' cache write tokens">cache ' + fmtTok(c) + '</span>' + (SYN ? '<span class="syn">synthetic</span>' : '');
 }
 var NOSPLIT = 'Input, output and cache split not reported';
-var accOff = {};   /* agent ids whose accordion section is collapsed; default is expanded */
-var CHEV = '<svg class="chev" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg>';
-function barLine(pct, colour, of) {
-  return '<div class="bl"><div class="bar" aria-hidden="true"><i style="width:' + pct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div><span class="pct' + (of ? ' wide' : '') + '">' + pct + '%' + (of ? ' of session' : '') + '</span></div>';
+/* ----- Summary and Detail (T-060): used tokens against the budget Merwyn sets; amounts come from OfficeCore.budgetView ----- */
+var USAGE_MODE = 'summary', fadeNext = false, lastBars = {};
+function tokWords(n) {
+  if (n >= 1e6) return (Math.round(n / 1e5) / 10) + ' million';
+  if (n >= 1000) return (n < 1e4 ? Math.round(n / 100) / 10 : Math.round(n / 1000)) + ' thousand';
+  return String(n);
 }
-function accHTML(id, head, body, label) {
-  var open = !accOff[id];
-  return '<div class="acc"><button type="button" class="ur ah rowtap" data-acc="' + esc(id) + '" aria-expanded="' + open + '" aria-label="' + esc(label) + '">' + CHEV + '<span class="ahc">' + head + '</span></button>' +
-    '<div class="ab"' + (open ? '' : ' hidden') + '>' + body + '</div></div>';
+function shortLabel(l) { return String(l).replace(/\s*\([^)]*\)\s*$/, ''); }
+function periodLabel(v) { return v.period === 'session' ? 'This session' : String(v.period); }
+/* the budget part of a row: bar (or dashed track), text, and the exact states in words (over and unset never rely on colour or hatch) */
+function budgetBar(r, key, colour) {
+  if (r.state === 'unset') return '<div class="bt"><div class="bar unset" aria-hidden="true"></div></div>';
+  return '<div class="bt"><div class="bar" aria-hidden="true"><i data-k="' + esc(key) + '" data-w="' + r.barPct + '" style="width:' + r.barPct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div>' +
+    (r.state === 'over' ? '<div class="hatch" aria-hidden="true" style="flex-grow:' + (r.hatch / 100).toFixed(3) + '"></div>' : '') + '</div>';
 }
-function shareRow(name, tokens, pct, title) {
-  return '<div class="rr sh"><span class="mono"' + (title ? ' title="' + esc(title) + '"' : '') + '>' + esc(name) + '</span><span class="rt">' + esc(fmtTok(tokens)) + '</span><span class="rt">' + pct + '%</span></div>';
+function budgetText(r, summary) {
+  if (r.state === 'unset') return '<span class="bx dim">budget not set</span>';
+  if (r.state === 'over') return '<span class="bx over" title="' + exact(r.used) + ' of ' + exact(r.budget) + ' tokens">over by ' + esc(fmtTok(r.over)) + (summary && r.pct !== null ? ' (' + r.pct + '% of your budget)' : '') + '</span>';
+  return '<span class="bx' + (summary ? '' : ' pc') + '" title="' + exact(r.used) + ' of ' + exact(r.budget) + ' tokens">' + r.pct + '%' + (summary ? ' of your budget' : '') + '</span>';
 }
-function recRunLine(r) {
-  return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + (r.tasks || []).map(function (t, i, a) { return '<span class="tid">' + esc(t) + (i < a.length - 1 ? ',' : '') + '</span>'; }).join(' ') + '</span>' +
-    '<span class="rt" title="' + (r.note ? esc(r.note) : NOSPLIT) + '">' + (r.total === null ? 'not reported' : esc(fmtTok(r.total))) + (r.note ? '*' : '') + '</span></div>';
+function figsText(r) {
+  return r.state === 'unset' ? fmtTok(r.used) + ' used' : fmtTok(r.used) + ' / ' + fmtTok(r.budget);
 }
-function synRunLine(r) {
-  var ml = C.modelLabel(D.providers, r.provider, r.model);
-  return '<div class="rr"><span class="mono">' + esc(r.task) + '</span><span class="mono">' + esc(ml.code + ' ' + ml.short) + '</span><span class="rt">' + esc(fmtTok(r.total)) + '</span></div>';
-}
-function focusBtn(id) { return '<button type="button" class="lnk" data-agent="' + esc(id) + '">Show details</button>'; }
-function recRows() {
-  var R = C.recTotals(S), rows = D.agents.filter(function (a) { return R.agents[a.id]; }).map(function (a) { return { a: a, q: R.agents[a.id] }; });
-  rows.sort(function (x, y) { return y.q.tokens - x.q.tokens || (x.a.name < y.a.name ? -1 : 1); });
-  return { R: R, rows: rows };
-}
-function recHTML() {
-  var x = recRows(), R = x.R, tot = R.total;
-  if (!tot.runs) return '<div class="uempty">No usage yet</div><div class="ufoot rec">Tokens appear as the replay runs.</div>';
-  var h = '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + ' tokens</span></div>' +
-    '<div class="l2 rec">' + tot.runs + ' runs' + (tot.nr ? ' · ' + tot.nr + ' not reported' : '') + '</div><div class="l2 rec">split not reported</div>' +
-    (tot.nr ? '<div class="l2 rec">Percentages exclude the ' + tot.nr + (tot.nr === 1 ? ' run' : ' runs') + ' with tokens not reported.</div>' : '') + '</div>';
-  h += '<h4>By provider</h4>';
-  var pid = D.log.provider, pr = pid && (D.providers || {})[pid];
-  if (pid) {
-    var pn = pr ? pr.label : pid, ag = x.rows.filter(function (r) { return r.q.tokens > 0; }), ps = C.shares(ag.map(function (r) { return r.q.tokens; }));
-    var phead = '<span class="l1"><span class="nm">' + esc(pn) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></span>' + barLine(100, pr && pr.colour, true) + '<span class="l2 rec">1 provider recorded</span>';
-    h += accHTML('prov:' + pid, phead, '<div class="sub">Agents</div>' + ag.map(function (r, i) { return shareRow(r.a.name, r.q.tokens, ps[i]); }).join('') + '<div class="note">Model not reported</div>',
-      pn + ': ' + fmtTok(tot.tokens) + ' tokens, 100% of session, ' + ag.length + ' agents');
+function rowSentence(name, r, extra) {
+  var t = name + ': ';
+  if (r.state === 'unset') t += tokWords(r.used) + ' tokens used, budget not set';
+  else {
+    t += tokWords(r.used) + ' of ' + tokWords(r.budget) + ' tokens, ';
+    t += r.state === 'over' ? 'over budget by ' + tokWords(r.over) + (r.pct !== null ? ', ' + r.pct + '% of your budget' : '') : r.pct + '% of your budget';
   }
-  else h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Provider</span><span class="cost">not reported</span></div></div>';
-  h += '<h4>By agent, most tokens first</h4>';
-  x.rows.forEach(function (r) {
-    var a = r.a, q = r.q, pl = a.planned_model, mnotes = q.notes.filter(function (n) { return !n.nr; }), noted = mnotes.length > 0, allnr = q.runs === q.nr;
-    var runsTxt = q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses' + (q.nr ? ' · ' + q.nr + ' not reported' : '');
-    var head = '<span class="l1"><span class="nm">' + esc(a.name) + '</span>' +
-      (pl ? '<span class="pl" title="' + esc('Model from the agent profile; the harness does not report the model used.' + (noted ? ' ' + mnotes.map(function (n) { return 'Run ' + n.run + ': ' + n.note; }).join(' ') : '')) + '">' + esc(pl) + ' planned' + (noted ? '*' : '') + '</span>' : '') +
-      '<span class="cost" title="' + NOSPLIT + (allnr ? '' : ': ' + exact(q.tokens) + ' tokens') + '">' + (allnr ? 'not reported' : esc(fmtTok(q.tokens))) + '</span></span>' +
-      (allnr ? '' : barLine(q.pct)) + '<span class="l2 rec">' + esc(runsTxt) + '</span>';
-    h += accHTML(a.id, head, (S.runlog[a.id] || []).map(recRunLine).join('') + focusBtn(a.id),
-      a.name + ': ' + (allnr ? 'tokens not reported' : fmtTok(q.tokens) + ' tokens, ' + q.pct + '% of session') + ', ' + runsTxt.replace(/ · /g, ', ') + ', split not reported');
-  });
-  h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Main session</span><span class="cost">not reported</span></div></div>';
-  h += '<div class="ufoot rec">' + esc(String(D.log.covers || '').replace(/[.\s]+$/, '')) + '. Share is of this session\'s recorded tokens.</div>';
-  return h;
+  return t + (extra ? ', ' + extra : '');
 }
-function usageHTML() {
-  if (REC) return recHTML();
-  var U = C.usageTotals(S, D.providers), tot = U.total, n = tot.usd + tot.plan + tot.unset + tot.none;
-  var h = '';
-  if (!n) return '<div class="uempty">No usage yet</div><div class="ufoot">Tokens and estimates appear as the replay runs.</div>';
-  h += '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost">' + esc(C.costText(tot)) + '</span></div><div class="l2">' + figs(tot) + '</div></div>';
-  h += '<h4>By provider</h4>';
-  var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
-  var PB = C.providerBreakdown(S);
-  order.forEach(function (pid) {
-    var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
-    var bd = PB[pid], phead = '<span class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></span>' + barLine(r.pct, pr && pr.colour, true) +
-      '<span class="l2">' + figs(r) + '</span>' + (r.dates.length ? '<span class="l3">prices checked ' + esc(r.dates.join(', ')) + '</span>' : '');
-    var body = '<div class="sub">Models</div>' + bd.models.map(function (m) { var l = C.modelLabel(D.providers, pid, m.id); return shareRow(l.short, m.tokens, m.pct, l.full); }).join('') +
-      '<div class="sub">Agents</div>' + bd.agents.map(function (g) { return shareRow(NAME[g.id] || g.id, g.tokens, g.pct); }).join('');
-    h += accHTML('prov:' + pid, phead, body, pid + ': ' + fmtTok(r.input + r.output + r.cache_read + r.cache_write) + ' tokens, ' + r.pct + '% of session, ' + bd.models.length + ' models, ' + bd.agents.length + ' agents');
-  });
-  h += '<h4>By agent</h4>';
-  D.agents.forEach(function (a) {
-    var r = U.agents[a.id], ml = modelOf(a.id);
-    var used = r.input + r.output + r.cache_read + r.cache_write, runs = S.runlog[a.id] || [];
-    var inner = '<span class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(used ? C.costText(r) : '') + '</span></span>' + (used ? barLine(r.pct) : '') + '<span class="l2">' + figs(r) + '</span>';
-    if (runs.length) h += accHTML(a.id, inner, runs.map(synRunLine).join('') + focusBtn(a.id), a.name + ': ' + fmtTok(used) + ' tokens, ' + r.pct + '% of total, ' + runs.length + ' steps');
-    else h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost"></span></div><div class="l2">' + figs(r) + '</div></button>';
-  });
-  var dates = tot.dates;
-  h += '<div class="ufoot">' + (SYN ? 'Synthetic numbers, not a real run. ' : '') + 'Costs are estimates from the office config' + (dates.length ? ', prices checked ' + esc(dates.join(', ')) : ', where a price is set') + '. Plan runs show tokens only.' +
-    ((D.warnings || []).length ? ' <span title="' + esc(D.warnings.map(function (w) { return 'line ' + w.line + ': ' + w.message; }).join('\n')) + '">! ' + D.warnings.length + '</span>' : '') + '</div>';
-  return h;
+function rowHTML(name, r, o) {
+  var warn = r.state === 'over' ? '<span class="gl" aria-hidden="true">&#9650;</span>' : '';
+  return '<div class="ur brow' + (r.state === 'over' ? ' isover' : '') + '" role="img" aria-label="' + esc(rowSentence(name, r, o.extra)) + '">' +
+    '<div class="l1"><span class="nm">' + warn + esc(name) + '</span><span class="cost mono">' + esc(figsText(r)) + '</span></div>' +
+    '<div class="bl">' + budgetBar(r, o.key, o.colour) + budgetText(r, o.summary) + '</div>' + (o.l3 || '') + '</div>';
+}
+function budgetsHTML() {
+  var v = C.budgetView(S, D);
+  if (v.none) return '<div class="uempty">No usage yet</div><div class="ufoot">' + 'Tokens appear as the replay runs.' + '</div>';
+  var h = '', syn = v.synthetic || SYN;
+  if (USAGE_MODE === 'summary') {
+    v.providers.forEach(function (p) {
+      var who = p.set_on || p.set_by ? (p.note ? p.note : 'Budget set by ' + p.set_by) : '';
+      var l3 = '<div class="l3">' + esc(periodLabel(v)) + (who ? ' &middot; <span title="' + esc((p.set_by || '') + ', ' + (p.set_on || '')) + '">' + esc(who) + '</span>' : '') + (syn ? ' <span class="syn">synthetic</span>' : '') + '</div>';
+      h += rowHTML(shortLabel(p.label), p.row, { key: 'p:' + p.id, colour: p.colour, summary: true, l3: l3, extra: periodLabel(v).toLowerCase() + (p.note ? ', ' + p.note.toLowerCase() : '') });
+    });
+  } else {
+    v.providers.forEach(function (p) {
+      var r = p.row, hd = r.state === 'unset' ? 'budget not set' : (r.state === 'over' ? 'over by ' + fmtTok(r.over) : r.pct + '% of your budget');
+      h += '<div class="dhead"><span class="nm">' + (r.state === 'over' ? '<span class="gl" aria-hidden="true">&#9650;</span>' : '') + esc(shortLabel(p.label)) + '</span><span class="dh">' + esc(hd) + '</span></div>';
+      p.agents.forEach(function (g) {
+        if (g.kind === 'main') { h += '<div class="ur brow dim" role="img" aria-label="' + esc(g.name + ': main session, tokens not reported') + '"><div class="l1"><span class="nm">' + esc(g.name) + '</span><span class="cost">Main session: not reported</span></div></div>'; return; }
+        h += rowHTML(g.name, g.row, { key: 'a:' + p.id + ':' + g.id, colour: p.colour, summary: false, extra: shortLabel(p.label) + ', ' + periodLabel(v).toLowerCase() });
+      });
+    });
+  }
+  h += '<div class="ufoot">' + (syn ? 'Synthetic budgets, not a real run. ' : '') + 'Budgets are yours to set. Anthropic does not publish the Max plan&rsquo;s limit in tokens.</div>';
+  return '<div class="umode' + (fadeNext ? ' ufade' : '') + '">' + h + '</div>';
+}
+function usageSummary() {
+  var v = C.budgetView(S, D);
+  if (v.none) return 'No usage yet';
+  var best = null;
+  v.providers.forEach(function (p) { if (p.row.state !== 'unset' && (!best || p.row.ratio > best.row.ratio)) best = p; });
+  var tail = SYN ? ' <span class="syn" style="color:var(--text-dim);font-style:italic">synthetic</span>' : '';
+  if (best) return esc(shortLabel(best.label)) + ' ' + (best.row.state === 'over' ? '<b>&#9650; over by ' + esc(fmtTok(best.row.over)) + '</b>' : best.row.pct + '% of your budget') + tail;
+  var first = v.providers.filter(function (p) { return p.row.used > 0; })[0] || v.providers[0];
+  return esc(shortLabel(first.label)) + ' ' + esc(fmtTok(first.row.used)) + ' used, budget not set' + tail;
+}
+function segHTML() {
+  var b = function (m, t) { return '<button type="button" role="radio" data-mode="' + m + '" aria-checked="' + (USAGE_MODE === m) + '" tabindex="' + (USAGE_MODE === m ? 0 : -1) + '">' + t + '</button>'; };
+  return '<div class="vseg" role="radiogroup" aria-label="Usage view">' + b('summary', 'Summary') + b('detail', 'Detail') + '</div>';
+}
+function loadMode() { var st = null; try { st = localStorage.getItem(C.MODE_KEY); } catch (e) { /* storage blocked: this visit only */ } return C.parseMode(st); }
+function setMode(m, fromUser) {
+  m = C.parseMode(m); if (m === USAGE_MODE) return;
+  USAGE_MODE = m; fadeNext = !REDUCED;
+  if (fromUser) { try { localStorage.setItem(C.MODE_KEY, m); } catch (e) { /* ignore */ } }
+  usageKey = ''; renderUsage(); fadeNext = false;
+  var v = C.budgetView(S, D), n = v.providers.reduce(function (a, p) { return a + p.agents.length; }, 0);
+  announce(m === 'detail' ? 'Detail view, ' + n + (n === 1 ? ' agent' : ' agents') : 'Summary view, ' + v.providers.length + (v.providers.length === 1 ? ' provider' : ' providers'));
+}
+function segKey(e) {
+  var t = e.target.closest && e.target.closest('[role=radio]'); if (!t) return;
+  var k = e.key, to = k === 'ArrowLeft' || k === 'ArrowUp' || k === 'Home' ? 'summary' : (k === 'ArrowRight' || k === 'ArrowDown' || k === 'End' ? 'detail' : (k === 'Enter' || k === ' ' ? t.dataset.mode : null));
+  if (!to) return;
+  e.preventDefault(); setMode(to, true);
+  var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), b = box.querySelector('[data-mode="' + to + '"]'); if (b) b.focus();   // the old buttons were replaced by the redraw
 }
 var usageKey = '', usageCol = false, usageColSet = false;
-function usageSummary() {
-  if (REC) { var rt = C.recTotals(S).total; return rt.runs ? fmtTok(rt.tokens) + ' tokens · recorded' : 'No usage yet'; }
-  var t = C.usageTotals(S, D.providers).total, tok = t.input + t.output + t.cache_read + t.cache_write;
-  return tok ? fmtTok(t.input + t.output) + ' in+out · ' + fmtTok(t.cache_read + t.cache_write) + ' cache' : 'No usage yet';
-}
 function renderUsage() {
   if (!HAS_MODELS) return;
-  var html = usageHTML(), key = html + '|' + usageCol + '|' + $('usheet').classList.contains('open');
+  var html = budgetsHTML(), key = html + '|' + usageCol + '|' + USAGE_MODE + '|' + $('usheet').classList.contains('open');
   if (key === usageKey) return;
   usageKey = key;
-  var keep = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.acc : null;
+  var ae = document.activeElement, keep = ae && ae.dataset ? ae.dataset.mode : null;
   $('ubody').innerHTML = html;
-  $('usum').innerHTML = esc(usageSummary()) + (SYN ? ' <span class="syn" style="color:var(--text-dim);font-style:italic">synthetic</span>' : '');
+  $('usum').innerHTML = usageSummary();
+  $('useg').innerHTML = segHTML();
   $('usage').classList.toggle('col', usageCol); $('usage').classList.toggle('rec', REC);
   $('ucol').setAttribute('aria-expanded', String(!usageCol)); $('ucol').setAttribute('aria-label', usageCol ? 'Expand usage' : 'Collapse usage');
+  growBars($('ubody'));
   if ($('usheet').classList.contains('open')) fillSheet(html);
-  refocus(keep);
+  if (keep) { var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), nb = box.querySelector('[data-mode="' + keep + '"]'); if (nb) nb.focus(); }
 }
-function refocus(id) {
-  if (!id) return;
-  var box = $('usheet').classList.contains('open') ? $('usheet') : $('ubody'), b = box.querySelector('[data-acc="' + id + '"]');
-  if (b) b.focus();
+/* bars grow from where they were (160ms, off in reduced motion): the panel is redrawn as HTML, so the old width is carried over by hand */
+function growBars(box) {
+  var now = {}, todo = [];
+  box.querySelectorAll('i[data-k]').forEach(function (i) {
+    var k = i.dataset.k, w = Number(i.dataset.w); now[k] = w;
+    if (!REDUCED && lastBars[k] !== undefined && lastBars[k] !== w) { i.style.width = lastBars[k] + '%'; todo.push([i, w]); }
+  });
+  lastBars = now;
+  if (todo.length) { void box.offsetWidth; todo.forEach(function (t) { t[0].style.width = t[1] + '%'; }); }
 }
-function toggleAcc(id) { accOff[id] = !accOff[id]; usageKey = ''; renderUsage(); refocus(id); }
 function fillSheet(html) {
-  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + (REC ? '<span class="synpill">recorded</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
+  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + (REC ? '<span class="synpill">recorded</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div><div class="useg">' + segHTML() + '</div>' + html;
   $('usx').addEventListener('click', closeSheet);
 }
 function openSheet() {
   var sh = $('usheet'); sh.hidden = false; sh.classList.add('open'); $('ubtn').setAttribute('aria-expanded', 'true');
-  fillSheet(usageHTML()); usageKey = '';
+  fillSheet(budgetsHTML()); usageKey = '';
   $('usx').focus();
 }
 function closeSheet() { var sh = $('usheet'); if (sh.hidden) return; sh.classList.remove('open'); sh.hidden = true; $('ubtn').setAttribute('aria-expanded', 'false'); usageKey = ''; }
@@ -1010,11 +1067,14 @@ function initUsage() {
   document.querySelectorAll('[data-rec]').forEach(function (e) { e.hidden = !REC; });
   $('ubtn').hidden = !HAS_MODELS;
   if (!HAS_MODELS) return;
+  USAGE_MODE = loadMode();
   usageCol = innerHeight < 520 || params.get('usage') === 'collapsed';
   $('ucol').addEventListener('click', function () { usageCol = !usageCol; usageKey = ''; renderUsage(); });
   $('ubtn').addEventListener('click', function () { if ($('usheet').classList.contains('open')) closeSheet(); else openSheet(); });
-  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) {
-    var t = e.target.closest && e.target.closest('[data-acc]'); if (t) { toggleAcc(t.dataset.acc); return; } var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
+  [$('usage'), $('usheet')].forEach(function (box) {
+    box.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('.vseg [role=radio]'); if (t) setMode(t.dataset.mode, true); });
+    box.addEventListener('keydown', segKey);
+  });
   document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
 }
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
