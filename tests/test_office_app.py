@@ -144,7 +144,8 @@ class PageRules(unittest.TestCase):
         # 200 KB until T-063. The chat (panel, phone sheet, combobox, notice, status chips, parser, scan) is about 40 KB of
         # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 216 KB by Fang (about 6 KB headroom).
         # Raised to 232 KB (237,568 B) by Fang for T-067: the no-overlap placement (C.place, C.sweep, the fit glue, the chip and layer CSS)
-        # is about 15 KB of page code (published ledger page about 245 KB). The limit is our creep guard, not a platform limit;
+        # added about 14.6 KB of page code (3.5 KB estimated). Size note 26 Nov 2026: 232 KB confirmed; committed page 235,833 B (1,735 B headroom);
+        # the published ledger page (250,543 B) is not covered here and grows with runs. The limit is our creep guard, not a platform limit;
         # trimming comments again costs reviewability and a split breaks the one-file artifact. The next raise needs a split or minify decision.
         self.assertLessEqual(len(self.html.encode("utf-8")), 232 * 1024)
 

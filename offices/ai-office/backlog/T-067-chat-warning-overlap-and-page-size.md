@@ -91,6 +91,12 @@ Dinda's UX accepted, with the chip answer below. Only `engine/app/office.templat
 **Decision record draft (for the Curator).** Decision: HUD parts on desktop are placed by one pure `C.place` in priority order (sheet, focus card, usage, events) with a shrink, collapse, chip ladder; flow keeps CSS geometry and takes only states from it; phone keeps one layer at a time; page limit raised to 232 KB. Options: absolute-paint the flow layout too (one path, but rewrites T-059 defaults and golden); CSS-only (cannot handle the focus card or saved panels); chosen as above. Why: one testable rule with the smallest change to T-059 and T-066; chips reuse `#ubtn` and `#tone`.
 — Fang (architect)
 
+**Size note (Fang, 26 Nov 2026).** The 232 KB decision above was made on a +3.5 KB estimate; the build added about 14.6 KB (221,168 B to 235,796 B; Rework 1 ended at 235,833 B). Committed `office.html` is **235,833 B** against the **237,568 B** limit: **1,735 B** headroom. The published ledger page is **250,543 B** (96 events) and grows with every recorded run; the test limit does not cover it.
+- **Limit confirmed at 232 KB (237,568 B), no raise.** The page fits it after the three Review 1 fixes. Raising again now would be the "next raise" without the split or minify record, and my estimate was off by 4x, so I do not use another estimate to justify headroom.
+- **Next page change.** T-070 (about 0.6 KB) fits: it must land within the 1,735 B and report its real bytes; if it comes in over, it trims in the same PR, no raise. T-069 moves the usage data out of the page: that shrinks the published page (and stops its growth with runs), but the committed page is built from the fixture, so it does not add committed headroom. After T-070, any change that would pass 237,568 B needs the split or minify decision record first (Architect, then Curator), before build.
+- `test_size_limit` comment updated to these numbers; the asserted limit is unchanged.
+— Fang (architect)
+
 ## Build notes
 **What changed** (only `engine/app/office.template.html`, the rebuilt `engine/app/office.html` and `tests/test_office_app.py`; no Python, no new files).
 - `C.place(b, parts)` and `C.sweep(from, to, obstacles)` in `OfficeCore`, pure, as in the Design. Ladder: slide (vertical first, then sideways) -> shrink into the largest free gap -> collapse (usage, then events) -> chip (lowest failing). A collapsed part never shrinks below its collapsed height. Inputs are never mutated and `place(out) = out`.
