@@ -2,7 +2,7 @@
 id: T-070
 title: "Count the main session's own tokens in the usage ledger"
 phase: 6-office
-status: build
+status: review
 priority: P2
 owner: reviewer
 where: code
