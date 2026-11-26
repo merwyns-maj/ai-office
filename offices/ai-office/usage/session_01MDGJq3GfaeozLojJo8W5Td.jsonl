@@ -34,3 +34,8 @@
 {"n": 33, "sprint": 6, "agent": "reviewer", "tasks": ["T-056"], "step": "review", "tokens": 106835, "tool_uses": 44, "duration_ms": 376733}
 {"n":34,"sprint":7,"agent":"pm","tasks":["T-057"],"step":"spec","tokens":32816,"tool_uses":8,"duration_ms":22574}
 {"n":35,"sprint":7,"agent":"designer","tasks":["T-057"],"step":"ux","tokens":33756,"tool_uses":4,"duration_ms":25956}
+{"n":36,"sprint":7,"agent":"architect","tasks":["T-057"],"step":"design","tokens":84456,"tool_uses":11,"duration_ms":200747}
+{"n":37,"sprint":7,"agent":"engineer","tasks":["T-057"],"step":"build","tokens":201468,"tool_uses":72,"duration_ms":647421}
+{"n":38,"sprint":7,"agent":"reviewer","tasks":["T-057"],"step":"review","tokens":84344,"tool_uses":36,"duration_ms":330276}
+{"n":39,"sprint":7,"agent":"engineer","tasks":["T-057"],"step":"rework","tokens":221942,"tool_uses":14,"duration_ms":140310,"note":"resumed agent (SendMessage); the harness figure may include the earlier build run, so the two may overlap"}
+{"n":40,"sprint":7,"agent":"reviewer","tasks":["T-057"],"step":"review","tokens":105174,"tool_uses":8,"duration_ms":113655,"note":"resumed agent (SendMessage); the harness figure may include the earlier review run, so the two may overlap"}
