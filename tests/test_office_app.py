@@ -455,10 +455,10 @@ if (mode === 'sprint3') {
   assert.strictEqual(C.opacityStep(40), 40); assert.strictEqual(C.opacityStep(150), 92); assert.strictEqual(C.opacityStep('9'), 92); assert.strictEqual(C.opacityStep(NaN), 92);
   assert.strictEqual(C.rectSentence('Usage', { x: 120, y: 80, w: 300, h: 240 }), 'Usage panel at 120, 80, size 300 by 240.');
   // saved state: valid, then every kind of corrupt storage falls back without throwing
-  const good = { usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, ticker: { x: 900, y: 500, w: 260, h: 150, o: 0 }, chat: null };
+  const good = { usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, ticker: { x: 900, y: 500, w: 260, h: 150, o: 0 } };
   assert.deepStrictEqual(C.parseLayout(JSON.stringify(good)), good);
   assert.deepStrictEqual(C.parseLayout(C.serializeLayout(good)), good);
-  const none = { usage: null, ticker: null, chat: null };   // T-063 added the chat panel id
+  const none = { usage: null, ticker: null };   // T-066: the chat docks, it is no longer a panel id
   [null, undefined, '', 'null', '{', '[1,2]', '"x"', '42', 'true', '{"usage":5}', '{"usage":[]}', '{"usage":{}}', '\u0000￾'].forEach(x => assert.deepStrictEqual(C.parseLayout(x), none, String(x)));
   const bad = v => JSON.stringify({ usage: Object.assign({}, good.usage, v), ticker: good.ticker });
   [{ x: 'a' }, { y: null }, { w: 239 }, { w: 521 }, { h: 119 }, { x: 1e9 }, { w: NaN }, { h: -5 }].forEach(v => {
@@ -470,6 +470,54 @@ if (mode === 'sprint3') {
   const big = C.parseLayout(JSON.stringify({ usage: { x: 5000, y: 5000, w: 520, h: 9000 } })).usage;
   assert.ok(inside(C.clampRect(big, C.panelBounds(1000, 600, 56)), C.panelBounds(1000, 600, 56)));
   console.log('layout ok');
+} else if (mode === 'dock') {
+  /* T-066: chat dock height, panel bounds above the dock, saved-state parsing */
+  const K = C.chatDock, H = C.chatH;
+  assert.deepStrictEqual(C.PANEL.IDS, ['usage', 'ticker']);
+  // default: 38% desktop, 40% phone; invalid or absent = default
+  [undefined, null, NaN, Infinity, -5, 0, '300', {}, []].forEach(x => assert.strictEqual(H(x, 800, 112, false, 0), 304, String(x)));
+  assert.strictEqual(H(undefined, 844, 212, true, 0), 338);
+  // clamp: min 180; max keeps the office strip (240 desktop, 160 phone)
+  assert.strictEqual(H(50, 800, 112, false, 0), 180);
+  assert.strictEqual(H(9999, 800, 112, false, 0), 800 - 112 - 240);
+  assert.strictEqual(H(9999, 844, 212, true, 0), 844 - 212 - 160);
+  assert.strictEqual(H(400, 800, 112, false, 0), 400);
+  // a window too short for the minimum office strip: the chat minimum wins
+  assert.strictEqual(H(400, 420, 112, false, 0), 180); assert.strictEqual(H(undefined, 300, 112, true, 0), 180);
+  // keyboard up: the chat takes all room under the chrome (never below its minimum)
+  assert.strictEqual(H(300, 844, 212, true, 330), 844 - 330 - 212);
+  assert.strictEqual(H(300, 500, 212, true, 400), 180);
+  assert.strictEqual(H(300, 844, 212, true, 0), 300); assert.strictEqual(H(300, 844, 212, true, NaN), 300);
+  // need (T-066 rework): the minimum rises to what grip + header + notice + composer + 2 thread lines take, so nothing is clipped
+  assert.strictEqual(H(undefined, 844, 212, true, 0, 412), 412); assert.strictEqual(H(50, 844, 212, true, 0, 412), 412);
+  assert.strictEqual(H(9999, 844, 212, true, 0, 412), 472); assert.strictEqual(H(50, 800, 112, false, 0, 255), 255);
+  assert.strictEqual(H(50, 800, 112, false, 0, 100), 180);   // a small need never lowers the 180 minimum
+  [undefined, NaN, 'x', -1].forEach(n => assert.strictEqual(H(50, 800, 112, false, 0, n), 180));
+  assert.strictEqual(H(50, 500, 212, true, 0, 412), 412);   // window too short: the need wins over the office strip
+  assert.strictEqual(H(300, 844, 212, true, 330, 412), 412);
+  assert.ok(K.LINES >= 56);
+  // panels: bounds end above the dock; a saved rect below it clamps up, the input rect is not changed
+  const B0 = C.panelBounds(1280, 800, 56), B1 = C.panelBounds(1280, 800, 56, 304);
+  assert.deepStrictEqual(B0, { left: 8, right: 1272, top: 56, bottom: 736 });
+  assert.deepStrictEqual(B1, { left: 8, right: 1272, top: 56, bottom: 432 });
+  assert.deepStrictEqual(C.panelBounds(1280, 800, 56, NaN), B0); assert.deepStrictEqual(C.panelBounds(1280, 800, 56, 'x'), B0);
+  const saved = { x: 900, y: 500, w: 260, h: 150 }, keep = JSON.stringify(saved), c = C.clampRect(saved, B1);
+  assert.strictEqual(JSON.stringify(saved), keep);
+  assert.ok(c.y + c.h <= B1.bottom && c.y >= B1.top, JSON.stringify(c));
+  assert.deepStrictEqual(C.clampRect(saved, B0), saved);   // chat closed: it is back where the viewer put it
+  const tall = C.clampRect({ x: 10, y: 60, w: 300, h: 600 }, B1); assert.ok(tall.y + tall.h <= B1.bottom && tall.h >= C.PANEL.MIN_H);
+  // layout storage: a chat entry is ignored on load and absent from the next save
+  const lay = C.parseLayout(JSON.stringify({ usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, chat: { x: 1, y: 1, w: 300, h: 300, o: 50 } }));
+  assert.strictEqual(lay.chat, undefined); assert.deepStrictEqual(Object.keys(lay).sort(), ['ticker', 'usage']);
+  assert.ok(!('chat' in JSON.parse(C.serializeLayout(Object.assign({}, lay, { chat: { x: 1, y: 1, w: 300, h: 300, o: 50 } })))));
+  // office.chat.v1: corrupt JSON, missing or bad h, T-063-era objects
+  const P = C.chat.parseSt, d0 = { open: false, seen_at: '', ack: false };
+  [null, undefined, '', '{', '[1]', '"x"', '42', 'null', '\u0000'].forEach(x => assert.deepStrictEqual(P(x), d0, String(x)));
+  assert.deepStrictEqual(P('{"open":true,"seen_at":"2026-01-01T00:00:00Z","ack":true}'), { open: true, seen_at: '2026-01-01T00:00:00Z', ack: true });
+  assert.strictEqual(P('{"open":true,"h":312}').h, 312);
+  ['"a"', 'null', '-1', '0', '[300]', '1e999', 'true'].forEach(v => assert.ok(!('h' in P('{"h":' + v + '}')), v));
+  assert.deepStrictEqual(P('{"seen_at":5,"open":1}'), { open: true, seen_at: '', ack: false });
+  console.log('dock ok');
 } else if (mode === 'chat') {
   /* T-063: pure chat logic; the same fixtures are read by tests/test_chat.py */
   const X = JSON.parse(fs.readFileSync(process.argv[4], 'utf8')), K = C.chat, A = D.chat.agents;
@@ -580,6 +628,35 @@ class CoreUnderNode(unittest.TestCase):
 
     def test_panel_layout_maths(self):
         self.assertIn("layout ok", self.node(str(HTML), "layout"))
+
+    def test_chat_dock_maths_under_node(self):
+        self.assertIn("dock ok", self.node(str(HTML), "dock"))
+
+    def test_chat_is_docked_not_a_panel(self):
+        html = HTML.read_text(encoding="utf-8")
+        self.assertIn("@property --chat-h", html)
+        self.assertRegex(html, r'<section id="chat" class="panel" ')          # no .pp: not a movable panel
+        self.assertRegex(html, r'id="chgrip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize chat"')
+        self.assertLess(html.index('<footer id="bar">'), html.index('<section id="chat"'))   # DOM order: stage, bar, chat
+        self.assertIn('aria-controls="chat"', html)
+        self.assertNotIn("inset:0;width:auto;height:auto", html)               # the phone sheet is gone
+        # nothing is anchored to the bar alone: every bottom offset from the bar carries the dock height
+        self.assertEqual(re.findall(r"bottom:calc\(var\(--bar\)[^)]*\)", html), [])
+        self.assertNotIn("bottom:var(--bar)", html)
+
+    def test_chat_notice_is_pinned_outside_the_scroll_area(self):
+        # Review 1 of T-066: the needs-ack C3 notice sat inside the scroller and was cut off. It must stay a fixed block above the thread.
+        html = HTML.read_text(encoding="utf-8")
+        chat = html[html.index('<section id="chat"'):html.index('<div id="live"')]
+        self.assertLess(chat.index('id="cnotice"'), chat.index('id="cmid"'))
+        self.assertLess(chat.index('id="chgrip"'), chat.index('id="cnotice"'))
+        self.assertLess(chat.index('id="cmid"'), chat.index('id="cform"'))
+        self.assertNotIn('id="cnotice"', chat[chat.index('id="cmid"'):chat.index('id="cform"')])
+        css = html[:html.index("</style>")]
+        self.assertRegex(css, r"\.cnotice\{[^}]*flex:none")
+        self.assertNotRegex(re.search(r"#cmid\{[^}]*\}", css).group(0), r"overflow")   # no inner scroll that could hide the notice
+        self.assertRegex(css, r"\.cwrap\{[^}]*min-height:56px")                         # two thread lines at least
+        self.assertIn("C.chatH(CS.st.h, innerHeight, chrome, phone, kb, need)", html)       # the dock minimum follows the measured parts
 
     def test_chat_logic_under_node(self):
         with tempfile.TemporaryDirectory() as tmp:
