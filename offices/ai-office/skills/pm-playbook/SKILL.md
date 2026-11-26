@@ -13,6 +13,8 @@ Sprint 1 lesson: a spec was written without its parent tasks because Glob and Gr
 3. If a parent still cannot be read, stop. Write nothing under Spec. Tell the PMO which ids you could not read and ask for the paths or the pasted text.
 4. Under Open questions, add one fact line naming any tool that was missing.
 
+Lean path (T-068): a task with a PMO `> Lean (...)` note has no PM run (the Architect writes the short Spec). If you get one anyway, or a `> Full path (...)` note sent it back to `spec`, write the full Spec. Example of the cost it avoids: T-066, 7 runs, about 520k tokens.
+
 ## 1. Problem before solution
 - Start from who is affected and what goes wrong today. If you can't say it in two sentences, the task is not ready: split it or send it back to Janice.
 - Describe the outcome, not the implementation. Leave the how to Fang and Sebastian.

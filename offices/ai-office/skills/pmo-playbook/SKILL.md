@@ -19,6 +19,12 @@ The office exists to finish the backlog's most valuable work, not to produce pro
 5. Move chosen tasks to `spec`, owner `pm`; give the PM exact backlog paths for each task and its parents (pm-playbook §0).
 6. Commit the regenerated board.md and the sprint file in a board-refresh PR (pr-workflow, "board.md (generated)").
 
+## 2a. Lean path (T-068)
+- When: all four hold, judged from the task file: one surface (one page or one module plus its tests), no new data or storage, no compliance flag, no `human_gates` item. Only for `where: code` or `repo` in this office's project.
+- Who decides: the PMO, at plan. Append `> Lean (<name>, pmo, <date>): <one surface>; no new data; no compliance flag; no human gate. Reason: <why>`, then move the task to `design`, owner `architect`. The PM run is skipped; the Architect writes a short Spec (problem, in/out, Done when) and the Design in one run.
+- Escape: the Architect, Reviewer or PMO appends `> Full path (<name>, <agent>, <date>): <condition that failed>`; the PMO sets status `spec`, owner `pm`. The last Lean/Full note wins. `python -m engine.runtime validate` checks the Lean note against the task text.
+- Still true: the PMO approves the Spec, Reviewer PASS is required, the PMO merges. Example: T-066 took 7 runs and about 520k tokens on the full path. At sprint close, compare the first lean task's ledger runs and tokens with T-066 and write it in the sprint file.
+
 ## 3. Flow, not busyness
 - **WIP limits:** at most 2 tasks in `build`, 1 in `design` per Architect. Finish before starting.
 - Watch three numbers from the board: **WIP** (items started, not done), **cycle time** (days from `spec` to `done`), **item age** (days an open item has sat in its current stage). They are linked: more WIP means longer cycle time.
@@ -75,6 +81,8 @@ Merwyn messages the office from the 3D office page (the AI Office artifact). The
 11. Crash and one session: the claim is the lock; a recipient stuck at `picked` or `replying` for over 30 minutes with no reply doc is reset to `new` by the next `chat plan`, and a reply doc without a status is repaired from it. One office session processes the inbox at a time; T-024 must keep that.
 
 **Publish (T-065).** There is one published page and one artifact: "AI Office" (5f1bb811-1633-4bfb-8285-9bcb2408dec2). It shows the real usage ledger and the chat. The single build command is `python scripts/office_app.py ai-office --ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`, which writes `engine/app/usage-session_01MDGJq3GfaeozLojJo8W5Td.html` (gitignored, never committed). Call `declare_capabilities` (`db`, `user`) first, then publish that file to "AI Office" (with `three.min.js` as a sibling, or rely on the CDN fallbacks). Republish after a ledger append you want shown: the page is the ledger as of its build. Record the build's printed size in KB. The committed `engine/app/office.html` is the synthetic dev build for tests and is never published. The "AI Office token usage" artifact is retired: delete it only when Merwyn confirms.
+
+**Phone check (T-071).** After a merged UI change is published, ask Merwyn to run `skills/phone-check` and name his phone and browser. Record his reply in that task's Review log as `Merwyn (human), phone check <date WIB>, <phone/browser>: PASS | FAIL step N: <his words>`. It does not replace Reviewer PASS. A FAIL does not reopen the done task: open a new task at `todo` quoting the failed step and linking the original. A Review log line is not planning-only, so it goes into the next `t-xxx` PR (on a FAIL, the follow-up task's PR). Follow-up: when T-067 (panels never overlap) merges, its Design adds a no-overlap step to `skills/phone-check`.
 
 ## Anti-patterns
 - Reporting only Green. Treating RAG as a weapon instead of a signal.
