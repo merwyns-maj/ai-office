@@ -4,7 +4,7 @@ title: "Budget bars: green, yellow, red as usage nears the budget"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-060]
@@ -71,7 +71,7 @@ What changed
 - `engine/runtime/budgets.py`: optional top-level `thresholds: { warn_at, alert_at, set_by, set_on }`, validated 0 < warn_at < alert_at <= 100 (numbers, bools rejected), set_by and set_on required, unknown keys rejected. Absent gives 70 and 90 marked set_by "default". Resolved data carries `thresholds`.
 - `offices/ai-office/budgets.yaml`: thresholds 70 / 90, set by Janice (pmo), 2026-11-26. `theme/theme.yaml`: new palette token `near: "#f0e04a"` (Dinda's yellow); ok uses `accent`, alert uses `bad` (fill) and `bad_text` (text). No hex in the template rules.
 - `office.template.html` (office-core): `budgetLevel(pct, over, th)` and `row.level` (unset, ok, near, alert, over), pure and node-tested. The level uses the rounded % the text shows, so a row reading "70%" is always yellow. Bad or missing thresholds fall back to 70/90.
-- View: bar fill follows level (not provider; provider chip colours untouched, dashed "budget not set" track untouched); % text coloured; word "near budget" / "at limit" after the % (own span so it wraps below on the phone sheet); over keeps "over by X", triangle and hatch, now red; Detail provider header and collapsed line take the level colour and word; aria-label appends ", near budget" / ", at limit" (over keeps "over budget by X"); no colour names.
+- View: bar fill follows level (not provider; provider chip colours untouched, dashed "budget not set" track untouched); % text coloured; word "near budget" / "at limit" after the % (own span so it wraps below on the phone sheet); over keeps "over by X", triangle and hatch, now red; Detail provider header takes the level colour and word; the collapsed line's % / "over by X" text takes the state colour via `.usum .lv-ok/.lv-near/.lv-alert/.lv-over` (added in rework after Review 1; first version only coloured the trailing word, the % and over text stayed plain); aria-label appends ", near budget" / ", at limit" (over keeps "over budget by X"); no colour names.
 - Docs: `engine/schema/usage.md`. `office.html` regenerated.
 - Deviation from the design: none. One note: the 100% case below over ("at budget", 99.5 to 100%) reads "at limit". The old T-060 test that bans amber/red on the hatch still passes (hatch uses the text colour).
 
@@ -119,3 +119,9 @@ Notes (not reasons for the reject)
 ## Decision
 
 ## Open questions
+
+### Rework 1 (Sebastian)
+- Added `.usum .lv-ok`, `.lv-near`, `.lv-alert,.lv-over` rules from `--accent`, `--near`, `--bad-text`; new test `test_collapsed_summary_line_text_takes_the_state_colour`; office.html regenerated; recorded page rebuilt.
+- Measured on collapsed line at 1280x800 (temp budgets copy): near "84% of your budget" `rgb(240,224,74)` with "near budget" word; over "over by 26k" `rgb(255,107,107)`. Screenshots /tmp/t062-shots/rework-near.png, rework-over.png (3D area blank there: temp copy had no three.js; irrelevant to the line).
+
+— Sebastian (engineer)

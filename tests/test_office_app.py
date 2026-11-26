@@ -714,6 +714,12 @@ class Recorded(unittest.TestCase):
         self.assertNotRegex(text, r"\.(bar i|bx|bw|dh)[^{]*\.lv-[^{]*\{[^}]*(--warn|#f4a261)")   # budget states never use the amber
         self.assertNotRegex(text, r"\.bar i\.lv[^{]*\{[^}]*#")                                    # no hard-coded hex in the template rules
 
+    def test_collapsed_summary_line_text_takes_the_state_colour(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        for cls in (".usum .lv-ok{color:var(--accent)}", ".usum .lv-near{color:var(--near)}",
+                    ".usum .lv-alert,.usum .lv-over{color:var(--bad-text)}"):
+            self.assertIn(cls, text)
+
     def test_state_word_and_aria_label_carry_the_level(self):
         text = TEMPLATE.read_text(encoding="utf-8")
         self.assertIn("near: 'near budget', alert: 'at limit'", text)
