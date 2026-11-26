@@ -34,3 +34,5 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 
 ## Budgets (T-060)
 The usage panel compares these totals with `offices/<office>/budgets.yaml` (per provider, and per agent inside a provider; format and rules in `engine/runtime/budgets.py`). A budget is set by Merwyn or whoever he names, every value has `set_by` and `set_on`, and the page never invents one: no budget reads "budget not set". Period today: the session.
+
+Colour (T-062): `budgets.yaml` may carry `thresholds: { warn_at, alert_at, set_by, set_on }` (percent of a budget, `0 < warn_at < alert_at <= 100`, defaults 70 and 90). The rounded % the page shows picks the level: below `warn_at` green, from `warn_at` yellow with the word "near budget", from `alert_at` red with "at limit", over budget red with "over by X". The level is also in each row's aria-label. Colours are theme palette tokens (`accent`, `near`, `bad`, `bad_text`).

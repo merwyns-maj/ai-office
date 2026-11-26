@@ -117,6 +117,49 @@ class Parsing(unittest.TestCase):
             self.assertEqual(len(p), 1)
 
 
+class Thresholds(unittest.TestCase):
+    """T-062: warn_at and alert_at, 0 < warn_at < alert_at <= 100, with who and when."""
+    T = dict(warn_at=70, alert_at=90, set_by="Merwyn", set_on="2026-11-26")
+
+    def with_t(self, **kw):
+        d = good()
+        d["thresholds"] = dict(self.T, **kw)
+        return d
+
+    def test_defaults_when_absent(self):
+        r, p = resolve(good())
+        self.assertEqual(p, [])
+        self.assertEqual(r["thresholds"], {"warn_at": 70, "alert_at": 90, "set_by": "default", "set_on": None})
+
+    def test_valid_pair_is_kept_with_who_and_when(self):
+        r, p = resolve(self.with_t(warn_at=50, alert_at=100))
+        self.assertEqual(p, [])
+        self.assertEqual(r["thresholds"], dict(self.T, warn_at=50, alert_at=100))
+        self.assertEqual(resolve(self.with_t(warn_at=0.5, alert_at=99.5))[1], [])
+
+    def test_bad_values_are_rejected(self):
+        for kw in (dict(warn_at=0), dict(warn_at=-1), dict(warn_at=90), dict(warn_at=95), dict(alert_at=101), dict(alert_at=70),
+                   dict(warn_at="70"), dict(alert_at=None), dict(warn_at=True), dict(alert_at=[90])):
+            r, p = resolve(self.with_t(**kw))
+            self.assertIsNone(r, kw)
+            self.assertIn("0 < warn_at < alert_at <= 100", " ".join(p), kw)
+
+    def test_who_when_and_keys_are_required(self):
+        d = self.with_t(); del d["thresholds"]["set_by"]
+        self.assertIn("set_by is required", " ".join(resolve(d)[1]))
+        self.assertIn("set_on is required", " ".join(resolve(self.with_t(set_on="soon"))[1]))
+        self.assertIn("unknown key", " ".join(resolve(self.with_t(extra=1))[1]))
+        d = good(); d["thresholds"] = 70
+        self.assertIn("thresholds: must be a map", " ".join(resolve(d)[1]))
+
+    def test_shipped_file_carries_70_and_90_set_by_janice(self):
+        cat, _ = providers.load_providers(OFFICE)
+        ids = {a["id"] for a in miniyaml.loads((OFFICE / "org.yaml").read_text(encoding="utf-8"))["agents"]}
+        r, p = budgets.load_budgets(OFFICE, agents=ids, providers=set(cat))
+        self.assertEqual(p, [])
+        self.assertEqual(r["thresholds"], {"warn_at": 70, "alert_at": 90, "set_by": "Janice (pmo)", "set_on": "2026-11-26"})
+
+
 class ShippedFile(unittest.TestCase):
     def setUp(self):
         cat, _ = providers.load_providers(OFFICE)
