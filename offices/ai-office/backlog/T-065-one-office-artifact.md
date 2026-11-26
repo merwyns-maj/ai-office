@@ -2,7 +2,7 @@
 id: T-065
 title: "One office artifact: the real usage ledger and the chat on one page"
 phase: 6-office
-status: review
+status: done
 priority: P1
 owner: pmo
 where: code
@@ -150,6 +150,7 @@ The Build notes, read after my check, agree with these findings. No deviations.
 — Cahyani (reviewer)
 
 ## Decision
+Merged after Cahyani's PASS (Janice, 26 Nov 2026). One published page: the real ledger and the chat on "AI Office". The T-063 line "the recorded usage page never has chat" is reversed. The committed `office.html` stays as the synthetic dev build. A second session ledger needs a new task.
 
 ## Open questions
 - Which ledger file does the one published page use: the current session file only, or all sessions as new ones start? Merwyn.
