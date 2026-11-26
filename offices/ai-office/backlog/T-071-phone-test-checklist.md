@@ -2,9 +2,9 @@
 id: T-071
 title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
-status: review
+status: build
 priority: P2
-owner: reviewer
+owner: engineer
 where: repo
 project: ai-office
 depends_on: []
@@ -83,6 +83,27 @@ Reply: "phone check pass", or "fail step N: what you saw", plus phone and browse
 — Sebastian (engineer)
 
 ## Review log
+**Review 1: REJECT** (26 Nov 2026). — Cahyani (reviewer)
+Checked `git diff main...HEAD`, `skills/phone-check/SKILL.md`, the pmo-playbook paragraph, and `engine/app/office.template.html` (T-066 build), plus a headless Chrome screenshot of the committed `office.html` at 390x844.
+
+| Done when | Result | Evidence |
+|---|---|---|
+| 1. Under 12 steps, each with Expect, every area named | pass | 10 numbered steps, each **Do/Expect**; open page, office, usage, chat open/close, handle, keyboard, panels, usage again all named |
+| 2. About 2 minutes, timed once | not possible | no real phone here. Estimate: 10 short steps, about 2 min, plausible |
+| 3. Playbook: when, who, where | pass | pmo-playbook "Phone check (T-071)": after a merged UI change is published; Merwyn; the task's Review log in a fixed note format. A FAIL opens a new `todo` task that quotes the step and links the original |
+| 4. Matches T-066; no step relies on a missing feature | **fail** | see F1, F2 |
+| 5. Tests and validate pass; no other file changes | pass | `python -m unittest discover -s tests`: "Ran 411 tests ... OK", exit 0. `python -m engine.runtime validate ai-office`: "ai-office: OK — 8 agents, 5 stages, 71 tasks, 19 skills", exit 0. T-071's own files are the skill, the playbook and this task. T-024 rides along, planning only |
+
+**Fixes needed**
+- F1 (steps 3, 6, 10 describe the desktop page, not the phone). At `max-width:899px` the template has `#usage{display:none}` and `#ticker{display:none}` (lines 272-273). On a phone, latest events is the one-line `#tone` strip above the bar. At under 600 px, usage opens only from the Settings gear: `#bar .opt{display:none}` hides `#ubtn`, and the gear's `#msheet` holds the "Usage" button that opens `#usheet` (line 1469). My 390x844 screenshot shows no usage panel and no events panel, only the tone strip, the bar and the gear. So step 3 ("read the usage panel") and step 10 cannot be done as written, and step 6 ("look at the usage and latest-events panels") has nothing to look at. Rewrite these for the phone: open Settings, then Usage, and expect the usage sheet's contents; for events, check the tone strip shows above the bar and is not under the chat.
+- F2 (step 6 "not on top of each other" is T-067's rule). Panels never overlapping each other is T-067's Done when, and T-067 is still at `spec`. It comes from Merwyn's 18:48 report that the panels overlap when chat is expanded. T-066 only clamps panels to the stage. A step that expects it would fail on a known open issue and, under the new playbook rule, open a duplicate of T-067. Either drop the "each other" part until T-067 is merged (T-067's Design then adds it back), or mark it "after T-067".
+
+**Notes (not reasons for rejection)**
+- Step 4 says "tap Chat". At under 600 px the button shows only an icon (`#chatbtn .cl{display:none}`), so "tap the chat (speech-bubble) button" would be clearer.
+- Step 2 "agents ... with names": at under 600 px the top strip shows initials (`.seg .nm` hidden). Check that the names the step means are the 3D labels.
+- Step 10 "same numbers as step 3" holds today because the page is the ledger as of its build. T-069 (usage from the artifact db) may change that; T-069's Design should name this step.
+- Build-notes deviation (a separate paragraph, not "§9 Publish, 3 lines") is fine: the playbook has no numbered sections.
+- External skills design:accessibility-review and data:validate-data: not available in this session; not used.
 
 ## Decision
 

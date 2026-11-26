@@ -94,6 +94,7 @@ Open for legal, not Wulan: whether lending personal data may ever be processed h
 ## Build notes
 
 ## Review log
+- Ride-along check on PR #65 (26 Nov 2026): planning only. The diff touches only this task file, and nothing is created or spent. Gates 1-6 are listed for Merwyn, and Wulan's K1-K6 and A/B/C conditions match the Design. No company data. Notes: (a) the Open questions have no item for gate 4 (may the runtime push to merwyns-maj/ai-office); there is only one for other repos. (b) The Design's first step builds the FakeProvider and then Merwyn picks, but Janice's note says the build starts once gate 1 is picked; say which order holds. (c) "Parked" is a terminal status, but frontmatter still says `design`/`pmo`. (d) Option C is a Compliance BLOCK, which is a human gate; it is already covered by gates 2, 3 and 5. — Cahyani (reviewer)
 
 ## Decision
 
