@@ -2,9 +2,9 @@
 id: T-066
 title: "Chat as a docked section below the office; the office resizes"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-065]
@@ -111,6 +111,42 @@ Dinda's UX accepted as written. Only `engine/app/office.template.html` and `test
 — Sebastian (engineer)
 
 ## Review log
+**Review 1 (26 Nov 2026): REJECT.** One spec failure, on the C3 notice. Everything else passes.
+
+Commands run on `t-066-chat-dock` at 5d4ae9e:
+- `python -m unittest discover -s tests`: `Ran 388 tests ... OK`, exit 0.
+- `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 66 tasks, 18 skills`, exit 0.
+- `python scripts/office_app.py ai-office --chat --check`: `engine/app/office.html: up to date (215 KB, 84 events)`, exit 0.
+- Size: `git show HEAD:engine/app/office.html | wc -c` gives 220777. `test_size_limit` is still `216 * 1024` (221,184) and the diff does not touch it, so the 407 B headroom is real. Published build (`--ledger ...session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat --out /tmp/...`): exit 0, 228,127 B. No size test covers it, same as before this PR.
+- Headless Chromium (Playwright, software GL, dpr 1). I used my own harness and stub `claude` under /tmp, and wrote it before reading the Build notes. Screenshots were not committed. Checks come from `getBoundingClientRect`. Each case checks: chat is full width (l=0, r=vw); chat top >= bar bottom >= stage bottom; usage, ticker and tone bottoms are above the chat top and inside the stage; canvas buffer = stage client size; `scrollHeight == innerHeight`; `scrollY == 0`; no console errors or page exceptions.
+
+Done-when checks:
+1. Full width below the office, nothing under it, at 1280x800 and 390x844: **pass**. 1280: closed stage 688; open 304/384; keys +32, Shift -64, End 448/240, Home 180/508, Enter back to 304. Drag +100 gives 404 and saves `h:404`. Dragging to the top clamps at 448. 390: closed 632; open 338/294; End 472/160; Home 180/452; drag gives 438. Every case was OK.
+2. Canvas resizes with no distortion and no page scroll; full height again when closed: **pass**. The buffer matched the stage size in every case. Mid-open (60 ms, `--chat-h` 370.9px) `scrollHeight` was 800 = innerHeight. Closing gives back 688 and 632.
+3. Panels stay visible and usable; saved positions do not push them off screen: **pass**. With a saved layout of usage (900,500) and ticker (100,560), plus a stale `chat` entry, the panels moved up above the dock when open (bottoms 432 at default, 288 at max). After Escape they were back at exactly (900,500) and (100,560), and the stored `office.layout.v1` was not rewritten. Window 1280x560 open gives 208/240; back at 800 the saved 448 is restored.
+4. Bottom bar visible and its buttons work, open and closed: **pass**. An `elementFromPoint` hit test on every visible bar button gave true for all, at both sizes, open and closed.
+5. Reload restores open or closed; first visit is closed: **pass**. On first visit `office.chat.v1` is null and the chat is closed. Reload keeps open at 448, or closed.
+6. Keyboard, focus and screen reader behaviour from T-063: **pass**. After acknowledgement, opening focuses `ctext`. Before it, focus stays on the Chat button, as on main, because the composer is disabled. Escape and × return focus to `chatbtn`, and `aria-expanded` flips. Escape inside the mentions list closes only the list. Grip `aria-valuemin/max/now` = 180/448/304 (desktop) and 180/472/338 (phone).
+7. T-063 features, C1-C8, tests and screenshots: **fail on the notice (C3 surface)**. Mentions list (9 items, inside the chat, never under the bar), per-recipient chips ("needs you", "answered", "is replying", "waiting for ... to pick up"), the needs-you amber edge, the pill and "Show Fang in the office" (focus card 60-292 inside the stage, bottom 296), the blocked 16-digit send ("This looks like personal data or a secret (16-digit run). Not sent."), the empty, nodb and "office not running" states, the footnote and Clear chat all render. The published page and the no-chat page have no errors.
+   **The failure: on first visit the notice and its "I understand" button are no longer fully visible.** They now sit inside the `#cmid` scroller, which is not scrolled to them.
+   - 390x844 at the default height: `#cmid` shows y 599-735. The notice spans 684-812 and its button 776-803. The text is cut mid-sentence and the button cannot be seen. The composer is disabled until acknowledgement, so a first-time phone user sees a disabled box and no way forward unless they find a thin inner scroll.
+   - 1280x800 at the default height: the button spans 686-713 against a visible bottom of 701, so it is half hidden.
+   - On main (T-063) at both sizes, the notice and button were fully visible on first open: 1280 button 587-615 above the form at 630; 390 button 691-719 above the form at 734.
+   - At min height (180) `#cmid` is 22 px tall on desktop and **0 px on phone**. The thread, note and notice cannot be seen at all, and on the phone they cannot be scrolled to. That also misses Dinda's definition of the minimum: "header, 2 thread lines, composer".
+   No C1-C8 logic changed. The scan, the ack gate (composer stays disabled), the notice and footnote text, storage and agents are untouched in the diff. The comments trimmed for size are explanatory only. But the C3 notice is no longer shown as it was in T-063, which the spec's "notice ... behave as in T-063" rules out.
+
+**Fixes needed (back to build):**
+1. While the notice still needs acknowledgement (`ack` false), the full notice text and "I understand" must be visible without inner scrolling at the default height at 1280x800 and 390x844. For example, keep the needs-ack notice outside `#cmid` as a `flex:none` block like the composer, or scroll it into view whenever it renders in the `need` state.
+2. At minimum height the middle area must show at least two thread lines on both sizes (Dinda's min). The needs-ack notice must stay reachable there too. Options: raise `C.chatDock.MIN`, or derive it from the measured header plus composer, or compact the header and composer at small heights. Update the `dock` node tests if MIN changes.
+3. Add a headless or node-level assertion that fails if, on first open, the needs-ack notice button is outside `#chat`'s visible box.
+
+**Non-blocking notes**
+- Two lines keep trailing spaces where comments were removed: `function dockEnd() {   ` and `function dockLayout(anim) {   `.
+- Some comments removed for size explained real edge cases: `fmtTok` rounding ("2,150,000 reads 2.2M"), the `nameCol` 4.5:1 rule, and the "clamped in memory only: storage is untouched" note in `applySaved`. Consider restoring the `fmtTok` and `applySaved` ones once there is room.
+- With 407 B left, the next page change will need either a limit raise or more trimming. Please state the number when that happens.
+- Reopening during the 140 ms close motion keeps the `cc` (ease-in) class until `dockEnd`. This is cosmetic.
+- External skills `design:accessibility-review` and `data:validate-data` are not available in this session. I did the accessibility checks by hand (above).
+— Cahyani (reviewer)
 
 ## Decision
 
