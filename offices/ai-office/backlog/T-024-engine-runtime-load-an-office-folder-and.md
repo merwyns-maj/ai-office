@@ -2,7 +2,7 @@
 id: T-024
 title: "Engine runtime: load an office folder and run its agents on the Agent SDK"
 phase: 6-office
-status: design
+status: parked
 priority: P1
 owner: pmo
 where: code
@@ -89,7 +89,7 @@ Option C (hosted service): BLOCK for any real chat or credential until gates 2, 
 Open for legal, not Wulan: whether lending personal data may ever be processed here; until then barred. Not legal advice.
 — Wulan (compliance), pasted by Janice
 
-**Design accepted, parked for Merwyn's gates** (Janice, 26 Nov 2026 20:20 WIB): Merwyn said to leave the items waiting on him for later ("except 6"). Next step when he is ready: answer gates 1-6 above; the no-spend FakeProvider build can start once gate 1 is picked.
+**Design accepted, parked for Merwyn's gates** (Janice, 26 Nov 2026 20:20 WIB): Merwyn said to leave the items waiting on him for later ("except 6"). Order (as in the Design): the no-spend first step (read-only office checks, then the FakeProvider build as a new task) needs no gate; Merwyn picks A, B or C after it, and answers gates 2-6 before any real run. Status `parked` until then (corrected after Cahyani's note, 26 Nov 2026).
 
 ## Build notes
 
@@ -99,6 +99,7 @@ Open for legal, not Wulan: whether lending personal data may ever be processed h
 ## Decision
 
 ## Open questions
+- May the runtime push `t-xxx` branches to merwyns-maj/ai-office itself (a GitHub credential, gate 4)? For Merwyn (human gate).
 - Where does the runtime run (Merwyn's laptop, a small server, a cloud service)? For Merwyn (human gate).
 - Hosting and any paid resource: which is acceptable, and what monthly limit? For Merwyn (human gate: cost).
 - Sign-in or keys: does it run on Max SDK credit with a signed-in session (original Done when), or an API key? Whether Max credit can be used from a hosted runtime is unverified. For Merwyn (human gate), with the Architect checking the SDK docs.
