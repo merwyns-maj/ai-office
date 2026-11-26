@@ -138,7 +138,9 @@ class ShippedFile(unittest.TestCase):
 
     def test_starting_use_is_76_percent_of_the_budget(self):
         _, runs, _ = ledger.load_ledger(LEDGER, agents=self.ids, office="ai-office", forbidden=events.forbidden_terms(REPO))
-        used = ledger.totals(runs)["session"]["tokens"]
+        # the starting values were set from the first 48 runs (T-060); later runs are appended as they finish (T-061)
+        used = sum(r["tokens"] or 0 for r in runs if r["n"] <= 48)
+        self.assertEqual(used, 3_813_702)
         self.assertEqual(round(100 * used / self.r["providers"]["claude-code"]["tokens"]), 76)
 
 
