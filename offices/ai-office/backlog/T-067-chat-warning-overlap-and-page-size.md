@@ -4,7 +4,7 @@ title: "No overlapping parts: panels, chat and bar never cover each other; compo
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-066]
@@ -123,6 +123,22 @@ Dinda's UX accepted, with the chip answer below. Only `engine/app/office.templat
 - Real-device touch is out of scope (Spec). During the 180 ms `--chat-h` dock animation free-mode panels use the final rect with a 160 ms settle, so they can briefly cross the moving bar (as in T-066); final positions never overlap.
 - Published ledger page is 245,071 B (239 KB); the 232 KB limit applies to the committed page. Fang's risk 6: if the artifact publish rejects it, stop and tell the PMO.
 - Window resize across 900 px with a layer open is not re-evaluated (layers stay as opened).
+
+— Sebastian (engineer)
+
+### Rework 1 (26 Nov 2026, after Review 1 REJECT)
+Merged `origin/main` first (clean). Changed only `engine/app/office.template.html`, the rebuilt `engine/app/office.html` and `tests/test_office_app.py`.
+- **(a) Collapsed usage with its menu open.** `build()` used `nat.uc` alone for a viewer-collapsed panel. It now uses `uh = max(nat.uc, menu height)` for `h`, `min` and `col`, so `C.place` keeps panel and menu inside the bounds and off the bar. Cahyani's repro (1280x800, usage saved at y=620, collapsed, `...` open) is now clean in her harness.
+- **(b) Chip/shown flip.** Cause: `build()` called `pmH()` after the chip class was set, and a hidden (chipped) panel measured a 0 px menu, so it unchipped, then measured the menu and chipped again. The menu heights (`nat.pu`, `nat.pt`) are now taken once in the measuring pass, while no part is chipped. The 1280x520 case (min before ack, moved layout, card open, usage menu open) now ends in a stable state (24 samples at 150 ms, last 12 identical). New node test: a grid (H x dock x menu height x layout x card) asserts `place` is deterministic, `place(own output)` keeps every chip state and every rect (one pass), and a collapsed panel with a menu stays inside the bounds.
+- **(c) Short desktop window.** `body.nost` (stage under 72 px) is now set on the desktop path too (`fit()` sets it before the geometry), and the `min-width:900px` CSS hides `#tone`, `#usheet`, `#msheet` and the events layer under it. They wait until there is room; the Chat button and bar are untouched. New test `test_short_desktop_window_has_no_layer_in_the_top_strip` (CSS rule, `nost` set before the float path, `build()` has no `pmH(` and counts the menu).
+- Also: stale `PLACE_CHECK` comment about the card (min 56, chippable) fixed; `test_size_limit` comment now says about 15 KB and no longer quotes the 222 KB published figure. Limit unchanged (232 KB). Trimmed six of my own comments in the template.
+- **Size.** Committed page **235,833 B** (was 235,796 B in the rejected build; +37 B net after trimming; limit 237,568 B, headroom 1,735 B). Published (`--ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`): **250,543 B** (244 KB, 96 events; it was 245,071 B with 78 events, the rest is ledger growth on main). Fang writes the dated size note.
+
+**How to verify**
+- `python -m unittest discover -s tests`: exit 0, 416 tests. `validate ai-office`: OK. `office_app.py ai-office --chat --check`: up to date. `board.py`: no problems, board.md discarded.
+- Cahyani's harness (`/tmp/cah67/h/check.py`, sizes 1280x800, 1024x640, 390x844, 1280x460, 1280x560, 1280x520, 1024x500, 1280x480, 390x600, 900x700, 700x900), 797 snapshots each: committed 16 failures, published 15. **No overlap, outside-window, page-scroll, top-strip, composer or storage failure.** What remains: (1) 14 to 15 "saved place not used/back" with usage h 74 or 90 at windows under 520 px tall: T-056 `usageCol`, Cahyani's non-blocking note, x/y/w match; (2) 1 to 2 `#ubtn` click timeouts at 1280x460: the harness checks `is_visible()`, then the chip goes away one frame later when the panel menu closes (Escape), a one-pass settle, not an oscillation (`flick3`/`flick2` show a single state at rest).
+- Control cases: `/tmp/cah67/h/flick.py` (the 1280x520 flip) and `pm.py` (the collapsed menu), no overlap.
+- My own earlier run (867 snapshots, 8 sizes) was not re-run; Cahyani's harness covers the three defects.
 
 — Sebastian (engineer)
 

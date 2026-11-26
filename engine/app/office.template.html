@@ -320,10 +320,10 @@ body.rm .tl.new{animation:none}
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
 body.tk #ticker{display:flex!important;position:fixed;margin:0;left:8px;right:8px;width:auto;top:auto;height:auto;z-index:7}
 body.tk #ticker.hd #tlist{display:block}
-/* one transient layer on phone and tablet (T-067): the card, usage sheet, menu and event list share one slot above the tone strip, inside the stage, and scroll inside */
+/* phone and tablet (T-067): card, usage sheet, menu and event list share one slot in the stage and scroll inside */
 @media (max-width:899px){body.nost #tone,body.nost #focus,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}
 #focus,#usheet,#msheet,body.tk #ticker{top:auto;bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--st) - var(--bb) - 48px);overflow:auto}}
-@media (min-width:900px){body.tk #ticker{left:auto;right:12px;width:calc(var(--side) - 24px);bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--bar) - var(--bb) - 48px);overflow:auto}}
+@media (min-width:900px){body.nost #tone,body.nost #usheet,body.nost #msheet,body.nost.tk #ticker{display:none!important}body.tk #ticker{left:auto;right:12px;width:calc(var(--side) - 24px);bottom:calc(var(--bb) + 40px);max-height:calc(100% - var(--bar) - var(--bb) - 48px);overflow:auto}}
 @media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
 /* office chat (T-063) */
 #chat[hidden],#chatbtn[hidden]{display:none}
@@ -935,7 +935,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
       chip[low] = 1;
     }
   }
-  /* a drag or resize moves x (and w) first, then y (and h), each stopped at the first obstacle edge; the neighbour is never pushed */
+  /* a drag or resize: x (w) then y (h), each stopped at the first obstacle edge; the neighbour is never pushed */
   function sweep(f, t, obs) {
     var r = { x: f.x, y: f.y, w: f.w, h: f.h };
     if (obs.some(function (o) { return hit(r, o); })) return r;
@@ -1474,7 +1474,7 @@ function initUsage() {
 }
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
 
-/* one transient layer (T-067): phone and tablet show one of card, usage sheet, menu, event list; on desktop the usage sheet and event list are layers over the card and menu, which sit beside the panels as parts */
+/* one transient layer (T-067); on desktop the usage sheet and event list are layers, the card and menu are parts */
 function closeLayer(n) {
   if (n === 'focus') { if (focused) focusAgent(null); }
   else if (n === 'usheet') closeSheet();
@@ -2545,7 +2545,7 @@ function initPanels() {
   }
   reqFit(true);
 }
-/* ---------- no overlap (T-067): one fit() builds the parts and asks C.place; flow keeps its CSS geometry and takes only the states from it ---------- */
+/* ---------- no overlap (T-067): fit() builds the parts and asks C.place; flow keeps its CSS geometry and takes only the states ---------- */
 function others(id) {   /* what a dragged panel may not enter: the other panel, the card, an open sheet or menu, the events chip */
   var o = []; pids().forEach(function (x) { if (x !== id && !$(x).classList.contains('xc')) o.push(shown(x)); });
   ['focus', 'msheet', 'usheet', 'tone'].forEach(function (x) { var e = $(x); if (e.offsetWidth) { var r = e.getBoundingClientRect(); o.push({ x: r.left, y: r.top, w: r.width, h: r.height }); } });
@@ -2561,10 +2561,11 @@ function fit() {
   if (pdrag) return;
   if (!floatOK()) {
     ['xc', 'ac', 'hd'].forEach(function (c) { u.classList.remove(c); t.classList.remove(c); }); f.classList.remove('xc');
-    B.classList.toggle('nost', $('stage').offsetHeight < 72);   // a window with no room for a layer (the chat covers it): the layer waits for room
+    B.classList.toggle('nost', $('stage').offsetHeight < 72);   // no room for a layer: it waits
     B.classList.remove('uchip', 'echip'); f.style.maxHeight = ''; side.style.removeProperty('--fh'); side.style.removeProperty('--fb'); u.style.minHeight = t.style.minHeight = ''; PLACED = {};
     return;
   }
+  B.classList.toggle('nost', $('stage').offsetHeight < 72);   // desktop too
   var free = PL.free, b = pbounds(), M = PN.MARGIN, cx = innerWidth - 12 - COLW, flow = !free, tk = B.classList.contains('tk'), usePl = !u.hidden;
   var sbot = b.bottom + M, bb = b;
   /* natural heights, measured with the auto classes off (sync, no paint in between) */
@@ -2574,6 +2575,7 @@ function fit() {
   u.classList.add('col'); nat.uc = u.querySelector('.uh').offsetHeight + $('usum').offsetHeight + 2;
   u.classList.toggle('col', uc0); u.classList.toggle('ac', ua0);
   var tuh = t.querySelector('.uh').offsetHeight; nat.tc = tuh + 2; nat.tn = tuh + $('tlist').scrollHeight + 16;
+  nat.pu = pmH('usage'); nat.pt = pmH('ticker');   // measured while unchipped (else 0 and a flip)
   t.classList.toggle('hd', th0); u.classList.toggle('xc', ux); t.classList.toggle('xc', tx);
   var fmh = f.style.maxHeight, fh0 = 0, fx = f.classList.contains('xc'); f.classList.remove('xc'); f.style.maxHeight = 'none'; if (!f.hidden) fh0 = f.offsetHeight; f.style.maxHeight = fmh; f.classList.toggle('xc', fx);
   function pmH(id) { var pm = $('pm-' + id); return pm && !pm.hidden ? pm.offsetTop + pm.offsetHeight + 2 : 0; }
@@ -2588,10 +2590,10 @@ function fit() {
     if (tone) P.push({ id: 'tone', fixed: true, r: { x: cx, y: sbot - 34, w: COLW, h: 34 } });
     if (fh0) { var h = Math.min(fh0, Math.max(56, Math.floor((sbot - b.top) * 0.45))); P.push({ id: 'focus', r: { x: cx, y: b.top + 4, w: COLW, h: h }, min: 56, axis: '', chip: true }); top = b.top + 4 + h + M; }
     if (usePl) {
-      var ur = free ? PL.r.usage : { x: cx, y: top, w: COLW, h: nat.un }, um = Math.max(PN.MIN_H, pmH('usage'));
-      P.push({ id: 'usage', r: { x: ur.x, y: ur.y, w: ur.w, h: usageCol ? nat.uc : ur.h }, min: usageCol ? nat.uc : um, col: Math.max(nat.uc, pmH('usage')), axis: free ? 'xy' : 'y', collapsible: !usageCol && !acPin, chip: true });
+      var ur = free ? PL.r.usage : { x: cx, y: top, w: COLW, h: nat.un }, um = Math.max(PN.MIN_H, nat.pu), uh = Math.max(nat.uc, nat.pu);
+      P.push({ id: 'usage', r: { x: ur.x, y: ur.y, w: ur.w, h: usageCol ? uh : ur.h }, min: usageCol ? uh : um, col: uh, axis: free ? 'xy' : 'y', collapsible: !usageCol && !acPin, chip: true });
     }
-    if (!tk) { var tr = free ? PL.r.ticker : { x: cx, y: top, w: COLW, h: nat.tn }; P.push({ id: 'ticker', r: { x: tr.x, y: tr.y, w: tr.w, h: tr.h }, min: Math.max(40, nat.tc, pmH('ticker')), col: Math.max(nat.tc, pmH('ticker')), axis: free ? 'xy' : 'y', collapsible: true, chip: true, off: !!tone, after: flow && usePl ? 'usage' : undefined }); }
+    if (!tk) { var tr = free ? PL.r.ticker : { x: cx, y: top, w: COLW, h: nat.tn }; P.push({ id: 'ticker', r: { x: tr.x, y: tr.y, w: tr.w, h: tr.h }, min: Math.max(40, nat.tc, nat.pt), col: Math.max(nat.tc, nat.pt), axis: free ? 'xy' : 'y', collapsible: true, chip: true, off: !!tone, after: flow && usePl ? 'usage' : undefined }); }
     return P;
   }
   function bounds(sh, tone) {   /* flow: the column ends 4px above the stage floor, or 8px above the highest sheet, menu or chip in it */
@@ -2607,7 +2609,7 @@ function fit() {
   [['usage', u, 'ac'], ['ticker', t, 'hd']].forEach(function (q) {
     var o = out[q[0]], e = q[1], on = !!o && o.s !== 'chip'; if (!o && !(q[0] === 'ticker' && tk)) return;
     e.classList.toggle('xc', !!o && o.s === 'chip'); e.classList.toggle(q[2], !!o && o.s === 'col');
-    var pm = pmH(q[0]); e.style.minHeight = on && pm ? pm + 'px' : '';
+    var pm = q[0] === 'usage' ? nat.pu : nat.pt; e.style.minHeight = on && pm ? pm + 'px' : '';
     if (free && o) { PLACED[q[0]] = o.s === 'chip' ? null : o; if (on) { var k = JSON.stringify(o); if (FLAST[q[0]] !== k) { var first = FLAST[q[0]] === undefined; FLAST[q[0]] = k; if (first || pdrag) paintRect(q[0]); else animPaint(q[0], 160); } } }
   });
   f.classList.toggle('xc', !!out.focus && out.focus.s === 'chip');   // no room beside an open menu: the card waits and returns when the menu closes

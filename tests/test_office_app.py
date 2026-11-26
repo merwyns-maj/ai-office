@@ -144,7 +144,7 @@ class PageRules(unittest.TestCase):
         # 200 KB until T-063. The chat (panel, phone sheet, combobox, notice, status chips, parser, scan) is about 40 KB of
         # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 216 KB by Fang (about 6 KB headroom).
         # Raised to 232 KB (237,568 B) by Fang for T-067: the no-overlap placement (C.place, C.sweep, the fit glue, the chip and layer CSS)
-        # is about 13 KB of page code. The limit is our creep guard, not a platform limit (the published ledger page loads at 222 KB, T-066);
+        # is about 15 KB of page code (published ledger page about 245 KB). The limit is our creep guard, not a platform limit;
         # trimming comments again costs reviewability and a split breaks the one-file artifact. The next raise needs a split or minify decision.
         self.assertLessEqual(len(self.html.encode("utf-8")), 232 * 1024)
 
@@ -1117,7 +1117,7 @@ for (const W of sizes.W) for (const H of sizes.H) for (const cm of sizes.chat) f
   for (let i = 0; i < real.length; i++) for (let j = i + 1; j < real.length; j++) {
     const A = real[i], B = real[j];
     if (A.p.fixed && B.p.fixed) continue;
-    // a card that cannot fit at all is the one allowed fallback: it has no chip (96px min); it never happens in the grid below
+    // the card has min 56 and can chip when beside an open menu there is no room (deviation 1)
     assert.ok(!hit(A.r, B.r), 'overlap ' + tag + ' ' + A.p.id + ' ' + B.p.id + ' ' + JSON.stringify([A.r, B.r]));
   }
   // placing the output again changes nothing
@@ -1169,6 +1169,27 @@ for (const W of sizes.W) for (const H of sizes.H) for (const cm of sizes.chat) f
     const free = C.sweep(f, t, []); assert.deepStrictEqual(free, { x: t.x, y: t.y, w: t.w, h: t.h });
   }
 }
+// T-067 rework 1 (a, b): a usage panel collapsed by the viewer with its menu open counts the menu in min, col and h; place applied to its own
+// output, and to the same input, is a fixed point (the fit() loop settles in one pass); a chipped part keeps its menu height, so it cannot flip
+{
+  let k = 0;
+  for (const H of [420, 480, 520, 560, 800]) for (const dkm of ['closed', 'min', 'default']) for (const pm of [0, 60, 150]) for (const lay of ['flow', 'moved', 'low']) for (const foc of [0, 96]) {
+    const dk = dock(1280, H, dkm), b = C.panelBounds(1280, H, 56, dk), cx = 1280 - 12 - COLW, uh = Math.max(64, pm), saved = lay === 'low' ? { x: 300, y: 620, w: 360, h: 300 } : lay === 'moved' ? { x: 300, y: 330, w: 360, h: 420 } : { x: cx, y: b.top + 4 + (foc ? 104 : 0), w: COLW, h: uh };
+    const mk = () => { const P = []; if (foc) P.push({ id: 'focus', r: { x: cx, y: b.top + 4, w: COLW, h: 96 }, min: 56, axis: '', chip: true });
+      P.push({ id: 'usage', r: { x: saved.x, y: saved.y, w: saved.w, h: uh }, min: uh, col: uh, axis: lay === 'flow' ? 'y' : 'xy', chip: true });
+      P.push({ id: 'ticker', r: { x: 420, y: 380, w: 300, h: 360 }, min: 40, col: 34, axis: lay === 'flow' ? 'y' : 'xy', collapsible: true, chip: true }); return P; };
+    const o1 = C.place(b, mk()), o1b = C.place(b, mk());
+    assert.deepStrictEqual(o1, o1b, 'place is not deterministic');
+    const u = o1.usage, tag = [H, dkm, pm, lay, foc].join('/');
+    if (u.s !== 'chip') { assert.ok(inb(u, b), 'collapsed usage with its menu outside the bounds ' + tag + JSON.stringify(u)); assert.ok(u.h >= uh, 'menu height lost ' + tag); }
+    const P2 = mk().map(p => o1[p.id].s === 'chip' ? p : Object.assign({}, p, { r: { x: o1[p.id].x, y: o1[p.id].y, w: o1[p.id].w, h: o1[p.id].h } }));
+    const o2 = C.place(b, P2);
+    for (const id of Object.keys(o1)) assert.strictEqual(o2[id].s === 'chip', o1[id].s === 'chip', 'chip flips on the second pass ' + tag + ' ' + id);
+    for (const id of Object.keys(o1)) if (o1[id].s !== 'chip') assert.deepStrictEqual([o2[id].x, o2[id].y, o2[id].w, o2[id].h], [o1[id].x, o1[id].y, o1[id].w, o1[id].h], 'second pass moves ' + tag + ' ' + id);
+    k++;
+  }
+  assert.ok(k > 200);
+}
 console.log('place ok ' + n);
 '''
 
@@ -1199,6 +1220,15 @@ class NoOverlap(unittest.TestCase):
         b = html.index("\n}", a)
         self.assertNotIn("writeStore", html[a:b])                             # placement never rewrites office.layout.v1
         self.assertNotIn("PL.r[", html[a:b].replace("PL.r.usage", "").replace("PL.r.ticker", ""))
+
+    def test_short_desktop_window_has_no_layer_in_the_top_strip(self):
+        html = TEMPLATE.read_text(encoding="utf-8")
+        self.assertRegex(html, r"@media \(min-width:900px\)\{body\.nost #tone,body\.nost #usheet,body\.nost #msheet,body\.nost\.tk #ticker\{display:none!important\}")
+        a = html.index("function fit()")
+        self.assertLess(html.index("B.classList.toggle('nost'", a), html.index("var free = PL.free", a))   # set on the desktop path too
+        b = html[html.index("function build(", a):html.index("function bounds(", a)]
+        self.assertNotIn("pmH(", b)                                           # menu heights come from the one measuring pass (no flip when chipped)
+        self.assertIn("h: usageCol ? uh : ur.h }, min: usageCol ? uh : um", b)  # a collapsed panel counts its open menu
 
     def test_composer_warning_is_solid_clipped_and_counted_in_the_minimum(self):
         html = TEMPLATE.read_text(encoding="utf-8")
