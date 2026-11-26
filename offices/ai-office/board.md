@@ -2,13 +2,13 @@
 
 _Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**57 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 26 · parked: 0
+**63 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 31 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (31)
+## todo (32)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -43,6 +43,7 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-053](backlog/T-053-recon-regulatory-figures-workflow.md) | P2 | Reconciliation and regulatory figures workflow | pmo | T-002, T-016 |
+| [T-064](backlog/T-064-standalone-office-app.md) | P2 | Standalone office app (desktop and mobile) on the office runtime | pmo | T-024, T-063 |
 
 ## spec (0)
 
@@ -60,7 +61,7 @@ _empty_
 
 _empty_
 
-## done (26)
+## done (31)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -72,6 +73,7 @@ _empty_
 | [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | curator | — |
 | [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
 | [T-055](backlog/T-055-metrics-test-breaks-on-sprint-close.md) | P0 | Hotfix: metrics test breaks when a new sprint closes | pmo | — |
+| [T-061](backlog/T-061-budget-test-breaks-on-ledger-append.md) | P0 | Hotfix: budget test breaks when the ledger grows | pmo | — |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
@@ -85,6 +87,10 @@ _empty_
 | [T-050](backlog/T-050-document-assessment-skill.md) | P1 | Partner or vendor document assessment skill | pmo | — |
 | [T-056](backlog/T-056-model-and-usage-in-the-3d-office.md) | P1 | Show which model each agent uses, and usage, in the 3D office (multi-provider) | pmo | — |
 | [T-057](backlog/T-057-token-usage-per-agent-per-session.md) | P1 | Record and show real token usage per agent, per session | pmo | — |
+| [T-058](backlog/T-058-provider-accordion.md) | P1 | Usage panel: By provider as an accordion | pmo | — |
+| [T-059](backlog/T-059-movable-resizable-panels.md) | P1 | 3D office: rearrange, resize and set opacity of the panels | pmo | — |
+| [T-060](backlog/T-060-usage-summary-and-detail-modes.md) | P1 | Usage panel: summary mode (provider vs budget) and detail mode (agent vs budget) | pmo | — |
+| [T-062](backlog/T-062-budget-colour-coding.md) | P1 | Budget bars: green, yellow, red as usage nears the budget | pmo | — |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
 | [T-032](backlog/T-032-adoption-metrics-hours-saved-reject-rate.md) | P2 | Adoption metrics (hours saved, reject rate, turnaround) | pmo | — |
 | [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
