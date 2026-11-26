@@ -7,6 +7,13 @@
 # Starting values by Janice (pmo), 26 Nov 2026, from this session's real use: 3,813,702 tokens over 48 recorded runs.
 period: session
 main_session: pmo
+# Colour thresholds (T-062), percent of a budget: green below warn_at, yellow ("near budget") from warn_at, red ("at limit", or over) from alert_at.
+# Needs 0 < warn_at < alert_at <= 100. Left out, the page uses 70 and 90.
+thresholds:
+  warn_at: 70
+  alert_at: 90
+  set_by: Janice (pmo)
+  set_on: "2026-11-26"
 providers:
   claude-code:
     tokens: 5000000

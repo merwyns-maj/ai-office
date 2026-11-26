@@ -15,7 +15,9 @@ FILE = "budgets.yaml"
 PERIODS = ("session",)   # day/week/month need a `date` on run lines (ledger.py accepts it since T-060) and a filter: not built yet
 MAX_TOKENS = 999_999_999_999
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
-TOP_KEYS = ("period", "main_session", "providers")
+TOP_KEYS = ("period", "main_session", "thresholds", "providers")
+THRESH_KEYS = ("warn_at", "alert_at", "set_by", "set_on")
+DEFAULT_WARN, DEFAULT_ALERT = 70, 90   # T-062: yellow from 70% of a budget, red from 90% (and over)
 PROV_KEYS = ("tokens", "set_by", "set_on", "note", "agents")
 AGENT_KEYS = ("share", "tokens", "set_by", "set_on")
 
@@ -57,6 +59,25 @@ def _split(total, shares):
     return fl
 
 
+def _thresholds(t, out):
+    """T-062: warn_at / alert_at as percent of a budget, 0 < warn_at < alert_at <= 100, with who set them and when.
+    Absent gives the defaults (70, 90) marked set_by "default"."""
+    if t is None:
+        return {"warn_at": DEFAULT_WARN, "alert_at": DEFAULT_ALERT, "set_by": "default", "set_on": None}
+    w = "budgets: thresholds"
+    if not isinstance(t, dict):
+        out.append(f"{w}: must be a map with warn_at, alert_at, set_by and set_on")
+        return None
+    for k in t:
+        if k not in THRESH_KEYS:
+            out.append(f"{w}: unknown key {k!r}")
+    warn, alert = t.get("warn_at", DEFAULT_WARN), t.get("alert_at", DEFAULT_ALERT)
+    if not _num(warn) or not _num(alert) or not 0 < warn < alert <= 100:
+        out.append(f"{w}: need 0 < warn_at < alert_at <= 100 (numbers, percent of a budget)")
+    _stamp(w, t, out)
+    return {"warn_at": warn, "alert_at": alert, "set_by": t.get("set_by"), "set_on": t.get("set_on")}
+
+
 def resolve(data, *, agents, providers, synthetic=False):
     """Return (resolved dict or None, list of problem strings) for a loaded budgets map.
 
@@ -72,6 +93,7 @@ def resolve(data, *, agents, providers, synthetic=False):
     ms = data.get("main_session")
     if ms is not None and (not isinstance(ms, str) or ms not in agents):
         out.append("budgets: main_session must be an agent id from org.yaml")
+    th = _thresholds(data.get("thresholds"), out)
     provs = data.get("providers")
     if not isinstance(provs, dict) or not provs:
         out.append("budgets: providers must be a map with at least one provider")
@@ -107,7 +129,7 @@ def resolve(data, *, agents, providers, synthetic=False):
         res[pid] = row
     if out:
         return None, out
-    return {"period": data["period"], "main_session": ms, "synthetic": bool(synthetic), "providers": res}, []
+    return {"period": data["period"], "main_session": ms, "synthetic": bool(synthetic), "thresholds": th, "providers": res}, []
 
 
 def _agents(w, ag, total, agent_ids, out):

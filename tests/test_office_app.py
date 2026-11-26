@@ -281,6 +281,14 @@ if (mode === 'sprint3') {
   r = R(0, 0); assert.deepStrictEqual([r.state, r.pct], ['ok', 0]);
   for (const b of [null, undefined, -1, NaN, 'x', Infinity]) { r = R(123, b); assert.deepStrictEqual([r.state, r.pct, r.barPct, r.over, r.budget], ['unset', null, 0, 0, null], String(b)); }
   assert.strictEqual(R(-5, 100).used, 0); assert.strictEqual(R(null, 100).pct, 0);
+  // T-062 colour level from the rounded % the text shows: 69 ok, 70 near, 89 near, 90 alert, 100 alert (at budget, not over), over
+  const L = (pct) => R(pct, 100).level;
+  assert.deepStrictEqual([0, 69, 70, 89, 90, 100].map(L), ['ok', 'ok', 'near', 'near', 'alert', 'alert']);
+  assert.deepStrictEqual([R(99.6, 100).level, R(101, 100).level, R(1, 0).level, R(0, 0).level, R(5, null).level], ['alert', 'over', 'over', 'ok', 'unset']);
+  assert.strictEqual(R(69.6, 100).pct, 70); assert.strictEqual(R(69.6, 100).level, 'near');   // the colour follows the % the text shows
+  const th = { warn_at: 50, alert_at: 80 };
+  assert.deepStrictEqual([49, 50, 79, 80].map(p => R(p, 100, th).level), ['ok', 'near', 'near', 'alert']);   // thresholds come from budgets.yaml
+  assert.strictEqual(R(75, 100, { warn_at: 'x' }).level, 'near'); assert.strictEqual(R(75, 100, null).level, 'near');   // bad or missing: the defaults
   // Detail order: by share of budget (not by tokens), unset after, main session last, ties by name
   const row = (name, used, budget, kind) => ({ name, kind: kind || 'agent', row: R(used, budget) });
   const names = C.sortDetail([row('Z main', 0, null, 'main'), row('B', 900, null), row('A', 50, 100), row('C', 120, 100), row('D', 50, 100), row('E', 5000, 100000), row('F', 901, null)]).map(x => x.name);
@@ -296,6 +304,8 @@ if (mode === 'sprint3') {
     assert.strictEqual(v.providers.length, 1); const p = v.providers[0];
     assert.strictEqual(p.row.used, py.tokens); assert.strictEqual(p.row.budget, B.tokens);
     assert.strictEqual(p.row.pct, Math.round(100 * py.tokens / B.tokens));
+    assert.deepStrictEqual(D.budgets.thresholds.warn_at < D.budgets.thresholds.alert_at, true);
+    p.agents.concat([p]).filter(a => a.kind !== 'main').forEach(a => assert.strictEqual(a.row.level, C.budgetLevel(a.row.pct, a.row.over, D.budgets.thresholds)));
     assert.strictEqual(p.agents.filter(a => a.kind === 'agent').length, Object.keys(py.agents).length);
     p.agents.filter(a => a.kind === 'agent').forEach(a => { assert.strictEqual(a.row.used, py.agents[a.id] || 0); assert.strictEqual(a.row.budget, B.agents[a.id].tokens); });
     assert.strictEqual(p.agents[p.agents.length - 1].kind, 'main'); assert.strictEqual(p.agents[p.agents.length - 1].id, D.budgets.main_session);
@@ -694,6 +704,28 @@ class Recorded(unittest.TestCase):
             self.assertNotIn(bad, text)
         self.assertIn("Anthropic does not publish the Max plan", text)
         self.assertNotRegex(text, r"--warn[^;}]*;[^}]*\.hatch|\.hatch\{[^}]*(--warn|--bad)")   # over budget never uses the amber or red of needs-you
+
+    def test_budget_colours_are_palette_tokens_and_never_the_needs_you_amber(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        theme = (REPO / "offices/ai-office/theme/theme.yaml").read_text(encoding="utf-8")
+        self.assertIn('near: "#f0e04a"', theme)
+        for cls in (".bar i.lv-near{background:var(--near)}", ".bar i.lv-alert,.bar i.lv-over{background:var(--bad)}"):
+            self.assertIn(cls, text)
+        self.assertNotRegex(text, r"\.(bar i|bx|bw|dh)[^{]*\.lv-[^{]*\{[^}]*(--warn|#f4a261)")   # budget states never use the amber
+        self.assertNotRegex(text, r"\.bar i\.lv[^{]*\{[^}]*#")                                    # no hard-coded hex in the template rules
+
+    def test_collapsed_summary_line_text_takes_the_state_colour(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        for cls in (".usum .lv-ok{color:var(--accent)}", ".usum .lv-near{color:var(--near)}",
+                    ".usum .lv-alert,.usum .lv-over{color:var(--bad-text)}"):
+            self.assertIn(cls, text)
+
+    def test_state_word_and_aria_label_carry_the_level(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("near: 'near budget', alert: 'at limit'", text)
+        self.assertIn("', ' + LVWORD[r.level]", text)   # rowSentence: appended to the aria-label, no colour names
+        for colour in ("green", "yellow", "red"):
+            self.assertNotRegex(text, r"aria-label[^\n]*" + colour)
 
     def test_mode_is_remembered_in_try_and_shown_as_a_radiogroup(self):
         text = TEMPLATE.read_text(encoding="utf-8")
