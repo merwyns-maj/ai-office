@@ -2,9 +2,9 @@
 id: T-050
 title: "Partner or vendor document assessment skill"
 phase: 3-skills
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: []
@@ -172,6 +172,9 @@ Mutation check: removed the `[medium]` tag from R2 in `api-doc.json` expected_ou
 — Sebastian (engineer)
 
 ## Review log
+PR #35 at e7c21e4, 26 Nov 2026: PASS. Five headings and severity rules; golden 3 cases OK (13 total, 74 checks); each bad_output fails; expected_output weakened 10 ways, every one caught; invented data only, data scan 0 hits; no-approval checks in all cases; loaded only by architect and compliance; build_agents no diff; 240 tests OK; combined with T-054: 13 cases, 0 problems.
+Notes: template-agreement R5 [low] fits the medium rule; the Questions-cite-ID rule has no golden check.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
