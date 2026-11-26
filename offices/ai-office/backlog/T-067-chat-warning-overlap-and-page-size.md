@@ -4,7 +4,7 @@ title: "No overlapping parts: panels, chat and bar never cover each other; compo
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-066]
@@ -216,6 +216,59 @@ This is a large improvement on main.
 - The headless rect check is still /tmp-only. Defects 1(a) to 1(c) suggest the node grid does not model a collapsed panel with an open menu, or a stage under 72 px on the desktop. Adding those two cases to `PLACE_CHECK` would catch fixes 1 and 3 without Chrome.
 - The `PLACE_CHECK` comment "a card that cannot fit at all ... has no chip (96px min)" is out of date: the card min is 56 and the card is chippable (deviation 1).
 - External skills `design:accessibility-review` and `data:validate-data` were not available in this session; not used.
+
+— Cahyani (reviewer)
+
+### Review 2 (Cahyani, 26 Nov 2026): PASS
+
+Branch `t-067-no-overlap` at 88764de (main merged in, `git pull`: already up to date). Same harness as Review 1 (/tmp/cah67, nothing committed, no screenshots in the repo). I ran my own repros before relying on the Rework notes.
+
+**Runs**
+- `python -m unittest discover -s tests`: `Ran 416 tests in 33.669s`, `OK`, exit 0.
+- `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 71 tasks, 19 skills`, exit 0.
+- `python scripts/office_app.py ai-office --chat --check`: `engine/app/office.html: up to date (230 KB, 84 events)`, exit 0.
+- Published build `--ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat --out /tmp/...`: `written, 244 KB, 8 agents, 96 events`, 250,543 B. Committed page 235,833 B.
+
+**1. The three Review 1 defects, own repro, rejected build (68b0ca5) vs this build**
+| Case | 68b0ca5 | 88764de |
+|---|---|---|
+| (a) 1280x800 chat default, usage saved y=620, collapsed, `...` open | `usagexbar (360x23)`, `barxpm-usage (216x22)` | none; usage 300,327,360,105, bar at 440 |
+| (a) 1280x460 chat default, same | same two overlaps, 15 distinct states in 3.6 s | none, 1 state |
+| (b) 1280x520 min before ack, moved, card open, usage `...` open, 24 samples at 150 ms | 16 distinct states (9 in the last half), `usagexticker`, `usagexbar`, `tickerxpm-usage`, `barxpm-usage` | 2 states, then 1 (settles); no overlap; after Escape 1 state |
+| (c) 1280x460 before ack: gear, tone, Usage chip | `topxmsheet (125x22)`, `topxticker (264x40)`, `topxusheet (264x14)` | `nost` set; `#tone` hidden; gear and Usage open with no overlap |
+| (c) 1280x480 before ack | `topxmsheet (125x2)` | none |
+| (c) 1280x460 and 1280x480 offline | clean | clean |
+
+**2. Does the new fixed-point test fail on the old code?** I put the 68b0ca5 template and page under this branch's tests (copy in /tmp): `Ran 59 tests`, `FAILED (failures=1)`, and the only failure is `test_short_desktop_window_has_no_layer_in_the_top_strip` (source-text checks: the desktop `nost` CSS, `nost` set before the free path, no `pmH(` in `build()`, the collapsed panel counts `uh`). **The new node fixed-point grid passes on the old code**, because `C.place` did not change in Rework 1; the grid builds its own parts with `min: uh` already, so it never runs the faulty `build()`. So (a) and (b) are guarded by source-text asserts, not by a behaviour test, and the "fit() twice" test I asked for is not there. Not a rejection: the spec asks for a test that fails on overlap plus a pure-maths test, and the suite does fail on the old code. But the node test's description in Rework 1 claims more than it checks. See notes.
+
+**3. Regressions, full harness, 11 sizes** (1280x800, 1024x640, 390x844, 1280x460, 1280x560, 1280x520, 1024x500, 1280x480, 390x600, 900x700, 700x900; chat closed, default, min, min before ack, max; flow, moved, roomy; card, gear, panel menu, usage sheet, events layer, offline warning, 16-digit send):
+| Page | Snapshots | Failures | Kinds |
+|---|---|---|---|
+| Committed | 800 | 16 | 15 T-056 saved-place (below), 1 overlap (below) |
+| Published | 800 | 15 | 15 T-056 saved-place |
+- 1280x800, 1024x640, 390x844: 0 failures on both pages. No overlap, nothing outside the window, no page scroll, no console errors or 4xx, `office.layout.v1` text never rewritten, 20 saved-rect hits (used, and back after closing chat), composer warning passes every check (`#cmid` above `#cform`, `#cwarn` inside `#chat`, five hit points on `#cwarn`, solid, not clipped), blocked send 0 writes. No interaction errors at any size.
+- The one overlap: committed, 1280x480 chat max roomy, `blocked-send` snapshot, `usagexbar (300x8)`, usage h 90 at y 57, bar at 139. I could not reproduce it: 3 reruns of the 1280x480 set (273 snapshots) gave 0 overlaps, and 50 ms sampling for 12 s (chat max and min, online and offline) gave only single frames with `.anim` during the 160 ms settle while the chat grows for the warning (the transient the Build notes already list). The fixture replay grows the usage summary (2% to 20%) and the page chips usage within a frame (`free uchip`, `col xc`). I read it as that one-frame change caught while two harnesses ran at once. I do not count it, but I note it.
+- **C1-C8:** the Rework 1 diff (22 lines of template) touches only the CSS layer rule, `fit()`/`build()` and comments: nothing in scan, notice, ack, `sendChat`, `newAsk`, purge or `claude.use`. Headless: composer disabled before ack, 16-digit send blocked with 0 writes.
+
+**4. Sebastian's two remaining harness results**
+- **T-056 `usageCol` under 520 px tall: harness artefact.** `usageCol = innerHeight < 520` is in main's template (line 1390) and in this one (line 1466). On main's page at 1280x460 and 1280x519, roomy layout, usage is `col`, 40,70,300,74, chevron `aria-expanded=false`; at 520 it is 240 tall. This build is the same. x, y and w match the saved rect; the height is the collapse T-056 chose. My check does not model it.
+- **`#ubtn` click timeout at 1280x460: harness artefact.** Not reproduced in this run (0 interaction errors in 1,600 snapshots). Cause, measured: with the card open and the usage `...` menu open, usage is chipped (`uchip`, `col xc`). After Escape the state changes 0 or 1 times, then stays `free`, Usage chip hidden, usage shown. My harness checks `is_visible()` in the same frame as the Escape, then clicks a chip that has just gone. One transition, not a loop.
+
+**5. Fang's size note: honest, with one soft spot.** Every number matches my count: 221,168 to 235,796 B (+14,628), 235,833 B after Rework 1, limit 237,568 B (232 x 1024), headroom 1,735 B, published 250,543 B with 96 events, and the estimate was 4.2x out (14.6 / 3.5 KB). The note says plainly that the test limit does not cover the published page, and it keeps the "next raise needs split or minify" rule. Soft spot: "T-070 (about 0.6 KB)" is an estimate with no source (T-070 is still at `spec` with no Design), in the same note that says Fang will not use estimates again. The rule that follows ("must land within 1,735 B, trims in the same PR, no raise") makes it safe. `test_size_limit` comment matches (14.6 KB, 235,833 B, 1,735 B, 250,543 B); asserted limit unchanged.
+
+**Done when**
+1. No overlap at any height and window size, flow and moved or resized: **PASS** (above; 0 settled overlaps in 1,600 + 273 snapshots).
+2. Composer warning clipped at min on 1280x800 and 390x844: **PASS** (as Review 1, rerun clean).
+3. Size decision recorded with numbers, page fits, `test_size_limit` matches: **PASS** (235,833 <= 237,568).
+4. Refined: tests fail on overlap, T-063/T-066 and C1-C8 pass, golden and `--check` pass, no console errors: **PASS**, with note 1.
+
+**Notes (non-blocking)**
+1. The node fixed-point grid does not guard (a) or (b); the source-text test does. A follow-up could let the node test call the real part builder (move the parts list out of `build()` into a pure `C.parts(nat, PL, flags)`), so that "a collapsed panel counts its menu" and "a chipped part keeps its menu height" are checked in behaviour.
+2. At 1280x460 with the card open, opening the usage `...` menu chips the panel, so the menu the viewer just opened disappears and the Usage chip appears. That matches the Design's ladder (menu folded into the panel's min) and stays reachable, but it may feel odd; Dinda may want to look at it.
+3. The headless rect check is still /tmp-only (as in Review 1).
+4. External skills `design:accessibility-review` and `data:validate-data` were not available in this session; not used.
+
+Verdict: **PASS**. Status stays `review`, owner `pmo`, awaiting Merwyn's merge.
 
 — Cahyani (reviewer)
 
