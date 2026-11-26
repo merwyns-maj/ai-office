@@ -2,9 +2,9 @@
 id: T-031
 title: "Monthly chat-to-office review"
 phase: 7-ways-of-working
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: chat
 project: ai-office
 depends_on: []
@@ -184,5 +184,6 @@ Status stays review until Merwyn's picks are recorded.
 — Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
+Merwyn's picks (26 Nov 2026 ~09:45 WIB, recorded by Janice): all four, items 1 to 4. Backlog: vendor document assessment skill (this office, can start now); patch hand-off, prod investigation and recon/regulatory figures (company work, behind T-002). Task files are created at the Sprint 5 close.
 
 ## Open questions
