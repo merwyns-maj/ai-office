@@ -2,7 +2,7 @@
 id: T-032
 title: "Adoption metrics (hours saved, reject rate, turnaround)"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P2
 owner: reviewer
 where: chat
