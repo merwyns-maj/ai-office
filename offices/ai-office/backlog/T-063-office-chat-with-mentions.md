@@ -257,6 +257,13 @@ Screenshots (headless Chrome, a stub `claude` injected into a copy of the page u
 
 — Sebastian (engineer)
 
+### Enable on the artifact (Janice, 26 Nov 2026 17:09 WIB)
+- Declared on "AI Office" (5f1bb811-1633-4bfb-8285-9bcb2408dec2): `db` with the one rule `{path: "chat", read: "owner", write: "owner"}`, plus `user`. Version 1795687765-6772. The artifact stays private (read `owner`).
+- Published `office.html` from main after PR #54 (`office_app.py ai-office --chat --check` up to date, 211 KB). Version 1795687772-34e8.
+- C7 check on the live db: `db_rules_get` returns only the chat rule; `db_write` as `admin` and as `view` on `chat/office/messages/<probe>` both refused (404, nothing written); `db_list` as `view` on `chat/office/messages` returns no docs; `chat rules ai-office` on the live rules: "rules ok: chat is owner-only for read and write" (exit 0), and it refuses `read: "view"` (exit 1).
+- Wrote the meta doc `chat/office` (`running: true`, `last_inbox_at` 2026-11-26T10:09:46Z), version 1. It shows "Office running" for 15 minutes after each inbox check.
+- Not checked yet: the page on the real artifact (send, listener resume after `unavailable`). That shows on Merwyn's first message.
+
 ## Review log
 **REJECT (first review), 26 Nov 2026, head eb0628b.** Most of it works and is well built. Three fixes are needed, all small: two are correctness bugs I found by running edge cases, one is a design step that was skipped.
 
