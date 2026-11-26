@@ -4,7 +4,7 @@ title: "Usage numbers from the artifact db, so the page needs no republish per l
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-067, T-070]
@@ -156,6 +156,12 @@ In every state the Summary and Detail figures are present (never blank). Detail 
 
 **Open questions (unchanged, for Janice at first sync).** Create-only `db_write`; chat docs survive the re-declare; C7 view-level refusals for `usage`.
 
+— Sebastian (engineer)
+
+### Rework 1
+U1a (Wulan, 26 Nov): `scan_doc` now exempts the `session` field only when `value == header session` and `ledger.SESSION_RE.fullmatch(value)` both hold, so it no longer relies on the loader. Tests added in `tests/test_usage_sync.py`: a 40-character value with a hyphen (`session_...-Qr9St0U`) that equals the header session is refused with "secret-like token"; and Cahyani's missing test, where a valid-looking id that differs from the header session is refused while the header's own id passes.
+Also: the report's `synced_at` is now stamped only when the plan has a `set` action, so a delete-only plan no longer shows a new sync time (the meta doc is not rewritten then).
+Verified: `python -m unittest discover -s tests` Ran 485, OK, exit 0; `validate ai-office` OK, exit 0; `office_app.py ai-office --chat --check` up to date. board.md discarded.
 — Sebastian (engineer)
 
 ## Review log

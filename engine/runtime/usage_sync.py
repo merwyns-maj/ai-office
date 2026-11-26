@@ -64,7 +64,7 @@ def scan_doc(path, doc, forbidden, session):
     The one exempt string is the validated session id itself, in the top-level `session` field of a doc (it is the ledger's file name; ledger.SESSION_RE); it gets the
     events.py data rule and the forbidden terms but not the long-token rule, which a 32-character id would trip."""
     for where, s in _walk(doc, ""):
-        if where == "session" and s == session:
+        if where == "session" and s == session and ledger.SESSION_RE.fullmatch(s):   # U1a: the pattern is checked here, not left to the loader
             kind = next((k for pat, k in zip(events.DATA_PATTERNS, events.PATTERN_KINDS) if pat.search(s)), None)
             if kind is None and any(f and f in s.lower() for f in forbidden):
                 kind = "forbidden term"
@@ -182,5 +182,5 @@ def plan(header, runs, main, budgets, items, *, rules, other_docs=0, forbidden=(
     unknown = sorted(p for p in old if p not in want and p not in orphans)
     actions += [_act("delete", p, old[p][1]) for p in orphans]   # U6: the db mirrors the repo, so what the repo no longer has goes
     report.update({"runs": len(runs), "chunks": sum(1 for p in want if p.startswith(CHUNKS)), "writes": sum(a["op"] == "set" for a in actions),
-                   "deletes": len(orphans), "orphans": orphans, "unknown": unknown, "in_sync": not actions, "synced_at": now if actions else (meta_old or {}).get("synced_at")})
+                   "deletes": len(orphans), "orphans": orphans, "unknown": unknown, "in_sync": not actions, "synced_at": now if any(a["op"] == "set" for a in actions) else (meta_old or {}).get("synced_at")})
     return {"actions": actions, "report": report}

@@ -212,6 +212,16 @@ class Scan(unittest.TestCase):
         with self.assertRaises(U.Refused):   # but the same text anywhere else is still a hit
             U.plan(h, [dict(runs[0], note=sid)] + runs[1:], main, budgets(), [], rules=RULES, now=NOW)
 
+    def test_u1a_a_session_value_that_fails_the_pattern_is_not_exempt(self):
+        bad = "session_Ab1Cd2Ef3Gh4Ij5Kl6Mn7Op8-Qr9St0U"   # 40 chars with a hyphen: not SESSION_RE
+        self.assertEqual(len(bad), 40)
+        self.assertIn("secret-like token", U.scan_doc("p", {"session": bad}, (), bad))   # equal to the header value, still refused
+
+    def test_the_exemption_needs_the_value_to_equal_the_header_session(self):
+        sid = "session_" + "Ab1Cd2Ef3Gh4Ij5Kl6Mn7Op8"
+        self.assertIsNone(U.scan_doc("p", {"session": sid}, (), sid))
+        self.assertIn("secret-like token", U.scan_doc("p", {"session": sid[:-1] + "9"}, (), sid))   # valid-looking id, not the header's
+
 
 class Orphans(unittest.TestCase):
     def test_a_chunk_the_repo_no_longer_has_is_reported_and_deleted_with_its_version(self):   # U6, U7
