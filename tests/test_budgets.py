@@ -167,31 +167,34 @@ class ShippedFile(unittest.TestCase):
         self.ids = {a["id"] for a in miniyaml.loads((OFFICE / "org.yaml").read_text(encoding="utf-8"))["agents"]}
         self.r, self.p = budgets.load_budgets(OFFICE, agents=self.ids, providers=set(cat))
 
-    def test_valid_and_marked_as_starting_values(self):
+    def test_valid_and_dated(self):
         self.assertEqual(self.p, [])
         cc = self.r["providers"]["claude-code"]
-        self.assertEqual(cc["tokens"], 5_000_000)
-        self.assertIn("Merwyn to adjust", cc["note"])
-        self.assertEqual(cc["set_by"], "Janice (pmo)")
-        self.assertEqual({k: v["tokens"] for k, v in cc["agents"].items()},
-                         {"engineer": 2_150_000, "reviewer": 1_500_000, "architect": 650_000, "designer": 300_000, "pm": 250_000, "curator": 100_000, "compliance": 50_000})
-        self.assertEqual(sum(v["tokens"] for v in cc["agents"].values()), 5_000_000)
+        self.assertIsInstance(cc["tokens"], int)
+        self.assertGreater(cc["tokens"], 0)
+        self.assertTrue(cc["set_by"])
+        import datetime
+        datetime.date.fromisoformat(cc["set_on"])
+        self.assertEqual(sum(v["tokens"] for v in cc["agents"].values()), cc["tokens"])
         self.assertEqual(self.r["main_session"], "pmo")
         self.assertNotIn("pmo", cc["agents"])   # the main session has no share: its tokens are not reported
 
-    def test_starting_use_is_76_percent_of_the_budget(self):
+    def test_starting_use_of_the_first_48_runs_is_76_percent_of_the_original_5m(self):
         _, runs, _ = ledger.load_ledger(LEDGER, agents=self.ids, office="ai-office", forbidden=events.forbidden_terms(REPO))
         # the starting values were set from the first 48 runs (T-060); later runs are appended as they finish (T-061)
         used = sum(r["tokens"] or 0 for r in runs if r["n"] <= 48)
         self.assertEqual(used, 3_813_702)
-        self.assertEqual(round(100 * used / self.r["providers"]["claude-code"]["tokens"]), 76)
+        self.assertEqual(round(100 * used / 5_000_000), 76)
 
 
 class Page(unittest.TestCase):
     def test_recorded_page_carries_the_resolved_budgets(self):
         data, probs_ = office_app.build_data(OFFICE, None, LEDGER)
         self.assertEqual(probs_, [])
-        self.assertEqual(data["budgets"]["providers"]["claude-code"]["tokens"], 5_000_000)
+        cat, _ = providers.load_providers(OFFICE)
+        ids = {a["id"] for a in miniyaml.loads((OFFICE / "org.yaml").read_text(encoding="utf-8"))["agents"]}
+        want, _ = budgets.load_budgets(OFFICE, agents=ids, providers=set(cat))
+        self.assertEqual(data["budgets"]["providers"]["claude-code"]["tokens"], want["providers"]["claude-code"]["tokens"])
         self.assertFalse(data["budgets"]["synthetic"])
 
     def test_synthetic_page_has_its_own_marked_budgets_and_the_header_does_not_repeat_them(self):

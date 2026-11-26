@@ -942,12 +942,29 @@ class ChatBuild(unittest.TestCase):
         data, _ = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE)
         self.assertNotIn("chat", data)
 
-    def test_chat_with_ledger_exits_2_and_the_library_refuses(self):
-        self.assertEqual(office_app.main(["ai-office", "--chat", "--ledger", str(LEDGER), "--out", "/tmp/never.html"]), 2)
-        with self.assertRaises(office_app.BuildError):
-            office_app.build_data(OFFICE, None, LEDGER, chat=True)
-        data, _ = office_app.build_data(OFFICE, None, LEDGER)
-        self.assertNotIn("chat", data)
+    def test_chat_with_ledger_builds_the_one_published_page(self):
+        only, _ = office_app.build_data(OFFICE, None, LEDGER)
+        both, _ = office_app.build_data(OFFICE, None, LEDGER, chat=True)
+        self.assertEqual({k: v for k, v in both.items() if k != "chat"}, only)
+        committed = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
+        self.assertEqual(both["chat"], committed["chat"])
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "one.html"
+            argv = ["ai-office", "--ledger", str(LEDGER), "--chat", "--out", str(out)]
+            self.assertEqual(office_app.main(argv), 0)
+            self.assertEqual(office_app.main(argv + ["--check"]), 0)
+            self.assertEqual(json.loads(block(out.read_text(encoding="utf-8"), "office-data")), json.loads(json.dumps(both)))
+            out.write_text(out.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+            self.assertEqual(office_app.main(argv + ["--check"]), 1)
+            office_app.main(argv)
+            if shutil.which("node"):
+                led = both["ledger"]
+                x = CoreUnderNode("test_recorded_replay_totals_and_percentages")
+                py = {"tokens": led["session"]["tokens"], "runs": led["session"]["runs"], "nr": led["session"]["not_reported"],
+                      "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+                self.assertIn("rec ok", x.node(str(out), "rec", x.json_file(tmp, "p.json", py)))
+                py = {"tokens": led["session"]["tokens"], "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+                self.assertIn("budgets rec ok", x.node(str(out), "budgets", x.json_file(tmp, "b.json", py)))
 
     def test_claude_is_only_reached_through_chat_init_which_needs_the_flag(self):
         html = TEMPLATE.read_text(encoding="utf-8")
