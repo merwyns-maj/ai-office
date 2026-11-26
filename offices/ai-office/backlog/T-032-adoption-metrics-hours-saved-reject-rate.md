@@ -2,13 +2,13 @@
 id: T-032
 title: "Adoption metrics (hours saved, reject rate, turnaround)"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P2
-owner: engineer
+owner: reviewer
 where: chat
 project: ai-office
 depends_on: []
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/30
 ---
 
 ## Done when
