@@ -4,7 +4,7 @@ title: "Usage numbers from the artifact db, so the page needs no republish per l
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-067, T-070]
@@ -211,6 +211,20 @@ The usage figures were never blank.
 4. If the `s == session` condition in the exemption is removed, the tests still pass. It is redundant today, because `build()` sets `session` from the header, but a test would pin it.
 5. Already true before T-069: `chat.scan` does not flag a 30-character `sk...` token (the long-token rule starts at 32).
 6. The external skills design:accessibility-review and data:validate-data were not available in this session, so I checked by hand.
+
+— Cahyani (reviewer)
+
+### Review 2 (after rework 1)
+**Verdict: PASS** (26 Nov 2026). Branch `t-069-usage-from-db` at 2f8aadb, PR 73. Rework diff `fbd1387..HEAD`: `engine/runtime/usage_sync.py` (2 lines), `tests/test_usage_sync.py` (+10), and this task file (U1a line, Rework 1, owner). Nothing else changed. No `board.md` in the diff.
+
+- U1a, `scan_doc`: **pass.** Line 67 is now `if where == "session" and s == session and ledger.SESSION_RE.fullmatch(s):`. The exemption needs both the value to equal the header session and the pattern to match (`^session_[A-Za-z0-9]{8,64}$`), so it no longer relies on the loader.
+- The new tests catch the bug: **pass.** In a temp copy (/tmp/t069old) with the pre-rework `usage_sync.py` from fbd1387, `test_u1a_a_session_value_that_fails_the_pattern_is_not_exempt` fails (`TypeError: argument of type 'NoneType' is not iterable`, because the old code exempted the 40-character hyphen value). `test_the_exemption_needs_the_value_to_equal_the_header_session` passes on the old code, as it should, since the old code already had `s == session`. With `s == session` removed from the new code, it fails (`tests.test_usage_sync`: 25 tests, FAILED errors=1). So the new test covers Review 1 note 4, and U1a has its own test.
+- Delete-only `synced_at`: **pass.** I ran a plan that is in sync except for one orphan chunk. New code: actions `['delete']`, `report.synced_at` = 2026-11-27T01:00:00Z (the stored value), and after apply the meta `synced_at` is 2026-11-27T01:00:00Z. Old code: the report showed 2026-11-27T02:00:00Z while the meta stayed at 01:00. The report now matches the db. `in_sync` is still False when there are deletes, and the `writes` count is unchanged.
+- Suite and CLIs: `python -m unittest discover -s tests`: `Ran 485 tests ... OK`, exit 0. `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 72 tasks, 19 skills`, exit 0. `office_app.py ai-office --chat --check`: `up to date (229 KB, 84 events)`, exit 0. `git status` is clean.
+
+**Notes (none of these cause a reject)**
+1. No unit test pins the delete-only `synced_at` behaviour. It was checked only by my ad hoc run above. Worth adding later.
+2. Review 1 notes 1, 2, 5 and 6 still stand (live U3/C7 refusals before the first sync, the Detail auto-collapse, the 30-character `sk` token, and the external skills not being available).
 
 — Cahyani (reviewer)
 
