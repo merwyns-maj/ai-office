@@ -207,7 +207,8 @@ class RealFiles(unittest.TestCase):
 
     def test_sprint_task_counts(self):
         counts = {s["n"]: len(s["tasks"]) for s in metrics.sprints(REPO / "offices" / OFFICE) if s["closed"]}
-        self.assertEqual(counts, {1: 2, 2: 3, 3: 3, 4: 3})
+        # Sprints 1-4 are history; later sprints are added as they close (T-055).
+        self.assertEqual({k: v for k, v in counts.items() if k <= 4}, {1: 2, 2: 3, 3: 3, 4: 3})
 
     def test_committed_report_clean(self):
         for rep in (REPO / "offices" / OFFICE / "metrics").glob("*.md"):
