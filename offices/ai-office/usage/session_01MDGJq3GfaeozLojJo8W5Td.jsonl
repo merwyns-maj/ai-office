@@ -95,3 +95,7 @@
 {"n": 94, "sprint": 7, "agent": "engineer", "tasks": ["T-071"], "step": "rework", "tokens": 23625, "tool_uses": 7, "duration_ms": 54501, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 95, "sprint": 7, "agent": "reviewer", "tasks": ["T-071"], "step": "review", "tokens": 36334, "tool_uses": 8, "duration_ms": 67697, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 96, "sprint": 7, "agent": "engineer", "tasks": ["T-067"], "step": "build", "tokens": 202344, "tool_uses": 85, "duration_ms": 4987258, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 97, "sprint": 7, "agent": "reviewer", "tasks": ["T-067"], "step": "review", "tokens": 128728, "tool_uses": 43, "duration_ms": 2198779, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 98, "sprint": 7, "agent": "engineer", "tasks": ["T-067"], "step": "rework", "tokens": 78298, "tool_uses": 29, "duration_ms": 2441617, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 99, "sprint": 7, "agent": "architect", "tasks": ["T-067"], "step": "design", "tokens": 41660, "tool_uses": 6, "duration_ms": 53070, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 100, "sprint": 7, "agent": "reviewer", "tasks": ["T-067"], "step": "review", "tokens": 101952, "tool_uses": 34, "duration_ms": 1559288, "date": "2026-11-26", "note": "after the Sprint 7 close"}
