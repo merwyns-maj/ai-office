@@ -12,8 +12,9 @@
   --panel:#1d1e2c;--text:#f2ede4;--text-dim:#9aa0b4;--rug:#353850;--wood:#7d6650;--paper:#efe6d2;
   --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --bar:56px;--side:288px;
+  --bar:56px;--side:288px;--bb:calc(var(--bar) + var(--chat-h));
 }
+@property --chat-h{syntax:'<length>';inherits:true;initial-value:0px}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#14151f;color:var(--text);font:13px/1.35 var(--ui);overflow:hidden;-webkit-text-size-adjust:100%}
 body{background:radial-gradient(120% 90% at 50% 38%,#272a40 0%,#171826 60%,#101119 100%)}
@@ -26,7 +27,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-o
 @supports (backdrop-filter:blur(6px)){.panel{backdrop-filter:blur(8px)}}
 
 /* stage = where the 3D lives; the HUD never covers it */
-#stage{position:absolute;left:0;right:0;top:var(--bar);bottom:var(--bar);overflow:hidden;touch-action:none}
+#stage{position:absolute;left:0;right:0;top:var(--bar);bottom:var(--bb);overflow:hidden;touch-action:none}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .lb{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap;pointer-events:none}
@@ -82,7 +83,7 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 .seg[aria-pressed=true]{background:#2a2c42;border-color:rgba(255,255,255,.35)}
 
 /* ticker */
-#side{position:absolute;right:12px;top:var(--bar);bottom:var(--bar);width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
+#side{position:absolute;right:12px;top:var(--bar);bottom:var(--bb);width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
 #ticker{flex:1 1 0;min-height:96px;padding:0 12px 12px;overflow:visible;position:relative;display:flex;flex-direction:column;gap:2px}
 #ticker .uh{padding:10px 0 8px}
 #nomodel{color:var(--text-dim);font-size:12px;margin:0 0 6px}
@@ -163,7 +164,7 @@ body.rm .umode.ufade{animation:none}
 #usheet .dhead{font-size:13px}
 .ufoot.rec{font-size:11px}
 #ubtn{display:none}
-#usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bar) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
+#usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bb) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
 #usheet.open{display:flex}
 #usheet .uh{position:sticky;top:0;background:var(--panel);padding:10px 0 8px;z-index:1}
 #usheet .ucol{width:44px;height:44px;font-size:20px}
@@ -186,7 +187,7 @@ body.rm .tl.new{animation:none}
 #tone{display:none}
 
 /* focus card */
-#focus{position:absolute;right:12px;top:var(--bar);width:calc(var(--side) - 24px);margin-top:4px;padding:14px;z-index:5}
+#focus{position:absolute;right:12px;top:var(--bar);width:calc(var(--side) - 24px);margin-top:4px;padding:14px;z-index:5;max-height:max(96px,calc(100% - var(--bar) - var(--bb) - 8px));overflow:auto}
 #focus[hidden]{display:none}
 #focus h3{margin:0;font:700 16px/1.2 var(--ui)}
 #focus .role{color:var(--text-dim);font-size:12px;margin:2px 0 10px}
@@ -199,7 +200,7 @@ body.rm .tl.new{animation:none}
 #fx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:8px;border:0;background:transparent;font-size:18px}
 
 /* bottom bar */
-#bar{position:absolute;left:0;right:0;bottom:0;height:var(--bar);display:flex;gap:10px;align-items:center;padding:8px 12px}
+#bar{position:absolute;left:0;right:0;bottom:var(--chat-h);height:var(--bar);display:flex;gap:10px;align-items:center;padding:8px 12px}
 .btn{height:38px;min-width:38px;padding:0 12px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(29,30,44,.92);font:600 13px/1 var(--ui);display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:hover{background:#2a2c42}
 .btn[aria-pressed=true]{border-color:rgba(255,255,255,.4)}
@@ -247,7 +248,7 @@ body.rm .tl.new{animation:none}
 .synpill{text-shadow:none}
 @media (min-width:900px){
   #gear{display:inline-flex}
-  #msheet{position:absolute;right:12px;bottom:calc(var(--bar) + 4px);padding:10px;gap:8px;flex-direction:column;z-index:9}
+  #msheet{position:absolute;right:12px;bottom:calc(var(--bb) + 4px);padding:10px;gap:8px;flex-direction:column;z-index:9}
   #msheet.open{display:flex}
   body.free #side{display:block;left:0;right:0;top:0;bottom:0;width:auto;margin:0;pointer-events:none}
   body.free #usage,body.free #ticker{position:absolute;pointer-events:auto;left:var(--px);top:var(--py);width:var(--pw);height:var(--ph);max-height:none;min-height:0;margin:0;flex:none;z-index:var(--pz,2)}
@@ -270,8 +271,8 @@ body.rm .tl.new{animation:none}
   #side{display:contents}
   #usage{display:none}
   #ticker{display:none}
-  #tone{display:block;position:absolute;left:12px;right:12px;bottom:var(--bar);height:34px;padding:0 12px;align-items:center;gap:8px;border:0;text-align:left;font-size:12px;overflow:hidden;white-space:nowrap}
-  #stage{bottom:calc(var(--bar) + 36px)}
+  #tone{display:block;position:absolute;left:12px;right:12px;bottom:var(--bb);height:34px;padding:0 12px;align-items:center;gap:8px;border:0;text-align:left;font-size:12px;overflow:hidden;white-space:nowrap}
+  #stage{bottom:calc(var(--bb) + 36px)}
   #focus{left:12px;right:auto}
 }
 @media (min-width:600px) and (max-width:899px){
@@ -295,26 +296,37 @@ body.rm .tl.new{animation:none}
   .seg:before{position:absolute;left:0;right:0;top:0;bottom:auto;width:auto;height:3px;margin:0}
   .seg .nm,.seg small{display:none}
   .seg .ini{display:block;font:700 11px/1 var(--ui)}
-  #stage{top:112px;bottom:calc(var(--bar) + 36px)}
+  #stage{top:112px;bottom:calc(var(--bb) + 36px)}
   #bar{padding:8px;gap:6px}
   #bar .seg2{display:none}
   #bar .opt{display:none}
   #bar #clock{display:none}
   #gear{display:inline-flex}
   #fps{min-width:0;font-size:10px}
-  #msheet{display:none;position:absolute;right:8px;bottom:calc(var(--bar) + 40px);padding:10px;gap:8px;flex-direction:column;z-index:6}
+  #msheet{display:none;position:absolute;right:8px;bottom:calc(var(--bb) + 40px);padding:10px;gap:8px;flex-direction:column;z-index:6}
   #msheet.open{display:flex}
   #msheet .seg2 button{height:40px;min-width:48px}
-  #focus{left:8px;right:8px;top:auto;bottom:calc(var(--bar) + 40px);width:auto}
+  #focus{left:8px;right:8px;top:auto;bottom:calc(var(--bb) + 40px);width:auto;max-height:max(96px,calc(100% - 112px - var(--bb) - 48px))}
   #tone{left:8px;right:8px}
 }
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
-body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bar) + 40px);z-index:7}
+body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bb) + 40px);z-index:7}
 @media (prefers-reduced-motion:reduce){.umode.ufade{animation:none}.bar i{transition:none}body.free .pp,body.free .pp.anim,body.free .pp.drag{transition:none!important}.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
 /* office chat (T-063) */
 #chat[hidden],#chatbtn[hidden]{display:none}
-#chat{position:absolute;right:calc(var(--side) + 4px);bottom:calc(var(--bar) + 12px);width:360px;height:480px;max-height:calc(100% - var(--bar) - 70px);z-index:6;display:flex;flex-direction:column;padding:0}
+#chat{position:absolute;left:0;right:0;bottom:var(--kb,0px);height:calc(var(--chat-h) - var(--kb,0px));z-index:6;display:flex;flex-direction:column;padding:0 0 env(safe-area-inset-bottom);border-radius:12px 12px 0 0;border-bottom:0}
+:root{transition:--chat-h .18s ease-out}
+:root.cc{transition:--chat-h .14s ease-in}
+:root.cm #chat{overflow:hidden}
+:root.nt{transition:none}
+#chgrip{position:relative;flex:none;height:12px;cursor:ns-resize;touch-action:none;z-index:1}
+#chgrip:before{content:'';position:absolute;left:0;right:0;top:-8px;bottom:-8px}
+#chgrip:after{content:'';position:absolute;left:50%;top:5px;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:rgba(255,255,255,.3)}
+#chgrip:hover:after,#chgrip.on:after{background:rgba(255,255,255,.6)}
+#chgrip:focus-visible{outline:2px solid var(--text);outline-offset:-2px}
+#cmid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin}
 #chat .uh h2{white-space:nowrap}
+#chat .cb{max-width:min(88%,720px)}
 #chat .uh .ucol{font-size:18px}
 .chst{display:inline-flex;align-items:center;gap:5px;font:500 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
 .chst i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--text-dim);display:inline-block}
@@ -356,7 +368,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 .cbtns button:hover,.cmore:hover,#cnew:hover{background:rgba(255,255,255,.08)}
 .ccopy{position:absolute;right:4px;top:4px;padding:1px 6px;min-height:20px;background:#2a2c42}
 #cnew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% - 0px);z-index:2}
-.cwrap{position:relative;flex:none}
+.cwrap{position:relative;flex:1 1 auto;min-height:64px;display:flex;flex-direction:column}
 #cnew{bottom:6px;background:var(--paper);color:var(--panel);border:0;font-weight:700}
 .cnotice{margin:0 12px 6px;font-size:11px;line-height:1.4;color:var(--text-dim);flex:none}
 .cnotice.need{padding:8px 10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:var(--text)}
@@ -383,9 +395,9 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 .cbadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--paper);color:var(--panel);font:700 11px/18px var(--ui);text-align:center}
 .cbadge.need{background:var(--warn)}
 #chatbtn .cl{display:inline}
-body.free #chat.placed{left:var(--px);top:var(--py);width:var(--pw);height:var(--ph);right:auto;bottom:auto;max-height:none;z-index:var(--pz,6)}
 @media (max-width:899px){
-  #chat{position:absolute;inset:0;width:auto;height:auto;max-height:none;border-radius:0;z-index:12;padding-top:env(safe-area-inset-top);padding-bottom:max(env(safe-area-inset-bottom),var(--kb,0px));bottom:var(--kb,0px)}
+  #chgrip{height:28px}
+  #chgrip:after{top:12px}
   #chat .uh{padding:10px 12px}
   #chat .ucol{width:44px;height:44px}
   #clist li{min-height:44px}
@@ -394,7 +406,7 @@ body.free #chat.placed{left:var(--px);top:var(--py);width:var(--pw);height:var(-
   .cb{max-width:94%}
 }
 @media (max-width:599px){#chatbtn .cl{display:none}#chatbtn{width:44px;height:44px}}
-@media (prefers-reduced-motion:reduce){.cb.new,.cchip.replying i{animation:none}}
+@media (prefers-reduced-motion:reduce){:root,:root.cc{transition:none}.cb.new,.cchip.replying i{animation:none}}
 body.rm .cb.new,body.rm .cchip.replying i{animation:none}
 </style>
 </head>
@@ -421,19 +433,6 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     <aside id="ticker" class="panel pp" aria-label="Event ticker"><div class="uh"><h2>Latest events</h2></div><div id="nomodel" hidden>This log has no model data.</div><div id="tlist"></div></aside>
   </div>
   <section id="usheet" class="panel" role="dialog" aria-label="Usage" hidden></section>
-  <section id="chat" class="panel pp" aria-label="Office chat" hidden>
-    <div class="uh"><h2>Office chat</h2><span id="chst" class="chst"></span><button id="chx" class="ucol" type="button" aria-label="Close chat">×</button></div>
-    <div id="cnote" class="cnote"></div>
-    <div class="cwrap" style="flex:1 1 auto;min-height:0;display:flex;flex-direction:column"><div id="cthread" class="cthread" role="log" aria-label="Chat messages" aria-live="polite" tabindex="0"></div><button id="cnew" type="button" hidden>New replies</button></div>
-    <div id="cnotice" class="cnotice"></div>
-    <form id="cform" class="cform" autocomplete="off">
-      <ul id="clist" role="listbox" aria-label="Agents" hidden></ul>
-      <div id="cto" class="cto"></div>
-      <div id="cwarn" role="alert" hidden></div>
-      <div class="cin"><textarea id="ctext" rows="1" maxlength="4000" placeholder="Message the office. @ to mention" aria-label="Message" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="clist"></textarea><button id="csend" class="btn" type="submit">Send</button></div>
-      <div class="cfoot"><span>Chat does not approve anything that needs a gate. Those are confirmed in the session.</span><button id="cclear" type="button">Clear chat</button></div>
-    </form>
-  </section>
   <button id="tone" class="panel" type="button" aria-label="Latest event; open the event list"></button>
   <section id="focus" class="panel" hidden aria-label="Agent details"><button id="fx" type="button" aria-label="Close">×</button><div id="fbody"></div></section>
   <div id="msheet" class="panel"></div>
@@ -449,6 +448,22 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     <button id="gear" class="btn" type="button" aria-label="Settings" aria-expanded="false"><svg viewBox="0 0 16 16"><path fill="currentColor" d="M8 5.2A2.8 2.8 0 1 0 8 10.8 2.8 2.8 0 0 0 8 5.2zM6.9.8h2.2l.4 1.9 1.2.5 1.6-1.1 1.6 1.6-1.1 1.6.5 1.2 1.9.4v2.2l-1.9.4-.5 1.2 1.1 1.6-1.6 1.6-1.6-1.1-1.2.5-.4 1.9H6.9l-.4-1.9-1.2-.5-1.6 1.1-1.6-1.6 1.1-1.6-.5-1.2L.8 9.1V6.9l1.9-.4.5-1.2L2.1 3.7l1.6-1.6 1.6 1.1 1.2-.5z" opacity=".9"/></svg></button>
     <span id="fps" aria-label="Frames per second">-- fps</span>
   </footer>
+  <section id="chat" class="panel" aria-label="Office chat" hidden>
+    <div id="chgrip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize chat"></div>
+    <div class="uh"><h2>Office chat</h2><span id="chst" class="chst"></span><button id="chx" class="ucol" type="button" aria-label="Close chat">×</button></div>
+    <div id="cmid">
+    <div id="cnote" class="cnote"></div>
+    <div class="cwrap"><div id="cthread" class="cthread" role="log" aria-label="Chat messages" aria-live="polite" tabindex="0"></div><button id="cnew" type="button" hidden>New replies</button></div>
+    <div id="cnotice" class="cnotice"></div>
+    </div>
+    <form id="cform" class="cform" autocomplete="off">
+      <ul id="clist" role="listbox" aria-label="Agents" hidden></ul>
+      <div id="cto" class="cto"></div>
+      <div id="cwarn" role="alert" hidden></div>
+      <div class="cin"><textarea id="ctext" rows="1" maxlength="4000" placeholder="Message the office. @ to mention" aria-label="Message" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="clist"></textarea><button id="csend" class="btn" type="submit">Send</button></div>
+      <div class="cfoot"><span>Chat does not approve anything that needs a gate. Those are confirmed in the session.</span><button id="cclear" type="button">Clear chat</button></div>
+    </form>
+  </section>
   <div id="live" class="sr" aria-live="polite"></div>
 </div>
 <script type="application/json" id="office-data">__OFFICE_DATA__</script>
@@ -804,11 +819,11 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     return '+' + String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
   }
   /* ---------- movable panels (T-059): pure layout maths, numbers only ---------- */
-  var PANEL = { MIN_W: 240, MIN_H: 120, MAX_W: 520, MARGIN: 8, SNAP: 12, STEP: 8, STEP_BIG: 32, OPACITY: 92, KEY: 'office.layout.v1', IDS: ['usage', 'ticker', 'chat'] };
+  var PANEL = { MIN_W: 240, MIN_H: 120, MAX_W: 520, MARGIN: 8, SNAP: 12, STEP: 8, STEP_BIG: 32, OPACITY: 92, KEY: 'office.layout.v1', IDS: ['usage', 'ticker'] };
   function pnum(v) { return typeof v === 'number' && isFinite(v); }
   function pclamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
-  /* the box a panel may occupy: 8px from the sides, never above the top bar (the needs-you pill and strip) or under the bottom bar */
-  function panelBounds(winW, winH, barH) { return { left: PANEL.MARGIN, right: winW - PANEL.MARGIN, top: barH, bottom: winH - barH - PANEL.MARGIN }; }
+  /* the box a panel may occupy: 8px from the sides, never above the top bar (the needs-you pill and strip) or under the bottom bar and the chat dock (T-066) */
+  function panelBounds(winW, winH, barH, dockH) { return { left: PANEL.MARGIN, right: winW - PANEL.MARGIN, top: barH, bottom: winH - barH - (pnum(dockH) ? dockH : 0) - PANEL.MARGIN }; }
   function panelMax(b) { return { w: Math.max(PANEL.MIN_W, Math.min(PANEL.MAX_W, b.right - b.left)), h: Math.max(PANEL.MIN_H, b.bottom - b.top) }; }
   /* size first (down to its minimum), then position; a window too small for the minimum overflows at the top-left corner, never hides */
   function clampRect(r, b) {
@@ -841,7 +856,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
   function rectSentence(name, r) { return name + ' panel at ' + r.x + ', ' + r.y + ', size ' + r.w + ' by ' + r.h + '.'; }
   /* saved state: every number validated, a bad panel falls back alone (null = default), a bad opacity falls back to 92; never throws */
   function parseLayout(text) {
-    var out = { usage: null, ticker: null, chat: null }, raw;
+    var out = { usage: null, ticker: null }, raw;
     if (typeof text !== 'string' || !text) return out;
     try { raw = JSON.parse(text); } catch (e) { return out; }
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
@@ -859,9 +874,26 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     PANEL.IDS.forEach(function (id) { var p = l[id]; if (p) o[id] = { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(p.w), h: Math.round(p.h), o: opacityStep(p.o) }; });
     return JSON.stringify(o);
   }
+  /* chat dock (T-066) */
+  var DOCK = { MIN: 180, DEF_D: 0.38, DEF_P: 0.40, MIN_STAGE_D: 240, MIN_STAGE_P: 160, STEP: 16, STEP_BIG: 64 };
+  /* want: saved px or anything else (default); chrome: top strip + bar + tone; kb: keyboard px */
+  function chatH(want, vh, chrome, phone, kb) {
+    var def = Math.round(vh * (phone ? DOCK.DEF_P : DOCK.DEF_D)), max = vh - chrome - (phone ? DOCK.MIN_STAGE_P : DOCK.MIN_STAGE_D);
+    if (pnum(kb) && kb > 0) return Math.max(DOCK.MIN, vh - kb - chrome);
+    max = Math.max(DOCK.MIN, max);
+    return Math.round(pclamp(pnum(want) && want > 0 ? want : def, DOCK.MIN, max));
+  }
   /* ----- office chat (T-063): pure helpers; the same rules as engine/runtime/chat.py (shared fixtures keep them equal) ----- */
   var CH = {};
   CH.TRANSITIONS = { 'new': ['picked'], picked: ['replying', 'new', 'answered', 'needs_merwyn'], replying: ['answered', 'needs_merwyn', 'new'], needs_merwyn: ['answered'], answered: [] };
+  CH.parseSt = function (text) {
+    var o = {}, r = { open: false, seen_at: '', ack: false };
+    try { o = JSON.parse(text || '{}'); } catch (e) { o = {}; }
+    if (!o || typeof o !== 'object' || Array.isArray(o)) o = {};
+    r.open = !!o.open; r.ack = !!o.ack; if (typeof o.seen_at === 'string') r.seen_at = o.seen_at;
+    if (pnum(o.h) && o.h > 0) r.h = o.h;
+    return r;
+  };
   CH.canMove = function (a, b) { return Object.prototype.hasOwnProperty.call(CH.TRANSITIONS, a) && CH.TRANSITIONS[a].indexOf(b) >= 0; };
   var MRE = /(^|[^\w@])@([A-Za-z][A-Za-z-]{0,23})/g;
   /* names come from user text: a null-prototype map, so @constructor or @__proto__ is never an agent */
@@ -951,7 +983,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
   function lum(h) { var v = [1, 3, 5].map(function (i) { var c = parseInt(h.substr(i, 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
   CH.contrast = function (a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
   CH.FILL = '#2a2c42';
-  CH.nameCol = function (h) {   // the avatar colour, lightened until the written name reads at 4.5:1 on the bubble fill
+  CH.nameCol = function (h) {
     var k = 0, c = h;
     function mix(p) { return '#' + [1, 3, 5].map(function (i) { var x = parseInt(h.substr(i, 2), 16); return ('0' + Math.round(x + (255 - x) * p).toString(16)).slice(-2); }).join(''); }
     while (CH.contrast(c, CH.FILL) < 4.5 && k < 10) { k++; c = mix(k / 10); }
@@ -1020,7 +1052,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
     MODE_KEY: MODE_KEY, parseMode: parseMode, budgetRow: budgetRow, budgetLevel: budgetLevel, sortDetail: sortDetail, budgetView: budgetView,
     tickerItems: tickerItems, switchSentence: switchSentence,
-    PANEL: PANEL, panelBounds: panelBounds, clampRect: clampRect, moveRect: moveRect, resizeRect: resizeRect, snapRect: snapRect, keyDelta: keyDelta,
+    PANEL: PANEL, chatDock: DOCK, chatH: chatH, panelBounds: panelBounds, clampRect: clampRect, moveRect: moveRect, resizeRect: resizeRect, snapRect: snapRect, keyDelta: keyDelta,
     opacityStep: opacityStep, blurFor: blurFor, textMode: textMode, rectSentence: rectSentence, parseLayout: parseLayout, serializeLayout: serializeLayout };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
@@ -1032,7 +1064,7 @@ var D = JSON.parse(document.getElementById('office-data').textContent);
 var P = D.theme.palette, EV = D.events, TL = C.timeline(EV), TOTAL = TL.total;
 var $ = function (id) { return document.getElementById(id); };
 var params = new URLSearchParams(location.search);
-var CFG = D.chat || null;   // T-063: no chat data (the recorded usage page, a default build) means no chat panel and no button
+var CFG = D.chat || null;
 if (!CFG) { ['chat', 'chatbtn'].forEach(function (i) { var e = $(i); if (e) e.remove(); }); }
 var NAME = {}, AG = {}, DESK = {}, ROOM = {}, STAGE_ROOM = {};
 D.agents.forEach(function (a) { NAME[a.id] = a.name; AG[a.id] = a; });
@@ -1195,7 +1227,7 @@ function announce(t) { $('live').textContent = ''; setTimeout(function () { $('l
 function fmtTok(n) {
   if (n < 1000) return String(n);
   if (n < 1e6 && Math.round(n / 1000) < 1000) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
-  return (Math.round(n / 1e5) / 10).toFixed(1) + 'M';   // 2,150,000 reads 2.2M (toFixed would say 2.1M); 999,600 rolls over to 1.0M, never 1000k
+  return (Math.round(n / 1e5) / 10).toFixed(1) + 'M';
 }
 /* "used / budget" that reads like the %: both in the budget's unit, with the fewest decimals at which the shown ratio rounds to the shown % */
 function fmtPair(used, budget, pct) {
@@ -1226,7 +1258,7 @@ function tokWords(n) {
 function shortLabel(l) { return String(l).replace(/\s*\([^)]*\)\s*$/, ''); }
 function periodLabel(v) { return v.period === 'session' ? 'This session' : String(v.period); }
 /* the budget part of a row: bar (or dashed track), text, and the exact states in words (over and unset never rely on colour or hatch) */
-var LVWORD = { near: 'near budget', alert: 'at limit' };   // the word that carries the state; over has "over by X"
+var LVWORD = { near: 'near budget', alert: 'at limit' };
 function budgetBar(r, key) {
   if (r.state === 'unset') return '<div class="bt"><div class="bar unset" aria-hidden="true"></div></div>';
   return '<div class="bt"><div class="bar" aria-hidden="true"><i data-k="' + esc(key) + '" data-w="' + r.barPct + '" class="lv-' + r.level + '" style="width:' + r.barPct + '%"></i></div>' +
@@ -1306,7 +1338,7 @@ function segKey(e) {
   var t = e.target.closest && e.target.closest('[role=radio]'); if (!t) return;
   var k = e.key, to = k === 'ArrowLeft' || k === 'ArrowUp' || k === 'Home' ? 'summary' : (k === 'ArrowRight' || k === 'ArrowDown' || k === 'End' ? 'detail' : (k === 'Enter' || k === ' ' ? t.dataset.mode : null));
   if (!to) return;
-  e.preventDefault(); e.stopPropagation(); setMode(to, true);   // arrows here are for the switch, not the page-wide replay shortcuts
+  e.preventDefault(); e.stopPropagation(); setMode(to, true);
  
   var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), b = box.querySelector('[data-mode="' + to + '"]'); if (b) b.focus();   // the old buttons were replaced by the redraw
 }
@@ -1474,7 +1506,7 @@ function dispatch(i) {
 function seek(t) {
   t = Math.max(0, Math.min(TOTAL, t)); T = t;
   S = C.stateAt(D, t); next = C.countDue(D, t);
-  if (CFG) C.chat.setLive(S, CHAT_LIVE);   // a live chat wait is never cleared by scrubbing the replay
+  if (CFG) C.chat.setLive(S, CHAT_LIVE);
   hist = []; for (var i = 0; i < next; i++) if (EV[i].type !== 'usage') hist.push({ ev: EV[i], start: TL[i].start });
   walkingSet = {}; ended = false;
   rebuildTicker(next);
@@ -1485,9 +1517,9 @@ function seek(t) {
 }
 
 /* ---------- loop ---------- */
-var last = 0, fpsN = 0, fpsT = 0, lowT = 0, lowRes = false;
+var last = 0, fpsN = 0, fpsT = 0, lowT = 0, lowRes = false, lastDt = 0, dockBusy = false;
 function frame(ms) {
-  var dt = Math.min(0.1, (ms - last) / 1000 || 0); last = ms; tNow = ms / 1000;
+  var dt = Math.min(0.1, (ms - last) / 1000 || 0); last = ms; lastDt = dt; tNow = ms / 1000;
   if (playing) {
     T += dt * speed;
     while (next < EV.length && TL[next].start <= T) { dispatch(next); next++; }
@@ -1808,7 +1840,7 @@ function initScene() {
   var cam = new T3.OrthographicCamera(-10, 10, 10, -10, 0.1, 200), DIR = new V3(-0.383, 0.643, 0.663).normalize();
   var home = { t: new V3(12, 0, 8), half: 10 }, camT = new V3(12, 0, 8), camZ = 1, userT = new V3(12, 0, 8), userZ = 1, userAt = -99, focusId = null, focusAt = -99;
   var fwd = new V3(), right = new V3(), up = new V3(), curAz = -1;
-  function setAz(deg) {   // a portrait screen turns the office to look along the pipeline
+  function setAz(deg) {
     if (deg === curAz) return; curAz = deg; var az = deg * Math.PI / 180;
     DIR.set(-0.766 * Math.sin(az), 0.643, 0.766 * Math.cos(az)); fwd.copy(DIR).negate();
     right.crossVectors(fwd, new V3(0, 1, 0)).normalize(); up.crossVectors(right, fwd).normalize();
@@ -1831,8 +1863,14 @@ function initScene() {
     W = Math.max(1, stage.clientWidth); H = Math.max(1, stage.clientHeight); aspect = W / H; setAz(aspect < 0.8 ? 62 : 30);
     renderer.setSize(W, H, false); fitHome(); if (camZ === 1 && !focusId) camT.copy(home.t); userT.copy(camT); applyCam();
   }
-  window.addEventListener('resize', resize);
-  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  /* T-066: one resize per frame; on slow frames while the dock moves, only the final size */
+  var rsF = 0;
+  function reqResize(force) {
+    if (!force && dockBusy && lastDt > 0.05 && lowRes) return;
+    if (!rsF) rsF = requestAnimationFrame(function () { rsF = 0; resize(); });
+  }
+  window.addEventListener('resize', function () { reqResize(); });
+  if (window.ResizeObserver) new ResizeObserver(function () { reqResize(); }).observe(stage);
   var tmp = new V3();
   function toNDC(v, out) { out.copy(v).project(cam); return out; }
   var nd = new V3();
@@ -2241,6 +2279,7 @@ function initScene() {
     onEvent: onEvent, restore: restore, idle: function () { return jobs.length === 0; },
     calls: function () { return renderer.info.render.calls; },
     lowRes: function () { renderer.setPixelRatio(1); resize(); },
+    resize: function () { reqResize(true); },
     frame: function (dt, rdt, tn) {
       schedStep(rdt);
       agentList.forEach(function (a) { updateAgent(a, dt, tn); });
@@ -2256,13 +2295,14 @@ function initScene() {
 }
 
 /* ---------- movable panels (T-059): usage and ticker float at 900px+; layout maths is in OfficeCore ---------- */
-var PN = C.PANEL, PNAME = { usage: 'Usage', ticker: 'Latest events', chat: 'Chat' }, PIDS = PN.IDS.filter(function (id) { return !!$(id); });
-var PL = { free: false, r: { usage: null, ticker: null, chat: null }, o: { usage: PN.OPACITY, ticker: PN.OPACITY, chat: PN.OPACITY }, pending: null }, pdrag = null, pTimers = {}, resetTimer = 0, animTimers = {};
+var PN = C.PANEL, PNAME = { usage: 'Usage', ticker: 'Latest events' }, PIDS = PN.IDS.filter(function (id) { return !!$(id); });
+var PL = { free: false, r: { usage: null, ticker: null }, o: { usage: PN.OPACITY, ticker: PN.OPACITY }, pending: null }, pdrag = null, pTimers = {}, resetTimer = 0, animTimers = {};
 var GRIP = '<svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/><circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/><circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/></g></svg>';
 var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></g></svg>';
 var RZ = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M14 4L4 14M14 9L9 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 function floatOK() { return innerWidth >= 900; }
-function pbounds() { return C.panelBounds(innerWidth, innerHeight, $('bar').offsetHeight || 56); }
+function pbounds() { return C.panelBounds(innerWidth, innerHeight, $('bar').offsetHeight || 56, (chatOpen() ? DK.h : 0)); }
+function shown(id) { return C.clampRect(PL.r[id], pbounds()); }
 function pids() { return PIDS.filter(function (id) { return !$(id).hidden; }); }
 function readStore() { try { return localStorage.getItem(PN.KEY); } catch (e) { return null; } }   // storage blocked: default layout, silently
 function writeStore() { try { localStorage.setItem(PN.KEY, C.serializeLayout(layoutObj())); } catch (e) { /* ignore */ } }
@@ -2272,30 +2312,31 @@ function measure() {
   var m = {}; pids().forEach(function (id) { var b = $(id).getBoundingClientRect(); m[id] = { x: Math.round(b.left), y: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height) }; });
   return m;
 }
-function measureDefaults() {   // today's flow layout, read without a repaint in between
+function measureDefaults() {
   var was = document.body.classList.contains('free'); document.body.classList.remove('free');
   var m = measure(); if (was) document.body.classList.add('free'); return m;
 }
 function paintRect(id) {
-  var r = PL.r[id], e = $(id); if (!r) return;
+  var r = PL.r[id] && shown(id), e = $(id); if (!r) return;
   e.classList.add('placed'); e.style.setProperty('--px', r.x + 'px'); e.style.setProperty('--py', r.y + 'px'); e.style.setProperty('--pw', r.w + 'px'); e.style.setProperty('--ph', r.h + 'px');
 }
 function paintOpacity(id) {
   var e = $(id), o = PL.o[id], m = C.textMode(o), inp = $('o-' + id);
-  e.style.setProperty('--pbg', 'rgba(29,30,44,' + (o / 100) + ')');   // the --panel colour at this opacity; text, border and handles stay solid
+  e.style.setProperty('--pbg', 'rgba(29,30,44,' + (o / 100) + ')');
   e.style.setProperty('--pblur', C.blurFor(o) + 'px');
   e.style.setProperty('--pbd', m.edge ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.07)');
   e.classList.toggle('tp', m.shadow); e.classList.toggle('tpd', m.dim);
   if (inp) { inp.value = o; inp.setAttribute('aria-valuetext', o + ' percent'); $('ov-' + id).textContent = o + '%'; }
 }
-function settle(id, r, ms) {   // short position settle; none under reduced motion
-  var e = $(id); PL.r[id] = r;
+function settle(id, r, ms) { PL.r[id] = r; animPaint(id, ms); }
+function animPaint(id, ms) {   // short position settle; none under reduced motion
+  var e = $(id);
   if (REDUCED) { paintRect(id); return; }
   e.style.setProperty('--pdur', ms + 'ms'); e.classList.add('anim'); paintRect(id);
   clearTimeout(animTimers[id]); animTimers[id] = setTimeout(function () { e.classList.remove('anim'); }, ms + 40);
 }
 function setFree(on) { PL.free = on; document.body.classList.toggle('free', on); }
-function freeze() {   // first action: both panels leave the flow column at exactly today's rectangles, so nothing jumps
+function freeze() {
   if (PL.free) return true;
   if (!floatOK()) return false;
   var m = measureDefaults(), b = pbounds();
@@ -2308,17 +2349,17 @@ function freeze() {   // first action: both panels leave the flow column at exac
 }
 function front(id) { if (!PL.free) return; PIDS.forEach(function (o) { $(o).style.setProperty('--pz', o === id ? 3 : 2); }); }
 function applySaved() {
-  var saved = PL.pending; if (!saved || PL.free || !floatOK() || !(saved.usage || saved.ticker || saved.chat)) return;
+  var saved = PL.pending; if (!saved || PL.free || !floatOK() || !(saved.usage || saved.ticker)) return;
   var d = measureDefaults(), b = pbounds();
-  pids().forEach(function (id) { var s = saved[id]; PL.r[id] = C.clampRect(s || d[id], b); PL.o[id] = s ? s.o : PN.OPACITY; });
-  setFree(true); PIDS.forEach(function (id) { paintRect(id); paintOpacity(id); });   // clamped in memory only: storage is untouched until the viewer acts
+  pids().forEach(function (id) { var s = saved[id]; PL.r[id] = s || C.clampRect(d[id], b); PL.o[id] = s ? s.o : PN.OPACITY; });
+  setFree(true); PIDS.forEach(function (id) { paintRect(id); paintOpacity(id); });
 }
 function closeMenus(report) {
   var any = false;
   PIDS.forEach(function (id) { var pm = $('pm-' + id); if (pm && !pm.hidden) { any = true; pm.hidden = true; var b = $('pmb-' + id); b.setAttribute('aria-expanded', 'false'); if (report) b.focus(); } });
   return any;
 }
-function keyEnd(id) {   // one announcement and one save, 600 ms after the last key
+function keyEnd(id) {
   clearTimeout(pTimers[id]);
   pTimers[id] = setTimeout(function () { writeStore(); announce(C.rectSentence(PNAME[id], PL.r[id])); }, 600);
 }
@@ -2332,14 +2373,14 @@ function resetLayout() {
   announce('Layout reset');
 }
 function clearFree() {
-  PL.r = { usage: null, ticker: null, chat: null }; setFree(false);
+  PL.r = { usage: null, ticker: null }; setFree(false);
   PIDS.forEach(function (id) { var e = $(id); e.classList.remove('anim', 'drag', 'placed'); ['--px', '--py', '--pw', '--ph', '--pz'].forEach(function (v) { e.style.removeProperty(v); }); });
 }
 function beginDrag(id, mode, e, host) {
   if (pdrag || !floatOK() || (e.pointerType === 'mouse' && e.button !== 0)) return;
   clearTimeout(resetTimer); if (!freeze() || !PL.r[id]) return;
   e.preventDefault(); closeMenus(false); front(id); clearTimeout(animTimers[id]); $(id).classList.remove('anim');
-  pdrag = { id: id, mode: mode, host: host, pid: e.pointerId, sx: e.clientX, sy: e.clientY, r: PL.r[id] };
+  pdrag = { id: id, mode: mode, host: host, pid: e.pointerId, sx: e.clientX, sy: e.clientY, r: shown(id) };
   try { host.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
   $(id).classList.add('drag');
 }
@@ -2361,11 +2402,11 @@ function keyAct(id, e, isGrip) {
   if (k === 'Home' && isGrip) {
     e.preventDefault(); if (!freeze()) return;
     var d = measureDefaults()[id]; if (!d) return;
-    b = pbounds(); front(id); PL.r[id] = C.moveRect(PL.r[id], d.x - PL.r[id].x, d.y - PL.r[id].y, b); paintRect(id); keyEnd(id); return;
+    b = pbounds(); front(id); r = shown(id); PL.r[id] = C.moveRect(r, d.x - r.x, d.y - r.y, b); paintRect(id); keyEnd(id); return;
   }
   var dl = C.keyDelta(k, e.shiftKey); if (!dl) return;
   e.preventDefault(); if (!freeze() || !PL.r[id]) return;
-  b = pbounds(); r = PL.r[id]; front(id); clearTimeout(resetTimer);
+  b = pbounds(); r = shown(id); front(id); clearTimeout(resetTimer);
   PL.r[id] = (isGrip && !e.altKey) ? C.moveRect(r, dl[0], dl[1], b) : C.resizeRect(r, r.w + dl[0], r.h + dl[1], b);
   paintRect(id); keyEnd(id);
 }
@@ -2405,8 +2446,7 @@ function initPanels() {
   window.addEventListener('resize', function () {
     if (!floatOK()) return;
     if (!PL.free) { applySaved(); return; }
-    var b = pbounds();
-    pids().forEach(function (id) { var r = PL.r[id], c = r && C.clampRect(r, b); if (c && (c.x !== r.x || c.y !== r.y || c.w !== r.w || c.h !== r.h)) settle(id, c, 160); });
+    pids().forEach(function (id) { if (PL.r[id]) animPaint(id, 160); });
   });
 }
 
@@ -2416,7 +2456,7 @@ var BODY = { chief: '#4361ee', pm: '#c77dd9', architect: '#1f7a99', engineer: '#
 function agCol(id) { return BODY[(DESK[id] || {}).sprite] || '#8d99ae'; }
 function wl(t) { return String(t).indexOf('chat:') === 0 ? 'chat' : t; }
 function hhmm(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
-function loadChatSt() { try { var o = JSON.parse(localStorage.getItem('office.chat.v1') || '{}'); return { open: !!o.open, seen_at: typeof o.seen_at === 'string' ? o.seen_at : '', ack: !!o.ack }; } catch (e) { return { open: false, seen_at: '', ack: false }; } }
+function loadChatSt() { try { return C.chat.parseSt(localStorage.getItem('office.chat.v1')); } catch (e) { return C.chat.parseSt(''); } }
 function saveChatSt() { try { localStorage.setItem('office.chat.v1', JSON.stringify(CS.st)); } catch (e) { /* storage blocked: session only */ } }
 function cDocs() {
   var have = {}; CS.docs.forEach(function (d) { have[d.id] = 1; });
@@ -2467,17 +2507,65 @@ function onChatDocs() {
   C.chat.setLive(S, CHAT_LIVE);
   renderChat(); hudRefresh(false);
 }
-function chatOpen() { return CFG && !$('chat').hidden; }
+var DK = { h: 0, min: 0, max: 0 }, dockT = 0;
+function chatOpen() { return !!(CFG && CS && CS.st.open); }
+function dockEnd() {   
+  clearTimeout(dockT); var r = document.documentElement; dockBusy = false; r.classList.remove('cm', 'cc');
+  if (!chatOpen()) $('chat').hidden = true;
+  if (scene) scene.resize();
+}
+function dockLayout(anim) {   
+  var r = document.documentElement, open = chatOpen(), px = 0, kb = parseFloat(r.style.getPropertyValue('--kb')) || 0, phone = innerWidth < 900;
+  if (open) {
+    var chrome = (parseFloat(getComputedStyle($('stage')).top) || 0) + $('bar').offsetHeight + (phone ? 36 : 0);
+    px = C.chatH(CS.st.h, innerHeight, chrome, phone, kb);
+    DK.min = C.chatDock.MIN; DK.max = Math.max(DK.min, innerHeight - chrome - (phone ? C.chatDock.MIN_STAGE_P : C.chatDock.MIN_STAGE_D));
+    var g = $('chgrip'); g.setAttribute('aria-valuemin', DK.min); g.setAttribute('aria-valuemax', DK.max); g.setAttribute('aria-valuenow', px);
+  }
+  DK.h = px;
+  var move = anim && !REDUCED; r.classList.toggle('nt', !move);
+  if (move) { dockBusy = true; r.classList.add('cm'); clearTimeout(dockT); dockT = setTimeout(dockEnd, 260); }
+  r.style.setProperty('--chat-h', (open ? px + kb : 0) + 'px');
+  if (PL.free && floatOK()) pids().forEach(function (id) { if (PL.r[id]) animPaint(id, 160); });
+  if (!move && scene && !dockBusy) scene.resize();
+}
+function initGrip() {
+  var g = $('chgrip'), d = null;
+  function put(px, save) { CS.st.h = px; dockLayout(false); CS.st.h = DK.h; if (save) saveChatSt(); }
+  g.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    d = { id: e.pointerId, y: e.clientY, h: DK.h }; try { g.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    g.classList.add('on'); dockBusy = true; e.preventDefault();
+  });
+  g.addEventListener('pointermove', function (e) { if (d && e.pointerId === d.id) put(d.h + d.y - e.clientY, false); });
+  function up(e) { if (!d || e.pointerId !== d.id) return; d = null; g.classList.remove('on'); dockBusy = false; saveChatSt(); if (scene) scene.resize(); }
+  g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+  function reset() { delete CS.st.h; dockLayout(false); saveChatSt(); }
+  g.addEventListener('dblclick', reset);
+  g.addEventListener('keydown', function (e) {
+    var k = e.key, st = e.shiftKey ? C.chatDock.STEP_BIG : C.chatDock.STEP;
+    if (k === 'Enter') reset();
+    else if (k === 'ArrowUp') put(DK.h + st, true); else if (k === 'ArrowDown') put(DK.h - st, true);
+    else if (k === 'Home') put(DK.min, true); else if (k === 'End') put(DK.max, true);
+    else return;
+    e.preventDefault();
+  });
+  document.documentElement.addEventListener('transitionend', function (e) { if (e.propertyName === '--chat-h') dockEnd(); });
+  window.addEventListener('resize', function () { if (chatOpen()) dockLayout(false); });
+}
 function openChat(scrollTo) {
-  var p = $('chat'); p.hidden = false; CS.st.open = true; saveChatSt();
+  var p = $('chat'), was = chatOpen(); p.hidden = false; CS.st.open = true; saveChatSt();
   $('chatbtn').setAttribute('aria-expanded', 'true');
-  if (PL.free && floatOK() && !PL.r.chat) { var sv = PL.pending && PL.pending.chat; PL.r.chat = C.clampRect(sv || measure().chat, pbounds()); PL.o.chat = sv ? sv.o : PN.OPACITY; paintRect('chat'); paintOpacity('chat'); }
+  if (!was) void p.offsetHeight;
+  dockLayout(!was && !CS.booting);
   chatInit(); CS.stick = true; CS.scrollTo = scrollTo || null; renderChat();
   if (focused) renderFocus();
   setTimeout(function () { if (!$('ctext').disabled) $('ctext').focus(); }, 0);
 }
 function closeChat(refocus) {
-  $('chat').hidden = true; CS.st.open = false; saveChatSt(); $('chatbtn').setAttribute('aria-expanded', 'false'); closeList();
+  CS.st.open = false; saveChatSt(); $('chatbtn').setAttribute('aria-expanded', 'false'); closeList();
+  if (!REDUCED) document.documentElement.classList.add('cc');
+  dockLayout(true); if (REDUCED) dockEnd();
   if (refocus) $('chatbtn').focus();
   renderBadge(); if (focused) renderFocus();
 }
@@ -2684,10 +2772,10 @@ function initChat() {
   $('chat').addEventListener('keydown', function (e) { if (e.key === 'Escape' && !e.defaultPrevented) { e.stopPropagation(); closeChat(true); } });
   window.addEventListener('online', function () { showWarn(''); });
   window.addEventListener('offline', function () { showWarn('You are offline; messages send when you are back'); });
-  if (window.visualViewport) { var kb = function () { var v = window.visualViewport; document.documentElement.style.setProperty('--kb', Math.max(0, Math.round(innerHeight - v.height - v.offsetTop)) + 'px'); }; window.visualViewport.addEventListener('resize', kb); kb(); }
-  renderBadge(); renderTo();
-  chatInit();   // at load: the badge and the needs-you link need the live messages even while the panel is closed
-  if (CS.st.open) openChat();
+  if (window.visualViewport) { var kb = function () { var v = window.visualViewport; document.documentElement.style.setProperty('--kb', Math.max(0, Math.round(innerHeight - v.height - v.offsetTop)) + 'px'); if (chatOpen()) dockLayout(false); }; window.visualViewport.addEventListener('resize', kb); kb(); }
+  initGrip(); renderBadge(); renderTo();
+  chatInit();
+  if (CS.st.open) { CS.booting = true; openChat(); CS.booting = false; }
 }
 
 /* ---------- boot ---------- */
