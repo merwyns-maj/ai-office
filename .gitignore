@@ -3,3 +3,4 @@ __pycache__/
 .env
 prod_guard.json
 engine/app/three.min.js
+engine/app/usage-*.html

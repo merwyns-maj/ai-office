@@ -212,6 +212,54 @@ if (mode === 'sprint3') {
     out.push({ t, n, total: slim(U.total), providers: rows(U.providers), agents: rows(U.agents), cost: C.costText(U.total) });
   }
   console.log(JSON.stringify({ total: tl.total, out }));
+} else if (mode === 'shares') {
+  /* percentage maths: whole numbers, largest remainder, always 100, ties to the earlier item */
+  const S = C.shares, sum = a => a.reduce((x, y) => x + y, 0);
+  assert.deepStrictEqual(S([1, 1, 1]), [34, 33, 33]);
+  assert.deepStrictEqual(S([50, 25, 25]), [50, 25, 25]);
+  assert.deepStrictEqual(S([0, 0]), [0, 0]);
+  assert.deepStrictEqual(S([]), []);
+  assert.deepStrictEqual(S([5]), [100]);
+  assert.deepStrictEqual(S([1, 0, 2]), [33, 0, 67]);
+  assert.deepStrictEqual(S([887, 714, 430, 203, 189, 69, 31]).length, 7);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for (let k = 0; k < 500; k++) {
+    const v = Array.from({ length: 1 + Math.floor(rnd() * 9) }, () => Math.floor(rnd() * 1e6) * (rnd() < 0.2 ? 0 : 1));
+    const p = S(v), T = sum(v);
+    assert.ok(p.every(x => Number.isInteger(x) && x >= 0 && x <= 100));
+    assert.strictEqual(sum(p), T ? 100 : 0, JSON.stringify(v));
+    v.forEach((x, i) => { if (T) assert.ok(Math.abs(p[i] - 100 * x / T) < 1, JSON.stringify(v)); });   // within one point of the exact share
+  }
+  console.log('shares ok');
+} else if (mode === 'rec') {
+  /* recorded page: replay every run; null runs add 0 tokens and are excluded from the percentages */
+  const E = D.events, tl = C.timeline(E);
+  let s = C.initState(D);
+  E.forEach((e, i) => C.apply(s, e, tl[i].start));
+  const R = C.recTotals(s), py = extra;
+  assert.strictEqual(R.total.tokens, py.tokens);
+  assert.strictEqual(R.total.runs, py.runs);
+  assert.strictEqual(R.total.nr, py.nr);
+  const ag = Object.values(R.agents);
+  assert.strictEqual(ag.reduce((a, q) => a + q.pct, 0), 100);
+  assert.strictEqual(ag.reduce((a, q) => a + q.tokens, 0), py.tokens);
+  Object.keys(py.agents).forEach(k => assert.strictEqual(R.agents[k].tokens, py.agents[k]));
+  assert.strictEqual(Object.values(s.runlog).reduce((a, l) => a + l.length, 0), E.length);   // every run listed under its agent
+  const nr = Object.values(s.runlog).flat().filter(r => r.total === null);
+  assert.strictEqual(nr.length, py.nr);
+  assert.ok(nr.every(r => !JSON.stringify(r).includes('"total":0')));
+  // the synthetic-style state is untouched by recorded events
+  assert.deepStrictEqual(s.usage, {});
+  console.log('rec ok');
+} else if (mode === 'syn') {
+  const E = D.events, tl = C.timeline(E);
+  let s = C.initState(D);
+  E.forEach((e, i) => C.apply(s, e, tl[i].start));
+  const U = C.usageTotals(s, D.providers);
+  assert.strictEqual(Object.values(U.providers).reduce((a, r) => a + r.pct, 0), 100);
+  assert.strictEqual(Object.values(U.agents).reduce((a, r) => a + r.pct, 0), 100);
+  console.log('syn ok');
 } else if (mode === 'pricing') {
   /* hand-written exact cases against the TEST catalogue (made-up prices) */
   const P = extra.providers, mk = (agent, provider, model, billing, o) => Object.assign({ agent, provider, model, billing, input: 0, output: 0, cache_read: 0, cache_write: 0 }, o);
@@ -310,6 +358,22 @@ class CoreUnderNode(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIn("all-types ok", self.node(str(HTML), "all", self.json_file(tmp, "all.json", {"events": data["events"]})))
 
+    def test_percentage_maths(self):
+        self.assertIn("shares ok", self.node(str(HTML), "shares"))
+
+    def test_recorded_replay_totals_and_percentages(self):
+        data, _ = office_app.build_data(OFFICE, None, LEDGER)
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp) / "r.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(page)]), 0)
+            led = data["ledger"]
+            py = {"tokens": led["session"]["tokens"], "runs": led["session"]["runs"], "nr": led["session"]["not_reported"],
+                  "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+            self.assertIn("rec ok", self.node(str(page), "rec", self.json_file(tmp, "p.json", py)))
+
+    def test_synthetic_percentages_add_to_100(self):
+        self.assertIn("syn ok", self.node(str(HTML), "syn"))
+
     def test_usage_totals_equal_the_sum_of_events_due_and_scrubbing_back_lowers_them(self):
         data = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
         with tempfile.TemporaryDirectory() as tmp:
@@ -403,6 +467,55 @@ class NoLiterals(unittest.TestCase):
         html = HTML.read_text(encoding="utf-8")
         self.assertIn('class="synpill" data-syn>synthetic</span>', html)   # the panel header pill
         self.assertGreaterEqual(html.count('<span class="syn">synthetic</span>'), 1)   # the suffix after every figure group
+
+
+LEDGER = REPO / "offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl"
+
+
+class Recorded(unittest.TestCase):
+    """--ledger: replay a recorded agent-run ledger (T-057)."""
+
+    def test_ledger_page_data_is_recorded_with_totals(self):
+        data, probs = office_app.build_data(OFFICE, None, LEDGER)
+        self.assertEqual(probs, [])
+        self.assertEqual(data["log"]["usage_source"], "recorded")
+        self.assertEqual(data["log"]["not_reported"], ["split", "model", "main_session"])
+        self.assertEqual(data["log"]["provider"], "claude-sdk")
+        self.assertEqual(data["ledger"]["session"]["tokens"], sum(e["total"] or 0 for e in data["events"]))
+        self.assertTrue(all(e["type"] == "usage" and "total" in e for e in data["events"]))
+        self.assertNotIn("$", json.dumps(data["events"]))
+
+    def test_cli_writes_the_default_name_and_check_works(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "u.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out)]), 0)
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out), "--check"]), 0)
+            out.write_text("x", encoding="utf-8")
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out), "--check"]), 1)
+        self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--fixture", str(office_app.DEFAULT_FIXTURE)]), 2)
+        self.assertEqual(office_app.main(["ai-office", "--ledger", "/nonexistent.jsonl"]), 2)
+
+    def test_data_rule_hit_exits_1_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / LEDGER.name
+            bad.write_text(LEDGER.read_text(encoding="utf-8") + '{"n":99,"sprint":4,"agent":"pm","tasks":["T-001"],"step":"x","tokens":1,'
+                           '"tool_uses":1,"duration_ms":1,"note":"a@b.example"}\n', encoding="utf-8")
+            out = Path(tmp) / "o.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(bad), "--out", str(out), "--allow-errors"]), 1)
+            self.assertFalse(out.exists())
+
+    def test_gitignored_default_page(self):
+        self.assertIn("engine/app/usage-*.html", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
+
+    def test_recorded_panel_code_never_says_synthetic(self):
+        text = TEMPLATE.read_text(encoding="utf-8")
+        for fn in ("function recHTML", "function recRows", "function focusRec", "function recRunLine", "function barLine", "function accHTML"):
+            body = re.search(re.escape(fn) + r".*?\n}\n", text, re.S).group(0)
+            self.assertNotIn("synth", body.lower(), fn)
+        summary = re.search(r"function usageSummary.*?\n}\n", text, re.S).group(0)
+        self.assertIn("recorded", summary)
+        self.assertIn("(SYN ?", re.search(r"function fillSheet.*?\n}\n", text, re.S).group(0))   # synthetic pill only when SYN
+        self.assertIn("var SYN = !!(D.log && D.log.v === 1 && !REC);", text)
 
 
 class Providers(unittest.TestCase):

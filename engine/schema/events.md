@@ -79,6 +79,10 @@ Field kinds: **PROVIDER** `^[a-z0-9][a-z0-9-]{0,31}$`; **MODEL** `^[A-Za-z0-9][A
 - The data rule above runs first and covers the new strings. The new numeric fields are bounded by type. Keys, and numbers in fields a type does not define, are not scanned: that gap belongs to T-027.
 - The page shows the event's model; the profile `model:` (opus or sonnet) appears only as "planned: x" when the event's model family differs.
 
+### usage, second shape: total (T-057)
+
+A `usage` event with a `total` field is a recorded agent run from a ledger (`engine/schema/usage.md`): `agent`, `task`, `total: TOKENS|null` (null = not reported, never 0), and optional `tasks: [TASK]` (1-8 distinct), `tool_uses: TOKENS|null`, `run: INT`, `sprint: INT`, `step` (lowercase slug), `note` (1-200 characters). It must not carry `provider`, `model`, `billing`, `input`, `output`, `cache_read`, `cache_write` or `cost_usd` (any of them with `total` is an error): the harness reports totals only. Without `total` the split shape above is checked unchanged. A v1 header written for a ledger also carries `covers`, `ledger` and optionally `provider` (headers are not field-checked). The page shows these per agent with "split not reported" and no "synthetic" label.
+
 ## Fixtures
 
 - `engine/app/fixtures/sprint-03.jsonl`: replay of Sprint 3 (T-043, T-044, T-045) from `offices/ai-office/sprints/sprint-03.md` and the task files. Hand-written: git history has five timestamps for that sprint and none inside a stage. Order and wall times: the sprint file, the task files and `git log`. All other times are synthetic.

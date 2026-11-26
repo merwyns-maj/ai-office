@@ -113,6 +113,40 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur.tot .cost{font-size:12px}
 .ufoot{margin-top:8px;font-size:10.5px;line-height:1.35;color:var(--text-dim)}
 .uempty{color:var(--text-dim);font-size:12px;padding:2px 0 4px}
+/* recorded ledger rendering (T-057) */
+.ur .l1 .pl{font:400 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
+.ur .bl{display:flex;align-items:center;gap:8px;margin:2px 0 1px}
+.ur .bl .bar{flex:1;margin:0}
+.ur .bl .pct{flex:none;width:34px;text-align:right;font:500 11px/1 var(--mono)}
+.ur .bar{position:relative;height:4px;border-radius:2px;overflow:hidden;margin:2px 0 1px}
+.acc{border-top:1px solid rgba(255,255,255,.05)}
+.ur.ah{display:grid;grid-template-columns:14px 1fr;align-items:start;gap:4px;border-top:0}
+.ur.ah .chev{margin-top:4px;rotate:0deg}
+.ur.ah[aria-expanded=false] .chev{rotate:-90deg}
+.ur.ah .ahc{display:block;min-width:0}
+.ur.ah .ahc > span{display:block}
+.ur.ah .ahc > .l1{display:flex}
+.ab{padding:0 0 6px 20px}
+.ab[hidden]{display:none}
+.rr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:11px;line-height:1.5;color:var(--text-dim)}
+.rr .rt{text-align:right;color:var(--text)}
+.lnk{background:none;border:0;color:var(--accent);font:600 11px/1.5 var(--ui);padding:2px 0;margin-top:2px;cursor:pointer;text-decoration:underline}
+#usheet .lnk{min-height:44px}
+#usheet .rr{font-size:12px}
+#usage.rec{max-height:calc(100% - 104px)}
+#usheet > *{flex:none}
+.ur.rowtap{padding-top:2px;padding-bottom:2px}
+#usage .ufoot.rec{margin-top:6px;line-height:1.3}
+.ur .bar::before{content:'';position:absolute;inset:0;background:var(--text-dim);opacity:.3}
+.ur .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width .2s ease-out}
+body.rm .ur .bar i{transition:none}
+.ur .l2.rec{font:400 11px/1.4 var(--ui)}
+.ur.dim,.ur.dim .l1{color:var(--text-dim);font-weight:400}
+.ur.dim .l1 .cost{color:var(--text-dim)}
+.ur.nrow{cursor:default}
+.ufoot.rec{font-size:11px}
+#usheet .ur.rowtap{min-height:44px}
+#usheet .ufoot.rec{position:sticky;bottom:-12px;background:var(--panel);padding:8px 0 12px;margin-top:4px}
 #ubtn{display:none}
 #usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bar) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
 #usheet.open{display:flex}
@@ -242,7 +276,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   </header>
   <div id="side">
     <section id="usage" class="panel" aria-label="Usage" hidden>
-      <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
+      <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><span class="synpill" data-rec hidden>recorded</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
       <div id="usum" class="usum"></div>
       <div id="ubody" class="ubody"></div>
     </section>
@@ -312,7 +346,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     return out;
   }
   function initState(data) {
-    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, lastSwitch: null };
+    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, rec: {}, runlog: {}, lastSwitch: null };
     data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle', model: null, prevModel: null, switchedAt: null }; });
     data.events.forEach(function (e) { if (e.task && e.type !== 'usage' && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
     return s;
@@ -362,6 +396,20 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     var pr = providers && providers[b.provider] && providers[b.provider].prices;
     if (c.state === 'usd' && pr && pr.checked && r.dates.indexOf(pr.checked) < 0) r.dates.push(pr.checked);
   }
+  /* whole-number percentages that add up to exactly 100 (largest remainder; ties go to the earlier item); all 0 when the total is 0 */
+  function shares(vals) {
+    var T = vals.reduce(function (a, v) { return a + v; }, 0);
+    if (!T) return vals.map(function () { return 0; });
+    var fl = vals.map(function (v) { return Math.floor(100 * v / T); }), rem = vals.map(function (v) { return (100 * v) % T; });
+    var left = 100 - fl.reduce(function (a, v) { return a + v; }, 0);
+    vals.map(function (v, i) { return i; }).sort(function (a, b) { return rem[b] - rem[a] || a - b; }).slice(0, left).forEach(function (i) { fl[i]++; });
+    return fl;
+  }
+  function pctify(rows) {
+    var ids = Object.keys(rows).sort(function (a, b) { var x = rows[a], y = rows[b]; return (y.input + y.output + y.cache_read + y.cache_write) - (x.input + x.output + x.cache_read + x.cache_write) || (a < b ? -1 : 1); });
+    var p = shares(ids.map(function (k) { var r = rows[k]; return r.input + r.output + r.cache_read + r.cache_write; }));
+    ids.forEach(function (k, i) { rows[k].pct = p[i]; });
+  }
   function usageTotals(s, providers) {
     var out = { total: emptyRow(), providers: {}, agents: {} };
     Object.keys(s.agents).forEach(function (id) { out.agents[id] = emptyRow(); });
@@ -371,6 +419,19 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
       addTo(out.providers[b.provider] || (out.providers[b.provider] = emptyRow()), b, c, providers);
       addTo(out.agents[b.agent] || (out.agents[b.agent] = emptyRow()), b, c, providers);
     });
+    pctify(out.providers); pctify(out.agents);
+    return out;
+  }
+  /* recorded totals so far: per agent and overall; share is of the recorded session total */
+  function recTotals(s) {
+    var out = { total: { runs: 0, nr: 0, tokens: 0, tools: 0 }, agents: {} };
+    Object.keys(s.rec).forEach(function (id) {
+      var q = s.rec[id], c = {}; Object.keys(q).forEach(function (k) { c[k] = q[k]; }); out.agents[id] = c;
+      out.total.runs += q.runs; out.total.nr += q.nr; out.total.tokens += q.tokens; out.total.tools += q.tools;
+    });
+    var ids = Object.keys(out.agents).sort(function (a, b) { return out.agents[b].tokens - out.agents[a].tokens || (a < b ? -1 : 1); });
+    var p = shares(ids.map(function (k) { return out.agents[k].tokens; }));
+    ids.forEach(function (k, i) { out.agents[k].pct = p[i]; });
     return out;
   }
   /* the only place a currency sign is built, and only from micro-USD */
@@ -423,10 +484,19 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
         if (ev.provider && ev.model) setModel(s, ev, at);
         break;
       case 'usage': {
+        if ('total' in ev) {   /* recorded ledger run (T-057): totals only, null = not reported */
+          var q = s.rec[ev.agent] || (s.rec[ev.agent] = { runs: 0, nr: 0, tokens: 0, tools: 0, notes: [], last: null });
+          q.runs++; if (ev.total === null) q.nr++; else q.tokens += ev.total;
+          q.tools += ev.tool_uses || 0; if (ev.note) q.notes.push({ run: ev.run, note: ev.note });
+          q.last = { run: ev.run, total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null };
+          (s.runlog[ev.agent] = s.runlog[ev.agent] || []).push({ run: ev.run, sprint: ev.sprint, step: ev.step, tasks: ev.tasks || [ev.task], total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null });
+          break;
+        }
         setModel(s, ev, at);
         var k = ev.agent + '|' + ev.provider + '|' + ev.model + '|' + ev.billing;
         var b = s.usage[k] || (s.usage[k] = { agent: ev.agent, provider: ev.provider, model: ev.model, billing: ev.billing, input: 0, output: 0, cache_read: 0, cache_write: 0, n: 0 });
         TOK.forEach(function (f) { b[f] += ev[f] || 0; }); b.n++;
+        (s.runlog[ev.agent] = s.runlog[ev.agent] || []).push({ task: ev.task, provider: ev.provider, model: ev.model, total: TOK.reduce(function (a, f) { return a + (ev[f] || 0); }, 0) });
         break; }
       case 'stage_changed': t.stage = ev.to; break;
       case 'handoff':
@@ -509,7 +579,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   root.OfficeCore = { DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
-    eventCost: eventCost, usageTotals: usageTotals, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
+    eventCost: eventCost, usageTotals: usageTotals, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
     tickerItems: tickerItems, switchSentence: switchSentence };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
@@ -575,8 +645,11 @@ var STWORD = { waiting: 'Waiting for you', blocked: 'Blocked', discussing: 'In a
 var S = C.stateAt(D, 0), next = 0, T = 0, playing = false, speed = 1, ended = false;
 var hist = [], lastAction = -99, tNow = 0, scene = null;
 var walkingSet = {};
-var HAS_MODELS = EV.some(function (e) { return !!e.provider; });
-var SYN = !!(D.log && D.log.v === 1 && D.log.usage_source !== 'recorded');
+var REC = !!(D.log && D.log.v === 1 && D.log.usage_source === 'recorded');
+var CHIPS = false;   /* model chips on agent tags: not for recorded ledgers (no model is reported) */
+var HAS_MODELS = REC || EV.some(function (e) { return !!e.provider; });
+var SYN = !!(D.log && D.log.v === 1 && !REC);
+CHIPS = HAS_MODELS && !REC;
 var TI = C.tickerItems(D), TI_AT = {};
 TI.forEach(function (it) { (TI_AT[it.i] = TI_AT[it.i] || []).push(it); });
 function modelOf(id) { var m = S.agents[id].model; return m ? C.modelLabel(D.providers, m.provider, m.model) : null; }
@@ -637,7 +710,7 @@ function renderStrip(force) {
     b.className = 'seg' + (o.st === 'waiting' ? ' waiting' : '');
     b.querySelector('.ic').innerHTML = ICON[o.st]; b.querySelector('.ic').style.color = STCOL[o.st];
     b.querySelector('small').textContent = holdText(o.id);
-    var ml = HAS_MODELS ? modelOf(o.id) : null;
+    var ml = CHIPS ? modelOf(o.id) : null;
     b.setAttribute('aria-label', NAME[o.id] + ': ' + word.toLowerCase() + (holdText(o.id) ? ', ' + holdText(o.id) : '') + (ml ? ', on ' + ml.code + ' ' + ml.short : ''));
     b.setAttribute('aria-pressed', String(focused === o.id));
     b.title = NAME[o.id] + ' · ' + word + (ml ? ' · ' + ml.code + ' ' + ml.short + ' (' + ml.full + ')' : '');
@@ -688,7 +761,58 @@ function figs(r) {
   return '<span title="' + exact(r.input) + ' input tokens">in ' + fmtTok(r.input) + '</span><span title="' + exact(r.output) + ' output tokens">out ' + fmtTok(r.output) +
     '</span><span title="' + exact(r.cache_read) + ' cache read, ' + exact(r.cache_write) + ' cache write tokens">cache ' + fmtTok(c) + '</span>' + (SYN ? '<span class="syn">synthetic</span>' : '');
 }
+var NOSPLIT = 'Input, output and cache split not reported';
+var accOff = {};   /* agent ids whose accordion section is collapsed; default is expanded */
+var CHEV = '<svg class="chev" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg>';
+function barLine(pct, colour) {
+  return '<div class="bl"><div class="bar" aria-hidden="true"><i style="width:' + pct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div><span class="pct">' + pct + '%</span></div>';
+}
+function accHTML(id, head, body, label) {
+  var open = !accOff[id];
+  return '<div class="acc"><button type="button" class="ur ah rowtap" data-acc="' + esc(id) + '" aria-expanded="' + open + '" aria-label="' + esc(label) + '">' + CHEV + '<span class="ahc">' + head + '</span></button>' +
+    '<div class="ab"' + (open ? '' : ' hidden') + '>' + body + '</div></div>';
+}
+function recRunLine(r) {
+  return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + esc((r.tasks || []).join(', ')) + '</span>' +
+    '<span class="rt" title="' + (r.note ? esc(r.note) : NOSPLIT) + '">' + (r.total === null ? 'not reported' : esc(fmtTok(r.total))) + (r.note ? '*' : '') + '</span></div>';
+}
+function synRunLine(r) {
+  var ml = C.modelLabel(D.providers, r.provider, r.model);
+  return '<div class="rr"><span class="mono">' + esc(r.task) + '</span><span class="mono">' + esc(ml.code + ' ' + ml.short) + '</span><span class="rt">' + esc(fmtTok(r.total)) + '</span></div>';
+}
+function focusBtn(id) { return '<button type="button" class="lnk" data-agent="' + esc(id) + '">Show details</button>'; }
+function recRows() {
+  var R = C.recTotals(S), rows = D.agents.filter(function (a) { return R.agents[a.id]; }).map(function (a) { return { a: a, q: R.agents[a.id] }; });
+  rows.sort(function (x, y) { return y.q.tokens - x.q.tokens || (x.a.name < y.a.name ? -1 : 1); });
+  return { R: R, rows: rows };
+}
+function recHTML() {
+  var x = recRows(), R = x.R, tot = R.total;
+  if (!tot.runs) return '<div class="uempty">No usage yet</div><div class="ufoot rec">Tokens appear as the replay runs.</div>';
+  var h = '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + ' tokens</span></div>' +
+    '<div class="l2 rec">' + tot.runs + ' runs' + (tot.nr ? ' · ' + tot.nr + ' not reported' : '') + '</div><div class="l2 rec">split not reported</div>' +
+    (tot.nr ? '<div class="l2 rec">Percentages exclude the ' + tot.nr + (tot.nr === 1 ? ' run' : ' runs') + ' with tokens not reported.</div>' : '') + '</div>';
+  h += '<h4>By provider</h4>';
+  var pid = D.log.provider, pr = pid && (D.providers || {})[pid];
+  if (pid) h += '<div class="ur"><div class="l1"><span class="nm">' + esc(pr ? pr.label : pid) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></div>' + barLine(100, pr && pr.colour) + '<div class="l2 rec">1 provider recorded</div></div>';
+  else h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Provider</span><span class="cost">not reported</span></div></div>';
+  h += '<h4>By agent, most tokens first</h4>';
+  x.rows.forEach(function (r) {
+    var a = r.a, q = r.q, pl = a.planned_model, noted = q.notes.length > 0, allnr = q.runs === q.nr;
+    var runsTxt = q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses' + (q.nr ? ' · ' + q.nr + ' not reported' : '');
+    var head = '<span class="l1"><span class="nm">' + esc(a.name) + '</span>' +
+      (pl ? '<span class="pl" title="' + esc('Model from the agent profile; the harness does not report the model used.' + (noted ? ' ' + q.notes.map(function (n) { return 'Run ' + n.run + ': ' + n.note; }).join(' ') : '')) + '">' + esc(pl) + ' planned' + (noted ? '*' : '') + '</span>' : '') +
+      '<span class="cost" title="' + NOSPLIT + (allnr ? '' : ': ' + exact(q.tokens) + ' tokens') + '">' + (allnr ? 'not reported' : esc(fmtTok(q.tokens))) + '</span></span>' +
+      (allnr ? '' : barLine(q.pct)) + '<span class="l2 rec">' + esc(runsTxt) + '</span>';
+    h += accHTML(a.id, head, (S.runlog[a.id] || []).map(recRunLine).join('') + focusBtn(a.id),
+      a.name + ': ' + (allnr ? 'tokens not reported' : fmtTok(q.tokens) + ' tokens, ' + q.pct + '% of session') + ', ' + runsTxt.replace(/ · /g, ', ') + ', split not reported');
+  });
+  h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Main session</span><span class="cost">not reported</span></div></div>';
+  h += '<div class="ufoot rec">' + esc(String(D.log.covers || '').replace(/[.\s]+$/, '')) + '. Share is of this session\'s recorded tokens.</div>';
+  return h;
+}
 function usageHTML() {
+  if (REC) return recHTML();
   var U = C.usageTotals(S, D.providers), tot = U.total, n = tot.usd + tot.plan + tot.unset + tot.none;
   var h = '';
   if (!n) return '<div class="uempty">No usage yet</div><div class="ufoot">Tokens and estimates appear as the replay runs.</div>';
@@ -697,13 +821,16 @@ function usageHTML() {
   var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
   order.forEach(function (pid) {
     var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
-    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' +
+    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' + barLine(r.pct, pr && pr.colour) +
       '<div class="l2">' + figs(r) + '</div>' + (r.dates.length ? '<div class="l3">prices checked ' + esc(r.dates.join(', ')) + '</div>' : '') + '</div>';
   });
   h += '<h4>By agent</h4>';
   D.agents.forEach(function (a) {
     var r = U.agents[a.id], ml = modelOf(a.id);
-    h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(r.input + r.output + r.cache_read + r.cache_write ? C.costText(r) : '') + '</span></div><div class="l2">' + figs(r) + '</div></button>';
+    var used = r.input + r.output + r.cache_read + r.cache_write, runs = S.runlog[a.id] || [];
+    var inner = '<span class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(used ? C.costText(r) : '') + '</span></span>' + (used ? barLine(r.pct) : '') + '<span class="l2">' + figs(r) + '</span>';
+    if (runs.length) h += accHTML(a.id, inner, runs.map(synRunLine).join('') + focusBtn(a.id), a.name + ': ' + fmtTok(used) + ' tokens, ' + r.pct + '% of total, ' + runs.length + ' steps');
+    else h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost"></span></div><div class="l2">' + figs(r) + '</div></button>';
   });
   var dates = tot.dates;
   h += '<div class="ufoot">' + (SYN ? 'Synthetic numbers, not a real run. ' : '') + 'Costs are estimates from the office config' + (dates.length ? ', prices checked ' + esc(dates.join(', ')) : ', where a price is set') + '. Plan runs show tokens only.' +
@@ -712,6 +839,7 @@ function usageHTML() {
 }
 var usageKey = '', usageCol = false, usageColSet = false;
 function usageSummary() {
+  if (REC) { var rt = C.recTotals(S).total; return rt.runs ? fmtTok(rt.tokens) + ' tokens · recorded' : 'No usage yet'; }
   var t = C.usageTotals(S, D.providers).total, tok = t.input + t.output + t.cache_read + t.cache_write;
   return tok ? fmtTok(t.input + t.output) + ' in+out · ' + fmtTok(t.cache_read + t.cache_write) + ' cache' : 'No usage yet';
 }
@@ -720,14 +848,22 @@ function renderUsage() {
   var html = usageHTML(), key = html + '|' + usageCol + '|' + $('usheet').classList.contains('open');
   if (key === usageKey) return;
   usageKey = key;
+  var keep = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.acc : null;
   $('ubody').innerHTML = html;
   $('usum').innerHTML = esc(usageSummary()) + (SYN ? ' <span class="syn" style="color:var(--text-dim);font-style:italic">synthetic</span>' : '');
-  $('usage').classList.toggle('col', usageCol);
+  $('usage').classList.toggle('col', usageCol); $('usage').classList.toggle('rec', REC);
   $('ucol').setAttribute('aria-expanded', String(!usageCol)); $('ucol').setAttribute('aria-label', usageCol ? 'Expand usage' : 'Collapse usage');
   if ($('usheet').classList.contains('open')) fillSheet(html);
+  refocus(keep);
 }
+function refocus(id) {
+  if (!id) return;
+  var box = $('usheet').classList.contains('open') ? $('usheet') : $('ubody'), b = box.querySelector('[data-acc="' + id + '"]');
+  if (b) b.focus();
+}
+function toggleAcc(id) { accOff[id] = !accOff[id]; usageKey = ''; renderUsage(); refocus(id); }
 function fillSheet(html) {
-  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
+  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + (REC ? '<span class="synpill">recorded</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
   $('usx').addEventListener('click', closeSheet);
 }
 function openSheet() {
@@ -739,12 +875,14 @@ function closeSheet() { var sh = $('usheet'); if (sh.hidden) return; sh.classLis
 function initUsage() {
   $('nomodel').hidden = HAS_MODELS; $('usage').hidden = !HAS_MODELS;
   document.querySelectorAll('[data-syn]').forEach(function (e) { e.hidden = !SYN; });
+  document.querySelectorAll('[data-rec]').forEach(function (e) { e.hidden = !REC; });
   $('ubtn').hidden = !HAS_MODELS;
   if (!HAS_MODELS) return;
   usageCol = innerHeight < 520 || params.get('usage') === 'collapsed';
   $('ucol').addEventListener('click', function () { usageCol = !usageCol; usageKey = ''; renderUsage(); });
   $('ubtn').addEventListener('click', function () { if ($('usheet').classList.contains('open')) closeSheet(); else openSheet(); });
-  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
+  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-acc]'); if (t) { toggleAcc(t.dataset.acc); return; } var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
   document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
 }
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
@@ -758,8 +896,20 @@ function focusAgent(id, fromHud) {
   if (scene) scene.focus(focused);
   renderStrip(true);
 }
+function focusRec(id) {
+  var R = C.recTotals(S), q = R.agents[id], a = AG[id], pl = a.planned_model;
+  var h = '<div class="row" style="color:var(--text-dim)"><span>' + (pl ? 'Model: ' + esc(pl) + ' (planned)' : 'Model: not reported') + '</span></div>';
+  if (!q) return h + '<div class="fu"><div>No recorded runs yet</div></div>';
+  var last = q.last;
+  h += '<div class="fu mono"><div title="' + NOSPLIT + '">Total ' + (q.runs === q.nr ? 'not reported' : esc(fmtTok(q.tokens)) + ' · ' + q.pct + '% of session') + '</div>' +
+    '<div>' + q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses</div><div>split not reported</div>' +
+    '<div>Last run ' + (last.run ? '#' + last.run + ': ' : '') + (last.total === null ? 'Tokens: not reported' : esc(fmtTok(last.total)) + ' tokens' + (last.tool_uses === null ? '' : ' · ' + last.tool_uses + ' tool uses')) + '</div>' +
+    q.notes.map(function (x) { return '<div>Note, run ' + x.run + ': ' + esc(x.note) + '</div>'; }).join('') + '</div>';
+  return h;
+}
 function focusModel(id) {
   if (!HAS_MODELS) return '';
+  if (REC) return focusRec(id);
   var m = S.agents[id].model, ml = modelOf(id);
   if (!m) return '<div class="row" style="color:var(--text-dim)">' + chipHtml(null) + '<span>No model yet</span></div>';
   var r = C.usageTotals(S, D.providers).agents[id], pl = AG[id].planned_model;
@@ -1434,11 +1584,11 @@ function initScene() {
     agentList.forEach(function (a) {
       var stt = a.cstt || 'idle', wait = stt === 'waiting', h = a.H;
       var nm = (small && !wait && focusId !== a.id) ? a.def.name.charAt(0) : a.def.name;
-      var ml = HAS_MODELS ? modelOf(a.id) : null, mk = ml ? ml.full : '';
+      var ml = CHIPS ? modelOf(a.id) : null, mk = ml ? ml.full : '';
       if (a.mkSkip) { a.mkSkip = false; a.mk = mk; } else if (a.mk === undefined) a.mk = mk;
       else if (a.mk !== mk) { if (a.mk && mk && !REDUCED) a.flashUntil = tn + 0.45; a.mk = mk; }
-      var html = '<div class="t1">' + (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>' + (HAS_MODELS && small ? chipHtml(ml) : '') + '</div>' +
-        (HAS_MODELS && !small ? '<div class="t2">' + chipHtml(ml) + '<span class="m">' + (ml ? esc(ml.short) : '') + '</span></div>' : '');
+      var html = '<div class="t1">' + (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>' + (CHIPS && small ? chipHtml(ml) : '') + '</div>' +
+        (CHIPS && !small ? '<div class="t2">' + chipHtml(ml) + '<span class="m">' + (ml ? esc(ml.short) : '') + '</span></div>' : '');
       if (a.tagEl._h !== html) { a.tagEl._h = html; a.tagEl.innerHTML = html; }
       a.tagEl.className = 'lb tag' + (wait ? ' warn' : '') + (spk === a ? ' talk' : '') + (tn < (a.flashUntil || 0) ? ' flash' : '');
       if (wait) placeEl(a.tagEl, a.x, h + 1.3, a.z, 0, 0); else placeEl(a.tagEl, a.x, h + 0.3 - 0.1 * a.sitK, a.z, 0, (REDUCED && a.sender && a.job) ? 62 : 0);

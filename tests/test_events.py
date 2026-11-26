@@ -303,5 +303,39 @@ class V1(unittest.TestCase):
         self.assertIn("3 warnings", out)
 
 
+class TotalShape(unittest.TestCase):
+    """v1 usage, second shape (T-057): totals only, null = not reported."""
+
+    def total(self, **k):
+        d = {"t": 1, "type": "usage", "src": "x.md", "agent": "pm", "task": "T-901", "total": 500}
+        d.update(k)
+        return json.dumps(d)
+
+    def test_total_shape_is_accepted(self):
+        _, evs, probs = parse1(self.total(), self.total(t=2, total=None, tool_uses=None),
+                               self.total(t=3, tasks=["T-901", "T-902"], tool_uses=4, run=3, sprint=2, step="spec", note="n"))
+        self.assertEqual((len(evs), probs), (3, []))
+        self.assertIsNone(evs[1]["total"])
+
+    def test_total_with_provider_model_split_or_cost_is_an_error(self):
+        for extra in ({"provider": "claude-sdk"}, {"model": "m"}, {"billing": "plan"}, {"input": 1}, {"output": 1},
+                      {"cache_read": 1}, {"cache_write": 1}, {"cost_usd": 0.1}):
+            _, evs, probs = parse1(self.total(**extra))
+            self.assertEqual((evs, len(errors(probs))), ([], 1), extra)
+            self.assertIn("must not carry", errors(probs)[0].message)
+
+    def test_total_bounds(self):
+        for bad in ({"total": -1}, {"total": 1.5}, {"total": True}, {"total": "5"}, {"total": 10 ** 9}, {"tool_uses": -1},
+                    {"tasks": []}, {"tasks": ["T-9"]}, {"tasks": ["T-901", "T-901"]}, {"note": "x" * 201}, {"step": "Bad Step"}):
+            _, evs, probs = parse1(self.total(**bad))
+            self.assertEqual((evs, len(errors(probs))), ([], 1), bad)
+        self.assertEqual(len(parse1(self.total(total=0))[1]), 1)   # 0 is a number
+
+    def test_split_shape_and_v0_unchanged(self):
+        self.assertEqual(parse1(use())[2], [])
+        self.assertEqual(len(errors(parse(self.total(), header=HDR)[2])), 0)   # v0: usage is an unknown type (warning), kept
+        self.assertEqual(parse(self.total(), header=HDR)[2][0].level, "warning")
+
+
 if __name__ == "__main__":
     unittest.main()

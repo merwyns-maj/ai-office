@@ -25,6 +25,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _fm import split  # noqa: E402
 from board import stages as board_stages  # noqa: E402
+from engine.runtime import events as ev_mod, ledger as ledger_mod, loader  # noqa: E402
 
 NR = "not recorded"
 STAGE_COLS = ("spec", "design", "build", "review")
@@ -267,6 +268,75 @@ def fmt_partial(value, missing):
     return f"{value} (partial, {missing} {NR})"
 
 
+def _n(v):
+    return f"{v:,}"
+
+
+def _pct(part, whole):
+    return f"{100 * part / whole:.1f}%" if whole else "n/a"
+
+
+def _hours(ms):
+    return f"{ms / 3_600_000:.2f}"
+
+
+def usage_section(office_dir, repo):
+    """Lines of the '## Token usage' section from every offices/<office>/usage/*.jsonl (T-057). Problems go to stderr."""
+    office_dir, repo = Path(office_dir), Path(repo)
+    files = sorted((office_dir / "usage").glob("*.jsonl"))
+    out = ["## Token usage", ""]
+    if not files:
+        return out + ["No ledger files under `usage/`: not recorded.", ""]
+    office, _ = loader.load_office(office_dir)
+    ids = {a.get("id") for a in office.org.get("agents", []) if isinstance(a, dict)} if office else set()
+    forbidden = ev_mod.forbidden_terms(repo)
+    for f in files:
+        header, runs, probs = ledger_mod.load_ledger(f, agents=ids, office=office_dir.name, forbidden=forbidden)
+        for p in probs:
+            print(f"{f.name}: {p}", file=sys.stderr)
+        errors = [p for p in probs if p.level == "error"]
+        out += [f"### {f.stem}", ""]
+        if header is None:
+            out += [f"Ledger rejected ({len(errors)} error{'s' if len(errors) != 1 else ''}); no numbers shown.", ""]
+            continue
+        if any(ev_mod.is_data_problem(p.message) for p in errors):
+            out += ["Tables omitted: a line matched the data rule (details on stderr).", ""]
+            continue
+        t = ledger_mod.totals(runs)
+        S = t["session"]
+        out += [f"Covers: {header['covers']}.", "",
+                f"Source: {header['source']}. Recorded by {header['recorded_by']}, {header['date']}.", "",
+                "Main session's own tokens: not reported (the harness reports agent runs only).", "",
+                "Model used: not reported (profile models are planned, not measured).", "",
+                "Share of the Max plan: not shown. The plan has no published fixed token limit, so any percentage of it "
+                "would be a guess.", ""]
+        if errors:
+            out += [f"{len(errors)} lines skipped (errors)", ""]
+        out += ["| Runs | Not reported | Tokens | Tool uses | Hours (agent run time) |", "|---|---|---|---|---|",
+                f"| {S['runs']} | {S['not_reported']} | {_n(S['tokens'])} | {_n(S['tool_uses'])} | {_hours(S['duration_ms'])} |", ""]
+
+        def table(title, label, rows, keyed):
+            lines = [f"**{title}**", "",
+                     f"| {label} | Runs | Not reported | Tokens | Share of session | Tasks | Tokens per task |",
+                     "|---|---|---|---|---|---|---|"]
+            for k, r in rows:
+                per = _n(round(r["tokens"] / len(r["tasks"]))) if r["tasks"] else "n/a"
+                lines.append(f"| {keyed(k)} | {r['runs']} | {r['not_reported']} | {_n(r['tokens'])} | "
+                             f"{_pct(r['tokens'], S['tokens'])} | {len(r['tasks'])} | {per} |")
+            return lines + [""]
+        out += table("By agent", "Agent", sorted(t["agents"].items(), key=lambda kv: (-kv[1]["tokens"], kv[0])), str)
+        out += table("By sprint", "Sprint", sorted(t["sprints"].items()), str)
+        sh = t["shared"]
+        out += ["**By task**", "", "| Task | Runs | Tokens counted once | Shared runs | Tokens incl. shared runs |", "|---|---|---|---|---|"]
+        for tid, r in sorted(t["tasks"].items()):
+            out.append(f"| {tid} | {r['runs']} | {_n(r['solo_tokens'])} | {r['shared_runs']} | {_n(r['tokens_with_shared'])} |")
+        out += [f"| Shared runs (counted once) | {sh['runs']} | {_n(sh['tokens'])} | {sh['runs']} | - |", "",
+                "A run that covered several tasks is never split between them. Task rows show the tokens of runs that "
+                "touched only that task; the last row holds the shared runs once. Solo tokens plus the shared row equal "
+                "the session total; the 'incl. shared' column adds up to more by design.", ""]
+    return out
+
+
 def build_report(repo, office, run_date):
     repo = Path(repo)
     office_dir = repo / "offices" / office
@@ -345,6 +415,7 @@ def build_report(repo, office, run_date):
     out += ["", "## Hours saved", "",
             "| Hours saved | not set: Merwyn supplies a per-task-type estimate |", "|---|---|", ""]
     out += foot + [""] if foot else []
+    out += usage_section(office_dir, repo)
     out += ["## How these are measured", "",
             "- Stage hours: sum over every visit to the stage (rework included), from `status:` changes in task "
             "files on main and on PR head refs; commit author times, not work time.",
@@ -361,6 +432,11 @@ def build_report(repo, office, run_date):
             f"{NR}.",
             "- Sprint window: main squash-commit times from the sprint plan to the sprint close (or the next plan).",
             "- Tasks per sprint: numbered task links in each closed sprint file. Open sprints are left out.",
+            "- Token usage: one line per agent run from the harness report, kept in `usage/<session>.jsonl` "
+            "(`engine/schema/usage.md`). Only the total per run is reported; the input/output/cache split, the model used "
+            "and the main session's own tokens are not. A run with no usage counts as a run and adds 0 tokens, never shown as 0.",
+            "- Token shares are of the session's recorded agent tokens. Runs that covered several tasks are counted once "
+            "under 'Shared runs', never apportioned.",
             f"- '{NR}' means the source is absent from the history available; it is never blank or 0.", ""]
     return "\n".join(out)
 

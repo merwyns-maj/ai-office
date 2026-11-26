@@ -51,6 +51,11 @@ Escalate early, once, with options:
 - After each sprint: what finished, cycle times, what got stuck and why. Hand April (Curator) the lessons; she proposes edits to skills and profiles.
 - Measure the office by outcomes (tasks done, cycle time, rework rate), not by activity.
 
+## 8. Token ledger
+- After every agent run, append one line to `offices/<office>/usage/<session-id>.jsonl` from the harness report: `n` (next number), `sprint`, `agent`, `tasks`, `step`, `tokens`, `tool_uses`, `duration_ms`. Write `null` where the report has no usage, never 0; add a `note` when the model differs from the profile. Never edit an existing line.
+- A new session id starts a new file with the v1 header (format in `engine/schema/usage.md`). Run `python -m engine.runtime ledger <office> <file>` before committing; commit the file in the sprint close PR.
+- The main session's own tokens and the input/output/cache split are not reported by the harness; the ledger says so and the report never estimates them.
+
 ## Anti-patterns
 - Reporting only Green. Treating RAG as a weapon instead of a signal.
 - Starting new tasks to look busy while others sit in review.
