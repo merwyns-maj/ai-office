@@ -27,14 +27,15 @@ class Shipped(unittest.TestCase):
     def test_exit_0_with_three_skills(self):
         code, out = run(["ai-office"], REPO)
         self.assertEqual(code, 0, out)
-        for s in ("partner-writing", "spec-writing", "review-checklist"):
+        for s in ("partner-writing", "spec-writing", "review-checklist", "document-assessment"):
             self.assertIn(f"{s}: ", out)
         self.assertIn("0 problems", out)
 
     def test_case_counts_3_to_5_per_skill(self):
         for folder in (REPO / "base/skills/partner-writing/golden",
                        REPO / "offices/ai-office/skills/spec-writing/golden",
-                       REPO / "offices/ai-office/skills/review-checklist/golden"):
+                       REPO / "offices/ai-office/skills/review-checklist/golden",
+                       REPO / "offices/ai-office/skills/document-assessment/golden"):
             self.assertTrue(3 <= len(list(folder.glob("*.json"))) <= 5, folder)
 
     def test_patterns_are_imported_not_copied(self):

@@ -81,7 +81,7 @@ class Pick(unittest.TestCase):
         self.assertIn("owner: architect (Fang)\n", out)
         self.assertIn("profile: offices/ai-office/agents/architect.md\n", out)
         self.assertIn("base_skills: working-standard\n", out)
-        self.assertIn("office_skills: architect-playbook, decision-record, handoff\n", out)
+        self.assertIn("office_skills: architect-playbook, decision-record, document-assessment, handoff\n", out)
         self.assertIn("external_skills: claude:diagram-design\n", out)
         self.assertIn("output_section: Design", out)
         self.assertIn("consults: designer (Dinda) writes UX design when the Spec or Design has UI, visual or motion work\n", out)

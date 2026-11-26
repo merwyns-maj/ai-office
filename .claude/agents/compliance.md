@@ -33,4 +33,5 @@ Before your step, read and follow:
 - base/skills/working-standard/SKILL.md
 - offices/ai-office/skills/compliance-playbook/SKILL.md
 - offices/ai-office/skills/uu-pdp-checklist/SKILL.md
+- offices/ai-office/skills/document-assessment/SKILL.md
 - offices/ai-office/skills/handoff/SKILL.md
