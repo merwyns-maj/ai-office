@@ -37,6 +37,22 @@ class Shipped(unittest.TestCase):
                        REPO / "offices/ai-office/skills/review-checklist/golden"):
             self.assertTrue(3 <= len(list(folder.glob("*.json"))) <= 5, folder)
 
+    def test_shipped_case_count_matches_discover(self):
+        code, out = run(["ai-office"], REPO)
+        n = len(golden.discover(REPO, "ai-office"))
+        self.assertGreater(n, 0)
+        self.assertIn(f"golden: {n} cases", out)
+
+    def test_zero_cases_exit_1_but_unknown_office_exit_2(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            shutil.copy(REPO / "workspaces.yaml", root / "workspaces.yaml")
+            (root / "offices" / "ai-office").mkdir(parents=True)
+            code, out = run(["ai-office"], root)
+            self.assertEqual(code, 1, out)
+            self.assertIn("no cases found", out)
+            self.assertEqual(run(["no-such-office"], root)[0], 2)
+
     def test_patterns_are_imported_not_copied(self):
         self.assertIs(golden.DATA_PATTERNS, events.DATA_PATTERNS)
         self.assertIs(golden.PATTERN_KINDS, events.PATTERN_KINDS)
@@ -204,3 +220,35 @@ class DataRule(TempRepo):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenQuestionPerLine(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        shutil.copy(REPO / "workspaces.yaml", self.root / "workspaces.yaml")
+        (self.root / "offices" / "ai-office").mkdir(parents=True)
+        shutil.copytree(REPO / "offices/ai-office/skills/spec-writing/golden",
+                        self.root / "offices/ai-office/skills/spec-writing/golden")
+        self.path = self.root / "offices/ai-office/skills/spec-writing/golden/open-question-owner.json"
+        self.case = json.loads(self.path.read_text())
+
+    def write(self):
+        self.path.write_text(json.dumps(self.case))
+
+    def test_shipped_passes(self):
+        self.assertEqual(run(["ai-office"], self.root)[0], 0)
+
+    def test_one_ownerless_line_in_expected_output_fails_check_4(self):
+        self.case["expected_output"] += "\n- Is a third format needed? Not blocking."
+        self.write()
+        code, out = run(["ai-office"], self.root)
+        self.assertEqual(code, 1, out)
+        self.assertIn("check 4 (must_not_match, Open questions)", out)
+
+    def test_bad_output_fails_only_the_per_line_check(self):
+        checks = self.case["checks"]
+        bad = self.case["bad_output"]
+        self.assertTrue(all(golden.run_check(c, bad) for c in checks[:3]))
+        self.assertFalse(golden.run_check(checks[3], bad))

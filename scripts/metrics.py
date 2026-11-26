@@ -258,6 +258,15 @@ def fmt_n(v):
     return NR if v is None else str(v)
 
 
+def fmt_partial(value, missing):
+    """Sprint cell: plain value when all tasks are recorded, NR when none, else marked partial."""
+    if value is None:
+        return NR
+    if missing == 0:
+        return str(value)
+    return f"{value} (partial, {missing} {NR})"
+
+
 def build_report(repo, office, run_date):
     repo = Path(repo)
     office_dir = repo / "offices" / office
@@ -296,7 +305,7 @@ def build_report(repo, office, run_date):
 
     def agg(ts, key):
         vals = [rows[t][key] for t in ts if rows[t][key] is not None]
-        return sum(vals) if vals else None
+        return (sum(vals) if vals else None), len(ts) - len(vals)
 
     out = [f"# Office metrics: {office}, run {run_date} at {state['head'] or 'no git'}", "",
            f"> History: {notice}", "", "## Sprints", "",
@@ -320,9 +329,9 @@ def build_report(repo, office, run_date):
         if known and len(known) < len(ts):
             ftxt += f" ({len(ts) - len(known)} {NR})"
         turns = [rows[t]["turn"] for t in ts if rows[t]["turn"] is not None]
-        med = fmt_h(statistics.median(turns)) if turns else NR
-        out.append(f"| {sp['n']} | {len(ts)}{mark} | {wtxt} | {fmt_n(agg(ts, 'reject'))} | "
-                   f"{fmt_n(agg(ts, 'block'))} | {fmt_n(agg(ts, 'escalations'))} | {ftxt} | {med} |")
+        med = fmt_partial(fmt_h(statistics.median(turns)) if turns else None, len(ts) - len(turns))
+        out.append(f"| {sp['n']} | {len(ts)}{mark} | {wtxt} | {fmt_partial(*agg(ts, 'reject'))} | "
+                   f"{fmt_partial(*agg(ts, 'block'))} | {fmt_partial(*agg(ts, 'escalations'))} | {ftxt} | {med} |")
 
     out += ["", "## Tasks", "",
             "| Task | Sprint | spec h | design h | build h | review h | Turnaround h | Reviewer REJECTs "
@@ -340,6 +349,8 @@ def build_report(repo, office, run_date):
             "- Stage hours: sum over every visit to the stage (rework included), from `status:` changes in task "
             "files on main and on PR head refs; commit author times, not work time.",
             "- Turnaround: first non-todo status to first done; not recorded when no stage before done was seen.",
+            f"- A sprint cell 'N (partial, k {NR})' sums, or takes the median of, only the tasks with a "
+            "recorded value; k tasks are missing.",
             "- Reviewer REJECTs and Compliance BLOCKs: verdict lines in each task's Review log and Compliance "
             "sections, counted separately.",
             "- Tasks with no Review log: REJECTs are review-to-build transitions in the status history (else "
