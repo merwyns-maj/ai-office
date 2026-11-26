@@ -8,7 +8,7 @@ owner: reviewer
 where: chat
 project: ai-office
 depends_on: []
-pr: null
+pr: 31
 ---
 
 > Rule: 3+ repeats and a clear 'done'
