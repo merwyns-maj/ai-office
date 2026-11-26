@@ -2,9 +2,9 @@
 id: T-057
 title: "Record and show real token usage per agent, per session"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-056]
@@ -260,6 +260,10 @@ Janice (pmo), 26 Nov: moved to review. On deviation 2 (header `provider`): these
 REJECT (round 1), 26 Nov 2026, PR #40 head 2de5b8c. Pass: ledger runs byte-identical to the seed; hand totals 2,520,926 per agent, per sprint and solo + shared; run 22 "not reported"; page shares sum to 100; 309 tests; report from a full clone matches; 17 break cases caught without echo; process rules and T-024/T-026 notes present; synthetic page unchanged; headless renders clean, accordion works by keyboard.
 Fail (no Max-plan share claim; ledger states facts only): header provider "claude-sdk" shows as "Claude Agent SDK (Max plan) 100%"; the runs were Claude Code subagents, and "(Max plan) 100%" reads as plan share. Fix: a providers.yaml entry for Claude Code subagents (Max plan), header points at it, bar % labelled as share of session; check header provider against providers.yaml ids, with a test.
 Notes: clock "(synth)" on recorded page; "planned*" set by a usage note; planning-only wording should say "never deleted"; unknown-agent error echoes the value; phone sheet cramped.
+— Cahyani (reviewer), recorded by Janice (pmo)
+
+PASS (Review 2), 26 Nov 2026, PR #40 head 5de23d2. Header provider now "claude-code" ("Claude Code subagents (Max plan)"); run lines still byte-identical to the seed; header provider checked against providers.yaml in CLI, metrics and office_app ("zz-weird" rejected, new test); bars read "100% of session" / "N% of session". Recorded clock "(replay)"; planned* only for model notes; planning-only wording "never edited or deleted"; ids no longer wrap. 310 tests; ledger CLI 35 runs, 1 not reported, 2,520,926 tokens; office.html --check up to date; headless renders clean, accordions expanded, keyboard works, 0 console errors.
+Notes: usage.md example header still says claude-sdk; phone sheet cramped; unknown-agent error echoes the value on stderr.
 — Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
