@@ -34,6 +34,7 @@ Before your step, read and follow:
 - offices/ai-office/skills/status-report/SKILL.md
 - offices/ai-office/skills/pr-workflow/SKILL.md
 - offices/ai-office/skills/handoff/SKILL.md
+- offices/ai-office/skills/working-with-merwyn/SKILL.md
 
 ## External skills (use when available)
 - claude:skill-creator
