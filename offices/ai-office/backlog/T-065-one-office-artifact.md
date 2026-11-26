@@ -4,7 +4,7 @@ title: "One office artifact: the real usage ledger and the chat on one page"
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-063]
@@ -117,6 +117,37 @@ Links: T-065, T-063, T-057.
 — Sebastian (engineer)
 
 ## Review log
+**Verdict: PASS** (26 Nov 2026). Every pre-merge Done-when check passes. Evidence below. I wrote it before reading the Build notes. The post-merge republish and the delete are Janice's.
+
+Commands run on `t-065-one-office-artifact` (head 594ca3f):
+```
+$ python -m unittest discover -s tests          -> Ran 386 tests ... OK, exit 0
+$ python -m engine.runtime validate ai-office   -> ai-office: OK - 8 agents, 5 stages, 65 tasks, 18 skills (exit 0)
+$ python scripts/office_app.py ai-office --chat --check
+  engine/app/office.html: up to date (211 KB, 84 events) (exit 0)
+$ python scripts/office_app.py ai-office --ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat
+  engine/app/usage-session_01MDGJq3GfaeozLojJo8W5Td.html: written, 217 KB, 8 agents, 67 events (exit 0; 222,927 B)
+$ ... --chat --ledger L --fixture F             -> "--fixture and --ledger cannot be used together", exit 2 (unchanged)
+```
+1. **Budget: pass.** `budgets.yaml` claude-code has `tokens: 8000000`, `set_by: Merwyn`, `set_on: "2026-11-26"`, and shares and thresholds are unchanged. To test the tests, I set the file to 7,000,000 for a while (then reverted it, and the tree is clean). `tests.test_budgets` (23) and the full suite (386) both passed at that value. So no test pins the value in the file. `grep` finds 5,000,000 only in each test's own maths: `_split` in `test_budgets.py:58`, the 76% check against the literal `5_000_000` at `:187`, and the node `R(...)` and `p(...)` cases in `test_office_app.py`. The shipped-file test still checks no problems, a positive int, `set_by`, a valid `set_on`, and that the agent tokens add up to the total.
+2. **One command, ledger plus chat: pass.** I built the command above and a `--ledger`-only page into /tmp, then read `office-data` from both. The combined page has the ledger-only keys plus `chat`. Combined minus `chat` == ledger-only: True. `chat` equals the committed `office.html` chat: True. Values: `log.usage_source` recorded, session 5,201,744 tokens over 67 runs, budget 8,000,000, `budgets.synthetic` false.
+3. **Headless page with a stub `claude`: pass.** Playwright drove /usr/bin/google-chrome on a /tmp copy plus `three.min.js`. The script was under /tmp, and no screenshots were kept. At 1280x800 and at 390x844 (with `?usage=open`), the "recorded" label, Summary and Detail all show, with "5.2M / 8M" and "65% of your budget". The Chat button is visible, and clicking it opens "Office chat / Office not running" with the hints. `claude.use` was called with `["db","user"]` only. Console errors and page errors: 0 at both sizes.
+4. **Same numbers and colours as the ledger-only page: pass.** I compared every `.bar i` on both pages: key, level class, width and computed colour. They match exactly. The provider row is `lv-ok` 65 rgb(83,186,126). In Detail, compliance is `lv-alert` 96 rgb(230,57,70), and designer 69, engineer 67, reviewer 67, architect 59, pm 51 and curator 43 are all `lv-ok` green. Neither page shows the word "synthetic", and the data has no fixture path.
+5. **Chat unchanged from T-063: pass.** `office.template.html`, `engine/schema/chat.md` and `engine/runtime/` are not in the diff. All T-063 chat tests pass in the 386.
+6. **`--chat` with `--ledger` accepted: pass.** The exit-2 test is replaced by `test_chat_with_ledger_builds_the_one_published_page`. It checks exit 0, the data equalities, `--check` 0 and then 1 after a touch, and the `rec` and `budgets rec` node checks (node is present, so these ran). `test_default_build_has_no_chat_key` and the ledger-only tests are kept. The committed page and `--check` agree (above).
+7. **Docs: pass.** `engine/app/README.md` (Files, Regenerate, artifact and chat paragraphs) and pmo-playbook section 9 "Publish" both name the single command and "AI Office" (5f1bb811-...). Both say the token usage artifact is retired, to be deleted only on Merwyn's confirmation, and that `office.html` is the synthetic dev build and is not published. `engine/schema/usage.md` mentions `--chat`.
+8. **C1 to C8 (T-063) not weakened: pass.** There is no change to the page code, the chat schema or the runtime. The playbook diff only adds the Publish paragraph: steps 1 to 11, including C4, C5, C6 and C7, are untouched. The README still says the artifact stays private and that sharing it needs a new compliance check. The ledger still goes through `forbidden_terms` at build (`office_app.py:69-72`). The same artifact and its owner-only rules are kept.
+
+Notes (not blocking):
+- With the stub, the combined page called `claude.use('db')` and `('user')` at load, before Chat was opened. The ledger-only page called it 0 times. This is T-063 behaviour (the db is read for the badge and needs-you) and is within C7, but Janice should know the published page reads the db on every load.
+- In the 390 px sheet I did not switch the Detail tab, so the per-agent bars were compared at 1280 only.
+- Style: `import datetime` sits inside `test_valid_and_dated` and could move to the top of the file.
+- The header comment in `budgets.yaml` still says "Starting values by Janice (pmo)". That is still true of the agent shares, so it is fine.
+- Risk (1) in the Design still applies: a second session ledger needs a new task.
+
+The Build notes, read after my check, agree with these findings. No deviations.
+
+— Cahyani (reviewer)
 
 ## Decision
 
