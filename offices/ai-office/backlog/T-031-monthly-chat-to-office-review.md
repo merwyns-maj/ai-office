@@ -2,7 +2,7 @@
 id: T-031
 title: "Monthly chat-to-office review"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: chat
