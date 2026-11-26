@@ -1,0 +1,18 @@
+# TEST catalogue (T-056): made-up prices, only for unit tests. Not a real price list.
+providers:
+  plan-test:
+    label: Plan provider (TEST)
+    code: PLN
+    colour: "#c084fc"
+    billing: plan
+    models:
+      plan-model: { short: plan-m, family: opus }
+  token-test:
+    label: Per-token provider (TEST)
+    code: TOK
+    colour: "#5b8def"
+    billing: per_token
+    prices: { source: "made-up test numbers", checked: "2000-01-01" }
+    models:
+      tok-model: { short: tok-m, family: sonnet, input: 0.3125, output: 1.8125, cache_read: 0.0625, cache_write: null }
+      tok-free: { short: tok-f, family: sonnet, input: 0, output: 0, cache_read: 0, cache_write: 0 }

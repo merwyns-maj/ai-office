@@ -1,0 +1,85 @@
+{"log": "office-events", "v": 1, "office": "ai-office", "clock": "synthetic", "usage_source": "synthetic", "title": "SYNTHETIC model and usage demo (T-056): invented numbers, not a real run"}
+{"t": 0, "type": "step_started", "agent": "pmo", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 0, "type": "usage", "agent": "pmo", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 8200, "output": 1400, "cache_read": 31000, "cache_write": 4200, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 2, "type": "step_started", "agent": "pm", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 2, "type": "usage", "agent": "pm", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 12400, "output": 3100, "cache_read": 54000, "cache_write": 6100, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 4, "type": "step_started", "agent": "architect", "task": "T-902", "provider": "claude-sdk", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 4, "type": "usage", "agent": "architect", "task": "T-902", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 15800, "output": 4200, "cache_read": 72000, "cache_write": 9000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 6, "type": "step_started", "agent": "designer", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 6, "type": "usage", "agent": "designer", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 9100, "output": 2600, "cache_read": 38000, "cache_write": 3000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 8, "type": "step_started", "agent": "engineer", "task": "T-903", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 8, "type": "usage", "agent": "engineer", "task": "T-903", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 21000, "output": 6800, "cache_read": 96000, "cache_write": 11000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 10, "type": "step_started", "agent": "reviewer", "task": "T-904", "provider": "claude-sdk", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 10, "type": "usage", "agent": "reviewer", "task": "T-904", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 7400, "output": 1500, "cache_read": 28000, "cache_write": 2000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 12, "type": "step_started", "agent": "compliance", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 12, "type": "usage", "agent": "compliance", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 5600, "output": 900, "cache_read": 17000, "cache_write": 1200, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 14, "type": "step_started", "agent": "curator", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 14, "type": "usage", "agent": "curator", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 3300, "output": 700, "cache_read": 9000, "cache_write": 800, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 18, "type": "stage_changed", "task": "T-901", "from": "todo", "to": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 19, "type": "handoff", "task": "T-901", "from_agent": "pmo", "to_agent": "pm", "to_stage": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 24, "type": "usage", "agent": "pm", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 6400, "output": 2200, "cache_read": 41000, "cache_write": 1800, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 30, "type": "stage_changed", "task": "T-901", "from": "spec", "to": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 31, "type": "handoff", "task": "T-901", "from_agent": "pm", "to_agent": "architect", "to_stage": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 39, "type": "step_started", "agent": "architect", "task": "T-901", "provider": "claude-sdk", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 39, "type": "usage", "agent": "architect", "task": "T-901", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 14200, "output": 5100, "cache_read": 66000, "cache_write": 7400, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 43, "type": "discussion", "task": "T-901", "agents": ["architect", "designer"], "lines": [{"agent": "architect", "text": "Badge goes on the name tag."}, {"agent": "designer", "text": "Two lines, provider chip first."}], "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 49, "type": "stage_changed", "task": "T-901", "from": "design", "to": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 50, "type": "handoff", "task": "T-901", "from_agent": "architect", "to_agent": "engineer", "to_stage": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 58, "type": "step_started", "agent": "engineer", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 58, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 18800, "output": 9400, "cache_read": 120000, "cache_write": 14000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 64, "type": "stage_changed", "task": "T-901", "from": "build", "to": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 65, "type": "handoff", "task": "T-901", "from_agent": "engineer", "to_agent": "reviewer", "to_stage": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 73, "type": "step_started", "agent": "reviewer", "task": "T-901", "provider": "claude-sdk", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 73, "type": "usage", "agent": "reviewer", "task": "T-901", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 9800, "output": 2300, "cache_read": 52000, "cache_write": 3300, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 76, "type": "review_pass", "task": "T-901", "agent": "reviewer", "note": "Synthetic pass", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 79, "type": "merged", "task": "T-901", "pr": 901, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 82, "type": "stage_changed", "task": "T-902", "from": "todo", "to": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 83, "type": "handoff", "task": "T-902", "from_agent": "pmo", "to_agent": "pm", "to_stage": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 91, "type": "step_started", "agent": "pm", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 91, "type": "usage", "agent": "pm", "task": "T-902", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 5200, "output": 1900, "cache_read": 33000, "cache_write": 1500, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 97, "type": "stage_changed", "task": "T-902", "from": "spec", "to": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 98, "type": "handoff", "task": "T-902", "from_agent": "pm", "to_agent": "architect", "to_stage": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 106, "type": "usage", "agent": "architect", "task": "T-902", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 11300, "output": 3800, "cache_read": 58000, "cache_write": 5000, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 112, "type": "stage_changed", "task": "T-902", "from": "design", "to": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 113, "type": "handoff", "task": "T-902", "from_agent": "architect", "to_agent": "engineer", "to_stage": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 121, "type": "step_started", "agent": "engineer", "task": "T-902", "provider": "openai", "model": "gpt-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 121, "type": "usage", "agent": "engineer", "task": "T-902", "provider": "openai", "model": "gpt-5", "billing": "per_token", "input": 24500, "output": 11200, "cache_read": 61000, "cache_write": 0, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 124, "type": "needs_merwyn", "agent": "pmo", "task": "T-903", "reason": "Which provider for the big refactor?", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 136, "type": "merwyn_answered", "agent": "pmo", "task": "T-903", "answer": "Try DeepSeek for the build step", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 140, "type": "stage_changed", "task": "T-902", "from": "build", "to": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 141, "type": "handoff", "task": "T-902", "from_agent": "engineer", "to_agent": "reviewer", "to_stage": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 149, "type": "step_started", "agent": "reviewer", "task": "T-902", "provider": "anthropic-api", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 149, "type": "usage", "agent": "reviewer", "task": "T-902", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": 13400, "output": 3600, "cache_read": 47000, "cache_write": 6200, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 152, "type": "review_pass", "task": "T-902", "agent": "reviewer", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 155, "type": "merged", "task": "T-902", "pr": 902, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 158, "type": "stage_changed", "task": "T-903", "from": "todo", "to": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 159, "type": "handoff", "task": "T-903", "from_agent": "pmo", "to_agent": "pm", "to_stage": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 167, "type": "usage", "agent": "pm", "task": "T-903", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 4800, "output": 1700, "cache_read": 29000, "cache_write": 1100, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 173, "type": "stage_changed", "task": "T-903", "from": "spec", "to": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 174, "type": "handoff", "task": "T-903", "from_agent": "pm", "to_agent": "architect", "to_stage": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 182, "type": "usage", "agent": "architect", "task": "T-903", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 10100, "output": 3300, "cache_read": 49000, "cache_write": 4100, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 188, "type": "stage_changed", "task": "T-903", "from": "design", "to": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 189, "type": "handoff", "task": "T-903", "from_agent": "architect", "to_agent": "engineer", "to_stage": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 197, "type": "step_started", "agent": "engineer", "task": "T-903", "provider": "deepseek", "model": "deepseek-chat", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 197, "type": "usage", "agent": "engineer", "task": "T-903", "provider": "deepseek", "model": "deepseek-chat", "billing": "per_token", "input": 31800, "output": 14600, "cache_read": 88000, "cache_write": 0, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 201, "type": "stage_changed", "task": "T-903", "from": "build", "to": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 202, "type": "handoff", "task": "T-903", "from_agent": "engineer", "to_agent": "reviewer", "to_stage": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 210, "type": "step_started", "agent": "reviewer", "task": "T-903", "provider": "claude-sdk", "model": "claude-opus-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 210, "type": "usage", "agent": "reviewer", "task": "T-903", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 8600, "output": 2000, "cache_read": 36000, "cache_write": 2400, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 213, "type": "review_pass", "task": "T-903", "agent": "reviewer", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 216, "type": "merged", "task": "T-903", "pr": 903, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 219, "type": "stage_changed", "task": "T-904", "from": "todo", "to": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 220, "type": "handoff", "task": "T-904", "from_agent": "pmo", "to_agent": "pm", "to_stage": "spec", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 228, "type": "usage", "agent": "pm", "task": "T-904", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 4100, "output": 1500, "cache_read": 25000, "cache_write": 900, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 234, "type": "stage_changed", "task": "T-904", "from": "spec", "to": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 235, "type": "handoff", "task": "T-904", "from_agent": "pm", "to_agent": "architect", "to_stage": "design", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 243, "type": "usage", "agent": "architect", "task": "T-904", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 9400, "output": 2900, "cache_read": 44000, "cache_write": 3600, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 249, "type": "stage_changed", "task": "T-904", "from": "design", "to": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 250, "type": "handoff", "task": "T-904", "from_agent": "architect", "to_agent": "engineer", "to_stage": "build", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 258, "type": "step_started", "agent": "engineer", "task": "T-904", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 258, "type": "usage", "agent": "engineer", "task": "T-904", "provider": "claude-sdk", "model": "claude-sonnet-4-5", "billing": "plan", "input": 16400, "output": 7200, "cache_read": 92000, "cache_write": 8800, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 262, "type": "stage_changed", "task": "T-904", "from": "build", "to": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 263, "type": "handoff", "task": "T-904", "from_agent": "engineer", "to_agent": "reviewer", "to_stage": "review", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 271, "type": "usage", "agent": "reviewer", "task": "T-904", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 7900, "output": 1800, "cache_read": 31000, "cache_write": 2100, "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 274, "type": "review_pass", "task": "T-904", "agent": "reviewer", "src": "engine/app/fixtures/models-synthetic.jsonl"}
+{"t": 277, "type": "merged", "task": "T-904", "pr": 904, "src": "engine/app/fixtures/models-synthetic.jsonl"}

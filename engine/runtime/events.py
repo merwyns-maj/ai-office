@@ -1,4 +1,4 @@
-"""Event log v0 parser and validator (engine/schema/events.md). Stdlib only, never raises on bad input."""
+"""Event log v0/v1 parser and validator (engine/schema/events.md). Stdlib only, never raises on bad input."""
 import json
 import re
 from dataclasses import dataclass
@@ -7,7 +7,13 @@ from pathlib import Path
 
 from .miniyaml import loads
 
-SCHEMA_VERSION = 0
+SCHEMA_VERSIONS = (0, 1)
+USAGE_SOURCES = ("synthetic", "recorded")
+BILLINGS = ("per_token", "plan")
+PROVIDER_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
+MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,63}$")
+MAX_TOKENS = 999_999_999
+MAX_USD = 999_999
 MAX_LINE = 2000
 TASK_RE = re.compile(r"^T-\d{3}$")
 VERDICTS = ("PASS", "PASS_WITH_CONDITIONS", "BLOCK")
@@ -27,6 +33,12 @@ EVENT_TYPES = {
     "compliance_result": {"task": "TASK", "agent": "AGENT", "verdict": "VERDICT"},
     "blocked": {"agent": "AGENT", "task": "TASK", "reason": "TEXT"},
     "merged": {"task": "TASK", "pr": "INT"},
+}
+# v1 additions (T-056): optional provider/model on step_started (both or neither) and the usage type
+V1_EXTRA = {"step_started": {"provider": "PROVIDER?", "model": "MODEL?"}}
+V1_TYPES = {
+    "usage": {"agent": "AGENT", "task": "TASK", "provider": "PROVIDER", "model": "MODEL", "billing": "BILLING",
+              "input": "TOKENS", "output": "TOKENS", "cache_read": "TOKENS?", "cache_write": "TOKENS?", "cost_usd": "USD?"},
 }
 COMMON = ("t", "type", "src", "wall")
 
@@ -138,6 +150,18 @@ def _check_field(kind, v, agents, stages):
         return None if isinstance(v, int) and not isinstance(v, bool) and v >= 1 else "must be an integer >= 1"
     if kind == "VERDICT":
         return None if v in VERDICTS else f"verdict must be one of {', '.join(VERDICTS)}"
+    if kind == "PROVIDER":
+        return None if isinstance(v, str) and PROVIDER_RE.match(v) else "bad provider id"
+    if kind == "MODEL":
+        return None if isinstance(v, str) and MODEL_RE.match(v) else "bad model id"
+    if kind == "BILLING":
+        return None if v in BILLINGS else f"billing must be one of {', '.join(BILLINGS)}"
+    if kind == "TOKENS":
+        ok = isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= MAX_TOKENS
+        return None if ok else f"tokens must be an integer from 0 to {MAX_TOKENS}"
+    if kind == "USD":
+        ok = isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= MAX_USD and round(v, 6) == v
+        return None if ok else f"must be a number from 0 to {MAX_USD} with at most 6 decimals"
     return None
 
 
@@ -156,14 +180,33 @@ def _check_discussion(ev, agents):
     return None
 
 
-def parse_log(text, *, agents, stages, forbidden=()):
-    """Return (header, kept events in file order, problems). Events carry their file line as '_line'."""
+def _catalogue_warning(ev, providers):
+    """Warning text for an event whose provider, model or billing the catalogue does not know, else None."""
+    prov, model = ev.get("provider"), ev.get("model")
+    if prov is None:
+        return None
+    entry = providers.get(prov)
+    if entry is None:
+        return f"provider {prov!r} is not in the provider catalogue (kept)"
+    if model not in (entry.get("models") or {}):
+        return f"model {model!r} is not in the catalogue for provider {prov!r} (kept)"
+    if ev.get("billing") not in (None, entry.get("billing")):
+        return f"billing {ev.get('billing')!r} differs from the catalogue's for {prov!r} (the event wins)"
+    return None
+
+
+def parse_log(text, *, agents, stages, forbidden=(), providers=None):
+    """Return (header, kept events in file order, problems). Events carry their file line as '_line'.
+
+    providers: optional catalogue (providers.load_providers); with it, unknown ids give one warning each."""
     problems = []
     header = None
     kept = []
     last_t = 0.0
     last_wall = None
     seen_header = False
+    version = 0
+    seen_warn = set()
 
     def err(n, msg):
         problems.append(LogProblem(n, "error", msg))
@@ -189,15 +232,18 @@ def parse_log(text, *, agents, stages, forbidden=()):
             obj = None
         if not seen_header:
             seen_header = True
-            if (not isinstance(obj, dict) or obj.get("log") != "office-events" or obj.get("v") != SCHEMA_VERSION
-                    or isinstance(obj.get("v"), bool) or obj.get("clock") not in CLOCKS):
-                err(n, "missing or invalid header (log=office-events, v=0, clock=synthetic|wall): file rejected")
+            if (not isinstance(obj, dict) or obj.get("log") != "office-events" or obj.get("v") not in SCHEMA_VERSIONS
+                    or isinstance(obj.get("v"), bool) or obj.get("clock") not in CLOCKS
+                    or (obj.get("v") == 1 and obj.get("usage_source") not in USAGE_SOURCES)):
+                err(n, "missing or invalid header (log=office-events, v=0|1, clock=synthetic|wall, "
+                       "v1 also usage_source=synthetic|recorded): file rejected")
                 return None, [], problems
             hit = _data_hit(obj, forbidden)
             if hit:
                 err(n, hit)
                 return None, [], problems
             header = obj
+            version = obj["v"]
             continue
         if obj is None:
             continue
@@ -233,6 +279,8 @@ def parse_log(text, *, agents, stages, forbidden=()):
         else:
             w = None
         spec = EVENT_TYPES.get(typ)
+        if version == 1:
+            spec = V1_TYPES.get(typ) or (dict(spec, **V1_EXTRA[typ]) if spec and typ in V1_EXTRA else spec)
         bad = None
         if spec is None:
             warn(n, f"unknown type {typ!r} (kept)")
@@ -253,12 +301,21 @@ def parse_log(text, *, agents, stages, forbidden=()):
                     break
             if not bad and typ == "discussion":
                 bad = _check_discussion(obj, agents)
+            if not bad and version == 1 and typ in ("step_started", "usage") and ("provider" in obj) != ("model" in obj):
+                bad = "provider and model go together"
+            if not bad and typ == "usage" and obj.get("billing") == "plan" and "cost_usd" in obj:
+                bad = "a plan step must not carry cost_usd"
             if bad:
                 err(n, bad)
                 continue
             for f in obj:
                 if f not in spec and f not in COMMON:
                     warn(n, f"field {f!r} is not defined for {typ} (kept)")
+            if providers and version == 1:
+                cw = _catalogue_warning(obj, providers)
+                if cw and cw not in seen_warn:
+                    seen_warn.add(cw)
+                    warn(n, cw)
         last_t = t
         if w is not None:
             last_wall = w

@@ -4,7 +4,7 @@ title: "Show which model each agent uses, and usage, in the 3D office (multi-pro
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-048]
@@ -342,6 +342,64 @@ Spec approved 26 Nov 2026. Answers: profile models today (base/agents): architec
 Janice (pmo), 26 Nov: Design accepted (Dinda's UX with Fang's three changes). Build starts when a build slot frees (at most 2 in build). Model ids in the fixture are illustrative and labelled synthetic; prices stay null. Engineer: do not set status.
 
 ## Build notes
+
+**What changed**
+- Parser `engine/runtime/events.py`: v0 and v1 (`SCHEMA_VERSIONS = (0, 1)`), v1 header needs `usage_source`, `step_started` takes `provider`+`model` (both or neither), new `usage` type, kinds PROVIDER, MODEL, BILLING, TOKENS, USD, plan step with `cost_usd` is an error, catalogue warnings (one per distinct message) via `parse_log(..., providers=)`. v0 behaviour untouched.
+- `engine/runtime/providers.py` (new) + `offices/ai-office/providers.yaml` (new): catalogue, colours, codes, `short`, `family`; all prices `null`, `prices.source`/`checked` `null`; a price without a dated source fails the build.
+- `scripts/office_app.py`: injects `providers`, `warnings`, `agents[].planned_model` (via `build_agents.merged`), `v: 1`; default fixture is now the v1 synthetic log; Sprint 3 still builds with `--fixture`.
+- `engine/app/office.template.html` (office-core): usage reducer, `eventCost`, `usageTotals`, `costText` (the only place a currency sign is built), `modelLabel`, `plannedDiffers`, `tickerItems`/`switchSentence`, `DUR.usage = 0` with `evDur` using `in`. (office-view): second line on each name tag (provider chip + short model; phone shows the chip only), Usage panel (total, by provider, by agent) docked above the ticker, sheet under 900 px (Usage button in the bar at 600-899, in the gear menu on phones), focus card model/planned/usage lines, strip tooltip and aria-label carry the provider code, ticker line on a model switch (usage events add none), "This log has no model data." for v0 logs.
+- `engine/app/fixtures/models-synthetic.jsonl` (new, SYNTHETIC): 84 events, 24 `usage`, 4 providers, 8 agents with a model by t=16 s, the engineer switching SDK -> OAI -> DSK -> SDK, the reviewer once on the Anthropic API, a needs-Merwyn moment at +01:45, no `cost_usd`, no warnings.
+- Docs: `engine/schema/events.md` (v1 section), `engine/schema/office.md` (providers.yaml), `engine/app/README.md`. T-026 got the Spec note to emit this format.
+- Tests: `tests/test_providers.py` (new), `tests/test_events.py` (+V1 class), `tests/test_office_app.py` (node modes `usage` and `pricing`, `NoLiterals`, `Providers`), fixtures `events-v1-edge.jsonl`, `providers-test.yaml` (made-up prices, labelled TEST).
+
+**How to verify** (real output, 26 Nov 2026)
+```
+$ python -m unittest                      -> Ran 271 tests ... OK   (was 240)
+$ python scripts/office_app.py ai-office --check
+engine/app/office.html: up to date (128 KB, 84 events)         # 131,275 bytes; limit 204,800
+$ python -m engine.runtime events ai-office engine/app/fixtures/sprint-03.jsonl      # v0
+engine/app/fixtures/sprint-03.jsonl: 45 events kept, 0 errors, 0 warnings
+$ python -m engine.runtime events ai-office engine/app/fixtures/models-synthetic.jsonl   # v1
+engine/app/fixtures/models-synthetic.jsonl: 84 events kept, 0 errors, 0 warnings
+$ python -m engine.runtime events ai-office tests/fixtures/events-v1-edge.jsonl      # exit 1 by design
+... 5 events kept, 8 errors, 3 warnings
+$ python scripts/golden.py ai-office      -> golden: 10 cases, 41 checks, 0 problems
+$ python -m engine.runtime validate ai-office   -> ai-office: OK - 8 agents, 5 stages, 56 tasks, 17 skills
+$ python scripts/build_agents.py ai-office -> built 8 agents;  python scripts/board.py ai-office -> 56 tasks (board.md discarded)
+```
+Open the page: get three.js as in `engine/app/README.md`, then `engine/app/office.html?t=40` (mid replay, all 8 models), `?t=108` (Janice waiting on Merwyn), `?t=105&play=1` (model switch), `?motion=reduced`, `?usage=open` on a phone width.
+
+**Done-when map**
+- v1 documented, v0 loads unchanged: events.md; `V1.test_v0_files_load_unchanged`, CLI exit 0 above.
+- Plan step shows tokens and "plan", no dollar; plan + `cost_usd` fails: `V1.test_plan_step_with_cost_is_an_error`, `pricing` node test (`plan` bucket: `micro 0`, text has no currency sign).
+- Per-token cost from config with source date, never "live": `pricing` node test (exact micro-USD: 116,088 -> "$0.12 est."), date shown per provider row ("prices checked ..."), footnote; `NoLiterals` bans "current price" and "live price/cost/usage". The shipped config has no price, so the committed page shows "price not set" and no currency sign anywhere (`test_committed_page_data_has_no_dollar_sign...`, `usage` node test asserts the end-of-replay cost text is "plan runs + 3 unpriced").
+- Synthetic: header `usage_source: synthetic`, title says SYNTHETIC, pill in the panel header and the word "synthetic" after the total, every provider row and every agent row (screenshots).
+- Model as colour plus text for all 8 agents at mid replay: `mid-desktop.png`.
+- Totals equal the sum of events due, scrubbing back lowers them: `CoreUnderNode.test_usage_totals_equal_the_sum_of_events_due...` (times 0, 60, end, 60, 120, 0; exact per-agent, per-provider and total).
+- Unknown provider/model: warning not error (`V1.test_unknown_ids_warn_once_not_error`, `Providers.test_unknown_provider_still_builds...`); renders raw id (cut at 12 chars with an ellipsis), neutral colour, dashed chip, `--` cost (`pricing` node test on `modelLabel` and `costText`). I did not screenshot an unknown provider on the page; it is covered by the node test only.
+- Config not hard-coded: `NoLiterals.test_no_price_numbers_provider_ids_or_live_claims` (no provider id, no test price, no `$\s*\d` in the template or `office_app.py`); `test_dollar_sign_is_built_in_exactly_one_place`.
+- Event model differs from profile `model:`: page shows the event's model, "planned: sonnet" only in the focus card (`plannedDiffers` node test; `focus-card.png`: Sebastian on gpt-5, planned sonnet; a same-family model on another provider gives no "planned" line, covered by the node test only).
+- T-048 data scan and size limit still pass (`PageRules`).
+
+**Screenshots** (`/tmp/t056-shots/`, headless Chrome, software GL; the only console output is Chrome's "GPU stall due to ReadPixels" driver message, no page errors; fps is red because software GL, not a real frame rate)
+`mid-desktop.png` (t=40, 1280x800, all 8 models, synthetic labels), `end-desktop.png` (t=233, four providers, ticker switch line), `needs-merwyn-desktop.png` (t=108, amber still loudest, waiting tag model line dim), `switch-flash.png` (t=105 playing, mid model switch), `reduced-desktop.png` (`?motion=reduced`), `focus-card.png`, `collapsed-desktop.png`, `short-laptop.png` (1280x500, panel collapsed by default), `phone-mid.png` and `phone-needs-merwyn.png` (390x844, chip-only tags), `phone-usage.png` (usage sheet), `tablet-usage.png` (700x800 sheet and bar Usage button), `v0-sprint03.png` (Sprint 3 log: no chips, no panel, "This log has no model data.").
+Fixed after looking: wrapping "cache" figure (spans no longer split), focus-card usage lines, the 600-899 px bar overflowing once the Usage button joined it (4x and fps were clipped), a duplicated "gpt-5 gpt-5" in the focus card, smaller chips on phones.
+
+**Deviations from the design**
+1. `Row` has an extra `usd` count (priced buckets) next to `plan`, `unset`, `none`: without it a priced bucket of 0 micro-USD cannot be told from "no usage". `costText` uses it.
+2. Added `?usage=open|collapsed` URL parameters so the sheet and collapsed state can be screenshotted without a click; documented in the app README. Not in the design.
+3. Panel collapse and sheet open are instant, not the 160/180 ms height and slide animations in Dinda's motion table (no loops or flashes were dropped; the model-switch chip flash, 180 ms cross-fade and the reduced-motion fallback are in). Say so if you want them.
+4. `tickerItems` (core) builds the ticker list, so the switch line is computed once from the event log and survives scrubbing; the design said the view would detect the switch. Same result, testable under node.
+5. Added `engine/schema/office.md` section and `engine/app/README.md` notes (the design named office.md only).
+
+**Known limits**
+- Tags are two lines now and the desks are close: Fang's and Dinda's tags overlap by about 8 px at 1280x800 (text stays readable); on phones tags still crowd as they did in T-048, now with a chip.
+- Provider rows follow the order of the config keys as written into the page (sorted by `json.dumps`), so the Anthropic API row comes before the SDK row.
+- The chip border contrast (3:1 non-text) was judged by eye on screen, not measured.
+- Real model ids and prices are unknown: the catalogue holds the fixture's illustrative ids and every price is null (Open questions below).
+- T-048 data-rule gap for keys/numbers is T-027's; not widened.
+
+— Sebastian (engineer)
 
 ## Review log
 

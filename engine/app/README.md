@@ -1,11 +1,13 @@
-# engine/app: the 3D office page (T-048)
+# engine/app: the 3D office page (T-048, model and usage T-056)
 
 One self-contained page, `office.html`, replays a recorded event log (`engine/schema/events.md`) in a three.js (r128) office built from `offices/ai-office/theme/theme.yaml`. No build step, no network calls except loading three.js. v0 is replay only: no live events (T-027 / T-024).
 
 Files
 - `office.template.html`: the page source (HTML, CSS, `office-core` pure logic, `office-view` scene and HUD)
 - `office.html`: generated, committed. Do not edit by hand
-- `fixtures/sprint-03.jsonl`: replay of Sprint 3 (T-043, T-044, T-045)
+- `fixtures/models-synthetic.jsonl`: SYNTHETIC v1 log (model and usage, four providers), the default page
+- `fixtures/sprint-03.jsonl`: replay of Sprint 3 (T-043, T-044, T-045), a v0 log: `python scripts/office_app.py ai-office --fixture engine/app/fixtures/sprint-03.jsonl --out /tmp/sprint03.html`
+- `offices/<office>/providers.yaml`: provider catalogue and prices the page reads (format in `engine/schema/office.md`)
 - `three.min.js`: NOT committed (gitignored). Fetch it as below
 
 ## Regenerate
@@ -27,7 +29,9 @@ The page loads `./three.min.js` first, then cdnjs r128, unpkg and jsdelivr (0.12
 
 As an artifact: publish `office.html` together with `three.min.js` as a sibling file, or rely on the CDN fallbacks.
 
-URL parameters: `?t=<seconds>` open paused at that replay time (`&play=1` to play from there), `?motion=reduced`, `?speed=1|2|4`.
+URL parameters: `?t=<seconds>` open paused at that replay time (`&play=1` to play from there), `?motion=reduced`, `?speed=1|2|4`, `?usage=collapsed` (docked usage panel starts collapsed) or `?usage=open` (open the usage sheet on screens under 900 px).
+
+Model and usage (T-056): every name tag shows a provider chip (code plus colour) and a short model name; the right column has a collapsible Usage panel (total, by provider, by agent) above the ticker; under 900 px it is a sheet opened from the Usage button (the gear menu on phones). Every usage figure carries the word "synthetic" while the log header says `usage_source: synthetic`. Cost is `tokens x config price`, an estimate with the config's date; with no price in the config a per-token row says "price not set". A log without model data (v0) shows no chips and no panel.
 Keys: Space play/pause, Left/Right step one event, 1/2/4 speed, M motion, F follow, Esc close.
 
 ## Screenshots (headless Chrome, software GL)

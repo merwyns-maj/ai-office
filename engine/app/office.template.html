@@ -30,7 +30,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-o
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .lb{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap;pointer-events:none}
-.tag{font:600 11px/1 var(--ui);background:rgba(29,30,44,.92);color:var(--text);padding:4px 7px 4px 6px;border-radius:5px;border:1px solid var(--c,#888);display:flex;gap:5px;align-items:center;transition:opacity .2s}
+.tag{font:600 11px/1 var(--ui);background:rgba(29,30,44,.92);color:var(--text);padding:4px 7px 4px 6px;border-radius:5px;border:1px solid var(--c,#888);display:flex;flex-direction:column;gap:3px;align-items:flex-start;transition:opacity .2s}
+.tag .t1,.tag .t2{display:flex;gap:5px;align-items:center}
+.tag .t2{font:500 10px/1 var(--ui)}
+.tag.warn .t2{color:var(--text-dim)}
+.tag.warn .chip{opacity:.65}
+.chip{font:700 10px/1 var(--mono);color:var(--text);padding:2px 3px;border:1px solid var(--pc,var(--wall));border-radius:3px;background:rgba(255,255,255,.04);display:inline-block;letter-spacing:.02em}
+@supports (background:color-mix(in srgb,red 10%,transparent)){.chip{background:color-mix(in srgb,var(--pc,#8d99ae) 22%,transparent)}}
+.chip.unk{border-style:dashed}
+.chip.none{color:var(--text-dim);border-color:rgba(255,255,255,.2);background:none}
+.tag.flash .chip{animation:chipflash .4s ease-out}
+.tag.flash .t2 .m{animation:xfade .18s ease-out}
+@keyframes chipflash{0%{border-color:var(--text);box-shadow:0 0 0 1px var(--text)}100%{box-shadow:0 0 0 1px transparent}}
+@keyframes xfade{from{opacity:0}to{opacity:1}}
 .tag.warn{border-color:var(--warn);box-shadow:0 0 0 1px rgba(244,162,97,.35)}
 .tag.talk{text-decoration:underline 2px;text-underline-offset:3px}
 .tag.dim{opacity:.5}
@@ -51,6 +63,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-o
 .room b.ok{border-color:var(--accent);color:var(--accent)}
 .room.lit{color:var(--text)}
 body.rm .tag,body.rm .bubble{transition:none}
+body.rm .tag.flash .chip,body.rm .tag.flash .t2 .m{animation:none}
 body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 
 /* top: needs-you pill + agent strip */
@@ -69,7 +82,47 @@ body.rm .bubble.in,body.rm .cardlb.stamp{animation:none}
 .seg[aria-pressed=true]{background:#2a2c42;border-color:rgba(255,255,255,.35)}
 
 /* ticker */
-#ticker{position:absolute;right:12px;top:var(--bar);bottom:var(--bar);width:calc(var(--side) - 24px);padding:12px;overflow:hidden;display:flex;flex-direction:column;gap:2px;margin:4px 0}
+#side{position:absolute;right:12px;top:var(--bar);bottom:var(--bar);width:calc(var(--side) - 24px);margin:4px 0;display:flex;flex-direction:column;gap:8px;min-height:0}
+#ticker{flex:1 1 0;min-height:96px;padding:12px;overflow:hidden;display:flex;flex-direction:column;gap:2px}
+#nomodel{color:var(--text-dim);font-size:12px;margin:0 0 6px}
+
+/* usage panel (T-056) */
+#usage{flex:0 1 auto;min-height:0;max-height:64%;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.uh{display:flex;align-items:center;gap:8px;padding:10px 10px 8px 12px;flex:none}
+.uh h2{margin:0;font:700 11px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
+.synpill{font:600 10px/1 var(--ui);letter-spacing:.04em;padding:3px 7px;border-radius:9px;background:var(--text-dim);color:var(--panel)}
+.ucol{margin-left:auto;width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.12);background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.ucol svg{width:12px;height:12px;transition:rotate .16s ease-out}
+.ucol[aria-expanded=false] svg{rotate:-90deg}
+body.rm .ucol svg{transition:none}
+.ubody{overflow:auto;padding:0 12px 10px;scrollbar-width:thin}
+#usage.col .ubody,#usage:not(.col) .usum{display:none}
+.usum{padding:0 12px 10px;font-size:12px;color:var(--text)}
+.ubody h4{margin:10px 0 3px;font:700 10px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
+.ur{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;padding:4px 6px;margin:0 -6px;border-radius:6px;border-top:1px solid rgba(255,255,255,.05)}
+.ubody > .ur:first-of-type{border-top:0}
+button.ur:hover{background:rgba(255,255,255,.05)}
+.ur .l1{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600}
+.ur .l1 .nm{flex:none}
+.ur .l1 .cost{margin-left:auto;text-align:right;font-weight:500;color:var(--text);font-size:11px}
+.ur .l2{font:400 10px/1.4 var(--mono);color:var(--text-dim);margin-top:2px}
+.ur .l2 > span{white-space:nowrap;margin-right:7px}
+.ur .l2 > span.syn{font:italic 400 10px/1.4 var(--ui);margin:0}
+.ur .l3{font:400 10px/1.3 var(--ui);color:var(--text-dim);margin-top:1px}
+.ur.tot .l1{font-size:13px}
+.ur.tot .cost{font-size:12px}
+.ufoot{margin-top:8px;font-size:10.5px;line-height:1.35;color:var(--text-dim)}
+.uempty{color:var(--text-dim);font-size:12px;padding:2px 0 4px}
+#ubtn{display:none}
+#usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bar) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
+#usheet.open{display:flex}
+#usheet .uh{position:sticky;top:0;background:var(--panel);padding:10px 0 8px;z-index:1}
+#usheet .ucol{width:44px;height:44px;font-size:20px}
+@media (max-width:599px){.chip{font-size:9px;padding:1px 2px}}
+#usheet .ur{padding:6px 6px}
+#usheet .ur .l1{font-size:13px}
+#usheet .ur .l2,#usheet .ur .l3,#usheet .ufoot{font-size:12px}
+#usheet .ur .l1 .cost{font-size:12px}
 #ticker h2{margin:0 0 6px;font:700 11px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
 #tlist{display:flex;flex-direction:column;gap:2px;overflow:hidden}
 .tl{display:flex;gap:8px;align-items:flex-start;padding:6px 6px 6px 8px;border-left:2px solid transparent;border-radius:3px;font-size:12px}
@@ -90,6 +143,9 @@ body.rm .tl.new{animation:none}
 #focus .role{color:var(--text-dim);font-size:12px;margin:2px 0 10px}
 #focus .row{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:12px}
 #focus svg{width:14px;height:14px}
+#focus .fu{font-size:11px;line-height:1.5;color:var(--text-dim);margin:2px 0 8px}
+#focus .fu span{white-space:nowrap;margin-right:7px}
+#focus .fu .syn{font:italic 400 10px/1 var(--ui);margin:0}
 #focus ol{margin:8px 0 0;padding:0 0 0 16px;color:var(--text-dim);font-size:12px}
 #fx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:8px;border:0;background:transparent;font-size:18px}
 
@@ -125,10 +181,20 @@ body.rm .tl.new{animation:none}
 
 @media (max-width:899px){
   :root{--side:0px}
+  #side{display:contents}
+  #usage{display:none}
   #ticker{display:none}
   #tone{display:block;position:absolute;left:12px;right:12px;bottom:var(--bar);height:34px;padding:0 12px;align-items:center;gap:8px;border:0;text-align:left;font-size:12px;overflow:hidden;white-space:nowrap}
   #stage{bottom:calc(var(--bar) + 36px)}
   #focus{left:12px;right:auto}
+}
+@media (min-width:600px) and (max-width:899px){
+  #ubtn{display:inline-flex}
+  .seg2{flex:none}
+  #fps{min-width:0;font-size:10px}
+  #bar{gap:6px}
+  #bar .btn{padding:0 9px;white-space:nowrap}
+  #usheet{left:12px;right:auto;width:min(520px,calc(100% - 24px))}
 }
 @media (max-width:599px){
   :root{--bar:64px}
@@ -157,8 +223,8 @@ body.rm .tl.new{animation:none}
   #tone{left:8px;right:8px}
 }
 @media (max-height:520px) and (min-width:600px){:root{--bar:48px}#top,#bar{padding:5px 12px}.seg,#pill{height:34px}}
-body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bar) + 40px);z-index:7}
-@media (prefers-reduced-motion:reduce){.tl.new,.bubble.in,.cardlb.stamp{animation:none}}
+body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right:8px;width:auto;top:112px;bottom:calc(var(--bar) + 40px);z-index:7}
+@media (prefers-reduced-motion:reduce){.tl.new,.bubble.in,.cardlb.stamp,.tag.flash .chip,.tag.flash .t2 .m{animation:none}.ucol svg{transition:none}}
 </style>
 </head>
 <body>
@@ -174,7 +240,15 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
     <button id="banner" type="button" hidden></button>
     <div id="strip" role="group" aria-label="Agents, most urgent first"></div>
   </header>
-  <aside id="ticker" class="panel" aria-label="Event ticker"><h2>Latest events</h2><div id="tlist"></div></aside>
+  <div id="side">
+    <section id="usage" class="panel" aria-label="Usage" hidden>
+      <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
+      <div id="usum" class="usum"></div>
+      <div id="ubody" class="ubody"></div>
+    </section>
+    <aside id="ticker" class="panel" aria-label="Event ticker"><h2>Latest events</h2><div id="nomodel" hidden>This log has no model data.</div><div id="tlist"></div></aside>
+  </div>
+  <section id="usheet" class="panel" role="dialog" aria-label="Usage" hidden></section>
   <button id="tone" class="panel" type="button" aria-label="Latest event; open the event list"></button>
   <section id="focus" class="panel" hidden aria-label="Agent details"><button id="fx" type="button" aria-label="Close">×</button><div id="fbody"></div></section>
   <div id="msheet" class="panel"></div>
@@ -185,6 +259,7 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
     <span id="clock">+00:00 (synth)</span>
     <button id="motion" class="btn opt" type="button">Motion: Full</button>
     <button id="follow" class="btn opt" type="button" aria-pressed="true">Follow: On</button>
+    <button id="ubtn" class="btn opt" type="button" aria-expanded="false">Usage</button>
     <button id="gear" class="btn" type="button" aria-label="Settings" aria-expanded="false"><svg viewBox="0 0 16 16"><path fill="currentColor" d="M8 5.2A2.8 2.8 0 1 0 8 10.8 2.8 2.8 0 0 0 8 5.2zM6.9.8h2.2l.4 1.9 1.2.5 1.6-1.1 1.6 1.6-1.1 1.6.5 1.2 1.9.4v2.2l-1.9.4-.5 1.2 1.1 1.6-1.6 1.6-1.6-1.1-1.2.5-.4 1.9H6.9l-.4-1.9-1.2-.5-1.6 1.1-1.6-1.6 1.1-1.6-.5-1.2L.8 9.1V6.9l1.9-.4.5-1.2L2.1 3.7l1.6-1.6 1.6 1.1 1.2-.5z" opacity=".9"/></svg></button>
     <span id="fps" aria-label="Frames per second">-- fps</span>
   </footer>
@@ -200,8 +275,8 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
   function talkDur(ev) { return (ev.lines || []).reduce(function (s, l) { return s + lineDur(l.text); }, 0); }
   /* estimated animation length at 1x, used to space events so one agent never has two at once */
   var DUR = { step_started: 0.6, stage_changed: 0.8, handoff: 9, needs_merwyn: 5, merwyn_answered: 5,
-    review_pass: 1.2, review_reject: 1.2, compliance_result: 1.2, blocked: 0.6, merged: 12 };
-  function evDur(ev) { return ev.type === 'discussion' ? 7 + talkDur(ev) : (DUR[ev.type] || 0.4); }
+    review_pass: 1.2, review_reject: 1.2, compliance_result: 1.2, blocked: 0.6, merged: 12, usage: 0 };
+  function evDur(ev) { return ev.type === 'discussion' ? 7 + talkDur(ev) : (ev.type in DUR ? DUR[ev.type] : 0.4); }
   function involved(ev) {
     var a = [];
     if (ev.agent) a.push(ev.agent);
@@ -237,9 +312,9 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
     return out;
   }
   function initState(data) {
-    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0 };
-    data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle' }; });
-    data.events.forEach(function (e) { if (e.task && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
+    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, lastSwitch: null };
+    data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle', model: null, prevModel: null, switchedAt: null }; });
+    data.events.forEach(function (e) { if (e.task && e.type !== 'usage' && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
     return s;
   }
   function add(list, x) { if (list.indexOf(x) < 0) list.push(x); }
@@ -259,17 +334,100 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
     if (Object.keys(a.blocked).length) return 'Blocked';
     return a.holds.some(function (t) { return s.tasks[t] && s.tasks[t].mark === 'reject'; }) ? 'Rejected' : '';
   }
+  /* ----- model and usage (event log v1, T-056). Pure: costs come from the catalogue passed in, never from literals ----- */
+  var TOK = ['input', 'output', 'cache_read', 'cache_write'];
+  function setModel(s, ev, at) {
+    var a = s.agents[ev.agent], cur = a.model;
+    if (cur && (cur.provider !== ev.provider || cur.model !== ev.model)) {
+      a.prevModel = cur; a.switchedAt = at; s.lastSwitch = { agent: ev.agent, from: cur, to: { provider: ev.provider, model: ev.model } };
+    }
+    a.model = { provider: ev.provider, model: ev.model };
+  }
+  function eventCost(b, providers) {
+    if (b.billing === 'plan') return { state: 'plan', micro: 0 };
+    var p = providers && providers[b.provider], m = p && p.models && p.models[b.model];
+    if (!m) return { state: 'none', micro: 0 };
+    var micro = 0, unset = false;
+    TOK.forEach(function (f) {
+      if (!b[f]) return;
+      var pr = m[f];
+      if (pr === null || pr === undefined) unset = true; else micro += Math.round(b[f] * pr);
+    });
+    return unset ? { state: 'unset', micro: 0 } : { state: 'usd', micro: micro };
+  }
+  function emptyRow() { return { input: 0, output: 0, cache_read: 0, cache_write: 0, micro: 0, usd: 0, plan: 0, unset: 0, none: 0, dates: [] }; }
+  function addTo(r, b, c, providers) {
+    TOK.forEach(function (f) { r[f] += b[f]; });
+    r.micro += c.micro; r[c.state]++;
+    var pr = providers && providers[b.provider] && providers[b.provider].prices;
+    if (c.state === 'usd' && pr && pr.checked && r.dates.indexOf(pr.checked) < 0) r.dates.push(pr.checked);
+  }
+  function usageTotals(s, providers) {
+    var out = { total: emptyRow(), providers: {}, agents: {} };
+    Object.keys(s.agents).forEach(function (id) { out.agents[id] = emptyRow(); });
+    Object.keys(s.usage).forEach(function (k) {
+      var b = s.usage[k], c = eventCost(b, providers);
+      addTo(out.total, b, c, providers);
+      addTo(out.providers[b.provider] || (out.providers[b.provider] = emptyRow()), b, c, providers);
+      addTo(out.agents[b.agent] || (out.agents[b.agent] = emptyRow()), b, c, providers);
+    });
+    return out;
+  }
+  /* the only place a currency sign is built, and only from micro-USD */
+  function costText(r) {
+    var parts = [], n = r.usd + r.plan + r.unset + r.none;
+    if (!n) return '--';
+    if (r.usd) parts.push('$' + (r.micro / 1e6).toFixed(2) + ' est.');
+    if (r.plan) parts.push(n > r.plan ? 'plan runs' : 'plan');
+    if (r.unset) parts.push(n > r.unset ? r.unset + ' unpriced' : 'price not set');
+    if (r.none) parts.push(n > r.none ? r.none + ' unknown' : '--');
+    return parts.join(' + ');
+  }
+  function modelLabel(providers, provider, model) {
+    var p = providers && providers[provider], m = p && p.models && p.models[model], id = String(model);
+    return { code: p ? p.code : String(provider).slice(0, 3).toUpperCase(), short: m ? m.short : (id.length > 12 ? id.slice(0, 11) + '…' : id),
+      colour: p ? p.colour : null, known: !!p, modelKnown: !!m, full: provider + ' / ' + model };
+  }
+  function plannedDiffers(planned, providers, provider, model) {
+    if (!planned) return false;
+    var p = providers && providers[provider], m = p && p.models && p.models[model];
+    return !(m && m.family === planned);
+  }
+  var tcache = new WeakMap();
+  /* ticker items: usage events add no line; a model switch adds one (after the event that caused it) */
+  function tickerItems(data) {
+    if (tcache.has(data.events)) return tcache.get(data.events);
+    var s = initState(data), tl = timeline(data.events), out = [];
+    data.events.forEach(function (ev, i) {
+      apply(s, ev, tl[i].start);
+      if (ev.type !== 'usage') out.push({ i: i, kind: 'ev' });
+      if (s.lastSwitch) out.push({ i: i, kind: 'switch', sw: s.lastSwitch });
+    });
+    tcache.set(data.events, out);
+    return out;
+  }
+  function switchSentence(sw, names, providers) {
+    var a = modelLabel(providers, sw.from.provider, sw.from.model), b = modelLabel(providers, sw.to.provider, sw.to.model);
+    return (names[sw.agent] || sw.agent) + '  ' + a.short + ' → ' + b.short + ' (' + a.code + ' → ' + b.code + ')';
+  }
   function apply(s, ev, at) {
     at = at || 0;
     var ids = Object.keys(s.agents), before = {};
     ids.forEach(function (i) { before[i] = agentStatus(s, i); });
     var A = s.agents, T = s.tasks, t = ev.task && T[ev.task];
-    s.now = at; s.seen++;
+    s.now = at; s.seen++; s.lastSwitch = null;
     switch (ev.type) {
       case 'step_started':
         add(A[ev.agent].holds, ev.task); delete A[ev.agent].blocked[ev.task];
         if (t && t.mark === 'reject') t.mark = null;
+        if (ev.provider && ev.model) setModel(s, ev, at);
         break;
+      case 'usage': {
+        setModel(s, ev, at);
+        var k = ev.agent + '|' + ev.provider + '|' + ev.model + '|' + ev.billing;
+        var b = s.usage[k] || (s.usage[k] = { agent: ev.agent, provider: ev.provider, model: ev.model, billing: ev.billing, input: 0, output: 0, cache_read: 0, cache_write: 0, n: 0 });
+        TOK.forEach(function (f) { b[f] += ev[f] || 0; }); b.n++;
+        break; }
       case 'stage_changed': t.stage = ev.to; break;
       case 'handoff':
         del(A[ev.from_agent].holds, ev.task); add(A[ev.to_agent].holds, ev.task);
@@ -335,13 +493,14 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
       case 'compliance_result': return n(ev.agent) + ': ' + ev.task + ' ' + stg(ev.verdict);
       case 'blocked': return n(ev.agent) + ' is blocked on ' + ev.task + ': ' + ev.reason;
       case 'merged': return ev.task + ' merged · #' + ev.pr;
+      case 'usage': return n(ev.agent) + ' used tokens on ' + ev.task;
       default: return 'Unknown event ‹' + ev.type + '› skipped';
     }
   }
   function kind(ev) {
     return { needs_merwyn: 'waiting', blocked: 'bad', review_reject: 'bad', merged: 'done', review_pass: 'done',
       compliance_result: ev.verdict === 'BLOCK' ? 'bad' : 'done', discussion: 'talk', handoff: 'walk',
-      merwyn_answered: 'done', step_started: 'work', stage_changed: 'idle' }[ev.type] || 'unknown';
+      merwyn_answered: 'done', step_started: 'work', stage_changed: 'idle', usage: 'work' }[ev.type] || 'unknown';
   }
   function clock(t) {
     t = Math.max(0, Math.floor(t));
@@ -349,7 +508,9 @@ body.tk #ticker{display:flex!important;left:8px;right:8px;width:auto;top:112px;b
   }
   root.OfficeCore = { DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
-    stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK };
+    stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
+    eventCost: eventCost, usageTotals: usageTotals, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
+    tickerItems: tickerItems, switchSentence: switchSentence };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
 <script id="office-view">
@@ -403,7 +564,8 @@ var ICON = {
   work: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg>',
   idle: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
   done: '<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.8 3.8L13.5 4"/></svg>',
-  unknown: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2"/></svg>'
+  unknown: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2"/></svg>',
+  swap: '<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M2 5.5h11M10 2.5l3 3-3 3M14 10.5H3M6 7.5l-3 3 3 3"/></svg>'
 };
 var STCOL = { waiting: 'var(--warn)', blocked: 'var(--bad-text)', bad: 'var(--bad-text)', discussing: 'var(--text)', talk: 'var(--text)',
   walking: 'var(--wall)', walk: 'var(--wall)', working: 'var(--accent)', work: 'var(--accent)', idle: 'var(--wall)', done: 'var(--accent)', unknown: 'var(--text-dim)' };
@@ -413,6 +575,14 @@ var STWORD = { waiting: 'Waiting for you', blocked: 'Blocked', discussing: 'In a
 var S = C.stateAt(D, 0), next = 0, T = 0, playing = false, speed = 1, ended = false;
 var hist = [], lastAction = -99, tNow = 0, scene = null;
 var walkingSet = {};
+var HAS_MODELS = EV.some(function (e) { return !!e.provider; });
+var SYN = !!(D.log && D.log.v === 1 && D.log.usage_source !== 'recorded');
+var TI = C.tickerItems(D), TI_AT = {};
+TI.forEach(function (it) { (TI_AT[it.i] = TI_AT[it.i] || []).push(it); });
+function modelOf(id) { var m = S.agents[id].model; return m ? C.modelLabel(D.providers, m.provider, m.model) : null; }
+function chipHtml(ml) {
+  return '<b class="chip' + (ml ? (ml.known ? '' : ' unk') : ' none') + '"' + (ml && ml.colour ? ' style="--pc:' + esc(ml.colour) + '"' : '') + '>' + esc(ml ? ml.code : '--') + '</b>';
+}
 
 function setSpeed(v) {
   speed = v;
@@ -467,9 +637,10 @@ function renderStrip(force) {
     b.className = 'seg' + (o.st === 'waiting' ? ' waiting' : '');
     b.querySelector('.ic').innerHTML = ICON[o.st]; b.querySelector('.ic').style.color = STCOL[o.st];
     b.querySelector('small').textContent = holdText(o.id);
-    b.setAttribute('aria-label', NAME[o.id] + ': ' + word.toLowerCase() + (holdText(o.id) ? ', ' + holdText(o.id) : ''));
+    var ml = HAS_MODELS ? modelOf(o.id) : null;
+    b.setAttribute('aria-label', NAME[o.id] + ': ' + word.toLowerCase() + (holdText(o.id) ? ', ' + holdText(o.id) : '') + (ml ? ', on ' + ml.code + ' ' + ml.short : ''));
     b.setAttribute('aria-pressed', String(focused === o.id));
-    b.title = NAME[o.id] + ' · ' + word;
+    b.title = NAME[o.id] + ' · ' + word + (ml ? ' · ' + ml.code + ' ' + ml.short + ' (' + ml.full + ')' : '');
   });
   if (reorder) {
     lastOrder = key; lastSort = now;
@@ -480,6 +651,10 @@ function renderStrip(force) {
     });
   }
 }
+function switchLine(sw, start, fresh) {
+  return el('div', 'tl' + (fresh && !REDUCED ? ' new' : ''), '<time>' + C.clock(start) + '</time><span style="color:var(--text-dim)">' + ICON.swap + '</span><span>' + esc(C.switchSentence(sw, NAME, D.providers)) + '</span>');
+}
+function itemLine(it, fresh) { return it.kind === 'switch' ? switchLine(it.sw, TL[it.i].start, fresh) : tickerLine(EV[it.i], TL[it.i].start, fresh); }
 function tickerLine(ev, start, fresh) {
   var k = C.kind(ev), cls = 'tl' + (k === 'waiting' ? ' warn' : (k === 'bad' ? ' bad' : '')) + (fresh && !REDUCED ? ' new' : '');
   var d = el('div', cls, '<time>' + C.clock(start) + '</time><span style="color:' + STCOL[k] + '">' + ICON[k] + '</span><span>' + esc(C.sentence(ev, NAME)) +
@@ -488,18 +663,91 @@ function tickerLine(ev, start, fresh) {
 }
 function rebuildTicker(upto) {
   var box = $('tlist'); box.innerHTML = '';
-  var from = Math.max(0, upto - 8);
-  for (var i = upto - 1; i >= from; i--) box.appendChild(tickerLine(EV[i], TL[i].start, false));
+  var shown = TI.filter(function (it) { return it.i < upto; }).slice(-8);
+  for (var i = shown.length - 1; i >= 0; i--) box.appendChild(itemLine(shown[i], false));
   if (!EV.length) box.innerHTML = '<div id="tempty">No events to replay. The office is quiet.</div>';
   updateTone(upto);
 }
 function updateTone(n) {
   var t = $('tone');
-  t.innerHTML = n ? '<span class="mono" style="color:var(--text-dim)">' + C.clock(TL[n - 1].start) + '</span> ' + esc(C.sentence(EV[n - 1], NAME)) : 'The office is quiet.';
+  var last = TI.filter(function (it) { return it.i < n; }).pop();
+  t.innerHTML = last ? '<span class="mono" style="color:var(--text-dim)">' + C.clock(TL[last.i].start) + '</span> ' + esc(last.kind === 'switch' ? C.switchSentence(last.sw, NAME, D.providers) : C.sentence(EV[last.i], NAME)) : 'The office is quiet.';
 }
 $('tone').addEventListener('click', function () { document.body.classList.toggle('tk'); });
 function announce(t) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = t; }, 30); }
-function hudRefresh(force) { updatePill(); renderStrip(force); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
+/* usage panel: one renderer feeds the docked panel and the phone sheet */
+function fmtTok(n) {
+  if (n < 1000) return String(n);
+  if (n < 1e6) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
+  return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+}
+function exact(n) { return Number(n).toLocaleString('en-US'); }
+function figs(r) {
+  var c = r.cache_read + r.cache_write;
+  if (!r.input && !r.output && !c) return '<span title="No usage in the replay so far">no usage yet</span>';
+  return '<span title="' + exact(r.input) + ' input tokens">in ' + fmtTok(r.input) + '</span><span title="' + exact(r.output) + ' output tokens">out ' + fmtTok(r.output) +
+    '</span><span title="' + exact(r.cache_read) + ' cache read, ' + exact(r.cache_write) + ' cache write tokens">cache ' + fmtTok(c) + '</span>' + (SYN ? '<span class="syn">synthetic</span>' : '');
+}
+function usageHTML() {
+  var U = C.usageTotals(S, D.providers), tot = U.total, n = tot.usd + tot.plan + tot.unset + tot.none;
+  var h = '';
+  if (!n) return '<div class="uempty">No usage yet</div><div class="ufoot">Tokens and estimates appear as the replay runs.</div>';
+  h += '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost">' + esc(C.costText(tot)) + '</span></div><div class="l2">' + figs(tot) + '</div></div>';
+  h += '<h4>By provider</h4>';
+  var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
+  order.forEach(function (pid) {
+    var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
+    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' +
+      '<div class="l2">' + figs(r) + '</div>' + (r.dates.length ? '<div class="l3">prices checked ' + esc(r.dates.join(', ')) + '</div>' : '') + '</div>';
+  });
+  h += '<h4>By agent</h4>';
+  D.agents.forEach(function (a) {
+    var r = U.agents[a.id], ml = modelOf(a.id);
+    h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(r.input + r.output + r.cache_read + r.cache_write ? C.costText(r) : '') + '</span></div><div class="l2">' + figs(r) + '</div></button>';
+  });
+  var dates = tot.dates;
+  h += '<div class="ufoot">' + (SYN ? 'Synthetic numbers, not a real run. ' : '') + 'Costs are estimates from the office config' + (dates.length ? ', prices checked ' + esc(dates.join(', ')) : ', where a price is set') + '. Plan runs show tokens only.' +
+    ((D.warnings || []).length ? ' <span title="' + esc(D.warnings.map(function (w) { return 'line ' + w.line + ': ' + w.message; }).join('\n')) + '">! ' + D.warnings.length + '</span>' : '') + '</div>';
+  return h;
+}
+var usageKey = '', usageCol = false, usageColSet = false;
+function usageSummary() {
+  var t = C.usageTotals(S, D.providers).total, tok = t.input + t.output + t.cache_read + t.cache_write;
+  return tok ? fmtTok(t.input + t.output) + ' in+out · ' + fmtTok(t.cache_read + t.cache_write) + ' cache' : 'No usage yet';
+}
+function renderUsage() {
+  if (!HAS_MODELS) return;
+  var html = usageHTML(), key = html + '|' + usageCol + '|' + $('usheet').classList.contains('open');
+  if (key === usageKey) return;
+  usageKey = key;
+  $('ubody').innerHTML = html;
+  $('usum').innerHTML = esc(usageSummary()) + (SYN ? ' <span class="syn" style="color:var(--text-dim);font-style:italic">synthetic</span>' : '');
+  $('usage').classList.toggle('col', usageCol);
+  $('ucol').setAttribute('aria-expanded', String(!usageCol)); $('ucol').setAttribute('aria-label', usageCol ? 'Expand usage' : 'Collapse usage');
+  if ($('usheet').classList.contains('open')) fillSheet(html);
+}
+function fillSheet(html) {
+  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
+  $('usx').addEventListener('click', closeSheet);
+}
+function openSheet() {
+  var sh = $('usheet'); sh.hidden = false; sh.classList.add('open'); $('ubtn').setAttribute('aria-expanded', 'true');
+  fillSheet(usageHTML()); usageKey = '';
+  $('usx').focus();
+}
+function closeSheet() { var sh = $('usheet'); if (sh.hidden) return; sh.classList.remove('open'); sh.hidden = true; $('ubtn').setAttribute('aria-expanded', 'false'); usageKey = ''; }
+function initUsage() {
+  $('nomodel').hidden = HAS_MODELS; $('usage').hidden = !HAS_MODELS;
+  document.querySelectorAll('[data-syn]').forEach(function (e) { e.hidden = !SYN; });
+  $('ubtn').hidden = !HAS_MODELS;
+  if (!HAS_MODELS) return;
+  usageCol = innerHeight < 520 || params.get('usage') === 'collapsed';
+  $('ucol').addEventListener('click', function () { usageCol = !usageCol; usageKey = ''; renderUsage(); });
+  $('ubtn').addEventListener('click', function () { if ($('usheet').classList.contains('open')) closeSheet(); else openSheet(); });
+  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
+  document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
+}
+function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
 
 /* focus card */
 var focused = null;
@@ -510,11 +758,20 @@ function focusAgent(id, fromHud) {
   if (scene) scene.focus(focused);
   renderStrip(true);
 }
+function focusModel(id) {
+  if (!HAS_MODELS) return '';
+  var m = S.agents[id].model, ml = modelOf(id);
+  if (!m) return '<div class="row" style="color:var(--text-dim)">' + chipHtml(null) + '<span>No model yet</span></div>';
+  var r = C.usageTotals(S, D.providers).agents[id], pl = AG[id].planned_model;
+  return '<div class="row">' + chipHtml(ml) + '<span><b>' + esc(ml.short) + '</b>' + (ml.short !== m.model ? ' <span class="mono" style="color:var(--text-dim)">' + esc(m.model) + '</span>' : '') + '</span></div>' +
+    (C.plannedDiffers(pl, D.providers, m.provider, m.model) ? '<div class="row" style="color:var(--text-dim);margin-top:-2px">planned: ' + esc(pl) + '</div>' : '') +
+    '<div class="fu mono"><div>' + figs(r) + '</div><div>' + esc(C.costText(r)) + '</div></div>';
+}
 function renderFocus() {
   var id = focused, a = AG[id], st = statusOf(id), h = S.agents[id].holds;
   var last = hist.filter(function (x) { var e = x.ev; return [e.agent, e.from_agent, e.to_agent].concat(e.agents || []).indexOf(id) >= 0; }).slice(-3).reverse();
   $('fbody').innerHTML = '<h3>' + esc(a.name) + '</h3><div class="role">' + esc(a.role) + ' · ' + esc(a.personality || '') + '</div>' +
-    '<div class="row" style="color:' + STCOL[st] + '">' + ICON[st] + '<b>' + STWORD[st] + '</b></div>' +
+    '<div class="row" style="color:' + STCOL[st] + '">' + ICON[st] + '<b>' + STWORD[st] + '</b></div>' + focusModel(id) +
     '<div class="row"><span class="mono">' + (h.length ? esc(h.join(', ')) : 'No task in hand') + '</span>' +
     (h.length ? '<span style="color:var(--text-dim)">for ' + Math.max(0, Math.round(S.now - S.agents[id].since)) + 's</span>' : '') + '</div>' +
     (last.length ? '<ol>' + last.map(function (x) { return '<li>' + esc(C.sentence(x.ev, NAME)) + '</li>'; }).join('') + '</ol>' : '<ol><li>No events yet</li></ol>');
@@ -546,6 +803,7 @@ $('gear').addEventListener('click', function () {
   var m = $('msheet'), open = !m.classList.contains('open');
   m.classList.toggle('open', open); $('gear').setAttribute('aria-expanded', String(open));
   if (open) { m.innerHTML = ''; m.appendChild(el('div', 'seg2')); Array.prototype.forEach.call($('speed').children, function (b) { var c = b.cloneNode(true); c.addEventListener('click', function () { setSpeed(+b.dataset.s); Array.prototype.forEach.call(m.firstChild.children, function (x) { x.setAttribute('aria-pressed', String(x.dataset.s == speed)); }); }); c.setAttribute('aria-pressed', String(+b.dataset.s === speed)); m.firstChild.appendChild(c); });
+    if (HAS_MODELS) { var ub = el('button', 'btn', 'Usage'); ub.addEventListener('click', function () { m.classList.remove('open'); $('gear').setAttribute('aria-expanded', 'false'); openSheet(); }); m.appendChild(ub); }
     ['motion', 'follow'].forEach(function (id) { var b = el('button', 'btn', $(id).textContent); b.disabled = $(id).disabled; b.addEventListener('click', function () { $(id).click(); b.textContent = $(id).textContent; }); m.appendChild(b); }); }
 });
 document.addEventListener('keydown', function (e) {
@@ -557,7 +815,7 @@ document.addEventListener('keydown', function (e) {
   else if (k === '1' || k === '2' || k === '4') setSpeed(+k);
   else if (k === 'm' || k === 'M') { if (!SYSTEM_RM) $('motion').click(); }
   else if (k === 'f' || k === 'F') { if (!REDUCED) $('follow').click(); }
-  else if (k === 'Escape') { if (focused) focusAgent(null); }
+  else if (k === 'Escape') { if (!$('usheet').hidden) closeSheet(); else if (focused) focusAgent(null); }
 });
 function stepEv(d) {
   setPlaying(false);
@@ -569,9 +827,9 @@ function stepEv(d) {
 function dispatch(i) {
   var ev = EV[i];
   C.apply(S, ev, TL[i].start);
-  hist.push({ ev: ev, start: TL[i].start });
+  if (ev.type !== 'usage') hist.push({ ev: ev, start: TL[i].start });
   var box = $('tlist'), e0 = box.querySelector('#tempty'); if (e0) e0.remove();
-  box.insertBefore(tickerLine(ev, TL[i].start, true), box.firstChild);
+  (TI_AT[i] || []).forEach(function (it) { box.insertBefore(itemLine(it, true), box.firstChild); });
   while (box.children.length > 8) box.lastChild.remove();
   updateTone(i + 1);
   if (ev.type === 'needs_merwyn') announce(NAME[ev.agent] + ' is waiting for you: ' + ev.task + '. ' + ev.reason);
@@ -583,7 +841,7 @@ function dispatch(i) {
 function seek(t) {
   t = Math.max(0, Math.min(TOTAL, t)); T = t;
   S = C.stateAt(D, t); next = C.countDue(D, t);
-  hist = []; for (var i = 0; i < next; i++) hist.push({ ev: EV[i], start: TL[i].start });
+  hist = []; for (var i = 0; i < next; i++) if (EV[i].type !== 'usage') hist.push({ ev: EV[i], start: TL[i].start });
   walkingSet = {}; ended = false;
   rebuildTicker(next);
   if (scene) scene.restore();
@@ -1176,9 +1434,13 @@ function initScene() {
     agentList.forEach(function (a) {
       var stt = a.cstt || 'idle', wait = stt === 'waiting', h = a.H;
       var nm = (small && !wait && focusId !== a.id) ? a.def.name.charAt(0) : a.def.name;
-      var html = (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>';
+      var ml = HAS_MODELS ? modelOf(a.id) : null, mk = ml ? ml.full : '';
+      if (a.mkSkip) { a.mkSkip = false; a.mk = mk; } else if (a.mk === undefined) a.mk = mk;
+      else if (a.mk !== mk) { if (a.mk && mk && !REDUCED) a.flashUntil = tn + 0.45; a.mk = mk; }
+      var html = '<div class="t1">' + (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>' + (HAS_MODELS && small ? chipHtml(ml) : '') + '</div>' +
+        (HAS_MODELS && !small ? '<div class="t2">' + chipHtml(ml) + '<span class="m">' + (ml ? esc(ml.short) : '') + '</span></div>' : '');
       if (a.tagEl._h !== html) { a.tagEl._h = html; a.tagEl.innerHTML = html; }
-      a.tagEl.className = 'lb tag' + (wait ? ' warn' : '') + (spk === a ? ' talk' : '');
+      a.tagEl.className = 'lb tag' + (wait ? ' warn' : '') + (spk === a ? ' talk' : '') + (tn < (a.flashUntil || 0) ? ' flash' : '');
       if (wait) placeEl(a.tagEl, a.x, h + 1.3, a.z, 0, 0); else placeEl(a.tagEl, a.x, h + 0.3 - 0.1 * a.sitK, a.z, 0, (REDUCED && a.sender && a.job) ? 62 : 0);
       var cl = a.cardEl, ct = a.ctx;
       if (ct) {
@@ -1300,7 +1562,7 @@ function initScene() {
       var e = pl.pts[pl.pts.length - 1]; a.x = e[0]; a.z = e[1]; a.place = pl; a.walking = false; a.carry = null; a.recv = null; a.armUp = 0; a.hop = 0; a.talking = false;
       a.yawT = a.yaw = pl.yaw != null ? pl.yaw : (pl.face ? Math.atan2(pl.face[0] - e[0], pl.face[1] - e[1]) : 0);
       syncDecor(a, true); a.ringK = a.vw.ringT; a.beaconK = a.vw.beaconT; a.drop = 1; a.shake = 0; a.shakeFor = a.vw.tag;
-      a.sitK = pl.kind === 'seat' ? 1 : 0; a.nod = 0;
+      a.sitK = pl.kind === 'seat' ? 1 : 0; a.nod = 0; a.mkSkip = true; a.flashUntil = 0;
     });
     if (live) {
       var el0 = S.now - d.at, acc = 0;
@@ -1381,6 +1643,7 @@ function loadThree() {
 }
 function boot() {
   setMotion(loadMotion(), false);
+  initUsage();
   setSpeed([1, 2, 4].indexOf(+params.get('speed')) >= 0 ? +params.get('speed') : 1);
   var skipped = D.skipped || [];
   if (!EV.length) { $('play').disabled = true; $('scrub').disabled = true; }
@@ -1389,6 +1652,7 @@ function boot() {
   seek(start);
   if (skipped.length) { var d = el('div', 'tl bad', '<time></time><span>' + ICON.bad + '</span><span>' + skipped.length + ' lines skipped (' + skipped.slice(0, 3).map(function (s) { return 'line ' + s.line; }).join(', ') + ')</span>'); $('tlist').insertBefore(d, $('tlist').firstChild); skipped.forEach(function (s) { console.warn('skipped line ' + s.line + ': ' + s.message); }); }
   setPlaying(EV.length > 0 && (t0 === null || params.get('play') === '1'));
+  if (HAS_MODELS && params.get('usage') === 'open' && innerWidth < 900) openSheet();
   requestAnimationFrame(frame);
   loadThree();
 }

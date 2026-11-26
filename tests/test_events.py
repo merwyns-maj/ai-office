@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from engine.runtime import events
+from engine.runtime import events, providers
 from tests._helpers import REPO, run
 
 AGENTS = {"pmo", "pm", "architect", "engineer", "reviewer", "compliance", "curator", "designer"}
@@ -180,6 +180,127 @@ class Cli(unittest.TestCase):
         self.assertIn("field 'reason'", out)
         for sec in secrets:
             self.assertNotIn(sec, out + err)
+
+
+HDR1 = '{"log":"office-events","v":1,"office":"ai-office","clock":"synthetic","usage_source":"synthetic"}'
+V1_FIXTURE = REPO / "engine/app/fixtures/models-synthetic.jsonl"
+V1_EDGE = REPO / "tests/fixtures/events-v1-edge.jsonl"
+CATALOGUE = {
+    "claude-sdk": {"billing": "plan", "models": {"claude-opus-4-5": {}}},
+    "openai": {"billing": "per_token", "models": {"gpt-5": {}}},
+    "deepseek": {"billing": "per_token", "models": {"deepseek-chat": {}}},
+    "anthropic-api": {"billing": "per_token", "models": {"claude-opus-4-5": {}}},
+}
+
+
+def use(**k):
+    d = {"type": "usage", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": 10, "output": 5}
+    d.update(k)
+    return ev(**d)
+
+
+def parse1(*lines, providers=None, forbidden=()):
+    text = "\n".join([HDR1] + list(lines))
+    return events.parse_log(text, agents=AGENTS, stages=STAGES, forbidden=forbidden, providers=providers)
+
+
+class V1(unittest.TestCase):
+    def test_v0_files_load_unchanged(self):
+        for path, n in ((FIXTURE, 45), (ALL_TYPES, 15)):
+            h, evs, probs = parse_file(path)
+            self.assertEqual((h["v"], len(evs), probs), (0, n, []), path)
+        code, out, _ = run("events", "ai-office", str(FIXTURE))
+        self.assertEqual(code, 0)
+        code, out, _ = run("events", "ai-office", str(ALL_TYPES))
+        self.assertEqual(code, 0, out)
+
+    def test_v1_fields_in_a_v0_file_keep_todays_warnings(self):
+        _, evs, probs = parse(use(t=1), ev(t=2, provider="openai", model="gpt-5"))
+        self.assertEqual(len(evs), 2)
+        self.assertEqual([p.level for p in probs], ["warning"] * 3)
+        self.assertIn("unknown type", probs[0].message)
+        self.assertTrue(all("not defined" in p.message for p in probs[1:]))
+
+    def test_v1_header_needs_usage_source(self):
+        hdr = '{"log":"office-events","v":1,"office":"x","clock":"synthetic","usage_source":"%s"}'
+        self.assertEqual(parse(ev(), header=hdr % "made-up")[0], None)
+        for ok in ("synthetic", "recorded"):
+            self.assertEqual(parse(ev(), header=hdr % ok)[0]["usage_source"], ok)
+        self.assertIsNone(parse(ev(), header='{"log":"office-events","v":1,"office":"x","clock":"synthetic"}')[0])
+        self.assertIsNone(parse(ev(), header='{"log":"office-events","v":2,"office":"x","clock":"synthetic","usage_source":"synthetic"}')[0])
+
+    def test_synthetic_fixture_is_clean_with_four_providers(self):
+        h, evs, probs = parse_file(V1_FIXTURE)
+        self.assertEqual(probs, [])
+        self.assertEqual(h["usage_source"], "synthetic")
+        self.assertIn("SYNTHETIC", h["title"])
+        us = [e for e in evs if e["type"] == "usage"]
+        self.assertGreaterEqual(len(us), 12)
+        self.assertEqual(len({e["provider"] for e in us}), 4)
+        self.assertTrue(all("cost_usd" not in e for e in us))
+        first40 = {e["agent"] for e in evs if e["type"] == "step_started" and e["t"] <= 40 and "model" in e}
+        self.assertEqual(first40, AGENTS)
+
+    def test_plan_step_with_cost_is_an_error(self):
+        _, evs, probs = parse1(use(billing="plan", provider="claude-sdk", cost_usd=0.5))
+        self.assertEqual(evs, [])
+        self.assertIn("plan", errors(probs)[0].message)
+        _, evs, probs = parse1(use(billing="plan", provider="claude-sdk"), use(t=2, cost_usd=0.5))
+        self.assertEqual((len(evs), probs), (2, []))
+
+    def test_numeric_bounds(self):
+        bad = [use(input=1_000_000_000), use(input=-1), use(input=1.5), use(input=True), use(output="5"), use(cache_read=10 ** 10),
+               use(cost_usd=0.1234567), use(cost_usd=-1), use(cost_usd=1_000_000), use(cost_usd=True)]
+        for line in bad:
+            _, evs, probs = parse1(line)
+            self.assertEqual((evs, len(errors(probs))), ([], 1), line)
+        good = use(input=999_999_999, output=0, cache_read=1, cache_write=2, cost_usd=0.123456)
+        self.assertEqual(parse1(good)[1][0]["input"], 999_999_999)
+
+    def test_ids_provider_model_pair_and_billing(self):
+        for line in (use(provider="Bad_Provider"), use(model="bad model!"), use(billing="free"), use(provider=None), use(model=None),
+                     ev(provider="openai"), ev(model="gpt-5")):
+            _, evs, probs = parse1(line)
+            self.assertEqual((evs, len(errors(probs))), ([], 1), line)
+        _, evs, probs = parse1(ev(provider="openai", model="gpt-5"))
+        self.assertEqual((len(evs), probs), (1, []))
+
+    def test_unknown_ids_warn_once_not_error(self):
+        lines = [use(t=1, provider="mystery-ai", model="m1"), use(t=2, provider="mystery-ai", model="m1"),
+                 use(t=3, provider="openai", model="gpt-9"), use(t=4, provider="deepseek", model="deepseek-chat", billing="plan")]
+        _, evs, probs = parse1(*lines, providers=CATALOGUE)
+        self.assertEqual(len(evs), 4)
+        self.assertEqual([p.level for p in probs], ["warning"] * 3)
+        self.assertEqual([p.line for p in probs], [2, 4, 5])
+        self.assertIn("'mystery-ai'", probs[0].message)
+        self.assertIn("'gpt-9'", probs[1].message)
+        self.assertIn("event wins", probs[2].message)
+        self.assertEqual(parse1(*lines)[2], [])   # no catalogue: no catalogue warnings
+
+    def test_edge_fixture_levels(self):
+        text = V1_EDGE.read_text(encoding="utf-8")
+        cat, _ = providers.load_providers(REPO / "offices/ai-office")
+        h, evs, probs = events.parse_log(text, agents=AGENTS, stages=STAGES, providers=cat)
+        self.assertEqual(len(evs), 5)
+        self.assertEqual(sorted(p.level for p in probs), ["error"] * 8 + ["warning"] * 3)
+        self.assertEqual({e["model"] for e in evs}, {"mystery-1", "gpt-9-preview", "deepseek-chat", "claude-opus-4-5"})
+
+    def test_data_rule_names_the_model_field_never_the_value(self):
+        for field, val in (("model", "a.b@example.com"), ("model", "x1234567890123456"), ("provider", "acme-corp")):
+            _, evs, probs = parse1(use(**{field: val}), forbidden=("acme-corp",))
+            self.assertEqual(evs, [])
+            msg = errors(probs)[0].message
+            self.assertIn(f"field '{field}'", msg)
+            self.assertTrue(events.is_data_problem(msg))
+            self.assertNotIn(val, msg)
+
+    def test_cli_runs_v1_files(self):
+        code, out, _ = run("events", "ai-office", str(V1_FIXTURE))
+        self.assertEqual(code, 0, out)
+        self.assertIn("0 errors, 0 warnings", out)
+        code, out, _ = run("events", "ai-office", str(V1_EDGE))
+        self.assertEqual(code, 1)
+        self.assertIn("3 warnings", out)
 
 
 if __name__ == "__main__":
