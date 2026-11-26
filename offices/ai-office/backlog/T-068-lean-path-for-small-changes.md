@@ -4,7 +4,7 @@ title: "Lean path for small changes (one design step, then build and review)"
 phase: 0-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: repo
 project: ai-office
 depends_on: []
@@ -119,6 +119,44 @@ Done-when checks (spec numbering):
 **Notes (non-blocking):**
 - The text checks are a floor, as the Design says: `**Compliance:** flagged`, surfaces split by `/`, and an Open question about production that doesn't use the words "human gate" all pass. The Architect and Reviewer escape covers these. Consider widening the compliance regex to allow `**`.
 - If the whole `paths` block and the reviewer gate are both removed, validate passes, because the gate check only runs when `paths` is present. Behaviour before this PR was the same, so this is out of scope. A later task could make the done/reviewer gate always required.
+— Cahyani (reviewer)
+
+**Review 2 (Cahyani, 26 Nov 2026): PASS.** The Review 1 REJECT point is fixed. All six Done-when items pass.
+
+Commands run on `t-068-lean-path` at bb4e4a4:
+- `python -m unittest discover -s tests`: `Ran 411 tests ... OK`, exit 0. Golden tests are part of this suite.
+- `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 71 tasks, 18 skills`, exit 0.
+- `python scripts/board.py ai-office`: exit 0 (board.md discarded).
+
+Review 1 point (Done when 2), re-tested in a temp copy of the repo. Each case below gives validate exit 1:
+- `skips: [spec, review]` with `never_skips: [design, build]`: "must not skip 'review' (hard rule ...)" and "never_skips must contain 'review'".
+- `skips: [spec, review]` with `never_skips` removed: the same two messages, plus "must contain 'build'".
+- `skips: [spec, build, review]` with `never_skips: []`: hard-rule messages for both build and review.
+- `skips: [spec, build]` with `never_skips: [design, review]`: hard-rule message for build.
+- `never_skips` removed, or missing build, or missing review (with `skips: [spec]`): "never_skips must contain ...".
+- Case and whitespace variants (`Review`, `REVIEW`, `" review"`, `"review "`, `never_skips: [Design, Build, Review]`): "is not a workflow stage" and/or "must contain".
+- Other shapes: scalar `skips: review`, scalar `never_skips: "design, build, review"`, block-list skips, a flow-map `lean: {...}`: all rejected.
+- YAML anchor/alias (`&s` / `*s`): rejected by miniyaml ("unsupported YAML construct"). Duplicate `skips` or `lean` keys: "duplicate key". An extra path (`fast:`) or `Lean:`: "only the key 'lean'".
+- Renaming the review stage to `qa` and skipping it: "paths needs a 'review' stage". Gate approver `Reviewer`: rejected.
+
+Two edits still give exit 0, but neither makes the lean path skip review or build:
+- An unknown sibling key such as `skip: [spec, review]` next to `skips: [spec]`. No code reads it. `grep` shows `skips` is read only in loader.py 5c, and `paths.lean.skips` still keeps review.
+- Renaming `paths:` to `Paths:`. This removes the lean path; it does not loosen it. Unknown top-level keys were accepted before this PR too (`foo_bar: [review]` also gives exit 0).
+
+Done-when checks:
+1. PASS. `paths.lean` is in workflow.yaml, and validate exits 0.
+2. PASS. The hard-coded review/build rule and the required `never_skips` entries are covered by the three new `LeanPath` tests, and they hold against every variant listed above.
+3. PASS. Re-run with a probe task: `Compliance: PASS`, `**Compliance:** flagged`, `**Compliance: flagged**` and `- **Compliance:** BLOCK` all exit 1 with "compliance flagged: full path". The human-gate case was confirmed in Review 1 and the code is unchanged.
+4. PASS. `LeanPath` covers the qualifying task, each failing condition, and the escape. `test_bold_compliance_and_slash_surface` was added.
+5. PASS. The playbooks are unchanged since Review 1 (the rework touched only loader.py, test_loader.py and this file).
+6. PASS. Against origin/main, workflow.yaml changes only by the new `paths` block. `gates`, `human_gates`, `merge` and pr-workflow are untouched.
+
+Hardenings: `**Compliance:** flagged` exits 1. "chat page/settings page" and "chat page / settings page" exit 1 with "more than one surface".
+
+**Notes (non-blocking):**
+- Text checks are still a floor. These pass: `compliance: flagged` (lower case), `Compliance:  flagged` (two spaces), `* Compliance: flagged`, and surfaces joined with `&`. The Architect and Reviewer escape covers them.
+- Consider rejecting unknown keys inside `paths.lean`, so that a stray `skip:` key can't mislead a human or agent reading the file.
+- External skills design:accessibility-review and data:validate-data were not used: there is no UI and no dataset in this change.
 — Cahyani (reviewer)
 
 ## Decision
