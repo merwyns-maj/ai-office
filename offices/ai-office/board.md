@@ -1,14 +1,14 @@
 # Board — ai-office
 
-_Generated 2026-11-25 by scripts/board.py. Do not edit._
+_Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**48 tasks** — todo: 34 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 14 · parked: 0
+**48 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 17 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (34)
+## todo (31)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -20,7 +20,6 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-008](backlog/T-008-update-log-entry-skill-to-write-to-brain.md) | P0 | Update log-entry skill to write to brain logs | pmo | T-003 |
 | [T-013](backlog/T-013-caas-3-0-design-skill.md) | P0 | CaaS 3.0 design skill | pmo | T-002 |
 | [T-019](backlog/T-019-prod-guard-mod-or-hook.md) | P0 | Prod-guard mod or hook | pmo | — |
-| [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
 | [T-005](backlog/T-005-create-personal-brain-repo-merwyns-maj-p.md) | P1 | Create personal brain repo (merwyns-maj/personal-brain) | pmo | T-003 |
 | [T-009](backlog/T-009-session-log-table-in-supabase.md) | P1 | Session log table in Supabase | pmo | T-008 |
 | [T-010](backlog/T-010-point-the-session-runs-dashboard-at-the.md) | P1 | Point the Session Runs dashboard at the live log | pmo | T-009 |
@@ -33,8 +32,6 @@ _Generated 2026-11-25 by scripts/board.py. Do not edit._
 | [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024, T-002 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
-| [T-047](backlog/T-047-hire-product-designer-agent.md) | P1 | Hire a product designer agent (Dinda) with a researched playbook | pmo | — |
-| [T-048](backlog/T-048-3d-animated-office-prototype.md) | P1 | 3D animated office: design and three.js prototype (slice of T-027) | pmo | T-047 |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
@@ -63,7 +60,7 @@ _empty_
 
 _empty_
 
-## done (14)
+## done (17)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -73,12 +70,15 @@ _empty_
 | [T-038](backlog/T-038-role-playbooks-for-every-agent.md) | P0 | Role playbooks for every agent | curator | — |
 | [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | curator | — |
 | [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | curator | — |
+| [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 | [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
 | [T-042](backlog/T-042-sprint-1-process-lessons.md) | P1 | Sprint 1 process lessons: tool check, board.md rule, handoff for read-only agents | curator | — |
 | [T-044](backlog/T-044-process-lessons-validate-warning-and-replay.md) | P1 | Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase | curator | — |
+| [T-047](backlog/T-047-hire-product-designer-agent.md) | P1 | Hire a product designer agent (Dinda) with a researched playbook | pmo | — |
+| [T-048](backlog/T-048-3d-animated-office-prototype.md) | P1 | 3D animated office: design and three.js prototype (slice of T-027) | pmo | — |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
 | [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | curator | — |
 
