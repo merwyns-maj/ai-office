@@ -4,7 +4,7 @@ title: "Lean path for small changes (one design step, then build and review)"
 phase: 0-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: repo
 project: ai-office
 depends_on: []
@@ -84,6 +84,13 @@ paths:
 Not covered by a test: the Open questions "human gate" scan only looks below `## Open questions`.
 — Sebastian (engineer)
 
+### Rework 1
+**Fixed (Review 1 point 1).** Rule 5c in `engine/runtime/loader.py` now always rejects `review` or `build` in `paths.lean.skips` (hard-coded, independent of `never_skips`) and requires `never_skips` to contain `build` and `review`. Tests added in `LeanPath`: `skips: [spec, review]` with `never_skips` edited; same with `never_skips` removed; `skips: [spec, build, review]` with `never_skips: []`.
+**Floor notes hardened.** `Compliance:` line now matches bold (`**Compliance:** flagged`); `/` counts as a surface separator. One test covers both.
+**Verify.** `python -m unittest discover -s tests` exit 0 (411 tests); `validate ai-office` and `board.py ai-office` run, board.md discarded.
+**Not done.** An Open question about production without the words "human gate" still passes (floor; escape covers it).
+— Sebastian (engineer)
+
 ## Review log
 **Review 1 (Cahyani, 26 Nov 2026): REJECT.** One spec item fails (Done when 2). Everything else passes.
 
@@ -119,3 +126,4 @@ Done-when checks (spec numbering):
 ## Open questions
 - Is a task "one surface" decided by the PMO's judgement or by a file-count rule? For the office (Architect proposes, PMO approves).
 - Expected saving is unmeasured (T-066: 7 runs, about 520k tokens; the lean path would drop at least the PM run). Measure on the first lean task? For the office.
+- Follow-up (out of scope here): if the whole `paths` block and the reviewer gate are both removed, validate passes; make the done/reviewer gate always required. For the office.

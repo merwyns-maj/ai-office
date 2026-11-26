@@ -211,6 +211,33 @@ class LeanPath(unittest.TestCase):
     def test_skip_build_rejected(self):
         self.bad_wf("skips: [spec] ", "skips: [build] ", "skips 'build' which is in never_skips")
 
+    def test_skip_review_with_never_skips_edited(self):
+        t = self.text.replace("skips: [spec] ", "skips: [spec, review] ", 1)
+        self.wf.write_text(t.replace("never_skips: [design, build, review]", "never_skips: [design, build]"))
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn("must not skip 'review'", out)
+        self.assertIn("never_skips must contain 'review'", out)
+
+    def test_skip_review_with_never_skips_removed(self):
+        t = self.text.replace("skips: [spec] ", "skips: [spec, review] ", 1)
+        self.wf.write_text(t.replace("    never_skips: [design, build, review]\n", ""))
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn("must not skip 'review'", out)
+
+    def test_skip_build_and_review_with_empty_never_skips(self):
+        t = self.text.replace("skips: [spec] ", "skips: [spec, build, review] ", 1)
+        self.wf.write_text(t.replace("never_skips: [design, build, review]", "never_skips: []"))
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn("must not skip 'review'", out)
+        self.assertIn("must not skip 'build'", out)
+
+    def test_bold_compliance_and_slash_surface(self):
+        self.bad_task("compliance flagged: full path", extra="**Compliance:** flagged\n")
+        self.bad_task("more than one surface", note=self.NOTE.replace("the docked chat page;", "chat page/settings page;"))
+
     def test_skip_unknown_stage(self):
         self.bad_wf("skips: [spec] ", "skips: [ghost] ", "skips 'ghost' is not a workflow stage")
 

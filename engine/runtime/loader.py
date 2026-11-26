@@ -14,7 +14,7 @@ _EXTERNAL = re.compile(r"^[\w.-]+:[\w.-]+$")
 
 LEAN_ENTRY = ("one_surface", "no_new_data", "no_compliance_flag", "no_human_gate")
 _PATH_NOTE = re.compile(r"^> (Lean|Full path) \(([^)]*)\):\s*(.*)$", re.M)
-_COMPLIANCE_LINE = re.compile(r"^(- )?Compliance: (flagged|PASS|BLOCK)", re.M)
+_COMPLIANCE_LINE = re.compile(r"^(- )?\**Compliance:\**:? (flagged|PASS|BLOCK)", re.M)
 
 
 def _task_body(task):
@@ -39,7 +39,7 @@ def lean_problems(office, task):
         if phrase not in text:
             out.append(f"lean note is missing '{phrase}'")
     surface = text.split(";")[0]
-    if re.search(r",| and |\+", surface):
+    if re.search(r",| and |\+|/", surface):
         out.append("more than one surface: full path")
     projects = _as_list(office.office.get("projects"))
     if task.meta.get("project") not in projects or task.meta.get("where") not in ("code", "repo"):
@@ -341,6 +341,11 @@ def validate(office):
                     add(wf, f"paths.lean skips '{sk}' is not a workflow stage")
                 if sk in never:
                     add(wf, f"paths.lean skips '{sk}' which is in never_skips")
+                if sk in ("review", "build"):
+                    add(wf, f"paths.lean must not skip '{sk}' (hard rule: build and Reviewer PASS stay required)")
+            for req in ("build", "review"):
+                if req not in never:
+                    add(wf, f"paths.lean never_skips must contain '{req}'")
             if office.stage("review") is None:
                 add(wf, "paths needs a 'review' stage")
             if not any(isinstance(g, dict) and g.get("stage") == "done" and g.get("approver") == "reviewer"
