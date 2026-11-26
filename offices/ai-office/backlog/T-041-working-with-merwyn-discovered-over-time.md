@@ -2,7 +2,7 @@
 id: T-041
 title: "working-with-merwyn skill, discovered over time"
 phase: 7-ways-of-working
-status: build
+status: review
 priority: P2
 owner: reviewer
 where: office
