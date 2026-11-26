@@ -617,7 +617,9 @@ Touch targets are at least 44px. That is above WCAG 2.2 SC 2.5.8's 24px minimum;
 - **Keyboard and screen reader.** Everything the canvas shows is also in the HUD buttons and ticker. The canvas has a live `aria-label`. One `aria-live="polite"` region announces **only** needs_merwyn and merwyn_answered, so it is not too chatty.
 - **Touch.** Targets are at least 44px (section 9).
 
-### Open questions
+#- 2026-11-26 09:07 (Merwyn, recorded by Janice): the artifact renders and the laptop frame rate is good; Done-when 6 and 8 confirmed.
+
+## Open questions
 1. Event type names and fields: does Fang's log v0 use the names in section 6? If he renames them, keep one animation row per type. Fang.
 2. The Sprint 3 history has no real `needs_merwyn` moment. Sprint 3 says none of its tasks were behind a human gate; T-043 Q1 was answered by Janice for Merwyn. To show the waiting state, the fixture needs one. Candidates: T-043 Q1 shown as a wait for Merwyn "(via Janice)", or a waiting event for T-002, which sprint-03 lists under "Waiting on Merwyn". The fixture must be labelled honestly either way. Fang to choose, Janice to confirm it is a fair replay.
 3. Adding a Dinda desk, the new palette tokens and `style: lowpoly-studio` to theme.yaml (section 2 and 3 proposals): Fang accepts or changes; Sebastian applies.

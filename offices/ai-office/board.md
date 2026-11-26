@@ -2,13 +2,13 @@
 
 _Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**48 tasks** — todo: 31 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 17 · parked: 0
+**49 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 17 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (31)
+## todo (32)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -32,6 +32,7 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024, T-002 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
+| [T-049](backlog/T-049-golden-examples-for-office-skills-slice-of-t-016.md) | P1 | Golden examples and evals for the office's own skills (slice of T-016) | pmo | — |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
