@@ -25,3 +25,10 @@ Status: scope Green, schedule Green, budget Green.
 **Carry forward:** usage.md example header still says claude-sdk; phone usage sheet cramped; unknown-agent error echoes the value on stderr; resumed-agent overlap needs a rule (prefer fresh agents for rework, or record the delta).
 
 **PMO note, 26 Nov 2026 22:10 WIB (Janice):** Merwyn, at 7,347,373 agent tokens (92% of 8M): "np just proceed. budget is not a constraint". The `budget_used >= 0.8` gate is answered for this session's remaining work (T-070, T-069, chat replies); the 8M figure in budgets.yaml stays as the page's reference until Merwyn sets another, so the bar shows red past 8M. Chat messages m-mwxhmrx2-582l and m-mwxhs3dt-3w9c waited about 3 hours unanswered: the inbox was not checked during agent waits. From now on Janice checks the inbox after each merge.
+
+**PMO note, 26 Nov 2026 23:35 WIB (Janice): T-069 live steps (U3, U4, sync), with Merwyn's approval of 22:30 WIB.**
+- U4: before the re-declare, the 4 chat message docs (2 asks, 2 replies; ids only, as m-mwxhmrx2-582l, m-mwxhs3dt-3w9c, r-m-mwxhmrx2-582l-pmo, r-m-mwxhs3dt-3w9c-curator) plus the `chat/office` meta. `declare_capabilities` (version 1795710790-0c78) set `db` rules chat and usage, both owner/owner, plus `user`. After it, `db_rules_get` showed both rules and the 4 chat docs were unchanged.
+- U3 / C7: `db_write` as `asLevel: view` was refused (404, nothing written) on `usage/office`, `usage/office/chunks/probe` and `usage/budgets`; `db_list` as view on `usage/office/chunks` returned no docs.
+- First sync (`usage plan`, exit 0): 3 docs, largest 19,099 B, 114 runs in 1 chunk, 0 orphans, 0 unknown; written in order chunk, budgets, meta (each version 1). The second plan (in_sync check) was not run: it needs the stored docs fed back on stdin, which is a manual copy of 19 KB. Next sync will show in_sync.
+- Open: whether `db_write` can create only when absent was not tested.
+- Published "AI Office" version 1795710943-3e09 from the combined build: 221,670 B (216 KB), 114 runs built in, 0 events embedded.
