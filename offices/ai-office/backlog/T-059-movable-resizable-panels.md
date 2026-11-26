@@ -118,6 +118,8 @@ Headless Chromium (playwright, swiftshader), 1280x800 on the recorded page, scri
 
 — Sebastian (engineer)
 
+Decision (Merwyn, 26 Nov 2026 ~14:20 WIB, recorded by Janice): below 60% opacity, each text line keeps a soft dark backing so it stays readable; the panel itself stays see-through as set. Rework to add it, then review.
+
 ## Review log
 
 ## Decision
