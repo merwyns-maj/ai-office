@@ -2,9 +2,9 @@
 id: T-063
 title: "Office chat: a pop-up chat in the 3D office, @mention one or more agents"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-062]
@@ -294,6 +294,33 @@ Screenshots (headless Chrome, a stub `claude` injected into a copy of the page u
 7. Clear chat sends up to 200 deletes in parallel. It may hit the rate limit, and if it does the page shows a warning.
 
 External skills design:accessibility-review and data:validate-data are not available in this session. The accessibility checks above were done by hand.
+
+— Cahyani (reviewer)
+
+**PASS (second review), 26 Nov 2026, head 81deff6.** All three fixes from Review 1 hold when run. The notes are handled too. Status `done`; Janice merges after Merwyn.
+
+**Fixes (verified by running them)**
+1. Prototype names. Node (`OfficeCore.chat.newAsk` from the built office.html) against Python (`chat.parse_mentions`) on 9 probes: `@constructor`, `@toString @valueOf`, `@__proto__`, `@hasOwnProperty`, `@Fang @constructor`, `@isPrototypeOf @propertyIsEnumerable`, `@toLocaleString`, `@__defineGetter__`, `@Fang`. Node recipients are `["pmo"]` for each prototype name (`["architect"]` when Fang is also mentioned), with `mentions:[]`. Python gives `ids:[]` plus the name in `unknown`, so it routes to Janice. They agree. In the page, typing `@constructor hi` shows "To: Janice (default) · No agent called Constructor; this goes to Janice". The shared `chat-mentions.json` has these cases (lines 379-416), and the node test reads it (test_office_app.py:479). Pass.
+2. ifVersion. I fed a db_list-shaped list `{id,data,version}` to the CLI. `chat purge` printed deletes with `"ifVersion": 11`, `0` and `4` for two old answered asks and one reply. Version 0 is kept, not dropped as falsy. A fresh picked ask was not deleted. `chat status --agent architect --to replying` printed `"ifVersion": 23`. A bare doc gives `null`. Pass.
+3. Size. `test_size_limit` is `216 * 1024` (221,184 B), and the comment cites Fang's 216 KB decision. `office.html` is 216,739 B, 4,445 B under the limit. Fang's decision is recorded in Design. Pass.
+
+**Notes from Review 1**
+- `unavailable`: headless with my stub (extended with a snapshot error hook and a fail-once write). The first `set` failed with `unavailable` and was retried once: 2 `set` calls to the same id, 1 ask stored, no "Not sent" button. After a snapshot `unavailable` error, the header chip reads "Reconnecting…" and the 3 bubbles stay. The next snapshot brings back "Office running". A `revoked` error shows "Chat storage is not available in this view". Shots are in /tmp/rv63/shots2 (not committed).
+- Non-ASCII digits: page against Python on Arabic-Indic 16 digits, fullwidth 12, Devanagari phone-like, Bengali 16 (not in the fixture), 4 Arabic-Indic digits and "2026". Both gave `16-digit run`, `run of 10+ digits`, `phone number`, `16-digit run`, none, none.
+- `rules_problem`, via the `chat rules` CLI: a root `""` rule with read view exits 1, `/` with write interact exits 1, `*` with read view exits 1, and an unrelated `other` rule with view exits 0 ("rules ok").
+- `chat.md` has "Database API (confirmed)" and the "not checked" wording is gone. The chatStore comment matches.
+
+**Regression**
+- `python -m pytest -q`: 386 passed, exit 0. `unittest discover`: OK. `golden.py ai-office`: 13 cases, 75 checks, 0 problems, exit 0. `validate ai-office`: OK, 8 agents, 5 stages, 64 tasks, 18 skills, exit 0. `office_app.py ai-office --chat --check`: up to date (211 KB, 84 events), exit 0. `--chat --ledger x`: exit 2.
+- Headless at 1280x800 and 390x844: "@Fang and @Dinda is T-063 ready?" writes one ask with recipients {architect, designer}. Simulated replies show the "Fang · answered" and "Dinda · answered" chips and both reply bubbles. 0 page errors and 0 stub rule violations. The only console error is the test server's favicon 404.
+
+**Notes (not blocking)**
+1. During an `unavailable` snapshot error, "Reconnecting…" shows in the header chip only. The thread keeps its bubbles and shows the word only while loading. That is reasonable. Rework 1 says "chip and thread".
+2. The page assumes the listener resumes after an `unavailable` snapshot error, and does not re-subscribe. If the real API ends the listener on error (Firebase does), the chip would stay on "Reconnecting…". Janice can check this on the real artifact after publish.
+3. The size comment says "about 6 KB headroom". It is about 4.3 KB now.
+4. On 390x844, the chat sheet's close button sits mid-header, not at the right edge. This is cosmetic.
+
+External skills design:accessibility-review and data:validate-data are not available in this session.
 
 — Cahyani (reviewer)
 
