@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-062]
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/54
 ---
 
 > Merwyn, 26 Nov 2026 15:54 WIB: "Can we have a dedicated chat section (can be open or close), maybe a chat button somewhere to pop it up. I can mention each agent like @Janice to mention her and send message directly to her. I can also mention multiple agents if i want to send same message to both. For context, we're building this to replace a claude code interface in a way." Same message: keep the 5M budget for now.
