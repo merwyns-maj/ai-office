@@ -2,7 +2,7 @@
 id: T-069
 title: "Usage numbers from the artifact db, so the page needs no republish per ledger append"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
