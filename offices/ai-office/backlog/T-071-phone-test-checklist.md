@@ -2,7 +2,7 @@
 id: T-071
 title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
-status: build
+status: review
 priority: P2
 owner: reviewer
 where: repo
