@@ -2,7 +2,7 @@
 id: T-057
 title: "Record and show real token usage per agent, per session"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
