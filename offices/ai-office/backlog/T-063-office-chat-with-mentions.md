@@ -333,6 +333,8 @@ External skills design:accessibility-review and data:validate-data are not avail
 
 ## Decision
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, Smaller records. — April (curator)
+
 ## Open questions
 - (Sebastian) The page assumes a Firebase-like db API (`db.doc(path).set/delete/onSnapshot`, `db.collection(path).orderBy().limit().onSnapshot`, snapshot `.docs[i].data()`, `user.id()`). It is isolated in `chatStore` in the template. Janice checks the real shape when declaring; if it differs, only that function changes.
 - (Sebastian) The shape of a db_query/db_list result is not confirmed; `chat plan` accepts bare docs or `{id, data, version}` and takes `ifVersion` from `version` or `_version`.

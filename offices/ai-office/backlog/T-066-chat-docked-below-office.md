@@ -215,6 +215,8 @@ Done-when regression (all pass, same harness as Review 1):
 ## Decision
 Merged after Cahyani's Review 2 PASS (Janice, 26 Nov 2026). Chat is a docked section below the bar; the office resizes. Minimum chat height is measured (notice plus two thread lines). Follow-up T-067: composer warning overlap at minimum height, and the page-size headroom (16 B).
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D2. — April (curator)
+
 ## Open questions
 - (Answered by Dinda in Design, UX: adjustable, bar above chat, height saved.) Can the chat height be adjusted (drag handle, presets) or is it fixed? Not a stated preference; the Design may choose. Dinda (UX) and Fang (design) to answer. Whatever is chosen must keep a minimum office height on a phone.
 - Where does the bottom bar sit relative to the chat: above it or below it? Same owners (Dinda, Fang).

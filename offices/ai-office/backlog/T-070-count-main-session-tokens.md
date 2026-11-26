@@ -124,6 +124,8 @@ Other items from the review brief:
 ## Decision
 Merged after Cahyani's PASS (Janice, 26 Nov 2026). Main-session usage is a separate `kind:"main_session"` ledger line from the explain-usage reading; never added to agent tokens. Follow-up noted, not a task yet: the row makes the Detail list about 67 px taller, so the usage panel auto-collapses about 60 px sooner (shorten the row's second line or let Detail scroll first).
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D6. — April (curator)
+
 ## Open questions
 - Does `explain-usage` or any harness output give the main session's tokens? Unknown; the finding answers it. For the office.
 - If a figure exists, does it cover the whole session or a window, and does it overlap with agent-run tokens (the Sprint 7 close noted resumed-agent overlap)? For the office; the Architect decides how to avoid double counting.

@@ -275,4 +275,6 @@ Verdict: **PASS**. Status stays `review`, owner `pmo`, awaiting Merwyn's merge.
 ## Decision
 Merged after Cahyani's Review 2 PASS (Janice, 26 Nov 2026). Every HUD part gets its own rectangle (C.place); parts give way in Dinda's order; short windows hide transient layers (`nost`). Page limit 232 KB kept (Fang's size note). Follow-ups noted, not tasks yet: a real fixed-point test over `build()` (the parts builder as a pure function), and the 1280x480 one-frame overlap Cahyani saw once. T-071's no-overlap phone step can now be added.
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D3. — April (curator)
+
 ## Open questions
