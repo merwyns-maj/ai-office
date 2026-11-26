@@ -128,6 +128,11 @@ class Schema(unittest.TestCase):
         self.assertIsNotNone(chat.rules_problem([]))
         self.assertIsNotNone(chat.rules_problem(None))
         self.assertIsNotNone(chat.rules_problem([{"path": "chat", "read": "owner", "write": "owner"}, {"path": "chat/office", "read": "view", "write": "owner"}]))
+        own = {"path": "chat", "read": "owner", "write": "owner"}
+        for wide in ({"path": "", "read": "view", "write": "owner"}, {"path": "/", "read": "owner", "write": "interact"}, {"path": "*", "read": "view", "write": "view"}):
+            self.assertIsNotNone(chat.rules_problem([wide, own]), wide)
+        self.assertIsNone(chat.rules_problem([{"path": "", "read": "owner", "write": "owner"}, own]))
+        self.assertIsNone(chat.rules_problem([{"path": "other", "read": "view", "write": "owner"}, own]))
 
 
 class Plan(unittest.TestCase):
@@ -266,6 +271,14 @@ class Purge(unittest.TestCase):
         self.assertEqual({d["id"] for d in out}, {old["id"], chat.reply_id(old["id"], "architect"), orphan["id"]})
         self.assertTrue(all(d["op"] == "delete" and d["path"].startswith("chat/office/messages/") for d in out))
 
+    def test_purge_carries_if_version_from_the_wrapper(self):
+        day = 86400
+        old = ask(1, status="answered", created=ago(31 * day))
+        r = rep(old, "architect")
+        out = chat.purge([{"id": old["id"], "data": old, "version": 7}, {"id": r["id"], "data": r, "version": 3}], NOW)
+        self.assertEqual({d["id"]: d["ifVersion"] for d in out}, {old["id"]: 7, r["id"]: 3})
+        self.assertIsNone(chat.purge([old], NOW)[0]["ifVersion"])
+
 
 class LedgerChatRun(unittest.TestCase):
     HEADER = {"log": "agent-runs", "v": 1, "office": "ai-office", "session": "session_test0001", "source": "test", "recorded_by": "test", "date": "2026-11-26", "covers": "x", "not_reported": []}
@@ -335,6 +348,11 @@ class Cli(unittest.TestCase):
         a = ask(1, status="picked")
         r = self.run_cli(["status", "ai-office", "--agent", "architect"], json.dumps({"ask": a}))
         self.assertEqual(json.loads(r.stdout)["patch"]["recipients"]["architect"]["status"], "replying")
+        w = self.run_cli(["status", "ai-office", "--agent", "architect"], json.dumps({"ask": {"id": a["id"], "data": a, "version": 5}}))
+        self.assertEqual(json.loads(w.stdout)["ifVersion"], 5)
+        old = ask(1, status="answered", created=ago(31 * 86400))
+        p = self.run_cli(["purge", "ai-office"], json.dumps([{"id": old["id"], "data": old, "version": 9}]))
+        self.assertEqual(json.loads(p.stdout)[0]["ifVersion"], 9)
         self.assertEqual(self.run_cli(["purge", "ai-office"], "[]").stdout.strip(), "[]")
         self.assertEqual(self.run_cli(["rules", "ai-office"], json.dumps([{"path": "chat", "read": "owner", "write": "owner"}])).returncode, 0)
         self.assertEqual(self.run_cli(["rules", "ai-office"], "[]").returncode, 1)

@@ -374,6 +374,47 @@
    ],
    "all": false,
    "unknown": []
+  },
+  {
+   "text": "@constructor please check",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "constructor"
+   ]
+  },
+  {
+   "text": "@toString @valueOf hi",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "tostring",
+    "valueof"
+   ]
+  },
+  {
+   "text": "@__proto__ hi",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@hasOwnProperty hi",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "hasownproperty"
+   ]
+  },
+  {
+   "text": "@Fang @constructor ok",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": [
+    "constructor"
+   ]
   }
  ]
 }

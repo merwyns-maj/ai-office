@@ -8,10 +8,13 @@ Parity fixtures read by both: `tests/fixtures/chat-mentions.json`, `tests/fixtur
 Chat text is company data. It lives only in the artifact database (claude.ai, owner access). It never enters this repo:
 the CLI reads stdin and writes stdout, tasks hold a pointer (`chat message <id>`), fixtures are invented.
 
+## Database API (confirmed)
+Confirmed from the artifact server's type definitions (T-063 rework 1), no longer assumed: documents live at even-length paths and collections at odd-length ones; operations are get, set, update, delete, acquire and onSnapshot; errors carry a code. The page isolates this in `chatStore`. Error handling: `unavailable` is transient (one retry after a 400-1200 ms random delay on writes; the panel shows "Reconnecting" and not an error); any other code (`quota_exceeded`, `revoked`, `not_granted`, ...) shows "Chat storage is not available". Mention names are looked up in a map without a prototype, so `@constructor` is an unknown name.
+
 ## Layout (even segment count = document)
 - `chat/office` (doc, meta, written only by the session): `{v:1, last_inbox_at:"<ISO UTC>", by:"pmo", running:bool}`. The page shows "Office running" when `running` is true and `last_inbox_at` is under 15 minutes old.
 - `chat/office/messages/{id}` (docs): asks and replies, below.
-- Rules (declared with the artifact): `[{path:"chat", read:"owner", write:"owner"}]`. `chat.rules_problem` checks them; the inbox refuses to route otherwise (C7).
+- Rules (declared with the artifact): `[{path:"chat", read:"owner", write:"owner"}]`. `chat.rules_problem` checks them, and also refuses when a wider rule (root path, `*`) gives read or write below owner; the inbox refuses to route otherwise (C7).
 
 ## Ask (written by the page)
 `{v:1, kind:"ask", id:"m-<Date.now() base36>-<4 base36>", author:"merwyn", author_uid, text (1..4000), created_at, mentions:[agent ids], all:bool, unknown:[lowercased names], in_reply_to:null|<reply id>, recipients:{<agent id>:{status, reply_id, at, by}}}`
@@ -25,11 +28,12 @@ the CLI reads stdin and writes stdout, tasks hold a pointer (`chat message <id>`
 new, picked, replying, answered, needs_merwyn. Table (`chat.TRANSITIONS`, same in the page): new to picked (claim); picked to replying; picked or replying to answered or needs_merwyn (reply written; a pmo ask is answered from picked); picked or replying back to new (lease older than 1800 s with no reply doc, or `ifVersion` lost); needs_merwyn to answered (a later ask is picked for that agent, or `in_reply_to` matches). `answered` is terminal.
 
 ## CLI (stdin only; output is never redirected into the repo)
-- `python -m engine.runtime chat plan ai-office`: stdin `{"rules":[...], "docs":[...]}`. Docs are bare docs or `{id, data, version}` wrappers (the db result shape is not checked yet: see the task's open questions). Prints a JSON list of actions in order (`post` and `refuse` for asks that failed the scan, then claims, then the rest): `{op: claim|reset|repair|close|mixed|refuse|post, path, patch|doc, ask, agents, changes, ifVersion}`. One action per ask, so one `ifVersion` per write. The patch always carries the whole `recipients` map. Exit 1 on bad input, bad rules or no rules.
+- `python -m engine.runtime chat plan ai-office`: stdin `{"rules":[...], "docs":[...]}`. Docs are bare docs or `{id, data, version}` wrappers (the `db_list` shape). Prints a JSON list of actions in order (`post` and `refuse` for asks that failed the scan, then claims, then the rest): `{op: claim|reset|repair|close|mixed|refuse|post, path, patch|doc, ask, agents, changes, ifVersion}`. One action per ask, so one `ifVersion` per write. The patch always carries the whole `recipients` map. Exit 1 on bad input, bad rules or no rules.
 - `chat reply ai-office --agent ID [--needs-merwyn] [--task T-nnn]`: stdin `{"ask": <ask doc>, "text": "...", "question": null|"..."}`. Prints `{path, doc, patch, ifVersion}`. Exit 1 on a scan hit (the kind only) or a bad transition.
 - `chat status ai-office --agent ID`: stdin `{"ask": ...}`; prints the picked-to-replying patch.
-- `chat purge ai-office`: stdin a list of docs; prints whole-document deletes for answered asks and their replies older than 30 days.
+- `chat purge ai-office`: stdin a list of docs; prints whole-document deletes `{op, path, id, ifVersion}` (version from the `{id, data, version}` wrapper, which `db_write` needs) for answered asks and their replies older than 30 days.
 - `chat mentions ai-office`: stdin text; prints the routing. `chat rules ai-office`: stdin the rules list.
 
 ## Scan (`chat.scan`, JS `OfficeCore.chat.scan`)
+Non-ASCII decimal digits (Unicode category Nd) are turned into ASCII digits before matching, in both.
 Kinds: email address, 16-digit run, run of 10+ digits (the `events.py` patterns), phone number, long number with separators, secret-like token, and forbidden terms (office side only). A hit returns the kind, never the text. It catches patterns, not names.

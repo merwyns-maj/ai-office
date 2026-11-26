@@ -142,8 +142,8 @@ class PageRules(unittest.TestCase):
 
     def test_size_limit(self):
         # 200 KB until T-063. The chat (panel, phone sheet, combobox, notice, status chips, parser, scan) is about 40 KB of
-        # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 224 KB (about 6 KB headroom).
-        self.assertLessEqual(len(self.html.encode("utf-8")), 224 * 1024)
+        # hand-written, library-free page code; the committed AI Office page is built with it. Raised to 216 KB by Fang (about 6 KB headroom).
+        self.assertLessEqual(len(self.html.encode("utf-8")), 216 * 1024)
 
     def test_three_min_js_is_not_committed(self):
         r = subprocess.run(["git", "ls-files", "engine/app/three.min.js"], cwd=REPO, capture_output=True, text=True)
@@ -475,6 +475,11 @@ if (mode === 'sprint3') {
   const X = JSON.parse(fs.readFileSync(process.argv[4], 'utf8')), K = C.chat, A = D.chat.agents;
   assert.strictEqual(A.length, 8);
   X.mentions.forEach(c => { const p = K.parseMentions(c.text, A); assert.deepStrictEqual([p.ids, p.all, p.unknown], [c.ids, c.all, c.unknown], c.text); });
+  assert.strictEqual(K.errCode({ code: 'unavailable' }), 'unavailable'); assert.strictEqual(K.errCode({ message: 'db is Unavailable now' }), 'unavailable'); assert.strictEqual(K.errCode(null), null);
+  assert.strictEqual(K.canMove('constructor', 'new'), false); assert.strictEqual(K.newAsk('@constructor please check', D.chat, 1, () => 0.5, 'u').recipients.pmo.status, 'new');
+  { let n = 0, slept = 0; K.retryOnce(() => (++n === 1 ? Promise.reject({ code: 'unavailable' }) : Promise.resolve('ok')), () => 0, (f, ms) => { slept = ms; f(); }).then(v => { assert.strictEqual([v, n, slept].join(), 'ok,2,400'); });
+    let m = 0; K.retryOnce(() => { m++; return Promise.reject({ code: 'revoked' }); }).catch(e => { assert.strictEqual(m, 1); });
+    let q = 0; K.retryOnce(() => { q++; return Promise.reject({ code: 'unavailable' }); }, () => 0, (f) => f()).catch(e => { assert.strictEqual(q, 2); }); }
   X.scan.forEach(c => assert.strictEqual(K.scan(c.text), c.hit, JSON.stringify(c.hit)));
   assert.deepStrictEqual(K.route(K.parseMentions('hello', A), 'pmo'), ['pmo']);
   assert.deepStrictEqual(K.route(K.parseMentions('@Fang @Dinda', A), 'pmo'), ['architect', 'designer']);

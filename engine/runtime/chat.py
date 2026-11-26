@@ -5,6 +5,7 @@ mention rules and scan; tests/fixtures/chat-mentions.json and chat-scan.json are
 Chat text is company data: nothing here writes it anywhere, and every message this module returns names a field or
 a kind of hit, never the text."""
 import re
+import unicodedata
 from datetime import datetime, timedelta, timezone
 from typing import NamedTuple
 
@@ -90,9 +91,14 @@ def _digit_total(s):
     return sum(c.isdigit() for c in s)
 
 
+def ascii_digits(s):
+    """Non-ASCII decimal digits (category Nd) become ASCII, so the digit patterns cannot be dodged. The page does the same."""
+    return "".join(str(unicodedata.decimal(c)) if ord(c) > 127 and unicodedata.category(c) == "Nd" else c for c in s)
+
+
 def scan(text, forbidden=()):
     """Return the kind of the first hit ("email address", "16-digit run", ...), or None. Never returns the matched text."""
-    s = text or ""
+    s = ascii_digits(text or "")
     for p, kind in zip(events.DATA_PATTERNS, events.PATTERN_KINDS):
         if p.search(s):
             return kind
@@ -219,6 +225,9 @@ def rules_problem(rules):
     """None when the declared rules keep chat readable and writable by the owner only; else a short reason (C7)."""
     if not isinstance(rules, list):
         return "rules: not a list"
+    for r in rules:   # a wider rule (root "" or "/", a parent of chat) applies to chat too
+        if isinstance(r, dict) and str(r.get("path", "")).strip("/") in ("", "*", "**") and (r.get("read") != "owner" or r.get("write") != "owner"):
+            return "rules: a path above chat is open below owner"
     hit = [r for r in rules if isinstance(r, dict) and r.get("path") == "chat"]
     if len(hit) != 1:
         return "rules: need exactly one rule for path chat"
@@ -364,9 +373,11 @@ def reply(ask, agent, text, needs_merwyn, question, task, now):
 
 def purge(items, now, days=RETENTION_DAYS):
     """Whole-document deletes (C6): asks whose recipients are all answered and older than days, and replies to
-    those asks, plus replies whose ask is gone and that are older than days. Returns [{op:'delete', path, id}]."""
+    those asks, plus replies whose ask is gone and that are older than days. Returns [{op:'delete', path, id, ifVersion}]; ifVersion comes from the input wrapper's version (db_write needs it)."""
     cut = now - timedelta(days=days)
-    docs = [d for d, _ in _norm(items) if isinstance(d, dict) and isinstance(d.get("id"), str)
+    pairs = _norm(items)
+    vers = {d["id"]: v for d, v in pairs if isinstance(d, dict) and isinstance(d.get("id"), str)}
+    docs = [d for d, _ in pairs if isinstance(d, dict) and isinstance(d.get("id"), str)
             and d.get("kind") in ("ask", "reply") and _iso(d.get("created_at"))]
     asks = {d["id"]: d for d in docs if d["kind"] == "ask"}
     gone = {i for i, d in asks.items() if isinstance(d.get("recipients"), dict) and d["recipients"]
@@ -377,5 +388,5 @@ def purge(items, now, days=RETENTION_DAYS):
         old = parse_time(d["created_at"]) < cut
         if (d["kind"] == "ask" and d["id"] in gone) or \
                 (d["kind"] == "reply" and (d.get("reply_to") in gone or (d.get("reply_to") not in asks and old))):
-            out.append({"op": "delete", "path": f"chat/office/messages/{d['id']}", "id": d["id"]})
+            out.append({"op": "delete", "path": f"chat/office/messages/{d['id']}", "id": d["id"], "ifVersion": vers.get(d["id"])})
     return out

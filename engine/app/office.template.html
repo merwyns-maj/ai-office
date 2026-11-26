@@ -862,20 +862,35 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
   /* ----- office chat (T-063): pure helpers; the same rules as engine/runtime/chat.py (shared fixtures keep them equal) ----- */
   var CH = {};
   CH.TRANSITIONS = { 'new': ['picked'], picked: ['replying', 'new', 'answered', 'needs_merwyn'], replying: ['answered', 'needs_merwyn', 'new'], needs_merwyn: ['answered'], answered: [] };
-  CH.canMove = function (a, b) { return (CH.TRANSITIONS[a] || []).indexOf(b) >= 0; };
+  CH.canMove = function (a, b) { return Object.prototype.hasOwnProperty.call(CH.TRANSITIONS, a) && CH.TRANSITIONS[a].indexOf(b) >= 0; };
   var MRE = /(^|[^\w@])@([A-Za-z][A-Za-z-]{0,23})/g;
-  function hmap(agents) { var h = {}; agents.forEach(function (a) { h[a.name.toLowerCase()] = a.id; }); return h; }
+  /* names come from user text: a null-prototype map, so @constructor or @__proto__ is never an agent */
+  function hmap(agents) { var h = Object.create(null); agents.forEach(function (a) { h[a.name.toLowerCase()] = a.id; }); return h; }
   CH.parseMentions = function (text, agents) {
     var h = hmap(agents), ids = [], unk = [], all = false, m, re = new RegExp(MRE.source, 'g');
     text = String(text || '');
     while ((m = re.exec(text))) {
       var n = m[2].replace(/-+$/, '').toLowerCase();
       if (n === 'all') all = true;
-      else if (h[n]) { if (ids.indexOf(h[n]) < 0) ids.push(h[n]); }
+      else if (n in h) { if (ids.indexOf(h[n]) < 0) ids.push(h[n]); }
       else if (n && unk.indexOf(n) < 0) unk.push(n);
     }
     if (all) ids = agents.map(function (a) { return a.id; });
     return { ids: ids, all: all, unknown: unk };
+  };
+  /* db error code: the code field, else a known code word in the message */
+  CH.errCode = function (e) {
+    var c = e && typeof e === 'object' ? e.code : null;
+    if (typeof c === 'string' && c) return c.toLowerCase().replace(/^[a-z]+\//, '').replace(/-/g, '_');
+    var m = e && /(unavailable|quota_exceeded|revoked|not_granted)/i.exec(String(e.message || ''));
+    return m ? m[1].toLowerCase() : null;
+  };
+  /* a write that fails with `unavailable` is tried once more after a short random delay; any other error goes straight up */
+  CH.retryOnce = function (fn, rnd, sleep) {
+    return Promise.resolve().then(fn).catch(function (e) {
+      if (CH.errCode(e) !== 'unavailable') throw e;
+      return new Promise(function (r) { (sleep || setTimeout)(r, 400 + Math.floor((rnd || Math.random)() * 800)); }).then(fn);
+    });
   };
   CH.route = function (p, def) { return p.ids.length ? p.ids.slice() : [def || 'pmo']; };
   /* the @ must start the text or follow whitespace; returns null or { start, query, items } */
@@ -957,7 +972,7 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
       if (i % 2) { var host = ''; try { host = new URL(seg).host; } catch (e) { host = ''; } out.push(host ? { t: 'link', s: host, href: seg } : { t: 'text', s: seg }); return; }
       var re = new RegExp(MRE.source, 'g'), at = 0, m;
       while ((m = re.exec(seg))) {
-        var n = m[2].replace(/-+$/, '').toLowerCase(), id = n === 'all' ? 'all' : h[n], st = m.index + m[1].length, len = 1 + n.length;
+        var n = m[2].replace(/-+$/, '').toLowerCase(), id = n === 'all' ? 'all' : (n in h ? h[n] : null), st = m.index + m[1].length, len = 1 + n.length;
         if (!id) continue;
         if (st > at) out.push({ t: 'text', s: seg.slice(at, st) });
         out.push({ t: 'men', s: seg.substr(st, len), id: id }); at = st + len;
@@ -979,8 +994,18 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     [/(?<![\w])(?:\+62|62|0)[\s-]?8\d{1,3}[\s.-]?\d{3,4}[\s.-]?\d{2,5}(?!\d)/, 'phone number'], [/(?<!\d)\d{3,}(?:[ .-]\d{3,}){2,}(?!\d)/, 'long number with separators'],
     [/\b(?:sk|pk|ghp|gho|ghs|xox[abp])[-_][A-Za-z0-9_-]{16,}|\bAKIA[0-9A-Z]{12,}|\bAIza[0-9A-Za-z_-]{20,}/, 'secret-like token'],
     [/\b(?:password|passwd|secret|api[_ -]?key|token)\s*[:=]\s*\S{6,}/i, 'secret-like token'], [/\bbearer\s+[A-Za-z0-9._~+\/-]{16,}/i, 'secret-like token'], [/-----BEGIN [A-Z ]*PRIVATE KEY/, 'secret-like token']];
+  /* non-ASCII decimal digits (Arabic-Indic, fullwidth, ...) become ASCII first, as chat.py does; value = offset in its contiguous run of Nd, mod 10 */
+  var ND = /\p{Nd}/u;
+  CH.asciiDigits = function (s) {
+    return s.replace(/\p{Nd}/gu, function (ch) {
+      var c = ch.codePointAt(0);
+      if (c < 128) return ch;
+      var b = c; while (b > 0 && ND.test(String.fromCodePoint(b - 1))) b--;
+      return String((c - b) % 10);
+    });
+  };
   CH.scan = function (text) {
-    var s = String(text || ''), i, m;
+    var s = CH.asciiDigits(String(text || '')), i, m;
     for (i = 0; i < SCAN.length; i++) {
       m = SCAN[i][0].exec(s);
       if (m && (SCAN[i][1] !== 'long number with separators' || m[0].replace(/\D/g, '').length >= 10)) return SCAN[i][1];
@@ -2398,19 +2423,24 @@ function cDocs() {
   return CS.docs.concat(Object.keys(CS.pending).filter(function (k) { return !have[k]; }).map(function (k) { return CS.pending[k].doc; }));
 }
 function withTimeout(p, ms) { return Promise.race([Promise.resolve(p), new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
-/* the only place that touches the artifact db API; shapes are assumed Firebase-like until checked on the declared artifact (task open questions) */
+/* the only place that touches the artifact db API. Shapes confirmed from the server's type definitions (T-063 rework 1): doc/collection paths,
+   get/set/update/delete/acquire/onSnapshot, error codes. `unavailable` is transient (one retry on writes); other codes are shown as not available. */
 function chatStore(db) {
   return {
-    set: function (path, doc) { return db.doc(path).set(doc); },
-    del: function (path) { return db.doc(path).delete(); },
+    set: function (path, doc) { return C.chat.retryOnce(function () { return db.doc(path).set(doc); }); },
+    del: function (path) { return C.chat.retryOnce(function () { return db.doc(path).delete(); }); },
     messages: function (cb, err) { return db.collection('chat/office/messages').orderBy('created_at', 'desc').limit(200).onSnapshot(function (s) { cb(s.docs.map(function (d) { return d.data(); }).reverse()); }, err); },
-    meta: function (cb) { return db.doc('chat/office').onSnapshot(function (s) { cb(s && s.data ? s.data() || null : null); }, function () { cb(null); }); }
+    meta: function (cb, err) { return db.doc('chat/office').onSnapshot(function (s) { cb(s && s.data ? s.data() || null : null); }, function (e) { cb(null); if (err) err(e); }); }
   };
 }
 function chatInit() {
   if (CS.phase !== 'idle') return;
   CS.phase = 'loading'; renderChat();
   var c = typeof claude !== 'undefined' ? claude : null, first = true;
+  function onDbErr(e) {
+    if (C.chat.errCode(e) === 'unavailable') { CS.reconn = true; renderChat(); renderChatStatus(); return; }   /* transient: keep what is shown, the listener resumes */
+    CS.phase = 'nodb'; renderChat();
+  }
   function fail(ph) { if (CS.phase === 'loading') { CS.phase = ph; renderChat(); } }
   if (!c || !c.use) { fail('nodb'); return; }
   withTimeout(c.use('db'), 10000).then(function (db) {
@@ -2418,16 +2448,16 @@ function chatInit() {
     return withTimeout(c.use('user'), 10000).then(function (u) { return withTimeout(u && u.id ? u.id() : null, 10000); }).then(function (uid) {
       if (!uid) { fail('signedout'); return; }
       CS.uid = uid; CS.store = chatStore(db);
-      CS.store.meta(function (m) { CS.meta = m; renderChatStatus(); });
+      CS.store.meta(function (m) { CS.meta = m; renderChatStatus(); }, onDbErr);
       CS.store.messages(function (docs) {
         var known = {}; CS.docs.forEach(function (d) { known[d.id] = 1; });
         var fresh = docs.filter(function (d) { return d.kind === 'reply' && C.chat.valid(d) && !known[d.id]; });
         CS.docs = docs.filter(C.chat.valid); CS.limited = docs.length >= 200;
         Object.keys(CS.pending).forEach(function (k) { if (CS.docs.some(function (d) { return d.id === k; })) delete CS.pending[k]; });
-        CS.phase = 'ready';
+        CS.phase = 'ready'; CS.reconn = false;
         if (!first) fresh.forEach(function (d) { var n = NAME[d.author] || d.author; announce(d.needs_merwyn ? n + ' needs you: ' + (d.question || '') : n + ' replied'); CS.newReplies = true; });
         first = false; onChatDocs();
-      }, function () { CS.phase = 'nodb'; renderChat(); });
+      }, onDbErr);
       setTimeout(function () { fail('nodb'); }, 10000);
     });
   }).catch(function () { fail('nodb'); });
@@ -2459,7 +2489,7 @@ function renderBadge() {
 }
 function renderChatStatus() {
   var o = C.chat.officeStatus(CS.meta, Date.now()), st = $('chst');
-  st.className = 'chst' + (o.running ? ' on' : ''); st.innerHTML = '<i></i>'; st.appendChild(document.createTextNode(o.running ? 'Office running' : 'Office not running'));
+  st.className = 'chst' + (o.running && !CS.reconn ? ' on' : ''); st.innerHTML = '<i></i>'; st.appendChild(document.createTextNode(CS.reconn ? 'Reconnecting…' : (o.running ? 'Office running' : 'Office not running')));
   $('cnote').textContent = o.running ? '' : (CFG.agents[0].name + ' picks this up when the office is running' + (o.last ? ' (last checked ' + hhmm(Date.parse(o.last)) + ')' : '') + '.');
 }
 function addText(box, parts) {
@@ -2554,7 +2584,7 @@ function renderChat() {
   ta.disabled = !ok; $('csend').disabled = !ok; $('cclear').disabled = !ready;
   var atBottom = CS.stick || th.scrollHeight - th.scrollTop - th.clientHeight < 40, seen = CS.rendered || (CS.rendered = {}), added = false;
   th.textContent = '';
-  if (CS.phase === 'idle' || CS.phase === 'loading') { var l = el('div', 'cerr'); l.textContent = 'Opening chat…'; th.appendChild(l); return; }
+  if (CS.phase === 'idle' || CS.phase === 'loading') { var l = el('div', 'cerr'); l.textContent = CS.reconn ? 'Reconnecting…' : 'Opening chat…'; th.appendChild(l); return; }
   if (CS.phase === 'nodb') { var e = el('div', 'cerr'); e.textContent = 'Chat storage is not available in this view'; th.appendChild(e); return; }
   if (CS.phase === 'signedout') { var s = el('div', 'cerr'), b = el('button', 'btn'); s.textContent = 'Chat needs you signed in'; b.type = 'button'; b.textContent = 'Try again'; b.addEventListener('click', function () { CS.phase = 'idle'; chatInit(); }); s.appendChild(b); th.appendChild(s); return; }
   var ts = C.chat.threads(cDocs());

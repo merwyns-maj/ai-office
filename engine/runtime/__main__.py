@@ -135,7 +135,7 @@ def _chat(args):
     try:
         if args.action == "status":
             path, patch = chat.set_status(ask, args.agent, args.to, now)
-            print(json.dumps({"path": path, "patch": patch}))
+            print(json.dumps({"path": path, "patch": patch, "ifVersion": chat._norm([data["ask"]])[0][1]}))
             return 0
         text, question = data.get("text"), data.get("question")
         for field, v in (("text", text), ("question", question)):

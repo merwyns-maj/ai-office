@@ -4,7 +4,7 @@ title: "Office chat: a pop-up chat in the 3D office, @mention one or more agents
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-062]
@@ -240,6 +240,18 @@ Screenshots (headless Chrome, a stub `claude` injected into a copy of the page u
 - Chat runs with no task are counted in the ledger `shared` row and are not in the event log used by the recorded page (a usage event needs a task).
 - Panel minimum size is the T-059 global 240 x 120, not 280 x 240. No sign-in action exists (the API is unknown): the signed-out state offers "Try again".
 - Not done here: C7 `asLevel: view` check, declare and publish (Janice, after review); no test against the real artifact db.
+
+— Sebastian (engineer)
+
+### Rework 1 (Sebastian, 26 Nov 2026, after Cahyani's REJECT)
+- Fix 1, mentions: `hmap` is now `Object.create(null)` and lookups use `in`; `canMove` uses `hasOwnProperty`. Python was already safe (a dict lookup); parity fixture gets `@constructor`, `@toString @valueOf`, `@__proto__` (no match: a name must start with a letter), `@hasOwnProperty`, and a mixed case.
+- Fix 2, version: `chat purge` deletes and `chat status` output now carry `ifVersion` from the `{id, data, version}` wrapper (null for bare docs). Tests: unit (purge) and CLI (status, purge).
+- Fix 3, size: Fang decided 216 KB (Janice's message). `test_size_limit` is 216 * 1024 with the comment corrected. office.html is 216,739 bytes (211 KB), about 4.4 KB under the limit.
+- Notes: `unavailable` is transient. Writes retry once after 400-1200 ms (`OfficeCore.chat.retryOnce`); a snapshot error with that code shows "Reconnecting..." (chip and thread) and keeps the data, the next snapshot clears it. Other codes go to "not available" as before. Tested under node (retry once, no retry on `revoked`, error after two failures).
+- Notes: the scan turns non-ASCII decimal digits (Unicode Nd) into ASCII first, in `chat.scan` (Python `unicodedata`, added to the stdlib allowlist in test_dryrun) and the page (value = offset in its run of Nd, mod 10). Four new scan fixture cases (Arabic-Indic 16-digit, fullwidth 12-digit, mixed phone-like, short non-ASCII digits with no hit).
+- Notes: `rules_problem` also refuses a rule with path `""`, `/` or `*` that is below owner for read or write. Tests added.
+- Notes: `chat.md` has a "Database API (confirmed)" section (doc/collection paths, get/set/update/delete/acquire/onSnapshot, error codes) and the "not checked yet" wording is gone. The `chatStore` comment says the same.
+- How to verify: `python -m pytest -q` (386 passed), `python scripts/golden.py ai-office`, `python -m engine.runtime validate ai-office`, `python scripts/office_app.py ai-office --chat --check`, ledger CLI on the session file (59 runs, 0 errors, 0 warnings), `python scripts/board.py ai-office` (board.md discarded). No browser run in this rework; the new page paths (retry, reconnecting) are covered by node unit tests only.
 
 — Sebastian (engineer)
 

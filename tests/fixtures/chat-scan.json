@@ -189,6 +189,47 @@
     ""
    ],
    "hit": null
+  },
+  {
+   "parts": [
+    "id ",
+    [
+     "rep",
+     "٧",
+     16
+    ],
+    " end"
+   ],
+   "hit": "16-digit run"
+  },
+  {
+   "parts": [
+    "acct ",
+    [
+     "rep",
+     "５",
+     12
+    ]
+   ],
+   "hit": "run of 10+ digits"
+  },
+  {
+   "parts": [
+    "call 0٨",
+    "11",
+    [
+     "rep",
+     "١",
+     8
+    ]
+   ],
+   "hit": "run of 10+ digits"
+  },
+  {
+   "parts": [
+    "no digits here ٣٤"
+   ],
+   "hit": null
   }
  ]
 }
