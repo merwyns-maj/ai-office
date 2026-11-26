@@ -2,9 +2,9 @@
 id: T-062
 title: "Budget bars: green, yellow, red as usage nears the budget"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-060]
@@ -113,6 +113,31 @@ Notes (not reasons for the reject)
 - Contrast against the backing over a light part of the scene (worst case, backing over white) is lower: green 4.44, red 3.87. The spec measures against the panel, so this passes the spec; worth a look if Merwyn runs the panel at 0% over the paper-coloured walls.
 - `budgetLevel` accepts any numeric thresholds in the browser (it does not re-check warn < alert); fine because budgets.py validates before build.
 - External skills design:accessibility-review and data:validate-data are not available in this session; checks were done by hand as above.
+
+— Cahyani (reviewer)
+
+### Review 2, 26 Nov 2026, PR #50 head 87c7bb1177846fb9249b48020e24e7689273b5b9: PASS
+
+Fix 1 (collapsed summary line state colour):
+- Rule added in template and office.html: `.usum .lv-ok{color:var(--accent)}.usum .lv-near{color:var(--near)}.usum .lv-alert,.usum .lv-over{color:var(--bad-text)}`. Theme tokens only, no hex.
+- Headless render (playwright, chrome headless, swiftshader, `?t=99999`, panel collapsed). I rebuilt the recorded page with `office_app.py ai-office --ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl` and copied three.min.js into engine/app/. For alert and over I used temporary budgets copies with the provider at 4,500,000 and 4,000,000 tokens (not committed). Runtime tokens: `--accent #53BA7E`, `--near #f0e04a`, `--bad-text #ff6b6b`.
+  - near (real page): `<span class="lv-near">84% of your budget</span>` -> `rgb(240, 224, 74)`; word "near budget" `rgb(240, 224, 74)`
+  - alert: `<span class="lv-alert">93% of your budget</span>` -> `rgb(255, 107, 107)`; word "at limit" `rgb(255, 107, 107)`
+  - over: `<b class="lv-over">▲ over by 198k</b>` -> `rgb(255, 107, 107)`
+  - ok (same page at the start of the timeline): `<span class="lv-ok">3% of your budget</span>` -> `rgb(83, 186, 126)`
+  - Same at 1280x800 and 390x844. Screenshots are in /tmp/rv062b/shots/ ({near,alert,over}-{1280,390}.png). I opened over-1280 and checked it: the red "over by 198k" has its triangle. PASS.
+- The new test bites. I deleted each of the three rules from the template in turn, and `test_collapsed_summary_line_text_takes_the_state_colour` failed each time (`FAILED (failures=1)` x3). The template was restored afterwards. PASS.
+- Build notes are corrected: the View bullet now says the collapsed line's % and "over by X" text take the state colour through `.usum .lv-*`, and that the first version coloured only the trailing word. A Rework 1 note was added. PASS.
+
+Regression:
+- `python -m unittest discover -s tests -t .` -> `Ran 347 tests ... OK`
+- `python scripts/golden.py ai-office` -> `golden: 13 cases, 75 checks, 0 problems`
+- `office_app.py ai-office --check` -> `office.html: up to date (169 KB, 84 events)`
+- ledger -> `53 runs kept (1 not reported), 4,198,359 tokens, 0 errors, 0 warnings`
+- Console and page errors: none across 6 loads (near, alert, over at 1280x800 and 390x844).
+
+Everything else passed in Review 1 and is unchanged by the rework, which touched only one CSS line, one test, office.html and the task file. Verdict: PASS. Status is done and waits for the human merge. Owner: pmo.
+The notes from Review 1 still stand: contrast over a white scene is lower, and the browser does not re-check thresholds. The external skills design:accessibility-review and data:validate-data are not available in this session.
 
 — Cahyani (reviewer)
 
