@@ -2,7 +2,7 @@
 id: T-050
 title: "Partner or vendor document assessment skill"
 phase: 3-skills
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
