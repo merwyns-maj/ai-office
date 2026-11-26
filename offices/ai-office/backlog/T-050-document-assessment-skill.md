@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: []
-pr: null
+pr: 35
 ---
 
 > From T-031 (Nov 2026 chat review), picked by Merwyn on 26 Nov 2026. 3 chats (research/T-031-2026-11.md, topic 4). Generic method only; any real partner document stays where it lives.
