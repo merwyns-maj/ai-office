@@ -4,11 +4,11 @@ title: "Golden examples and evals for the office's own skills (slice of T-016)"
 phase: 3-skills
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: []
-pr: null
+pr: 28
 ---
 
 > T-016 names SLIK, recon and PRD skills; those live in klik-workspace (company repo, behind T-002) and their examples would touch company data. This slice does the same for the skills that live here, so the method is proven before T-016 resumes.
@@ -157,6 +157,39 @@ Links: T-049, T-016, T-048
 Janice (pmo), 26 Nov: Design accepted, moved to build. Answers: the metrics report states what history shows (Sprint 1 window: T-012 only, footnoted); the retro is not rewritten. W6 (overrides) is April's call on the evidence. Agreed: for T-041 and T-031 the Reviewer records PASS and leaves status at review; Janice sets done after Merwyn acts. Findings file now says "company repo, behind T-002" (no forbidden terms).
 
 ## Build notes
+
+**What changed**
+- `scripts/golden.py` (new runner, imports `DATA_PATTERNS`, `PATTERN_KINDS`, `forbidden_terms` from `engine/runtime/events.py`; `main(argv, repo=REPO)` takes an optional repo root so tests can use a temp repo).
+- Cases: `base/skills/partner-writing/golden/` (b1-no-dash, b2-english-terms, b3-no-overpromise, b6-plain-email), `offices/ai-office/skills/spec-writing/golden/` (five-parts-present, done-when-verifiable, open-question-owner), `offices/ai-office/skills/review-checklist/golden/` (pass, reject-lists-fixes, second-reject). 10 cases, 41 checks. The em-dash in B1 bad_output is a JSON escape, so no case file holds a literal dash.
+- `tests/test_golden.py` (24 tests), README "Golden examples" section, note appended to T-016 (Done when unchanged).
+
+**How to verify**
+```
+$ python scripts/golden.py ai-office
+partner-writing: 4 cases OK
+review-checklist: 3 cases OK
+spec-writing: 3 cases OK
+golden: 10 cases, 41 checks, 0 problems
+$ python -m unittest
+Ran 224 tests in 6.742s
+OK
+$ python scripts/build_agents.py ai-office
+ai-office: built 8 agents -> .claude/agents/ (...)
+$ python -m engine.runtime validate ai-office
+ai-office: OK - 8 agents, 5 stages, 49 tasks, 16 skills
+```
+Tests went from 200 to 224 (24 new). board.py ran with no problems; board.md discarded.
+
+**Deviations from the Design**
+- Runner exit 1 also covers a `golden/` folder with the wrong case count, as designed. Two small additions: a case whose only checks are `max_lines` is a problem (Spec: at least one must or must-not check), and a data hit in an unparseable JSON file is still reported.
+- Message format for the count problem: `<folder>: N cases, expected 3 to 5`.
+
+**Known limits**
+- Data scan reuses the T-048 patterns as they stand (T-027 covers key names and numbers); raw-text scan adds coverage of digits and emails anywhere in the file.
+- Checks are regex or literal on recorded text; no LLM is run. B5 and part of B4 are human-note only.
+- Zero discovered cases exits 0 with "0 cases"; not specified in the Design, left as is.
+
+— Sebastian (engineer)
 
 ## Review log
 
