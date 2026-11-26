@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-056]
-pr: null
+pr: 40
 ---
 
 > Merwyn, 26 Nov 2026 11:20 WIB: "Yes please do, evaluate in each session, each agents how much token they used." Today the only real numbers are the harness's per-run reports (total tokens, tool uses, duration) that the main session sees after each agent run; Janice has collected them for Sprints 4–6 of this session (/tmp/t057/session-runs.jsonl, outside the repo until built). The split into input, output and cache, and the main session's own tokens, are not reported to us. When the office runs on the SDK (T-024), each result message carries that split and this ledger fills itself.
