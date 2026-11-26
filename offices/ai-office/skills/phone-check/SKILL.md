@@ -6,6 +6,8 @@ description: 2-minute phone check Merwyn runs on the published AI Office page af
 
 Run on a real phone, on the published "AI Office" page. About 2 minutes. For each step, do it, compare with Expect, answer pass or fail. Janice pastes these steps to Merwyn.
 
+Hold the phone upright (portrait) for the whole check. Landscape is out of scope.
+
 1. **Do:** open the published AI Office page on your phone. **Expect:** office view, top strip with agents, bar at the bottom, no error text, within about 5 s.
 2. **Do:** look at the office. **Expect:** the top strip shows one initial per agent (names are not shown on a phone); agents at their desks in the 3D view with name labels; nothing cut off at the sides.
 3. **Do:** tap the gear (Settings) in the bar, then tap Usage. **Expect:** a usage sheet opens above the bar with session total and agent rows with numbers, a budget word or "budget not set", the main-session row text. Close it with the x. (No Usage button in Settings means the page has no usage data: say so.)
