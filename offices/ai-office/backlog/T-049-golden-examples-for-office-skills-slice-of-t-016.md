@@ -2,7 +2,7 @@
 id: T-049
 title: "Golden examples and evals for the office's own skills (slice of T-016)"
 phase: 3-skills
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
