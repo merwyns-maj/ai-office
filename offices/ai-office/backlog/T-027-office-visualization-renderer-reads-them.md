@@ -28,3 +28,4 @@ pr: null
 ## Decision
 
 ## Open questions
+- 2026-11-26 (Janice, Sprint 4 close): carried from T-048 on Merwyn's decision: the event data rule checks string values only; it must also scan key names and numbers (or the whole rendered data blob before writing) and never echo a hit key. Also: phone numbers with separators, phone layout under 600px. First slice: engine/app/ (T-048).
