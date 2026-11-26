@@ -4,7 +4,8 @@ Usage: python scripts/golden.py <office> [-v]
 
 Discovers base/skills/*/golden/*.json and offices/<office>/skills/*/golden/*.json.
 Exit 0: all cases valid, all checks pass on expected_output, every bad_output fails
-at least one check, data scan clean. Exit 1: any problem. Exit 2: usage error.
+at least one check, data scan clean. Exit 1: any problem, or no cases found for the office.
+Exit 2: usage error or unknown office.
 Problems print one per line as "<repo-relative path>: <problem>"; matched data is never echoed.
 """
 import json
@@ -160,6 +161,10 @@ def main(argv, repo=REPO):
         return 2
     forbidden = forbidden_terms(repo)
     files = discover(repo, office)
+    if not files:
+        print("golden: no cases found under base/skills/*/golden/ or "
+              f"offices/{office}/skills/*/golden/")
+        return 1
     problems, per_skill, n_checks = [], {}, 0
     for f in files:
         rel = _rel(f, repo)

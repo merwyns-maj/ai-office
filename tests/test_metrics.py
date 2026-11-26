@@ -127,10 +127,19 @@ class FixtureHistory(unittest.TestCase):
         self.assertEqual((win[0].hour, win[1].hour), (8, 14))
         self.assertEqual(metrics.window_extras(ml, win, {"T-901", "T-902"}), [("T-903", 3)])
 
+    def test_fmt_partial(self):
+        self.assertEqual(metrics.fmt_partial(2, 0), "2")
+        self.assertEqual(metrics.fmt_partial("0.3", 0), "0.3")
+        self.assertEqual(metrics.fmt_partial(None, 3), "not recorded")
+        self.assertEqual(metrics.fmt_partial(1, 1), "1 (partial, 1 not recorded)")
+        self.assertEqual(metrics.fmt_partial("0.3", 2), "0.3 (partial, 2 not recorded)")
+
     def test_report(self):
         rep = metrics.build_report(self.root, OFFICE, "2026-01-31")
         self.assertIn("History: full (1 PR refs)", rep)
-        self.assertIn("| 1 | 2 [1] | 2026-01-02 08:00 to 2026-01-03 14:00 | 1 | 1 | 1 |", rep)
+        part = "(partial, 1 not recorded)"
+        self.assertIn(f"| 1 | 2 [1] | 2026-01-02 08:00 to 2026-01-03 14:00 | 1 {part} | 1 {part} | 1 {part} "
+                      f"| 1 of 2 (1 not recorded) | 4.0 {part} |", rep)
         self.assertIn("T-903 (#3)", rep)
         self.assertIn("| T-901 | 1 | not recorded | 2.0 | 1.0 | 1.0 | 4.0 | 1 | 1 | 1 | yes |", rep)
         self.assertIn("| T-902 | 1 | not recorded | not recorded | not recorded | not recorded | "
