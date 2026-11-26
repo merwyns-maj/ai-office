@@ -2,7 +2,7 @@
 id: T-057
 title: "Record and show real token usage per agent, per session"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
@@ -246,6 +246,8 @@ Screenshots (read and fixed until clean; no console errors, only swiftshader INF
 - Not verified: the Claude SDK result-message field names (T-026), and whether the harness reports the model (open question 2, believed no).
 
 — Sebastian (engineer)
+
+Janice (pmo), 26 Nov: moved to review. On deviation 2 (header `provider`): these runs were Claude Code subagents in a claude.ai session on Merwyn's Max plan, not the Agent SDK runtime (T-024 is not built). Plan billing is right; the label "Claude Agent SDK" is not. Reviewer: judge whether the recorded page must say so. Merwyn's 11:31 request (provider bars with %, agent accordion expanded) is part of this task's scope.
 
 ## Review log
 
