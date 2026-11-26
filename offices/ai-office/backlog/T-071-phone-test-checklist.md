@@ -4,7 +4,7 @@ title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
 status: review
 priority: P2
-owner: reviewer
+owner: pmo
 where: repo
 project: ai-office
 depends_on: []
@@ -140,6 +140,30 @@ Review 1 fixes:
 - This is the second REJECT, so per reviewer-playbook it goes through Janice. The fix is one line, so Janice may decide whether Merwyn needs to see it.
 - T-024 ride-along (commit 4f342d6, PMO, planning only): fine. Frontmatter `status: parked` (a terminal status in workflow.yaml line 7), `owner: pmo`. The order note now matches Design line 70: the no-spend checks and the FakeProvider build need no gate, then Merwyn picks A/B/C, then gates 2-6 before any real run. Open questions gain the gate-4 item (push `t-xxx` branches to merwyns-maj/ai-office). That covers my Review 1 notes (a), (b) and (c).
 - External skills design:accessibility-review and data:validate-data: not available in this session; not used.
+
+**Review 3: PASS** (26 Nov 2026). — Cahyani (reviewer)
+Merwyn decided after Review 2: "Fix and re-review". Checked `git diff HEAD~3 -- skills/phone-check/SKILL.md`, `git diff a243296..HEAD` (Review 2 commit to now), and `engine/app/office.template.html`.
+
+F3 fix:
+- `skills/phone-check/SKILL.md` line 9 now reads "Hold the phone upright (portrait) for the whole check. Landscape is out of scope." It sits in the intro, before step 1, so it covers every step.
+- In portrait, a 390x844 phone is in the `@media (max-width:599px)` block (lines 286-311). Every step still matches: step 2 initials (`.seg .nm` hidden, `.seg .ini` shown, lines 297-298); step 3 and 10 gear and Usage (`#gear` shown line 304, `#bar .opt` hidden line 302, `#usheet` with x `#usx` lines 1374-1375); step 4 icon-only chat button (line 409); step 5 handle `#chgrip` at the chat top (lines 322-326); step 6 `#tone` at `bottom:var(--bb)` above bar and chat (lines 274, 310), `#usage`/`#ticker` hidden (lines 272-273); steps 7-8 keyboard via `visualViewport` (line 2778). The 600-899 px band from F3 (`#ubtn` in the bar, "Chat" label, names, no gear) is now excluded.
+- The template is unchanged since Review 2: `git diff a243296 -- engine/` is empty, and main has no `engine/app/` changes since the merge base.
+
+Nothing else changed since Review 2: `git diff a243296 --stat` shows only the SKILL.md line (+2) and this task file (frontmatter `build` to `review`, and the "Rework 2" Build notes). The pmo-playbook and the T-024 ride-along are untouched.
+
+| Done when | Result | Evidence |
+|---|---|---|
+| 1. Under 12 steps, each with Expect, every area named | pass | 10 **Do/Expect** steps, unchanged from Review 2. No-overlap is left to T-067 on purpose |
+| 2. About 2 minutes | not possible | no real phone here. One extra intro line, about 2 min is still plausible |
+| 3. Playbook: when, who, where | pass | pmo-playbook "Phone check (T-071)" unchanged |
+| 4. Matches T-066; no step relies on a missing feature | pass | F3 fixed (portrait only); every step matches the under-600 px layout, see above |
+| 5. Tests, validate, no other file changes | pass | `python -m unittest discover -s tests`: "Ran 411 tests in 22.079s / OK", exit 0. `python -m engine.runtime validate ai-office`: "ai-office: OK — 8 agents, 5 stages, 71 tasks, 19 skills", exit 0. Branch files: the T-071 skill, pmo-playbook, this task, and the T-024 ride-along (planning only) |
+
+**Notes (not reasons for rejection)**
+- A phone held sideways, or a phone 600 px wide or more in portrait (a small tablet), is not covered. That is on purpose now. If Merwyn's phone ever reports the 600-899 layout, a follow-up task can add the variant.
+- External skills design:accessibility-review and data:validate-data: not available in this session; not used.
+
+Verdict: PASS. Status stays `review`, owner `pmo` for merge after Merwyn's approval.
 
 ## Decision
 
