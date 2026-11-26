@@ -19,6 +19,12 @@ The office exists to finish the backlog's most valuable work, not to produce pro
 5. Move chosen tasks to `spec`, owner `pm`; give the PM exact backlog paths for each task and its parents (pm-playbook §0).
 6. Commit the regenerated board.md and the sprint file in a board-refresh PR (pr-workflow, "board.md (generated)").
 
+## 2a. Lean path (T-068)
+- When: all four hold, judged from the task file: one surface (one page or one module plus its tests), no new data or storage, no compliance flag, no `human_gates` item. Only for `where: code` or `repo` in this office's project.
+- Who decides: the PMO, at plan. Append `> Lean (<name>, pmo, <date>): <one surface>; no new data; no compliance flag; no human gate. Reason: <why>`, then move the task to `design`, owner `architect`. The PM run is skipped; the Architect writes a short Spec (problem, in/out, Done when) and the Design in one run.
+- Escape: the Architect, Reviewer or PMO appends `> Full path (<name>, <agent>, <date>): <condition that failed>`; the PMO sets status `spec`, owner `pm`. The last Lean/Full note wins. `python -m engine.runtime validate` checks the Lean note against the task text.
+- Still true: the PMO approves the Spec, Reviewer PASS is required, the PMO merges. Example: T-066 took 7 runs and about 520k tokens on the full path. At sprint close, compare the first lean task's ledger runs and tokens with T-066 and write it in the sprint file.
+
 ## 3. Flow, not busyness
 - **WIP limits:** at most 2 tasks in `build`, 1 in `design` per Architect. Finish before starting.
 - Watch three numbers from the board: **WIP** (items started, not done), **cycle time** (days from `spec` to `done`), **item age** (days an open item has sat in its current stage). They are linked: more WIP means longer cycle time.

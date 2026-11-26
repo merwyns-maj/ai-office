@@ -12,6 +12,48 @@ TASK_KEYS = ("id", "title", "status", "priority", "owner")
 _EXTERNAL = re.compile(r"^[\w.-]+:[\w.-]+$")
 
 
+LEAN_ENTRY = ("one_surface", "no_new_data", "no_compliance_flag", "no_human_gate")
+_PATH_NOTE = re.compile(r"^> (Lean|Full path) \(([^)]*)\):\s*(.*)$", re.M)
+_COMPLIANCE_LINE = re.compile(r"^(- )?\**Compliance:\**:? (flagged|PASS|BLOCK)", re.M)
+
+
+def _task_body(task):
+    try:
+        return split_frontmatter(task.path.read_text(encoding="utf-8"), str(task.path))[1]
+    except (OSError, UnicodeDecodeError, YamlError):
+        return ""
+
+
+def lean_problems(office, task):
+    """Reasons a task cannot use the lean path (empty list = qualifies, or the last note is not Lean).
+
+    Text checks are a floor, not proof: the Architect, Reviewer and PMO still escape with a Full path note.
+    """
+    body = _task_body(task)
+    notes = _PATH_NOTE.findall(body)
+    if not notes or notes[-1][0] != "Lean":
+        return []
+    text = notes[-1][2]
+    out = []
+    for phrase in ("no new data", "no compliance flag", "no human gate"):
+        if phrase not in text:
+            out.append(f"lean note is missing '{phrase}'")
+    surface = text.split(";")[0]
+    if re.search(r",| and |\+|/", surface):
+        out.append("more than one surface: full path")
+    projects = _as_list(office.office.get("projects"))
+    if task.meta.get("project") not in projects or task.meta.get("where") not in ("code", "repo"):
+        out.append("company/chat/office work: full path")
+    if _COMPLIANCE_LINE.search(body):
+        out.append("compliance flagged: full path")
+    oq = re.split(r"(?m)^## Open questions\s*$", body, maxsplit=1)
+    if len(oq) == 2 and re.search(r"human gate", oq[1], re.I):
+        out.append("human gate: full path")
+    if task.status == "spec":
+        out.append("lean task is at 'spec': a lean task skips the PM spec run (write a Full path note to use it)")
+    return out
+
+
 @dataclass(frozen=True)
 class Problem:
     file: str
@@ -286,6 +328,41 @@ def validate(office):
             if c["output_section"] in stage_sections:
                 add(wf, f"consult output_section '{c['output_section']}' is already a stage's output_section")
 
+    # 5c. paths (optional, T-068): the lean path skips only the PM spec run; review stays required
+    paths = office.workflow.get("paths")
+    if paths is not None:
+        if not isinstance(paths, dict) or set(paths) != {"lean"} or not isinstance(paths.get("lean"), dict):
+            add(wf, "'paths' must be a map with only the key 'lean'")
+        else:
+            lean = paths["lean"]
+            skips, never = list(_as_list(lean.get("skips"))), list(_as_list(lean.get("never_skips")))
+            for sk in skips:
+                if sk not in office.stage_ids:
+                    add(wf, f"paths.lean skips '{sk}' is not a workflow stage")
+                if sk in never:
+                    add(wf, f"paths.lean skips '{sk}' which is in never_skips")
+                if sk in ("review", "build"):
+                    add(wf, f"paths.lean must not skip '{sk}' (hard rule: build and Reviewer PASS stay required)")
+            for req in ("build", "review"):
+                if req not in never:
+                    add(wf, f"paths.lean never_skips must contain '{req}'")
+            if office.stage("review") is None:
+                add(wf, "paths needs a 'review' stage")
+            if not any(isinstance(g, dict) and g.get("stage") == "done" and g.get("approver") == "reviewer"
+                       for g in _as_list(office.workflow.get("gates"))):
+                add(wf, "paths needs a gate {stage: done, approver: reviewer} (Reviewer PASS before merge)")
+            if sorted(_as_list(lean.get("entry"))) != sorted(LEAN_ENTRY):
+                add(wf, f"paths.lean entry must be exactly {', '.join(LEAN_ENTRY)}")
+            first = next((s for s in _as_list(stages) if isinstance(s, dict) and s.get("id") not in skips
+                          and s.get("id") != "todo"), None)
+            if first is None or lean.get("spec_by") != first.get("owner"):
+                add(wf, f"paths.lean spec_by '{lean.get('spec_by')}' must own the first stage not skipped"
+                        f" ('{first.get('owner') if first else None}')")
+            spec_gate = next((g for g in _as_list(office.workflow.get("gates"))
+                              if isinstance(g, dict) and g.get("stage") == "spec"), None)
+            if spec_gate is None or lean.get("spec_approver") != spec_gate.get("approver"):
+                add(wf, "paths.lean spec_approver must equal the spec gate approver")
+
     # 6. agents/*.md
     for sk in office.default_base_skills:
         if sk not in office.base_skills:
@@ -330,4 +407,6 @@ def validate(office):
                 continue  # cross-office reference: not checked offline
             if d not in office.tasks:
                 add(t.path, f"depends_on '{d}' does not exist in this backlog")
+        for why in lean_problems(office, t):  # 7b
+            add(t.path, why)
     return P
