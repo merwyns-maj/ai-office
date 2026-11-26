@@ -154,6 +154,10 @@ Janice (pmo), 26 Nov: Design accepted, moved to build. Answers: the metrics repo
 — Sebastian (engineer)
 
 ## Review log
+PASS, PR #29 (head fc333c9), 26 Nov 2026. build_agents exit 0 (8 agents); skill listed only in pmo and curator; 200 tests OK; data scan 0 hits; no en/em dashes in SKILL.md. Every pointer opens to its heading. Separate events: W1 3, W3 3, W4 2, W6 3, terse rows 2 and 2. Watching list in Decision; approval pending.
+Notes: (1) table quoted "accepted" but his recorded word is "accept" (T-012 D1); (2) status line read as approved; (3) "b" seen once, rightly in watching; (4) W1: consider T-012 D1. Notes 1, 2 and 4 applied by Janice before asking Merwyn (wording only).
+Status stays review until Merwyn's approval is recorded.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
