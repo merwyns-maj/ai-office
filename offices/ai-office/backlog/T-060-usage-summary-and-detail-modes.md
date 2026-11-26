@@ -2,9 +2,9 @@
 id: T-060
 title: "Usage panel: summary mode (provider vs budget) and detail mode (agent vs budget)"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-059]
@@ -151,6 +151,21 @@ Notes (not reasons to reject):
 7. External skills design:accessibility-review and data:validate-data are not available in this session; checks above done by hand.
 
 Build notes were on screen when I opened the task file (one read of the whole file); every figure above comes from my own runs, not from them.
+
+— Cahyani (reviewer)
+
+**PASS** (second review), 26 Nov 2026, head 82faa40. The REJECT fix works and every Done when check still passes.
+
+Checks (run by me, outputs real):
+- Rebuilt the recorded page: `office_app --ledger ...session_01MDGJq3GfaeozLojJo8W5Td.jsonl`: written, 168 KB, 8 agents, 48 events. `--check`: up to date (168 KB, 84 events). `python -m unittest`: Ran 339 tests ... OK. `golden.py ai-office`: 13 cases, 75 checks, 0 problems.
+- Keyboard on the switch, recorded page paused at 400 (`/tmp/cy60/step.py`): 1280x800 panel `scrub before 400 after ArrowRight 400 after ArrowLeft 400 after Home 400`, play state Play after Space; 390x844 phone sheet identical. In Review 1 the same script gave 404 and 383.
+- Synthetic page playing (`/tmp/cy60/play.py`, `/tmp/cy60/r2.py`): the play button still says Pause (still playing) after ArrowRight, ArrowLeft, End, Home, ArrowDown, ArrowUp and Space. Scrub moves +1 per key, the same as the normal play rate (baseline +2 in 500ms); in Review 1 it jumped 8 to 11 and paused. aria-checked moves with each key (detail=true / summary=true in turn).
+- Cross-fade on keyboard: a MutationObserver on `#ubody` logs one re-render after ArrowRight, class `umode ufade` (synthetic `45:umode ufade`, recorded `366:umode ufade`), and no later re-render without `ufade`. Computed animationName `ufade` for both keyboard and click.
+- `fmtTok`, cut from office.html and run in node: 999499 999k, 999500 1.0M, 999600 1.0M, 1000000 1.0M, 1049999 1.0M, 1050000 1.1M, 2150000 2.2M. No "1000k".
+- Shown used/budget against the %, recorded Detail: 203/250 = 81.2 (81%), 514/650 = 79.1 (79%), 1.65/2.15 = 76.7 (77%), 1.13/1.5 = 75.3 (75%), 223/300 = 74.3 (74%), 69/100 = 69 (69%), 31/50 = 62 (62%); Summary 3.8/5 = 76 (76%). Synthetic Detail: 198/240 = 82.5 (83%), 398/500 = 79.6 (80%), 237/300 = 79 (79%), 421/600 = 70.2 (70%), 70/50 over by 20k. All consistent; order unchanged (Emmy, Fang, Sebastian, Cahyani, Dinda, April, Wulan, Janice "Main session: not reported").
+- Headless Chrome (`/tmp/cy60/shot.py`): both pages, both modes, 1280x800 and 390x844 (phone sheet), scrollWidth 1280 / 390, mode survives reload, 0 console errors on every page. Screenshots `/tmp/cy60/{rec,syn}-{1280,390}-{summary,detail}.png` (rec-390-detail read: no overflow, figures fit).
+
+Notes (not reasons to reject): Review 1 notes 3 to 6 stay open for Dinda/Merwyn as Sebastian says. External skills design:accessibility-review and data:validate-data were not available; checks done by hand.
 
 — Cahyani (reviewer)
 
