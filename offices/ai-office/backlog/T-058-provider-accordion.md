@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-057]
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/43
 ---
 
 > Merwyn, artifact comment on the 3D office, 26 Nov 2026 13:09 WIB, anchored on "By provider": "accordion here". Same pattern as the T-057 By agent accordion (Dinda's UX, accepted by Fang), so no new UX consult.
