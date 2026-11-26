@@ -2,13 +2,13 @@
 
 _Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**54 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 21 · parked: 0
+**56 tasks** — todo: 34 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 22 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (33)
+## todo (34)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-050](backlog/T-050-document-assessment-skill.md) | P1 | Partner or vendor document assessment skill | pmo | — |
 | [T-051](backlog/T-051-patch-hand-off-skill.md) | P1 | Data patch hand-off skill (Bytebase-ready scripts + ITH ticket) | pmo | T-002 |
 | [T-052](backlog/T-052-prod-investigation-skill.md) | P1 | Read-only prod investigation skill (new and legacy platforms) | pmo | T-002 |
+| [T-056](backlog/T-056-model-and-usage-in-the-3d-office.md) | P1 | Show which model each agent uses, and usage, in the 3D office (multi-provider) | pmo | — |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
@@ -62,7 +63,7 @@ _empty_
 
 _empty_
 
-## done (21)
+## done (22)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -73,6 +74,7 @@ _empty_
 | [T-040](backlog/T-040-prod-guard-hook-script-and-tests-slice-of.md) | P0 | Prod-guard hook script and tests (repo-only slice of T-019) | curator | — |
 | [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | curator | — |
 | [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
+| [T-055](backlog/T-055-metrics-test-breaks-on-sprint-close.md) | P0 | Hotfix: metrics test breaks when a new sprint closes | pmo | — |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
 | [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
