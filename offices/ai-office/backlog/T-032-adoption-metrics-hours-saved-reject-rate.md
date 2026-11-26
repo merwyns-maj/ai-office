@@ -4,7 +4,7 @@ title: "Adoption metrics (hours saved, reject rate, turnaround)"
 phase: 7-ways-of-working
 status: build
 priority: P2
-owner: engineer
+owner: reviewer
 where: chat
 project: ai-office
 depends_on: []
@@ -150,7 +150,7 @@ Janice (pmo), 26 Nov: Design accepted, moved to build. Answers: the metrics repo
 
 **Headline numbers (Sprints 1 to 4)**
 - Tasks per sprint: 2, 3, 3, 3. Footnote on Sprint 1: T-012 (#10).
-- Reviewer REJECTs: S1 0, S2 not recorded (no Review log in T-042, T-014, T-015), S3 0, S4 2 (both T-048). Compliance BLOCKs: S1 1 (T-040), others 0 or not recorded. Escalations: S1 1, S3 0, S4 1.
+- Reviewer REJECTs: S1 0, S2 0, S3 0, S4 2 (both T-048). Compliance BLOCKs: S1 1 (T-040), S2 to S4 0. Escalations: S1 1, S2 0, S3 0, S4 1. (Corrected in Rework 1: S2 was wrongly "not recorded".)
 - Specs approved first time: 2/2, 3/3, 3/3, 3/3. Median turnaround (h): 0.3, 0.2, 0.3, 0.1. T-048 turnaround 9.4 h (build 9.1 h across the overnight gap: commit times, not work time).
 - Hours saved: "not set", Merwyn supplies.
 
@@ -168,6 +168,16 @@ Janice (pmo), 26 Nov: Design accepted, moved to build. Answers: the metrics repo
 - Review log wording is read from task files at HEAD; T-042, T-014, T-015 have no Review log section, so their verdict cells read "not recorded".
 - On a shallow clone with no PR refs, sprints whose plan commit is in the 11 visible commits still show derived values from main commits alone (e.g. Sprint 3 median 0.2 h); the PARTIAL HISTORY notice covers this.
 - Design's Janice question (Sprint 1 retro vs T-037/T-038): followed merge times, footnote lists T-012 only.
+
+— Sebastian (engineer)
+
+**Rework 1** (Review 1 REJECT, 26 Nov)
+- `scripts/metrics.py`: new `derive_without_review()` for tasks with no Review log or Compliance section (T-042, T-014, T-015). REJECTs = review -> build transitions in the PR-ref status history (fallback if no history: 0 when the sprint Close lists the task under "all with Reviewer PASS"); BLOCKs = 0 when the task says "Compliance: not flagged" (the T-042/T-014/T-015 wording is `**Compliance:** not flagged`, in the Design); escalations = "escalated to Merwyn" lines, else 0 when the sprint Close says "without escalating". New `sprint_close_text()`; "How these are measured" updated.
+- `tests/test_metrics.py`: real-file test that Sprint 2 sums to 0 | 0 | 0 with no value None (no git needed, so it runs in the shallow worktree), plus a review -> build transition test. 216 tests.
+- `metrics/2026-11.md` regenerated from /tmp/cmx (fresh fetch, detached at origin/main `eeafa84`, 31 PR refs): history "full (31 PR refs)".
+- Output: `python -m unittest` -> `Ran 216 tests ... OK`; validate -> `OK - 8 agents, 5 stages, 49 tasks, 16 skills`; build_agents clean; board.py no problems, board.md discarded; shallow run exits 0 with PARTIAL HISTORY notice (Sprint 2 row still 0 | 0 | 0 from files alone); data grep prints nothing.
+- New rows (Sprint | Tasks | REJECTs | BLOCKs | Escalations): 1 | 2 | 0 | 1 | 1; 2 | 3 | 0 | 0 | 0; 3 | 3 | 0 | 0 | 0; 4 | 3 | 2 | 0 | 1. T-048 still 2 REJECTs, 1 escalation.
+- Status left at `build`; owner set to reviewer (status is the PMO's/Reviewer's to write).
 
 — Sebastian (engineer)
 

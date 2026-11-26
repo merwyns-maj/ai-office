@@ -184,6 +184,27 @@ class RealFiles(unittest.TestCase):
         v = self._v("T-048")
         self.assertEqual((v["reject"], v["escalations"]), (2, 1))
 
+    def test_sprint2_row_is_zero_not_unrecorded(self):
+        """T-042/T-014/T-015 have no Review log; their counts derive from Design and sprint Close."""
+        od = REPO / "offices" / OFFICE
+        sp = next(s for s in metrics.sprints(od) if s["n"] == 2)
+        close = metrics.sprint_close_text(od, 2)
+        tot = {"reject": 0, "block": 0, "escalations": 0}
+        for t in sp["tasks"]:
+            f = next((od / "backlog").glob(f"{t}-*.md"))
+            v = metrics.derive_without_review(f.read_text(encoding="utf-8"), t, [], close)
+            for k in tot:
+                self.assertIsNotNone(v[k], (t, k))
+                tot[k] += v[k]
+        self.assertEqual((tot["reject"], tot["block"], tot["escalations"]), (0, 0, 0))
+
+    def test_review_to_build_transitions(self):
+        t = datetime.fromisoformat
+        evs = [(t(f"2026-01-01T0{i}:00:00+00:00"), s) for i, s in
+               enumerate(["design", "build", "review", "build", "review", "build", "review", "done"])]
+        v = metrics.derive_without_review("## Design\n**Compliance:** not flagged\n", "T-1", evs, "")
+        self.assertEqual((v["reject"], v["block"]), (2, 0))
+
     def test_sprint_task_counts(self):
         counts = {s["n"]: len(s["tasks"]) for s in metrics.sprints(REPO / "offices" / OFFICE) if s["closed"]}
         self.assertEqual(counts, {1: 2, 2: 3, 3: 3, 4: 3})

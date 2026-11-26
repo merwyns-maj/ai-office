@@ -163,6 +163,39 @@ def verdicts(task_text, task_id=None):
     return {"reject": reject, "block": block, "escalations": esc}
 
 
+def derive_without_review(task_text, tid, evs, close_text):
+    """Fallback for a task with no Review log or Compliance section (T-042, T-014, T-015).
+
+    reject: count of review -> build transitions in the status history; if no history is available,
+    0 only when the sprint Close says the task finished with Reviewer PASS and it is listed there.
+    block: 0 when the Design says 'Compliance: not flagged'.
+    escalations: 'escalated to Merwyn' lines in the task, else 0 when the sprint Close says
+    'without escalating', else not recorded.
+    """
+    seq = [st for _, st in evs]
+    close = close_text or ""
+    if "review" in seq:
+        reject = sum(1 for a, b in zip(seq, seq[1:]) if a == "review" and b == "build")
+    elif tid in close and re.search(r"(?i)all with Reviewer PASS", close):
+        reject = 0
+    else:
+        reject = None
+    block = 0 if re.search(r"(?i)\bCompliance:?\*{0,2}:?\s*not flagged", task_text) else None
+    esc = sum(1 for ln in task_text.splitlines() if _ESCALATED.search(ln))
+    if not esc:
+        esc = 0 if re.search(r"(?i)without escalating", close) else None
+    return {"reject": reject, "block": block, "escalations": esc}
+
+
+def sprint_close_text(office_dir, n):
+    f = office_dir / "sprints" / f"sprint-{n:02d}.md"
+    if not f.is_file():
+        return ""
+    text = f.read_text(encoding="utf-8")
+    m = re.search(r"(?ms)^## (?:Retro|Close)\b.*", text)
+    return m.group(0) if m else ""
+
+
 def spec_first_time(task_text, evs):
     sec = section(task_text, "Approvals (PMO)")
     if sec is None:
@@ -255,6 +288,8 @@ def build_report(repo, office, run_date):
             text = files[0].read_text(encoding="utf-8") if files else ""
             evs = events.get(t, [])
             v = verdicts(text, t)
+            if text and section(text, "Review log") is None and section(text, "Compliance") is None:
+                v = derive_without_review(text, t, evs, sprint_close_text(office_dir, sp["n"]))
             sh = stage_hours(evs, STAGE_COLS)
             rows[t] = {"sprint": sp["n"], "stages": sh, "turn": turnaround_hours(evs), **v,
                        "first": spec_first_time(text, evs) if text else NR}
@@ -307,6 +342,9 @@ def build_report(repo, office, run_date):
             "- Turnaround: first non-todo status to first done; not recorded when no stage before done was seen.",
             "- Reviewer REJECTs and Compliance BLOCKs: verdict lines in each task's Review log and Compliance "
             "sections, counted separately.",
+            "- Tasks with no Review log: REJECTs are review-to-build transitions in the status history (else "
+            "from the sprint Close 'all with Reviewer PASS'); BLOCKs are 0 when the Design says 'Compliance: "
+            "not flagged'; escalations come from the sprint Close ('without escalating').",
             "- Escalations to Merwyn: lines saying 'escalated to Merwyn' in those sections.",
             "- Specs approved first time: from the PMO approval heading (from Sprint 2 on); earlier tasks are "
             f"{NR}.",
