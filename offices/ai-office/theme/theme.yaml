@@ -5,21 +5,34 @@ palette:
   accent: "#53BA7E"
   warn: "#f4a261"
   bad: "#e63946"
+  bad_text: "#ff6b6b"
+  bad_tag: "#c1121f"
+  panel: "#1d1e2c"
+  text: "#f2ede4"
+  text_dim: "#9aa0b4"
+  rug: "#353850"
+  wood: "#7d6650"
+  paper: "#efe6d2"
+  skin_light: "#e0b48f"
+  skin_mid: "#c68e65"
+  skin_dark: "#8d5a3c"
 rooms:
-  - { id: lobby,     label: Backlog,       stage: todo }
-  - { id: product,   label: Product room,  stage: spec }
-  - { id: whiteboard,label: Design wall,   stage: design }
-  - { id: workshop,  label: Workshop,      stage: build }
-  - { id: lab,       label: QA lab,        stage: review }
-  - { id: archive,   label: Archive,       stage: done }
-  - { id: corner,    label: Merwyn's door, stage: null }   # where agents wait for approval
+  - { id: lobby,     label: Backlog,       stage: todo, rect: [0, 9, 9, 16] }
+  - { id: product,   label: Product room,  stage: spec, rect: [0, 0, 5, 7] }
+  - { id: whiteboard,label: Design wall,   stage: design, rect: [5, 0, 10, 7] }
+  - { id: workshop,  label: Workshop,      stage: build, rect: [14, 0, 19, 7] }
+  - { id: lab,       label: QA lab,        stage: review, rect: [19, 0, 24, 7] }
+  - { id: archive,   label: Archive,       stage: done, rect: [15, 9, 24, 16] }
+  - { id: corner,    label: Merwyn's door, stage: null, rect: [10, 0, 14, 7] }   # where agents wait for approval
+  - { id: meeting,   label: Meeting table, stage: null, rect: [9, 9, 15, 16] }
 desks:
-  - { agent: pmo, label: Janice,        room: lobby,      sprite: chief }
-  - { agent: pm, label: Emmy,         room: product,    sprite: pm }
-  - { agent: architect, label: Fang,  room: whiteboard, sprite: architect }
-  - { agent: engineer, label: Sebastian,   room: workshop,   sprite: engineer }
-  - { agent: reviewer, label: Cahyani,   room: lab,        sprite: qa }
-  - { agent: compliance, label: Wulan, room: corner,     sprite: officer }
-  - { agent: curator, label: April,    room: archive,    sprite: librarian }
-  - { agent: designer, label: Dinda,     room: whiteboard, sprite: designer }
+  - { agent: pmo, label: Janice,        room: lobby,      sprite: chief, at: [3, 12] }
+  - { agent: pm, label: Emmy,         room: product,    sprite: pm, at: [2.5, 3.5] }
+  - { agent: architect, label: Fang,  room: whiteboard, sprite: architect, at: [6.5, 3.5] }
+  - { agent: engineer, label: Sebastian,   room: workshop,   sprite: engineer, at: [16.5, 3.5] }
+  - { agent: reviewer, label: Cahyani,   room: lab,        sprite: qa, at: [21.5, 3.5] }
+  - { agent: compliance, label: Wulan, room: corner,     sprite: officer, at: [13.2, 4.8] }
+  - { agent: curator, label: April,    room: archive,    sprite: librarian, at: [20, 12.5] }
+  - { agent: designer, label: Dinda,     room: whiteboard, sprite: designer, at: [8.8, 3.5] }
 hub: lobby
+door: [12, 0]            # Merwyn's door, on the back wall
