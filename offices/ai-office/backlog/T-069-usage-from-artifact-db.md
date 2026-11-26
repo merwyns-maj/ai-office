@@ -4,11 +4,11 @@ title: "Usage numbers from the artifact db, so the page needs no republish per l
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-067, T-070]
-pr: null
+pr: 73
 ---
 
 > Merwyn, 26 Nov 2026 19:54 WIB, on Janice's improvement list: "Just start these all no worries except 6" (6 = the items waiting on him).
