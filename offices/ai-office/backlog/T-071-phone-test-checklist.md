@@ -4,7 +4,7 @@ title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
 status: build
 priority: P2
-owner: engineer
+owner: reviewer
 where: repo
 project: ai-office
 depends_on: []
@@ -80,6 +80,15 @@ Reply: "phone check pass", or "fail step N: what you saw", plus phone and browse
 - `python scripts/board.py ai-office`: no Problems; board.md discarded.
 - Read the skill: 10 numbered steps (< 12), each with Expect; steps 5 to 8 are behaviour-level (handle at chat top, panels inside the office area, keyboard returns the office strip).
 - Not done: timing the run on a real phone (Reviewer may note not possible).
+— Sebastian (engineer)
+
+### Rework 1
+Fixes for Review 1 (F1, F2 and notes).
+- **F1.** Steps 3, 6, 10 rewritten for the phone as the template behaves: below 900px `#usage` and `#ticker` are hidden and latest events is the one-line `#tone` strip above the bar; below 600px usage opens from the gear (Settings), then Usage (`#msheet` to `#usheet`). Step 6 now checks the tone strip is readable and not under chat or bar. Step 9 mentions the strip, not panels.
+- **F2.** "Not on top of each other" dropped. Step 6 and the pmo-playbook Phone check paragraph say T-067 adds a no-overlap step when it merges (follow-up for T-067's Design).
+- **Notes.** Step 4 says chat (speech-bubble) button, no label on a phone. Step 2 says top strip shows initials; names are the 3D labels. Step 10 still equals step 3 until T-069 changes the usage source; T-069's Design should name this step. Still 10 steps, about 2 minutes (not timed on a real phone).
+- **Verified.** Headless Chrome 390x844 screenshot of `office.html` (three.min.js copied under /tmp, not committed): initials strip, no usage or ticker panel, tone strip "Janice starts T-901" above the bar, chat icon with no label, gear. WebGL is unavailable headless, so the 3D labels were not seen; the screenshot says "3D view could not load".
+- `python -m unittest discover -s tests`: Ran 411 tests, OK, exit 0. `python -m engine.runtime validate ai-office`: OK (8 agents, 5 stages, 71 tasks, 19 skills), exit 0.
 — Sebastian (engineer)
 
 ## Review log
