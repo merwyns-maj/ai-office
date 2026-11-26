@@ -3,7 +3,7 @@
 
 Usage: python scripts/office_app.py <office> [--fixture PATH | --ledger PATH] [--chat] [--out PATH] [--check] [--allow-errors]
 --ledger replays a recorded agent-run ledger (offices/<office>/usage/<session>.jsonl, T-057); default out engine/app/usage-<session>.html (not committed).
---chat (T-063) adds the office chat (data.chat): the committed AI Office page is built with it; it cannot be combined with --ledger (the recorded usage page never has chat).
+--chat (T-063) adds the office chat (data.chat): the committed synthetic page is built with it. With --ledger it gives the one published AI Office page (T-065): the real ledger and the chat.
 Exit 0 written or up to date; 1 data-rule problems (always), other log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
 """
 import argparse
@@ -111,8 +111,6 @@ def build_data(office_root, fixture, ledger=None, chat=False):
     if totals is not None:
         data["ledger"] = totals
     if chat:
-        if ledger is not None:
-            raise BuildError("--chat cannot be used with --ledger")
         data["chat"] = {"v": 1, "agents": [{k: a.get(k) for k in ("id", "name", "role")} for a in org_agents], "default": "pmo",
                         "all": "all", "max_len": CHAT_MAX_LEN, "lease_s": CHAT_LEASE_S}
     return data, probs
@@ -131,7 +129,7 @@ def main(argv=None):
     ap.add_argument("office", help="office id (offices/<id>) or a path to an office folder")
     ap.add_argument("--fixture")
     ap.add_argument("--ledger", help="replay an agent-run ledger instead of an event log")
-    ap.add_argument("--chat", action="store_true", help="add the office chat (T-063); not with --ledger")
+    ap.add_argument("--chat", action="store_true", help="add the office chat (T-063); may be combined with --ledger (T-065)")
     ap.add_argument("--out")
     ap.add_argument("--check", action="store_true", help="fail if --out is not what would be generated")
     ap.add_argument("--allow-errors", action="store_true", help="drop bad log lines instead of failing")
@@ -141,9 +139,6 @@ def main(argv=None):
         return int(e.code or 0)
     if args.fixture and args.ledger:
         print("office_app: --fixture and --ledger cannot be used together", file=sys.stderr)
-        return 2
-    if args.chat and args.ledger:
-        print("office_app: --chat and --ledger cannot be used together (the recorded usage page has no chat)", file=sys.stderr)
         return 2
     try:
         root = loader.resolve_office(args.office, Path.cwd())

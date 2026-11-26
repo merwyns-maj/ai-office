@@ -16,10 +16,10 @@ thresholds:
   set_on: "2026-11-26"
 providers:
   claude-code:
-    tokens: 5000000
-    set_by: Janice (pmo)
+    tokens: 8000000
+    set_by: Merwyn
     set_on: "2026-11-26"
-    note: Starting values, Merwyn to adjust
+    note: Raised from 5,000,000 at 5,201,744 used (17:20 WIB), before T-065
     agents:
       engineer:   { share: 43, set_by: Janice (pmo), set_on: "2026-11-26" }
       reviewer:   { share: 30, set_by: Janice (pmo), set_on: "2026-11-26" }

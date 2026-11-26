@@ -74,6 +74,8 @@ Merwyn messages the office from the 3D office page (the AI Office artifact). The
 10. Retention (C6): each inbox run pipes the docs into `chat purge ai-office` and deletes what it lists with `db_write` op `delete` (answered asks and their replies older than 30 days). The page has "Clear chat". Deleting from the database does not delete session transcripts: say so if Merwyn asks.
 11. Crash and one session: the claim is the lock; a recipient stuck at `picked` or `replying` for over 30 minutes with no reply doc is reset to `new` by the next `chat plan`, and a reply doc without a status is repaired from it. One office session processes the inbox at a time; T-024 must keep that.
 
+**Publish (T-065).** There is one published page and one artifact: "AI Office" (5f1bb811-1633-4bfb-8285-9bcb2408dec2). It shows the real usage ledger and the chat. The single build command is `python scripts/office_app.py ai-office --ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`, which writes `engine/app/usage-session_01MDGJq3GfaeozLojJo8W5Td.html` (gitignored, never committed). Call `declare_capabilities` (`db`, `user`) first, then publish that file to "AI Office" (with `three.min.js` as a sibling, or rely on the CDN fallbacks). Republish after a ledger append you want shown: the page is the ledger as of its build. Record the build's printed size in KB. The committed `engine/app/office.html` is the synthetic dev build for tests and is never published. The "AI Office token usage" artifact is retired: delete it only when Merwyn confirms.
+
 ## Anti-patterns
 - Reporting only Green. Treating RAG as a weapon instead of a signal.
 - Starting new tasks to look busy while others sit in review.

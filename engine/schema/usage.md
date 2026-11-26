@@ -30,7 +30,7 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 `ledger.totals(runs)`: session, per agent, per sprint, per task. A null adds 0 to every sum and 1 to `not_reported`. A run with one task counts in that task's `solo_tokens`; a run with 2+ tasks, or none (a chat run), counts once under `shared` and in full in `tokens_with_shared` of each task it touched. It is never split between tasks. Invariant: sum over agents = sum over sprints = sum of `solo_tokens` + `shared` = session.
 
 ## Page
-`python scripts/office_app.py ai-office --ledger <file>` converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored). Chat runs (no task) are not in the event log, which needs a task per usage event; they stay in the ledger totals.
+`python scripts/office_app.py ai-office --ledger <file>` (add `--chat` for the one published AI Office page, T-065) converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored). Chat runs (no task) are not in the event log, which needs a task per usage event; they stay in the ledger totals.
 
 ## Budgets (T-060)
 The usage panel compares these totals with `offices/<office>/budgets.yaml` (per provider, and per agent inside a provider; format and rules in `engine/runtime/budgets.py`). A budget is set by Merwyn or whoever he names, every value has `set_by` and `set_on`, and the page never invents one: no budget reads "budget not set". Period today: the session.
