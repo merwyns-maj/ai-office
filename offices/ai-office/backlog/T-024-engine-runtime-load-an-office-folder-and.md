@@ -19,6 +19,8 @@ pr: null
 
 ## Spec
 
+**Note from T-057 (26 Nov 2026):** the SDK runtime appends one line per agent run to `offices/<office>/usage/<session-id>.jsonl` in the format of `engine/schema/usage.md`, filling `model`, `input`, `output`, `cache_read`, `cache_write` from each result message (check field names against the SDK docs), and drops `split`/`model` from `not_reported`.
+
 ## Design
 
 ## Build notes

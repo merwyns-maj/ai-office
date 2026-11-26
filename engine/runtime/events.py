@@ -40,6 +40,11 @@ V1_TYPES = {
     "usage": {"agent": "AGENT", "task": "TASK", "provider": "PROVIDER", "model": "MODEL", "billing": "BILLING",
               "input": "TOKENS", "output": "TOKENS", "cache_read": "TOKENS?", "cache_write": "TOKENS?", "cost_usd": "USD?"},
 }
+# v1 usage, second shape "total" (T-057): totals only, from a harness report; null = not reported (never 0)
+TOTAL_SPEC = {"agent": "AGENT", "task": "TASK", "total": "TOKENS_OR_NULL", "tasks": "TASKS?", "tool_uses": "COUNT_OR_NULL?",
+              "run": "INT?", "sprint": "INT?", "step": "STEP?", "note": "NOTE?"}
+TOTAL_FORBIDDEN = ("provider", "model", "billing", "input", "output", "cache_read", "cache_write", "cost_usd")
+MAX_NOTE = 200
 COMMON = ("t", "type", "src", "wall")
 
 DATA_PATTERNS = (
@@ -159,6 +164,19 @@ def _check_field(kind, v, agents, stages):
     if kind == "TOKENS":
         ok = isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= MAX_TOKENS
         return None if ok else f"tokens must be an integer from 0 to {MAX_TOKENS}"
+    if kind == "TOKENS_OR_NULL":
+        return None if v is None else _check_field("TOKENS", v, agents, stages)
+    if kind == "COUNT_OR_NULL":
+        return None if v is None else _check_field("TOKENS", v, agents, stages)
+    if kind == "TASKS":
+        ok = (isinstance(v, list) and 1 <= len(v) <= 8 and len(set(map(str, v))) == len(v)
+              and all(isinstance(x, str) and TASK_RE.match(x) for x in v))
+        return None if ok else "tasks must be 1 to 8 distinct task ids"
+    if kind == "STEP":
+        return None if isinstance(v, str) and re.fullmatch(r"[a-z][a-z-]{0,23}", v) else "step must be a lowercase slug"
+    if kind == "NOTE":
+        ok = isinstance(v, str) and 1 <= len(v) <= MAX_NOTE and "\n" not in v and "\r" not in v
+        return None if ok else f"note must be 1-{MAX_NOTE} characters with no newline"
     if kind == "USD":
         ok = isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= MAX_USD and round(v, 6) == v
         return None if ok else f"must be a number from 0 to {MAX_USD} with at most 6 decimals"
@@ -282,7 +300,15 @@ def parse_log(text, *, agents, stages, forbidden=(), providers=None):
         if version == 1:
             spec = V1_TYPES.get(typ) or (dict(spec, **V1_EXTRA[typ]) if spec and typ in V1_EXTRA else spec)
         bad = None
-        if spec is None:
+        total_shape = version == 1 and typ == "usage" and "total" in obj
+        if total_shape:
+            spec = TOTAL_SPEC
+            clash = next((f for f in TOTAL_FORBIDDEN if f in obj), None)
+            if clash:
+                bad = f"a usage event with total must not carry {clash!r}"
+        if bad:
+            pass
+        elif spec is None:
             warn(n, f"unknown type {typ!r} (kept)")
         else:
             for f, kind in spec.items():
@@ -301,13 +327,14 @@ def parse_log(text, *, agents, stages, forbidden=(), providers=None):
                     break
             if not bad and typ == "discussion":
                 bad = _check_discussion(obj, agents)
-            if not bad and version == 1 and typ in ("step_started", "usage") and ("provider" in obj) != ("model" in obj):
+            if not bad and version == 1 and typ in ("step_started", "usage") and not total_shape and ("provider" in obj) != ("model" in obj):
                 bad = "provider and model go together"
             if not bad and typ == "usage" and obj.get("billing") == "plan" and "cost_usd" in obj:
                 bad = "a plan step must not carry cost_usd"
-            if bad:
-                err(n, bad)
-                continue
+        if bad:
+            err(n, bad)
+            continue
+        if spec is not None:
             for f in obj:
                 if f not in spec and f not in COMMON:
                     warn(n, f"field {f!r} is not defined for {typ} (kept)")

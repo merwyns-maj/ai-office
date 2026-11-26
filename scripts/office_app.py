@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate the self-contained 3D office page: theme + org + workflow + event log -> engine/app/office.html.
 
-Usage: python scripts/office_app.py <office> [--fixture PATH] [--out PATH] [--check] [--allow-errors]
+Usage: python scripts/office_app.py <office> [--fixture PATH | --ledger PATH] [--out PATH] [--check] [--allow-errors]
+--ledger replays a recorded agent-run ledger (offices/<office>/usage/<session>.jsonl, T-057); default out engine/app/usage-<session>.html (not committed).
 Exit 0 written or up to date; 1 data-rule problems (always), other log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
 """
 import argparse
@@ -13,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from engine.runtime import events, loader, miniyaml, providers  # noqa: E402
+from engine.runtime import events, ledger as ledger_mod, loader, miniyaml, providers  # noqa: E402
 import build_agents  # noqa: E402
 
 TEMPLATE = REPO / "engine" / "app" / "office.template.html"
@@ -37,8 +38,8 @@ def _planned_model(office, agent):
     return (office.office.get("defaults") or {}).get("model")
 
 
-def build_data(office_root, fixture):
-    """Return (data dict for the page, list of LogProblem)."""
+def build_data(office_root, fixture, ledger=None):
+    """Return (data dict for the page, list of LogProblem). With ledger: the page replays that agent-run ledger instead of fixture."""
     office_root = Path(office_root)
     office, problems = loader.load_office(office_root)
     if office is None:
@@ -60,9 +61,20 @@ def build_data(office_root, fixture):
     catalogue, cat_problems = providers.load_providers(office_root)
     if cat_problems:
         raise BuildError("; ".join(cat_problems))
-    log_text = Path(fixture).read_text(encoding="utf-8")
-    header, evs, probs = events.parse_log(log_text, agents=ids, stages=set(stages),
-                                          forbidden=events.forbidden_terms(office.repo_root), providers=catalogue)
+    forbidden = events.forbidden_terms(office.repo_root)
+    lprobs, totals = [], None
+    if ledger is not None:
+        lh, runs, lprobs = ledger_mod.load_ledger(ledger, agents=ids, office=office.id, forbidden=forbidden, providers=set(catalogue))
+        if lh is None:
+            return {"log": None, "skipped": [{"line": p.line, "message": p.message} for p in lprobs]}, lprobs
+        log_text = ledger_mod.to_event_log(lh, runs)
+        totals = ledger_mod.totals(runs)
+    else:
+        log_text = Path(fixture).read_text(encoding="utf-8")
+    header, evs, probs = events.parse_log(log_text, agents=ids, stages=set(stages), forbidden=forbidden, providers=catalogue)
+    probs = lprobs + probs
+    if totals is not None:
+        header = dict(header, not_reported=lh["not_reported"])
     skipped = [{"line": p.line, "message": p.message} for p in probs if p.level == "error"]
     warnings = [{"line": p.line, "message": p.message} for p in probs if p.level == "warning"]
     data = {
@@ -78,6 +90,8 @@ def build_data(office_root, fixture):
         "events": evs,
         "skipped": skipped,
     }
+    if totals is not None:
+        data["ledger"] = totals
     return data, probs
 
 
@@ -92,18 +106,28 @@ def render(template_text, data):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="office_app.py", description=__doc__.split("\n")[0])
     ap.add_argument("office", help="office id (offices/<id>) or a path to an office folder")
-    ap.add_argument("--fixture", default=str(DEFAULT_FIXTURE))
-    ap.add_argument("--out", default=str(DEFAULT_OUT))
+    ap.add_argument("--fixture")
+    ap.add_argument("--ledger", help="replay an agent-run ledger instead of an event log")
+    ap.add_argument("--out")
     ap.add_argument("--check", action="store_true", help="fail if --out is not what would be generated")
     ap.add_argument("--allow-errors", action="store_true", help="drop bad log lines instead of failing")
     try:
         args = ap.parse_args(argv)
     except SystemExit as e:
         return int(e.code or 0)
+    if args.fixture and args.ledger:
+        print("office_app: --fixture and --ledger cannot be used together", file=sys.stderr)
+        return 2
     try:
         root = loader.resolve_office(args.office, Path.cwd())
         template = TEMPLATE.read_text(encoding="utf-8")
-        data, probs = build_data(root, Path(args.fixture))
+        if args.ledger:
+            if not Path(args.ledger).is_file():
+                raise FileNotFoundError(f"{args.ledger}: no such ledger file")
+            out_default = REPO / "engine" / "app" / f"usage-{Path(args.ledger).stem}.html"
+        else:
+            out_default = DEFAULT_OUT
+        data, probs = build_data(root, Path(args.fixture or DEFAULT_FIXTURE), Path(args.ledger) if args.ledger else None)
     except FileNotFoundError as e:
         print(str(e), file=sys.stderr)
         return 2
@@ -124,10 +148,10 @@ def main(argv=None):
     except BuildError as e:
         print(f"office_app: {e}", file=sys.stderr)
         return 1
-    out = Path(args.out)
+    out = Path(args.out or out_default)
     if args.check:
         if not out.exists() or out.read_text(encoding="utf-8") != html:
-            print(f"office_app: {out} is stale; run: python scripts/office_app.py {args.office}", file=sys.stderr)
+            print(f"office_app: {out} is stale; run: python scripts/office_app.py {args.office}" + (f" --ledger {args.ledger}" if args.ledger else ""), file=sys.stderr)
             return 1
         print(f"{out}: up to date ({len(html.encode('utf-8')) // 1024} KB, {len(data['events'])} events)")
         return 0

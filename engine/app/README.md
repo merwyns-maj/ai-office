@@ -6,6 +6,7 @@ Files
 - `office.template.html`: the page source (HTML, CSS, `office-core` pure logic, `office-view` scene and HUD)
 - `office.html`: generated, committed. Do not edit by hand
 - `fixtures/models-synthetic.jsonl`: SYNTHETIC v1 log (model and usage, four providers), the default page
+- Recorded ledger page (T-057, not committed, goes stale on every ledger append): `python scripts/office_app.py ai-office --ledger offices/ai-office/usage/<session>.jsonl` writes `engine/app/usage-<session>.html`
 - `fixtures/sprint-03.jsonl`: replay of Sprint 3 (T-043, T-044, T-045), a v0 log: `python scripts/office_app.py ai-office --fixture engine/app/fixtures/sprint-03.jsonl --out /tmp/sprint03.html`
 - `offices/<office>/providers.yaml`: provider catalogue and prices the page reads (format in `engine/schema/office.md`)
 - `three.min.js`: NOT committed (gitignored). Fetch it as below

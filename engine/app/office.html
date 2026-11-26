@@ -113,6 +113,43 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur.tot .cost{font-size:12px}
 .ufoot{margin-top:8px;font-size:10.5px;line-height:1.35;color:var(--text-dim)}
 .uempty{color:var(--text-dim);font-size:12px;padding:2px 0 4px}
+/* recorded ledger rendering (T-057) */
+.ur .l1 .pl{font:400 11px/1 var(--ui);color:var(--text-dim);white-space:nowrap}
+.ur .bl{display:flex;align-items:center;gap:8px;margin:2px 0 1px}
+.ur .bl .bar{flex:1;margin:0}
+.ur .bl .pct.wide{width:auto}
+.ur .bl .pct{flex:none;width:34px;text-align:right;font:500 11px/1 var(--mono)}
+.ur .bar{position:relative;height:4px;border-radius:2px;overflow:hidden;margin:2px 0 1px}
+.acc{border-top:1px solid rgba(255,255,255,.05)}
+.ur.ah{display:grid;grid-template-columns:14px 1fr;align-items:start;gap:4px;border-top:0}
+.ur.ah .chev{margin-top:4px;rotate:0deg}
+.ur.ah[aria-expanded=false] .chev{rotate:-90deg}
+.ur.ah .ahc{display:block;min-width:0}
+.ur.ah .ahc > span{display:block}
+.ur.ah .ahc > .l1{display:flex}
+.ab{padding:0 0 6px 20px}
+.ab[hidden]{display:none}
+.rr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:11px;line-height:1.5;color:var(--text-dim)}
+.tid{white-space:nowrap}
+.rr > span:first-child{white-space:nowrap}
+.rr .rt{white-space:nowrap;text-align:right;color:var(--text)}
+.lnk{background:none;border:0;color:var(--accent);font:600 11px/1.5 var(--ui);padding:2px 0;margin-top:2px;cursor:pointer;text-decoration:underline}
+#usheet .lnk{min-height:44px}
+#usheet .rr{font-size:12px}
+#usage.rec{max-height:calc(100% - 104px)}
+#usheet > *{flex:none}
+.ur.rowtap{padding-top:2px;padding-bottom:2px}
+#usage .ufoot.rec{margin-top:6px;line-height:1.3}
+.ur .bar::before{content:'';position:absolute;inset:0;background:var(--text-dim);opacity:.3}
+.ur .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width .2s ease-out}
+body.rm .ur .bar i{transition:none}
+.ur .l2.rec{font:400 11px/1.4 var(--ui)}
+.ur.dim,.ur.dim .l1{color:var(--text-dim);font-weight:400}
+.ur.dim .l1 .cost{color:var(--text-dim)}
+.ur.nrow{cursor:default}
+.ufoot.rec{font-size:11px}
+#usheet .ur.rowtap{min-height:44px}
+#usheet .ufoot.rec{position:sticky;bottom:-12px;background:var(--panel);padding:8px 0 12px;margin-top:4px}
 #ubtn{display:none}
 #usheet{display:none;position:absolute;left:8px;right:8px;bottom:calc(var(--bar) + 40px);max-height:60vh;overflow:auto;z-index:8;padding:0 12px 12px;flex-direction:column}
 #usheet.open{display:flex}
@@ -242,7 +279,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   </header>
   <div id="side">
     <section id="usage" class="panel" aria-label="Usage" hidden>
-      <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
+      <div class="uh"><h2>Usage</h2><span class="synpill" data-syn>synthetic</span><span class="synpill" data-rec hidden>recorded</span><button id="ucol" class="ucol" type="button" aria-expanded="true" aria-controls="ubody" aria-label="Collapse usage"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></button></div>
       <div id="usum" class="usum"></div>
       <div id="ubody" class="ubody"></div>
     </section>
@@ -265,7 +302,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   </footer>
   <div id="live" class="sr" aria-live="polite"></div>
 </div>
-<script type="application/json" id="office-data">{"agents":[{"id":"pmo","name":"Janice","personality":"ESTJ","planned_model":"sonnet","role":"Chief of Staff (PMO)"},{"id":"pm","name":"Emmy","personality":"ENFJ","planned_model":"sonnet","role":"Product Manager"},{"id":"architect","name":"Fang","personality":"INTJ","planned_model":"opus","role":"Architect / Tech Lead"},{"id":"engineer","name":"Sebastian","personality":"ISTP","planned_model":"sonnet","role":"Engineer"},{"id":"reviewer","name":"Cahyani","personality":"INTP","planned_model":"opus","role":"Reviewer / QA"},{"id":"compliance","name":"Wulan","personality":"ISTJ","planned_model":"sonnet","role":"Compliance Officer"},{"id":"curator","name":"April","personality":"INFJ","planned_model":"sonnet","role":"Knowledge Curator"},{"id":"designer","name":"Dinda","personality":"ISFP","planned_model":"sonnet","role":"Product Designer"}],"events":[{"agent":"pmo","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"step_started"},{"agent":"pmo","billing":"plan","cache_read":31000,"cache_write":4200,"input":8200,"model":"claude-sonnet-4-5","output":1400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"usage"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":54000,"cache_write":6100,"input":12400,"model":"claude-sonnet-4-5","output":3100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"usage"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":72000,"cache_write":9000,"input":15800,"model":"claude-opus-4-5","output":4200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"usage"},{"agent":"designer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"step_started"},{"agent":"designer","billing":"plan","cache_read":38000,"cache_write":3000,"input":9100,"model":"claude-sonnet-4-5","output":2600,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"usage"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":96000,"cache_write":11000,"input":21000,"model":"claude-sonnet-4-5","output":6800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"usage"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":28000,"cache_write":2000,"input":7400,"model":"claude-opus-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"usage"},{"agent":"compliance","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"step_started"},{"agent":"compliance","billing":"plan","cache_read":17000,"cache_write":1200,"input":5600,"model":"claude-sonnet-4-5","output":900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"usage"},{"agent":"curator","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"step_started"},{"agent":"curator","billing":"plan","cache_read":9000,"cache_write":800,"input":3300,"model":"claude-sonnet-4-5","output":700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"usage"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":18,"task":"T-901","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":19,"task":"T-901","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":41000,"cache_write":1800,"input":6400,"model":"claude-sonnet-4-5","output":2200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":24,"task":"T-901","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":30,"task":"T-901","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":31,"task":"T-901","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":66000,"cache_write":7400,"input":14200,"model":"claude-opus-4-5","output":5100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"usage"},{"agents":["architect","designer"],"lines":[{"agent":"architect","text":"Badge goes on the name tag."},{"agent":"designer","text":"Two lines, provider chip first."}],"src":"engine/app/fixtures/models-synthetic.jsonl","t":43,"task":"T-901","type":"discussion"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":49,"task":"T-901","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":50,"task":"T-901","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":120000,"cache_write":14000,"input":18800,"model":"claude-sonnet-4-5","output":9400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":64,"task":"T-901","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":65,"task":"T-901","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":52000,"cache_write":3300,"input":9800,"model":"claude-opus-4-5","output":2300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"usage"},{"agent":"reviewer","note":"Synthetic pass","src":"engine/app/fixtures/models-synthetic.jsonl","t":76,"task":"T-901","type":"review_pass"},{"pr":901,"src":"engine/app/fixtures/models-synthetic.jsonl","t":79,"task":"T-901","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":82,"task":"T-902","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":83,"task":"T-902","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":33000,"cache_write":1500,"input":5200,"model":"claude-sonnet-4-5","output":1900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":97,"task":"T-902","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":98,"task":"T-902","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":58000,"cache_write":5000,"input":11300,"model":"claude-opus-4-5","output":3800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":106,"task":"T-902","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":112,"task":"T-902","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":113,"task":"T-902","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"gpt-5","provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":61000,"cache_write":0,"input":24500,"model":"gpt-5","output":11200,"provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"usage"},{"agent":"pmo","reason":"Which provider for the big refactor?","src":"engine/app/fixtures/models-synthetic.jsonl","t":124,"task":"T-903","type":"needs_merwyn"},{"agent":"pmo","answer":"Try DeepSeek for the build step","src":"engine/app/fixtures/models-synthetic.jsonl","t":136,"task":"T-903","type":"merwyn_answered"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":140,"task":"T-902","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":141,"task":"T-902","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"step_started"},{"agent":"reviewer","billing":"per_token","cache_read":47000,"cache_write":6200,"input":13400,"model":"claude-opus-4-5","output":3600,"provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":152,"task":"T-902","type":"review_pass"},{"pr":902,"src":"engine/app/fixtures/models-synthetic.jsonl","t":155,"task":"T-902","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":158,"task":"T-903","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":159,"task":"T-903","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":29000,"cache_write":1100,"input":4800,"model":"claude-sonnet-4-5","output":1700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":167,"task":"T-903","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":173,"task":"T-903","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":174,"task":"T-903","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":49000,"cache_write":4100,"input":10100,"model":"claude-opus-4-5","output":3300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":182,"task":"T-903","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":188,"task":"T-903","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":189,"task":"T-903","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"deepseek-chat","provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":88000,"cache_write":0,"input":31800,"model":"deepseek-chat","output":14600,"provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":201,"task":"T-903","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":202,"task":"T-903","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":36000,"cache_write":2400,"input":8600,"model":"claude-opus-4-5","output":2000,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":213,"task":"T-903","type":"review_pass"},{"pr":903,"src":"engine/app/fixtures/models-synthetic.jsonl","t":216,"task":"T-903","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":219,"task":"T-904","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":220,"task":"T-904","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":25000,"cache_write":900,"input":4100,"model":"claude-sonnet-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":228,"task":"T-904","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":234,"task":"T-904","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":235,"task":"T-904","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":44000,"cache_write":3600,"input":9400,"model":"claude-opus-4-5","output":2900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":243,"task":"T-904","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":249,"task":"T-904","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":250,"task":"T-904","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":92000,"cache_write":8800,"input":16400,"model":"claude-sonnet-4-5","output":7200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":262,"task":"T-904","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":263,"task":"T-904","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","billing":"plan","cache_read":31000,"cache_write":2100,"input":7900,"model":"claude-opus-4-5","output":1800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":271,"task":"T-904","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":274,"task":"T-904","type":"review_pass"},{"pr":904,"src":"engine/app/fixtures/models-synthetic.jsonl","t":277,"task":"T-904","type":"merged"}],"log":{"clock":"synthetic","log":"office-events","office":"ai-office","title":"SYNTHETIC model and usage demo (T-056): invented numbers, not a real run","usage_source":"synthetic","v":1},"office":{"id":"ai-office","name":"AI Office — Build Office"},"providers":{"anthropic-api":{"billing":"per_token","code":"API","colour":"#5b8def","label":"Anthropic API","models":{"claude-opus-4-5":{"cache_read":null,"cache_write":null,"family":"opus","input":null,"output":null,"short":"opus"},"claude-sonnet-4-5":{"cache_read":null,"cache_write":null,"family":"sonnet","input":null,"output":null,"short":"sonnet"}},"prices":{"checked":null,"source":null}},"claude-sdk":{"billing":"plan","code":"SDK","colour":"#c084fc","label":"Claude Agent SDK (Max plan)","models":{"claude-opus-4-5":{"family":"opus","short":"opus"},"claude-sonnet-4-5":{"family":"sonnet","short":"sonnet"}}},"deepseek":{"billing":"per_token","code":"DSK","colour":"#3fd0e0","label":"DeepSeek","models":{"deepseek-chat":{"cache_read":null,"cache_write":null,"family":"deepseek","input":null,"output":null,"short":"v3"}},"prices":{"checked":null,"source":null}},"openai":{"billing":"per_token","code":"OAI","colour":"#f472b6","label":"OpenAI","models":{"gpt-5":{"cache_read":null,"cache_write":null,"family":"gpt","input":null,"output":null,"short":"gpt-5"}},"prices":{"checked":null,"source":null}}},"skipped":[],"stages":["todo","spec","design","build","review","done","parked"],"theme":{"desks":[{"agent":"pmo","at":[3,12],"label":"Janice","room":"lobby","sprite":"chief"},{"agent":"pm","at":[2.5,3.5],"label":"Emmy","room":"product","sprite":"pm"},{"agent":"architect","at":[6.5,3.5],"label":"Fang","room":"whiteboard","sprite":"architect"},{"agent":"engineer","at":[16.5,3.5],"label":"Sebastian","room":"workshop","sprite":"engineer"},{"agent":"reviewer","at":[21.5,3.5],"label":"Cahyani","room":"lab","sprite":"qa"},{"agent":"compliance","at":[13.2,4.8],"label":"Wulan","room":"corner","sprite":"officer"},{"agent":"curator","at":[20,12.5],"label":"April","room":"archive","sprite":"librarian"},{"agent":"designer","at":[8.8,3.5],"label":"Dinda","room":"whiteboard","sprite":"designer"}],"door":[12,0],"hub":"lobby","palette":{"accent":"#53BA7E","bad":"#e63946","bad_tag":"#c1121f","bad_text":"#ff6b6b","floor":"#2b2d42","panel":"#1d1e2c","paper":"#efe6d2","rug":"#353850","skin_dark":"#8d5a3c","skin_light":"#e0b48f","skin_mid":"#c68e65","text":"#f2ede4","text_dim":"#9aa0b4","wall":"#8d99ae","warn":"#f4a261","wood":"#7d6650"},"rooms":[{"id":"lobby","label":"Backlog","rect":[0,9,9,16],"stage":"todo"},{"id":"product","label":"Product room","rect":[0,0,5,7],"stage":"spec"},{"id":"whiteboard","label":"Design wall","rect":[5,0,10,7],"stage":"design"},{"id":"workshop","label":"Workshop","rect":[14,0,19,7],"stage":"build"},{"id":"lab","label":"QA lab","rect":[19,0,24,7],"stage":"review"},{"id":"archive","label":"Archive","rect":[15,9,24,16],"stage":"done"},{"id":"corner","label":"Merwyn's door","rect":[10,0,14,7],"stage":null},{"id":"meeting","label":"Meeting table","rect":[9,9,15,16],"stage":null}],"style":"pixel-startup"},"v":1,"warnings":[]}</script>
+<script type="application/json" id="office-data">{"agents":[{"id":"pmo","name":"Janice","personality":"ESTJ","planned_model":"sonnet","role":"Chief of Staff (PMO)"},{"id":"pm","name":"Emmy","personality":"ENFJ","planned_model":"sonnet","role":"Product Manager"},{"id":"architect","name":"Fang","personality":"INTJ","planned_model":"opus","role":"Architect / Tech Lead"},{"id":"engineer","name":"Sebastian","personality":"ISTP","planned_model":"sonnet","role":"Engineer"},{"id":"reviewer","name":"Cahyani","personality":"INTP","planned_model":"opus","role":"Reviewer / QA"},{"id":"compliance","name":"Wulan","personality":"ISTJ","planned_model":"sonnet","role":"Compliance Officer"},{"id":"curator","name":"April","personality":"INFJ","planned_model":"sonnet","role":"Knowledge Curator"},{"id":"designer","name":"Dinda","personality":"ISFP","planned_model":"sonnet","role":"Product Designer"}],"events":[{"agent":"pmo","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"step_started"},{"agent":"pmo","billing":"plan","cache_read":31000,"cache_write":4200,"input":8200,"model":"claude-sonnet-4-5","output":1400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":0,"task":"T-901","type":"usage"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":54000,"cache_write":6100,"input":12400,"model":"claude-sonnet-4-5","output":3100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":2,"task":"T-901","type":"usage"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":72000,"cache_write":9000,"input":15800,"model":"claude-opus-4-5","output":4200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":4,"task":"T-902","type":"usage"},{"agent":"designer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"step_started"},{"agent":"designer","billing":"plan","cache_read":38000,"cache_write":3000,"input":9100,"model":"claude-sonnet-4-5","output":2600,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":6,"task":"T-902","type":"usage"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":96000,"cache_write":11000,"input":21000,"model":"claude-sonnet-4-5","output":6800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":8,"task":"T-903","type":"usage"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":28000,"cache_write":2000,"input":7400,"model":"claude-opus-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":10,"task":"T-904","type":"usage"},{"agent":"compliance","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"step_started"},{"agent":"compliance","billing":"plan","cache_read":17000,"cache_write":1200,"input":5600,"model":"claude-sonnet-4-5","output":900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":12,"task":"T-902","type":"usage"},{"agent":"curator","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"step_started"},{"agent":"curator","billing":"plan","cache_read":9000,"cache_write":800,"input":3300,"model":"claude-sonnet-4-5","output":700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":14,"task":"T-901","type":"usage"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":18,"task":"T-901","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":19,"task":"T-901","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":41000,"cache_write":1800,"input":6400,"model":"claude-sonnet-4-5","output":2200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":24,"task":"T-901","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":30,"task":"T-901","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":31,"task":"T-901","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"step_started"},{"agent":"architect","billing":"plan","cache_read":66000,"cache_write":7400,"input":14200,"model":"claude-opus-4-5","output":5100,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":39,"task":"T-901","type":"usage"},{"agents":["architect","designer"],"lines":[{"agent":"architect","text":"Badge goes on the name tag."},{"agent":"designer","text":"Two lines, provider chip first."}],"src":"engine/app/fixtures/models-synthetic.jsonl","t":43,"task":"T-901","type":"discussion"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":49,"task":"T-901","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":50,"task":"T-901","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":120000,"cache_write":14000,"input":18800,"model":"claude-sonnet-4-5","output":9400,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":58,"task":"T-901","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":64,"task":"T-901","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":65,"task":"T-901","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":52000,"cache_write":3300,"input":9800,"model":"claude-opus-4-5","output":2300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":73,"task":"T-901","type":"usage"},{"agent":"reviewer","note":"Synthetic pass","src":"engine/app/fixtures/models-synthetic.jsonl","t":76,"task":"T-901","type":"review_pass"},{"pr":901,"src":"engine/app/fixtures/models-synthetic.jsonl","t":79,"task":"T-901","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":82,"task":"T-902","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":83,"task":"T-902","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"step_started"},{"agent":"pm","billing":"plan","cache_read":33000,"cache_write":1500,"input":5200,"model":"claude-sonnet-4-5","output":1900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":91,"task":"T-902","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":97,"task":"T-902","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":98,"task":"T-902","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":58000,"cache_write":5000,"input":11300,"model":"claude-opus-4-5","output":3800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":106,"task":"T-902","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":112,"task":"T-902","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":113,"task":"T-902","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"gpt-5","provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":61000,"cache_write":0,"input":24500,"model":"gpt-5","output":11200,"provider":"openai","src":"engine/app/fixtures/models-synthetic.jsonl","t":121,"task":"T-902","type":"usage"},{"agent":"pmo","reason":"Which provider for the big refactor?","src":"engine/app/fixtures/models-synthetic.jsonl","t":124,"task":"T-903","type":"needs_merwyn"},{"agent":"pmo","answer":"Try DeepSeek for the build step","src":"engine/app/fixtures/models-synthetic.jsonl","t":136,"task":"T-903","type":"merwyn_answered"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":140,"task":"T-902","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":141,"task":"T-902","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"step_started"},{"agent":"reviewer","billing":"per_token","cache_read":47000,"cache_write":6200,"input":13400,"model":"claude-opus-4-5","output":3600,"provider":"anthropic-api","src":"engine/app/fixtures/models-synthetic.jsonl","t":149,"task":"T-902","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":152,"task":"T-902","type":"review_pass"},{"pr":902,"src":"engine/app/fixtures/models-synthetic.jsonl","t":155,"task":"T-902","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":158,"task":"T-903","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":159,"task":"T-903","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":29000,"cache_write":1100,"input":4800,"model":"claude-sonnet-4-5","output":1700,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":167,"task":"T-903","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":173,"task":"T-903","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":174,"task":"T-903","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":49000,"cache_write":4100,"input":10100,"model":"claude-opus-4-5","output":3300,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":182,"task":"T-903","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":188,"task":"T-903","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":189,"task":"T-903","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"deepseek-chat","provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"step_started"},{"agent":"engineer","billing":"per_token","cache_read":88000,"cache_write":0,"input":31800,"model":"deepseek-chat","output":14600,"provider":"deepseek","src":"engine/app/fixtures/models-synthetic.jsonl","t":197,"task":"T-903","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":201,"task":"T-903","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":202,"task":"T-903","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","model":"claude-opus-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"step_started"},{"agent":"reviewer","billing":"plan","cache_read":36000,"cache_write":2400,"input":8600,"model":"claude-opus-4-5","output":2000,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":210,"task":"T-903","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":213,"task":"T-903","type":"review_pass"},{"pr":903,"src":"engine/app/fixtures/models-synthetic.jsonl","t":216,"task":"T-903","type":"merged"},{"from":"todo","src":"engine/app/fixtures/models-synthetic.jsonl","t":219,"task":"T-904","to":"spec","type":"stage_changed"},{"from_agent":"pmo","src":"engine/app/fixtures/models-synthetic.jsonl","t":220,"task":"T-904","to_agent":"pm","to_stage":"spec","type":"handoff"},{"agent":"pm","billing":"plan","cache_read":25000,"cache_write":900,"input":4100,"model":"claude-sonnet-4-5","output":1500,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":228,"task":"T-904","type":"usage"},{"from":"spec","src":"engine/app/fixtures/models-synthetic.jsonl","t":234,"task":"T-904","to":"design","type":"stage_changed"},{"from_agent":"pm","src":"engine/app/fixtures/models-synthetic.jsonl","t":235,"task":"T-904","to_agent":"architect","to_stage":"design","type":"handoff"},{"agent":"architect","billing":"plan","cache_read":44000,"cache_write":3600,"input":9400,"model":"claude-opus-4-5","output":2900,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":243,"task":"T-904","type":"usage"},{"from":"design","src":"engine/app/fixtures/models-synthetic.jsonl","t":249,"task":"T-904","to":"build","type":"stage_changed"},{"from_agent":"architect","src":"engine/app/fixtures/models-synthetic.jsonl","t":250,"task":"T-904","to_agent":"engineer","to_stage":"build","type":"handoff"},{"agent":"engineer","model":"claude-sonnet-4-5","provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"step_started"},{"agent":"engineer","billing":"plan","cache_read":92000,"cache_write":8800,"input":16400,"model":"claude-sonnet-4-5","output":7200,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":258,"task":"T-904","type":"usage"},{"from":"build","src":"engine/app/fixtures/models-synthetic.jsonl","t":262,"task":"T-904","to":"review","type":"stage_changed"},{"from_agent":"engineer","src":"engine/app/fixtures/models-synthetic.jsonl","t":263,"task":"T-904","to_agent":"reviewer","to_stage":"review","type":"handoff"},{"agent":"reviewer","billing":"plan","cache_read":31000,"cache_write":2100,"input":7900,"model":"claude-opus-4-5","output":1800,"provider":"claude-sdk","src":"engine/app/fixtures/models-synthetic.jsonl","t":271,"task":"T-904","type":"usage"},{"agent":"reviewer","src":"engine/app/fixtures/models-synthetic.jsonl","t":274,"task":"T-904","type":"review_pass"},{"pr":904,"src":"engine/app/fixtures/models-synthetic.jsonl","t":277,"task":"T-904","type":"merged"}],"log":{"clock":"synthetic","log":"office-events","office":"ai-office","title":"SYNTHETIC model and usage demo (T-056): invented numbers, not a real run","usage_source":"synthetic","v":1},"office":{"id":"ai-office","name":"AI Office — Build Office"},"providers":{"anthropic-api":{"billing":"per_token","code":"API","colour":"#5b8def","label":"Anthropic API","models":{"claude-opus-4-5":{"cache_read":null,"cache_write":null,"family":"opus","input":null,"output":null,"short":"opus"},"claude-sonnet-4-5":{"cache_read":null,"cache_write":null,"family":"sonnet","input":null,"output":null,"short":"sonnet"}},"prices":{"checked":null,"source":null}},"claude-code":{"billing":"plan","code":"CC","colour":"#8e9bf5","label":"Claude Code subagents (Max plan)","models":{"claude-opus-4-5":{"family":"opus","short":"opus"},"claude-sonnet-4-5":{"family":"sonnet","short":"sonnet"}}},"claude-sdk":{"billing":"plan","code":"SDK","colour":"#c084fc","label":"Claude Agent SDK (Max plan)","models":{"claude-opus-4-5":{"family":"opus","short":"opus"},"claude-sonnet-4-5":{"family":"sonnet","short":"sonnet"}}},"deepseek":{"billing":"per_token","code":"DSK","colour":"#3fd0e0","label":"DeepSeek","models":{"deepseek-chat":{"cache_read":null,"cache_write":null,"family":"deepseek","input":null,"output":null,"short":"v3"}},"prices":{"checked":null,"source":null}},"openai":{"billing":"per_token","code":"OAI","colour":"#f472b6","label":"OpenAI","models":{"gpt-5":{"cache_read":null,"cache_write":null,"family":"gpt","input":null,"output":null,"short":"gpt-5"}},"prices":{"checked":null,"source":null}}},"skipped":[],"stages":["todo","spec","design","build","review","done","parked"],"theme":{"desks":[{"agent":"pmo","at":[3,12],"label":"Janice","room":"lobby","sprite":"chief"},{"agent":"pm","at":[2.5,3.5],"label":"Emmy","room":"product","sprite":"pm"},{"agent":"architect","at":[6.5,3.5],"label":"Fang","room":"whiteboard","sprite":"architect"},{"agent":"engineer","at":[16.5,3.5],"label":"Sebastian","room":"workshop","sprite":"engineer"},{"agent":"reviewer","at":[21.5,3.5],"label":"Cahyani","room":"lab","sprite":"qa"},{"agent":"compliance","at":[13.2,4.8],"label":"Wulan","room":"corner","sprite":"officer"},{"agent":"curator","at":[20,12.5],"label":"April","room":"archive","sprite":"librarian"},{"agent":"designer","at":[8.8,3.5],"label":"Dinda","room":"whiteboard","sprite":"designer"}],"door":[12,0],"hub":"lobby","palette":{"accent":"#53BA7E","bad":"#e63946","bad_tag":"#c1121f","bad_text":"#ff6b6b","floor":"#2b2d42","panel":"#1d1e2c","paper":"#efe6d2","rug":"#353850","skin_dark":"#8d5a3c","skin_light":"#e0b48f","skin_mid":"#c68e65","text":"#f2ede4","text_dim":"#9aa0b4","wall":"#8d99ae","warn":"#f4a261","wood":"#7d6650"},"rooms":[{"id":"lobby","label":"Backlog","rect":[0,9,9,16],"stage":"todo"},{"id":"product","label":"Product room","rect":[0,0,5,7],"stage":"spec"},{"id":"whiteboard","label":"Design wall","rect":[5,0,10,7],"stage":"design"},{"id":"workshop","label":"Workshop","rect":[14,0,19,7],"stage":"build"},{"id":"lab","label":"QA lab","rect":[19,0,24,7],"stage":"review"},{"id":"archive","label":"Archive","rect":[15,9,24,16],"stage":"done"},{"id":"corner","label":"Merwyn's door","rect":[10,0,14,7],"stage":null},{"id":"meeting","label":"Meeting table","rect":[9,9,15,16],"stage":null}],"style":"pixel-startup"},"v":1,"warnings":[]}</script>
 <script id="office-core">
 /* Pure logic: no DOM, no THREE. Runs in a browser and under node (tests). */
 (function (root) {
@@ -312,7 +349,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     return out;
   }
   function initState(data) {
-    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, lastSwitch: null };
+    var s = { now: 0, agents: {}, tasks: {}, unknown: [], discuss: null, shelf: [], seen: 0, usage: {}, rec: {}, runlog: {}, lastSwitch: null };
     data.agents.forEach(function (a) { s.agents[a.id] = { holds: [], waiting: [], blocked: {}, since: 0, st: 'idle', model: null, prevModel: null, switchedAt: null }; });
     data.events.forEach(function (e) { if (e.task && e.type !== 'usage' && !s.tasks[e.task]) s.tasks[e.task] = { stage: 'todo', owner: null, mark: null, compliance: null, pr: null, fresh: false }; });
     return s;
@@ -362,6 +399,20 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     var pr = providers && providers[b.provider] && providers[b.provider].prices;
     if (c.state === 'usd' && pr && pr.checked && r.dates.indexOf(pr.checked) < 0) r.dates.push(pr.checked);
   }
+  /* whole-number percentages that add up to exactly 100 (largest remainder; ties go to the earlier item); all 0 when the total is 0 */
+  function shares(vals) {
+    var T = vals.reduce(function (a, v) { return a + v; }, 0);
+    if (!T) return vals.map(function () { return 0; });
+    var fl = vals.map(function (v) { return Math.floor(100 * v / T); }), rem = vals.map(function (v) { return (100 * v) % T; });
+    var left = 100 - fl.reduce(function (a, v) { return a + v; }, 0);
+    vals.map(function (v, i) { return i; }).sort(function (a, b) { return rem[b] - rem[a] || a - b; }).slice(0, left).forEach(function (i) { fl[i]++; });
+    return fl;
+  }
+  function pctify(rows) {
+    var ids = Object.keys(rows).sort(function (a, b) { var x = rows[a], y = rows[b]; return (y.input + y.output + y.cache_read + y.cache_write) - (x.input + x.output + x.cache_read + x.cache_write) || (a < b ? -1 : 1); });
+    var p = shares(ids.map(function (k) { var r = rows[k]; return r.input + r.output + r.cache_read + r.cache_write; }));
+    ids.forEach(function (k, i) { rows[k].pct = p[i]; });
+  }
   function usageTotals(s, providers) {
     var out = { total: emptyRow(), providers: {}, agents: {} };
     Object.keys(s.agents).forEach(function (id) { out.agents[id] = emptyRow(); });
@@ -371,6 +422,19 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
       addTo(out.providers[b.provider] || (out.providers[b.provider] = emptyRow()), b, c, providers);
       addTo(out.agents[b.agent] || (out.agents[b.agent] = emptyRow()), b, c, providers);
     });
+    pctify(out.providers); pctify(out.agents);
+    return out;
+  }
+  /* recorded totals so far: per agent and overall; share is of the recorded session total */
+  function recTotals(s) {
+    var out = { total: { runs: 0, nr: 0, tokens: 0, tools: 0 }, agents: {} };
+    Object.keys(s.rec).forEach(function (id) {
+      var q = s.rec[id], c = {}; Object.keys(q).forEach(function (k) { c[k] = q[k]; }); out.agents[id] = c;
+      out.total.runs += q.runs; out.total.nr += q.nr; out.total.tokens += q.tokens; out.total.tools += q.tools;
+    });
+    var ids = Object.keys(out.agents).sort(function (a, b) { return out.agents[b].tokens - out.agents[a].tokens || (a < b ? -1 : 1); });
+    var p = shares(ids.map(function (k) { return out.agents[k].tokens; }));
+    ids.forEach(function (k, i) { out.agents[k].pct = p[i]; });
     return out;
   }
   /* the only place a currency sign is built, and only from micro-USD */
@@ -423,10 +487,19 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
         if (ev.provider && ev.model) setModel(s, ev, at);
         break;
       case 'usage': {
+        if ('total' in ev) {   /* recorded ledger run (T-057): totals only, null = not reported */
+          var q = s.rec[ev.agent] || (s.rec[ev.agent] = { runs: 0, nr: 0, tokens: 0, tools: 0, notes: [], last: null });
+          q.runs++; if (ev.total === null) q.nr++; else q.tokens += ev.total;
+          q.tools += ev.tool_uses || 0; if (ev.note) q.notes.push({ run: ev.run, note: ev.note, nr: ev.total === null });
+          q.last = { run: ev.run, total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null };
+          (s.runlog[ev.agent] = s.runlog[ev.agent] || []).push({ run: ev.run, sprint: ev.sprint, step: ev.step, tasks: ev.tasks || [ev.task], total: ev.total, tool_uses: ev.tool_uses, note: ev.note || null });
+          break;
+        }
         setModel(s, ev, at);
         var k = ev.agent + '|' + ev.provider + '|' + ev.model + '|' + ev.billing;
         var b = s.usage[k] || (s.usage[k] = { agent: ev.agent, provider: ev.provider, model: ev.model, billing: ev.billing, input: 0, output: 0, cache_read: 0, cache_write: 0, n: 0 });
         TOK.forEach(function (f) { b[f] += ev[f] || 0; }); b.n++;
+        (s.runlog[ev.agent] = s.runlog[ev.agent] || []).push({ task: ev.task, provider: ev.provider, model: ev.model, total: TOK.reduce(function (a, f) { return a + (ev[f] || 0); }, 0) });
         break; }
       case 'stage_changed': t.stage = ev.to; break;
       case 'handoff':
@@ -509,7 +582,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   root.OfficeCore = { DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
-    eventCost: eventCost, usageTotals: usageTotals, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
+    eventCost: eventCost, usageTotals: usageTotals, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
     tickerItems: tickerItems, switchSentence: switchSentence };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
@@ -575,8 +648,11 @@ var STWORD = { waiting: 'Waiting for you', blocked: 'Blocked', discussing: 'In a
 var S = C.stateAt(D, 0), next = 0, T = 0, playing = false, speed = 1, ended = false;
 var hist = [], lastAction = -99, tNow = 0, scene = null;
 var walkingSet = {};
-var HAS_MODELS = EV.some(function (e) { return !!e.provider; });
-var SYN = !!(D.log && D.log.v === 1 && D.log.usage_source !== 'recorded');
+var REC = !!(D.log && D.log.v === 1 && D.log.usage_source === 'recorded');
+var CHIPS = false;   /* model chips on agent tags: not for recorded ledgers (no model is reported) */
+var HAS_MODELS = REC || EV.some(function (e) { return !!e.provider; });
+var SYN = !!(D.log && D.log.v === 1 && !REC);
+CHIPS = HAS_MODELS && !REC;
 var TI = C.tickerItems(D), TI_AT = {};
 TI.forEach(function (it) { (TI_AT[it.i] = TI_AT[it.i] || []).push(it); });
 function modelOf(id) { var m = S.agents[id].model; return m ? C.modelLabel(D.providers, m.provider, m.model) : null; }
@@ -637,7 +713,7 @@ function renderStrip(force) {
     b.className = 'seg' + (o.st === 'waiting' ? ' waiting' : '');
     b.querySelector('.ic').innerHTML = ICON[o.st]; b.querySelector('.ic').style.color = STCOL[o.st];
     b.querySelector('small').textContent = holdText(o.id);
-    var ml = HAS_MODELS ? modelOf(o.id) : null;
+    var ml = CHIPS ? modelOf(o.id) : null;
     b.setAttribute('aria-label', NAME[o.id] + ': ' + word.toLowerCase() + (holdText(o.id) ? ', ' + holdText(o.id) : '') + (ml ? ', on ' + ml.code + ' ' + ml.short : ''));
     b.setAttribute('aria-pressed', String(focused === o.id));
     b.title = NAME[o.id] + ' · ' + word + (ml ? ' · ' + ml.code + ' ' + ml.short + ' (' + ml.full + ')' : '');
@@ -688,7 +764,58 @@ function figs(r) {
   return '<span title="' + exact(r.input) + ' input tokens">in ' + fmtTok(r.input) + '</span><span title="' + exact(r.output) + ' output tokens">out ' + fmtTok(r.output) +
     '</span><span title="' + exact(r.cache_read) + ' cache read, ' + exact(r.cache_write) + ' cache write tokens">cache ' + fmtTok(c) + '</span>' + (SYN ? '<span class="syn">synthetic</span>' : '');
 }
+var NOSPLIT = 'Input, output and cache split not reported';
+var accOff = {};   /* agent ids whose accordion section is collapsed; default is expanded */
+var CHEV = '<svg class="chev" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg>';
+function barLine(pct, colour, of) {
+  return '<div class="bl"><div class="bar" aria-hidden="true"><i style="width:' + pct + '%' + (colour ? ';background:' + esc(colour) : '') + '"></i></div><span class="pct' + (of ? ' wide' : '') + '">' + pct + '%' + (of ? ' of session' : '') + '</span></div>';
+}
+function accHTML(id, head, body, label) {
+  var open = !accOff[id];
+  return '<div class="acc"><button type="button" class="ur ah rowtap" data-acc="' + esc(id) + '" aria-expanded="' + open + '" aria-label="' + esc(label) + '">' + CHEV + '<span class="ahc">' + head + '</span></button>' +
+    '<div class="ab"' + (open ? '' : ' hidden') + '>' + body + '</div></div>';
+}
+function recRunLine(r) {
+  return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + (r.tasks || []).map(function (t, i, a) { return '<span class="tid">' + esc(t) + (i < a.length - 1 ? ',' : '') + '</span>'; }).join(' ') + '</span>' +
+    '<span class="rt" title="' + (r.note ? esc(r.note) : NOSPLIT) + '">' + (r.total === null ? 'not reported' : esc(fmtTok(r.total))) + (r.note ? '*' : '') + '</span></div>';
+}
+function synRunLine(r) {
+  var ml = C.modelLabel(D.providers, r.provider, r.model);
+  return '<div class="rr"><span class="mono">' + esc(r.task) + '</span><span class="mono">' + esc(ml.code + ' ' + ml.short) + '</span><span class="rt">' + esc(fmtTok(r.total)) + '</span></div>';
+}
+function focusBtn(id) { return '<button type="button" class="lnk" data-agent="' + esc(id) + '">Show details</button>'; }
+function recRows() {
+  var R = C.recTotals(S), rows = D.agents.filter(function (a) { return R.agents[a.id]; }).map(function (a) { return { a: a, q: R.agents[a.id] }; });
+  rows.sort(function (x, y) { return y.q.tokens - x.q.tokens || (x.a.name < y.a.name ? -1 : 1); });
+  return { R: R, rows: rows };
+}
+function recHTML() {
+  var x = recRows(), R = x.R, tot = R.total;
+  if (!tot.runs) return '<div class="uempty">No usage yet</div><div class="ufoot rec">Tokens appear as the replay runs.</div>';
+  var h = '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + ' tokens</span></div>' +
+    '<div class="l2 rec">' + tot.runs + ' runs' + (tot.nr ? ' · ' + tot.nr + ' not reported' : '') + '</div><div class="l2 rec">split not reported</div>' +
+    (tot.nr ? '<div class="l2 rec">Percentages exclude the ' + tot.nr + (tot.nr === 1 ? ' run' : ' runs') + ' with tokens not reported.</div>' : '') + '</div>';
+  h += '<h4>By provider</h4>';
+  var pid = D.log.provider, pr = pid && (D.providers || {})[pid];
+  if (pid) h += '<div class="ur"><div class="l1"><span class="nm">' + esc(pr ? pr.label : pid) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></div>' + barLine(100, pr && pr.colour, true) + '<div class="l2 rec">1 provider recorded</div></div>';
+  else h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Provider</span><span class="cost">not reported</span></div></div>';
+  h += '<h4>By agent, most tokens first</h4>';
+  x.rows.forEach(function (r) {
+    var a = r.a, q = r.q, pl = a.planned_model, mnotes = q.notes.filter(function (n) { return !n.nr; }), noted = mnotes.length > 0, allnr = q.runs === q.nr;
+    var runsTxt = q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses' + (q.nr ? ' · ' + q.nr + ' not reported' : '');
+    var head = '<span class="l1"><span class="nm">' + esc(a.name) + '</span>' +
+      (pl ? '<span class="pl" title="' + esc('Model from the agent profile; the harness does not report the model used.' + (noted ? ' ' + mnotes.map(function (n) { return 'Run ' + n.run + ': ' + n.note; }).join(' ') : '')) + '">' + esc(pl) + ' planned' + (noted ? '*' : '') + '</span>' : '') +
+      '<span class="cost" title="' + NOSPLIT + (allnr ? '' : ': ' + exact(q.tokens) + ' tokens') + '">' + (allnr ? 'not reported' : esc(fmtTok(q.tokens))) + '</span></span>' +
+      (allnr ? '' : barLine(q.pct)) + '<span class="l2 rec">' + esc(runsTxt) + '</span>';
+    h += accHTML(a.id, head, (S.runlog[a.id] || []).map(recRunLine).join('') + focusBtn(a.id),
+      a.name + ': ' + (allnr ? 'tokens not reported' : fmtTok(q.tokens) + ' tokens, ' + q.pct + '% of session') + ', ' + runsTxt.replace(/ · /g, ', ') + ', split not reported');
+  });
+  h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Main session</span><span class="cost">not reported</span></div></div>';
+  h += '<div class="ufoot rec">' + esc(String(D.log.covers || '').replace(/[.\s]+$/, '')) + '. Share is of this session\'s recorded tokens.</div>';
+  return h;
+}
 function usageHTML() {
+  if (REC) return recHTML();
   var U = C.usageTotals(S, D.providers), tot = U.total, n = tot.usd + tot.plan + tot.unset + tot.none;
   var h = '';
   if (!n) return '<div class="uempty">No usage yet</div><div class="ufoot">Tokens and estimates appear as the replay runs.</div>';
@@ -697,13 +824,16 @@ function usageHTML() {
   var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
   order.forEach(function (pid) {
     var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
-    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' +
+    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' + barLine(r.pct, pr && pr.colour, true) +
       '<div class="l2">' + figs(r) + '</div>' + (r.dates.length ? '<div class="l3">prices checked ' + esc(r.dates.join(', ')) + '</div>' : '') + '</div>';
   });
   h += '<h4>By agent</h4>';
   D.agents.forEach(function (a) {
     var r = U.agents[a.id], ml = modelOf(a.id);
-    h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(r.input + r.output + r.cache_read + r.cache_write ? C.costText(r) : '') + '</span></div><div class="l2">' + figs(r) + '</div></button>';
+    var used = r.input + r.output + r.cache_read + r.cache_write, runs = S.runlog[a.id] || [];
+    var inner = '<span class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost">' + esc(used ? C.costText(r) : '') + '</span></span>' + (used ? barLine(r.pct) : '') + '<span class="l2">' + figs(r) + '</span>';
+    if (runs.length) h += accHTML(a.id, inner, runs.map(synRunLine).join('') + focusBtn(a.id), a.name + ': ' + fmtTok(used) + ' tokens, ' + r.pct + '% of total, ' + runs.length + ' steps');
+    else h += '<button type="button" class="ur" data-agent="' + esc(a.id) + '" aria-label="' + esc(a.name) + ': show details"><div class="l1">' + chipHtml(ml) + '<span class="nm">' + esc(a.name) + '</span><span class="cost"></span></div><div class="l2">' + figs(r) + '</div></button>';
   });
   var dates = tot.dates;
   h += '<div class="ufoot">' + (SYN ? 'Synthetic numbers, not a real run. ' : '') + 'Costs are estimates from the office config' + (dates.length ? ', prices checked ' + esc(dates.join(', ')) : ', where a price is set') + '. Plan runs show tokens only.' +
@@ -712,6 +842,7 @@ function usageHTML() {
 }
 var usageKey = '', usageCol = false, usageColSet = false;
 function usageSummary() {
+  if (REC) { var rt = C.recTotals(S).total; return rt.runs ? fmtTok(rt.tokens) + ' tokens · recorded' : 'No usage yet'; }
   var t = C.usageTotals(S, D.providers).total, tok = t.input + t.output + t.cache_read + t.cache_write;
   return tok ? fmtTok(t.input + t.output) + ' in+out · ' + fmtTok(t.cache_read + t.cache_write) + ' cache' : 'No usage yet';
 }
@@ -720,14 +851,22 @@ function renderUsage() {
   var html = usageHTML(), key = html + '|' + usageCol + '|' + $('usheet').classList.contains('open');
   if (key === usageKey) return;
   usageKey = key;
+  var keep = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.acc : null;
   $('ubody').innerHTML = html;
   $('usum').innerHTML = esc(usageSummary()) + (SYN ? ' <span class="syn" style="color:var(--text-dim);font-style:italic">synthetic</span>' : '');
-  $('usage').classList.toggle('col', usageCol);
+  $('usage').classList.toggle('col', usageCol); $('usage').classList.toggle('rec', REC);
   $('ucol').setAttribute('aria-expanded', String(!usageCol)); $('ucol').setAttribute('aria-label', usageCol ? 'Expand usage' : 'Collapse usage');
   if ($('usheet').classList.contains('open')) fillSheet(html);
+  refocus(keep);
 }
+function refocus(id) {
+  if (!id) return;
+  var box = $('usheet').classList.contains('open') ? $('usheet') : $('ubody'), b = box.querySelector('[data-acc="' + id + '"]');
+  if (b) b.focus();
+}
+function toggleAcc(id) { accOff[id] = !accOff[id]; usageKey = ''; renderUsage(); refocus(id); }
 function fillSheet(html) {
-  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
+  $('usheet').innerHTML = '<div class="uh"><h2>Usage</h2>' + (SYN ? '<span class="synpill">synthetic</span>' : '') + (REC ? '<span class="synpill">recorded</span>' : '') + '<button type="button" class="ucol" id="usx" aria-label="Close usage">×</button></div>' + html;
   $('usx').addEventListener('click', closeSheet);
 }
 function openSheet() {
@@ -739,12 +878,14 @@ function closeSheet() { var sh = $('usheet'); if (sh.hidden) return; sh.classLis
 function initUsage() {
   $('nomodel').hidden = HAS_MODELS; $('usage').hidden = !HAS_MODELS;
   document.querySelectorAll('[data-syn]').forEach(function (e) { e.hidden = !SYN; });
+  document.querySelectorAll('[data-rec]').forEach(function (e) { e.hidden = !REC; });
   $('ubtn').hidden = !HAS_MODELS;
   if (!HAS_MODELS) return;
   usageCol = innerHeight < 520 || params.get('usage') === 'collapsed';
   $('ucol').addEventListener('click', function () { usageCol = !usageCol; usageKey = ''; renderUsage(); });
   $('ubtn').addEventListener('click', function () { if ($('usheet').classList.contains('open')) closeSheet(); else openSheet(); });
-  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
+  [$('ubody'), $('usheet')].forEach(function (box) { box.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-acc]'); if (t) { toggleAcc(t.dataset.acc); return; } var b = e.target.closest && e.target.closest('[data-agent]'); if (b) { closeSheet(); focusAgent(b.dataset.agent, false); } }); });
   document.addEventListener('pointerdown', function (e) { var sh = $('usheet'); if (!sh.hidden && !sh.contains(e.target) && e.target !== $('ubtn') && !(e.target.closest && e.target.closest('#gear,#msheet'))) closeSheet(); });
 }
 function hudRefresh(force) { updatePill(); renderStrip(force); renderUsage(); if (focused) renderFocus(); if (scene) scene.updateLabels(); }
@@ -758,8 +899,20 @@ function focusAgent(id, fromHud) {
   if (scene) scene.focus(focused);
   renderStrip(true);
 }
+function focusRec(id) {
+  var R = C.recTotals(S), q = R.agents[id], a = AG[id], pl = a.planned_model;
+  var h = '<div class="row" style="color:var(--text-dim)"><span>' + (pl ? 'Model: ' + esc(pl) + ' (planned)' : 'Model: not reported') + '</span></div>';
+  if (!q) return h + '<div class="fu"><div>No recorded runs yet</div></div>';
+  var last = q.last;
+  h += '<div class="fu mono"><div title="' + NOSPLIT + '">Total ' + (q.runs === q.nr ? 'not reported' : esc(fmtTok(q.tokens)) + ' · ' + q.pct + '% of session') + '</div>' +
+    '<div>' + q.runs + (q.runs === 1 ? ' run' : ' runs') + ' · ' + q.tools + ' tool uses</div><div>split not reported</div>' +
+    '<div>Last run ' + (last.run ? '#' + last.run + ': ' : '') + (last.total === null ? 'Tokens: not reported' : esc(fmtTok(last.total)) + ' tokens' + (last.tool_uses === null ? '' : ' · ' + last.tool_uses + ' tool uses')) + '</div>' +
+    q.notes.map(function (x) { return '<div>Note, run ' + x.run + ': ' + esc(x.note) + '</div>'; }).join('') + '</div>';
+  return h;
+}
 function focusModel(id) {
   if (!HAS_MODELS) return '';
+  if (REC) return focusRec(id);
   var m = S.agents[id].model, ml = modelOf(id);
   if (!m) return '<div class="row" style="color:var(--text-dim)">' + chipHtml(null) + '<span>No model yet</span></div>';
   var r = C.usageTotals(S, D.providers).agents[id], pl = AG[id].planned_model;
@@ -861,7 +1014,7 @@ function frame(ms) {
     $('scrub').value = TOTAL ? Math.round(Math.min(1, T / TOTAL) * 1000) : 0;
     S.now = T;
   }
-  $('clock').textContent = C.clock(T) + ' (synth)';
+  $('clock').textContent = C.clock(T) + (REC ? ' (replay)' : ' (synth)');
   if (scene) { scene.frame(dt, dt * (playing ? speed : 0), tNow); }
   fpsN++; fpsT += dt;
   if (fpsT >= 0.5) {
@@ -1434,11 +1587,11 @@ function initScene() {
     agentList.forEach(function (a) {
       var stt = a.cstt || 'idle', wait = stt === 'waiting', h = a.H;
       var nm = (small && !wait && focusId !== a.id) ? a.def.name.charAt(0) : a.def.name;
-      var ml = HAS_MODELS ? modelOf(a.id) : null, mk = ml ? ml.full : '';
+      var ml = CHIPS ? modelOf(a.id) : null, mk = ml ? ml.full : '';
       if (a.mkSkip) { a.mkSkip = false; a.mk = mk; } else if (a.mk === undefined) a.mk = mk;
       else if (a.mk !== mk) { if (a.mk && mk && !REDUCED) a.flashUntil = tn + 0.45; a.mk = mk; }
-      var html = '<div class="t1">' + (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>' + (HAS_MODELS && small ? chipHtml(ml) : '') + '</div>' +
-        (HAS_MODELS && !small ? '<div class="t2">' + chipHtml(ml) + '<span class="m">' + (ml ? esc(ml.short) : '') + '</span></div>' : '');
+      var html = '<div class="t1">' + (wait ? '<svg viewBox="0 0 16 16" width="9" height="9" style="color:var(--warn)"><path fill="currentColor" d="M8 .8l7.2 7.2L8 15.2.8 8z"/></svg>' : '<i></i>') + '<span class="n">' + esc(nm) + '</span>' + (CHIPS && small ? chipHtml(ml) : '') + '</div>' +
+        (CHIPS && !small ? '<div class="t2">' + chipHtml(ml) + '<span class="m">' + (ml ? esc(ml.short) : '') + '</span></div>' : '');
       if (a.tagEl._h !== html) { a.tagEl._h = html; a.tagEl.innerHTML = html; }
       a.tagEl.className = 'lb tag' + (wait ? ' warn' : '') + (spk === a ? ' talk' : '') + (tn < (a.flashUntil || 0) ? ' flash' : '');
       if (wait) placeEl(a.tagEl, a.x, h + 1.3, a.z, 0, 0); else placeEl(a.tagEl, a.x, h + 0.3 - 0.1 * a.sitK, a.z, 0, (REDUCED && a.sender && a.job) ? 62 : 0);

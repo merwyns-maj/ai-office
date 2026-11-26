@@ -30,7 +30,7 @@ class Loading(unittest.TestCase):
     def test_repo_config_loads_clean_with_four_providers(self):
         cat, probs = providers.load_providers(OFFICE)
         self.assertEqual(probs, [])
-        self.assertEqual(sorted(cat), ["anthropic-api", "claude-sdk", "deepseek", "openai"])
+        self.assertEqual(sorted(cat), ["anthropic-api", "claude-code", "claude-sdk", "deepseek", "openai"])
         self.assertEqual(cat["claude-sdk"]["billing"], "plan")
 
     def test_repo_config_has_no_price_set(self):

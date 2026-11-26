@@ -228,5 +228,69 @@ class RealFiles(unittest.TestCase):
                 self.assertNotIn(term.lower(), text.lower())
 
 
+class TokenSection(unittest.TestCase):
+    LEDGER = REPO / "offices" / OFFICE / "usage" / "session_01MDGJq3GfaeozLojJo8W5Td.jsonl"
+
+    def section(self, office_dir=None, repo=REPO):
+        return "\n".join(metrics.usage_section(office_dir or REPO / "offices" / OFFICE, repo))
+
+    def parsed(self):
+        from engine.runtime import ledger
+        agents = {"pmo", "pm", "architect", "engineer", "reviewer", "compliance", "curator", "designer"}
+        return ledger.load_ledger(self.LEDGER, agents=agents, office=OFFICE)[1]
+
+    def test_section_matches_the_parser_and_adds_up(self):
+        from engine.runtime import ledger
+        runs = self.parsed()
+        t = ledger.totals(runs)
+        text = self.section()
+        self.assertIn("## Token usage", text)
+        self.assertIn(f"| {t['session']['runs']} | {t['session']['not_reported']} | {t['session']['tokens']:,} |", text)
+        by_agent = text.split("**By agent**")[1].split("**By sprint**")[0]
+        by_sprint = text.split("**By sprint**")[1].split("**By task**")[0]
+        by_task = text.split("**By task**")[1]
+        num = lambda cell: int(cell.strip().replace(",", ""))
+        rows = lambda block: [[c.strip() for c in ln.strip("|").split("|")] for ln in block.splitlines() if ln.startswith("| ") and "---" not in ln][1:]
+        self.assertEqual(sum(num(r[3]) for r in rows(by_agent)), t["session"]["tokens"])
+        self.assertEqual(sum(num(r[3]) for r in rows(by_sprint)), t["session"]["tokens"])
+        task_rows = [r for r in rows(by_task) if r[0].startswith("T-") or r[0].startswith("Shared")]
+        self.assertEqual(sum(num(r[2]) for r in task_rows), t["session"]["tokens"])   # solo + shared row
+
+    def test_states_what_is_not_reported_and_why_no_plan_share(self):
+        text = self.section()
+        for needle in ("Main session's own tokens: not reported", "Model used: not reported", "Share of the Max plan: not shown",
+                       "no published fixed token limit", "not reported", "Shared runs (counted once)", "'incl. shared' column adds up to more by design"):
+            self.assertIn(needle, text)
+        self.assertNotIn("$", text)
+        self.assertNotRegex(text, r"(?i)% of (the )?(max )?plan|of the plan")
+
+    def test_error_and_data_rule_handling(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shutil.copytree(REPO / "offices" / OFFICE, root / "offices" / OFFICE, ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(REPO / "base", root / "base")
+            shutil.copy(REPO / "workspaces.yaml", root / "workspaces.yaml")
+            od = root / "offices" / OFFICE
+            f = od / "usage" / self.LEDGER.name
+            good = f.read_text(encoding="utf-8")
+            f.write_text(good + '{"n":5,"sprint":4,"agent":"zzz","tasks":["T-001"],"step":"x","tokens":1,"tool_uses":1,"duration_ms":1}\n', encoding="utf-8")
+            self.assertIn("1 lines skipped (errors)", self.section(od, root))
+            f.write_text(good + '{"n":99,"sprint":4,"agent":"pm","tasks":["T-001"],"step":"x","tokens":1,"tool_uses":1,"duration_ms":1,"note":"a@b.example"}\n', encoding="utf-8")
+            text = self.section(od, root)
+            self.assertIn("Tables omitted", text)
+            self.assertNotIn("**By agent**", text)
+            self.assertNotIn("a@b.example", text)
+
+    def test_committed_report_has_the_section(self):
+        for rep in (REPO / "offices" / OFFICE / "metrics").glob("*.md"):
+            if rep.name == "2026-11.md":
+                text = rep.read_text(encoding="utf-8")
+                self.assertIn("## Token usage", text)
+                self.assertIn("### session_01MDGJq3GfaeozLojJo8W5Td", text)
+                self.assertEqual(text.count("## Token usage"), 1)
+                self.assertLess(text.index("## Hours saved"), text.index("## Token usage"))
+                self.assertLess(text.index("## Token usage"), text.index("## How these are measured"))
+
+
 if __name__ == "__main__":
     unittest.main()
