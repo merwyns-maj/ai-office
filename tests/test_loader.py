@@ -168,5 +168,103 @@ class Consults(unittest.TestCase):
         self.assertEqual(code, 0, out)
 
 
+class LeanPath(unittest.TestCase):
+    """T-068: paths.lean rules in workflow.yaml and the lean entry rule on tasks."""
+    NOTE = "> Lean (Janice, pmo, 2026-11-27): the docked chat page; no new data; no compliance flag; no human gate. Reason: small.\n"
+
+    def setUp(self):
+        self.c = OfficeCopy()
+        self.addCleanup(self.c.cleanup)
+        self.wf = self.c.root / "workflow.yaml"
+        self.text = self.wf.read_text()
+        self.assertIn("paths:\n  lean:", self.text)
+
+    def validate(self):
+        return run("validate", str(self.c.root))
+
+    def bad_wf(self, old, new, needle):
+        self.assertIn(old, self.text)
+        self.wf.write_text(self.text.replace(old, new, 1))
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn(needle, out)
+
+    def task(self, note=NOTE, status="design", where="repo", project="ai-office", extra=""):
+        self.c.replace_backlog([("T-900", status, "P1", "architect", [])])
+        f = next((self.c.root / "backlog").glob("T-900-*.md"))
+        f.write_text(f"---\nid: T-900\ntitle: x\nstatus: {status}\npriority: P1\nowner: architect\n"
+                     f"where: {where}\nproject: {project}\ndepends_on: []\n---\n{note}## Spec\n{extra}## Open questions\n")
+        return f
+
+    def bad_task(self, needle, **kw):
+        self.task(**kw)
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn(needle, out)
+
+    def test_live_workflow_validates(self):
+        self.assertEqual(self.validate()[0], 0)
+
+    def test_skip_review_rejected(self):
+        self.bad_wf("skips: [spec] ", "skips: [review] ", "skips 'review' which is in never_skips")
+
+    def test_skip_build_rejected(self):
+        self.bad_wf("skips: [spec] ", "skips: [build] ", "skips 'build' which is in never_skips")
+
+    def test_skip_unknown_stage(self):
+        self.bad_wf("skips: [spec] ", "skips: [ghost] ", "skips 'ghost' is not a workflow stage")
+
+    def test_no_reviewer_gate(self):
+        self.bad_wf("  - { stage: done,   approver: reviewer }", "  - { stage: done,   approver: pmo }", "paths needs a gate {stage: done, approver: reviewer}")
+
+    def test_no_review_stage(self):
+        line = [l for l in self.text.splitlines(True) if l.startswith("  - { id: review")][0]
+        self.bad_wf(line, "", "paths needs a 'review' stage")
+
+    def test_unknown_entry_id(self):
+        self.bad_wf("no_human_gate]", "no_human_gate, extra]", "paths.lean entry must be exactly")
+
+    def test_spec_by_must_own_first_unskipped_stage(self):
+        self.bad_wf("spec_by: architect", "spec_by: pm", "spec_by 'pm' must own the first stage not skipped ('architect')")
+
+    def test_spec_approver_must_match_gate(self):
+        self.bad_wf("spec_approver: pmo", "spec_approver: human", "spec_approver must equal the spec gate approver")
+
+    def test_other_path_key_rejected(self):
+        self.bad_wf("paths:\n  lean:", "paths:\n  fast: {}\n  lean:", "only the key 'lean'")
+
+    def test_qualifying_task_passes(self):
+        self.task()
+        self.assertEqual(self.validate()[0], 0)
+
+    def test_two_surfaces(self):
+        self.bad_task("more than one surface", note=self.NOTE.replace("the docked chat page", "the chat page and the sprint page"))
+
+    def test_missing_no_new_data(self):
+        self.bad_task("missing 'no new data'", note=self.NOTE.replace("no new data; ", ""))
+
+    def test_compliance_flagged(self):
+        self.bad_task("compliance flagged: full path", extra="Compliance: flagged\n")
+
+    def test_human_gate_question(self):
+        f = self.task()
+        f.write_text(f.read_text() + "- Needs a human gate: writes to a company repo.\n")
+        code, out, _ = self.validate()
+        self.assertEqual(code, 1, out)
+        self.assertIn("human gate: full path", out)
+
+    def test_company_work(self):
+        self.bad_task("company/chat/office work: full path", where="company")
+
+    def test_lean_task_at_spec_fails(self):
+        self.bad_task("lean task is at 'spec'", status="spec")
+
+    def test_escape_to_full_path(self):
+        full = "> Full path (Fang, architect, 2026-11-28): two surfaces\n"
+        self.task(note=self.NOTE + full + "", status="spec", extra="Compliance: flagged\n")
+        code, out, _ = self.validate()
+        self.assertEqual(code, 0, out)
+
+
 if __name__ == "__main__":
     unittest.main()

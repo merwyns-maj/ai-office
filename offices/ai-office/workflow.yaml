@@ -11,6 +11,15 @@ terminal: [done, parked]
 consults:
   - { agent: designer, stage: design, when: "the Spec or Design has UI, visual or motion work", output_section: UX design, accepted_by: architect }
 
+# Lean path (T-068): small changes skip the separate PM spec run. PMO decides at plan, from the task file.
+paths:
+  lean:
+    skips: [spec]                 # todo -> design; the Architect writes a short Spec + Design in one run
+    spec_by: architect            # must own the first stage not skipped
+    spec_approver: pmo            # must equal the spec gate approver; PMO approves before build
+    entry: [one_surface, no_new_data, no_compliance_flag, no_human_gate]
+    never_skips: [design, build, review]
+
 # Authority (decided by Merwyn, 25 Nov 2026): the office is self-managed inside this repo.
 # PMO approves specs, Reviewer PASS is required before merge, PMO merges.
 gates:

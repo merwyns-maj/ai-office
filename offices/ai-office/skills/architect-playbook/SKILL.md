@@ -16,6 +16,8 @@ Distilled from architecture decision record (ADR) practice (sources at the end).
 - **Risks** — what could go wrong and how the build handles it.
 - **Flags** — anything touching production, money, credentials or personal data goes to Wulan before build.
 
+On a lean task (PMO `> Lean (...)` note, pmo-playbook §2a): write a short Spec (problem, in/out, Done when) above the Design, then set owner `pmo` for Spec approval. If the entry rule is wrong, append `> Full path (<name>, architect, <date>): <condition>` and hand back to the PMO. When you flag Compliance, write a line `Compliance: flagged`.
+
 ## 3. Decision records
 Write one when a decision is significant, hard to reverse, or likely to be questioned later. Keep each record to one decision, in the repo next to the work:
 - **Title**, **Status** (proposed, accepted, superseded by …), **Context** (the forces at play), **Decision**, **Consequences** (what gets easier, what gets harder).
