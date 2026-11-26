@@ -15,7 +15,7 @@ STEP_RE = re.compile(r"^[a-z][a-z-]{0,23}$")
 NOT_REPORTED = ("split", "model", "main_session")
 HEADER_TEXT = ("source", "recorded_by", "covers")
 HEADER_KEYS = ("log", "v", "office", "session", "source", "recorded_by", "covers", "date", "not_reported", "provider")
-RUN_KEYS = ("n", "sprint", "agent", "tasks", "step", "tokens", "tool_uses", "duration_ms", "note",
+RUN_KEYS = ("n", "sprint", "agent", "tasks", "step", "tokens", "tool_uses", "duration_ms", "note", "date",
             "model", "input", "output", "cache_read", "cache_write")
 NUMS = ("tokens", "tool_uses", "duration_ms")
 SPLIT = ("input", "output", "cache_read", "cache_write")
@@ -28,6 +28,13 @@ def _int(v, lo=0, hi=events.MAX_TOKENS):
 
 def _text(v, lo=1, hi=300):
     return isinstance(v, str) and lo <= len(v) <= hi and "\n" not in v and "\r" not in v
+
+
+def _iso_date(v):
+    try:
+        return isinstance(v, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v) is not None and date.fromisoformat(v) is not None
+    except ValueError:
+        return False
 
 
 def _check_header(h, office, providers=None):
@@ -77,6 +84,8 @@ def _check_run(r, agents):
             return f"{k} must be an integer from 0 to {events.MAX_TOKENS}, or null for not reported"
     if "note" in r and not _text(r["note"], 1, MAX_NOTE):
         return f"note must be 1-{MAX_NOTE} characters with no newline"
+    if "date" in r and not _iso_date(r["date"]):
+        return "date must be YYYY-MM-DD"
     if "model" in r and not (isinstance(r["model"], str) and events.MODEL_RE.match(r["model"])):
         return "bad model id"
     present = [k for k in SPLIT if k in r]

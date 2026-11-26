@@ -20,6 +20,7 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 ```
 - `n` integer >= 1, strictly increasing (a repeat or decrease is an error, a gap a warning); `sprint` integer >= 1; `agent` an `org.yaml` id; `tasks` 1-8 distinct `T-nnn`; `step` a lowercase slug (spec, ux, design, compliance, build, rework, review today).
 - `tokens`, `tool_uses`, `duration_ms`: integer 0 to 999,999,999, or `null` = **not reported**. A run whose harness report had no usage stays in the file with `null`, never 0.
+- `date` (optional, T-060): the day the run happened, YYYY-MM-DD. New run lines should carry it so a budget period (day, week, month) can be applied later; until every line has one, the usage panel's period is the session. A bad date is an error.
 - `note` (optional, 1-200 characters). On a run with `tokens: null` it explains the missing usage; on any other run it records a caveat such as the model differing from the profile (the page marks `planned*` only for the latter).
 - Later, written by the SDK runtime (T-024, T-026): `model`, `input`, `output`, `cache_read`, `cache_write`. If any of the four token fields is present, `input` and `output` are required and `tokens` must equal their sum.
 - An unknown field is a warning and is kept.
@@ -30,3 +31,6 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 
 ## Page
 `python scripts/office_app.py ai-office --ledger <file>` converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored).
+
+## Budgets (T-060)
+The usage panel compares these totals with `offices/<office>/budgets.yaml` (per provider, and per agent inside a provider; format and rules in `engine/runtime/budgets.py`). A budget is set by Merwyn or whoever he names, every value has `set_by` and `set_on`, and the page never invents one: no budget reads "budget not set". Period today: the session.
