@@ -114,3 +114,5 @@
 {"n": 112, "sprint": 7, "agent": "reviewer", "tasks": ["T-069"], "step": "review", "tokens": 105157, "tool_uses": 49, "duration_ms": 641035, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 113, "sprint": 7, "agent": "engineer", "tasks": ["T-069"], "step": "rework", "tokens": 34182, "tool_uses": 11, "duration_ms": 117534, "date": "2026-11-26", "note": "after the Sprint 7 close"}
 {"n": 114, "sprint": 7, "agent": "reviewer", "tasks": ["T-069"], "step": "review", "tokens": 33712, "tool_uses": 11, "duration_ms": 89320, "date": "2026-11-26", "note": "after the Sprint 7 close"}
+{"n": 115, "sprint": 7, "agent": "curator", "tasks": ["T-063", "T-065", "T-066", "T-067", "T-068", "T-069", "T-070", "T-071"], "step": "build", "tokens": 71847, "tool_uses": 12, "duration_ms": 97862, "date": "2026-11-26", "note": "decision records (PR #76); also covers T-072"}
+{"n": 116, "sprint": 7, "agent": "reviewer", "tasks": ["T-063", "T-065", "T-066", "T-067", "T-068", "T-069", "T-070", "T-071"], "step": "review", "tokens": 59885, "tool_uses": 9, "duration_ms": 85278, "date": "2026-11-26", "note": "decision records (PR #76); also covers T-072"}
