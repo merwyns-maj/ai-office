@@ -831,6 +831,33 @@ class Recorded(unittest.TestCase):
         self.assertTrue(all(e["type"] == "usage" and "total" in e for e in data["events"]))
         self.assertNotIn("$", json.dumps(data["events"]))
 
+    def _with_main(self, tmp):
+        f = Path(tmp) / LEDGER.name
+        f.write_text(LEDGER.read_text(encoding="utf-8") + '{"kind":"main_session","window":1,"date":"2026-11-26","source":"explain-usage skill",'
+                     '"since":"test fixture","requests":3,"input":10,"cache_write":20,"cache_read":30,"output":40}\n', encoding="utf-8")
+        return f
+
+    def test_main_session_totals_reach_the_page_data_not_the_events(self):
+        base, _ = office_app.build_data(OFFICE, None, LEDGER)
+        self.assertIsNone(base["ledger"]["main"])
+        with tempfile.TemporaryDirectory() as tmp:
+            data, probs = office_app.build_data(OFFICE, None, self._with_main(tmp))
+        self.assertEqual(probs, [])
+        self.assertEqual(data["ledger"]["main"]["output"], 40)
+        self.assertEqual(data["ledger"]["session"], base["ledger"]["session"])   # agent totals untouched
+        self.assertEqual(data["events"], base["events"])
+
+    def test_page_row_says_metered_with_lines_and_not_reported_without(self):
+        tpl = (REPO / "engine/app/office.template.html").read_text(encoding="utf-8")
+        self.assertIn("Main session (metered)", tpl)
+        self.assertIn("Main session: not reported", tpl)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "u.html"
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(self._with_main(tmp)), "--out", str(out)]), 0)
+            self.assertIn('"main":{"cache_read":30', out.read_text(encoding="utf-8"))
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out)]), 0)
+            self.assertIn('"main":null', out.read_text(encoding="utf-8"))
+
     def test_cli_writes_the_default_name_and_check_works(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "u.html"

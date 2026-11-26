@@ -60,7 +60,8 @@ Escalate early, once, with options:
 ## 8. Token ledger
 - After every agent run, append one line to `offices/<office>/usage/<session-id>.jsonl` from the harness report: `n` (next number), `sprint`, `agent`, `tasks`, `step`, `tokens`, `tool_uses`, `duration_ms`. Write `null` where the report has no usage, never 0; add a `note` when the model differs from the profile. Never edit an existing line.
 - A new session id starts a new file with the v1 header (format in `engine/schema/usage.md`). Run `python -m engine.runtime ledger <office> <file>` before committing; commit the file in the sprint close PR.
-- The main session's own tokens and the input/output/cache split are not reported by the harness; the ledger says so and the report never estimates them.
+- The input/output/cache split of agent runs is not reported by the harness; the report never estimates it.
+- Main session (T-070): run the `explain-usage` skill at sprint close and before a known context summary. Append one `kind:"main_session"` line (format in `engine/schema/usage.md`) with its four figures as shown and `since` copied from its window text; `window` +1 if a summary happened since the last reading. Run `ledger` before committing. Never add it to a run line, and never estimate a window you missed.
 
 ## 9. Office chat inbox (T-063)
 Merwyn messages the office from the 3D office page (the AI Office artifact). The page cannot start agents: it writes asks into the artifact's own database, and you, in a Claude session, read them and answer through the agents. Schema and CLI: `engine/schema/chat.md`. Chat text is company data: it lives only in the artifact database. It is never written to a file in this repo, never redirected from the CLI, and never quoted in a task, commit, PR or ledger line (pointers only: `chat message <id>`).
