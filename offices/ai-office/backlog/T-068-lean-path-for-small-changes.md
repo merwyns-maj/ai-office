@@ -2,9 +2,9 @@
 id: T-068
 title: "Lean path for small changes (one design step, then build and review)"
 phase: 0-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: repo
 project: ai-office
 depends_on: []
@@ -85,6 +85,34 @@ Not covered by a test: the Open questions "human gate" scan only looks below `##
 — Sebastian (engineer)
 
 ## Review log
+**Review 1 (Cahyani, 26 Nov 2026): REJECT.** One spec item fails (Done when 2). Everything else passes.
+
+Commands run on `t-068-lean-path` at b525c17:
+- `python -m unittest discover -s tests`: `Ran 407 tests ... OK`, exit 0.
+- `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 71 tasks, 18 skills`, exit 0.
+- `python scripts/board.py ai-office`: exit 0 (board.md discarded).
+
+Done-when checks (spec numbering):
+1. PASS. `paths.lean` with the entry rule is in `workflow.yaml` (lines 14-21), and validate exits 0.
+2. **FAIL.** The lean path itself can skip review and validate still passes. In a temp copy:
+   - removing the `{stage: done, approver: reviewer}` gate gives "paths needs a gate ... (Reviewer PASS before merge)", exit 1 (good);
+   - removing the `review` stage gives "paths needs a 'review' stage", exit 1 (good);
+   - `skips: [spec, review]` with `review` taken out of `never_skips` (or `never_skips` deleted) gives `ai-office: OK`, **exit 0**;
+   - `skips: [spec, build, review]` with `never_skips: []` gives `ai-office: OK`, **exit 0**.
+   So the protection is only as strong as the editable `never_skips` list. The review-stage and gate checks look at the whole workflow, not at the lean path. `test_skip_review_rejected` passes only because `never_skips` still lists review. With `[review]` alone, the failure comes from a `spec_by` mismatch, not from a review check.
+3. PASS. With a `Compliance: flagged` or `- Compliance: BLOCK` line, validate exits 1 with "compliance flagged: full path". A "human gate" line under Open questions exits 1 with "human gate: full path". `where: office` and `where: chat` exit 1 with "company/chat/office work: full path". "X and Y" as the surface exits 1 with "more than one surface: full path".
+4. PASS. `LeanPath` covers a qualifying task, two surfaces, missing "no new data", `Compliance: flagged`, a human-gate question, `where: company`, a Lean task at spec, and Lean then Full note.
+5. PASS. pmo-playbook §2a covers when to use lean, who decides (PMO), the note format, the escape, what still holds, and the T-066 figures (7 runs, about 520k tokens). pm-playbook has its paragraph, and architect-playbook has its line. A PMO can follow it from the task file alone.
+6. PASS for tests and board. No other workflow rule changed: the diff touches only the new `paths` block in workflow.yaml. `gates`, `human_gates`, `merge` and pr-workflow are untouched. The merge and planning-only rules are not loosened, because the PMO's Lean note plus todo->design counts as "status, owner, dated PMO decision notes", which is already planning-only.
+
+**Fixes needed (to pass Done when 2):**
+- In 5c, reject any `paths.lean.skips` entry that is `review` or `build`, hard-coded, whatever `never_skips` says. Also require `never_skips` to contain `review`. Either one closes the hole; doing both is cleanest.
+- Add a test for `skips: [spec, review]` with `never_skips: [design, build]`, and one for a missing `never_skips`. Both should exit 1 with a review-specific message.
+
+**Notes (non-blocking):**
+- The text checks are a floor, as the Design says: `**Compliance:** flagged`, surfaces split by `/`, and an Open question about production that doesn't use the words "human gate" all pass. The Architect and Reviewer escape covers these. Consider widening the compliance regex to allow `**`.
+- If the whole `paths` block and the reviewer gate are both removed, validate passes, because the gate check only runs when `paths` is present. Behaviour before this PR was the same, so this is out of scope. A later task could make the done/reviewer gate always required.
+— Cahyani (reviewer)
 
 ## Decision
 
