@@ -2,9 +2,9 @@
 id: T-041
 title: "working-with-merwyn skill, discovered over time"
 phase: 7-ways-of-working
-status: review
+status: done
 priority: P2
-owner: reviewer
+owner: pmo
 where: office
 project: ai-office
 depends_on: [T-012]
@@ -184,7 +184,7 @@ Approve or change (reply with numbers):
 3. Approve, but load it for all agents, not only PMO and Curator.
 4. Change something else (say what).
 
-Merwyn's approval: pending (date and time to be recorded here by April or Janice).
+Merwyn's approval: option 1, approve as written (26 Nov 2026, recorded by Janice).
 Status stays at `review` until approval is recorded.
 
 — April (curator)

@@ -3,7 +3,7 @@ name: working-with-merwyn
 description: How the PMO and Curator read Merwyn's replies, offer him choices and record his decisions. Use before asking Merwyn anything and when recording his answer.
 ---
 # Working with Merwyn
-Status: proposed by April, 26 Nov 2026; approval pending (Merwyn's date and time recorded here when he approves).
+Status: proposed by April, 26 Nov 2026; approved by Merwyn on 26 Nov 2026 (option 1, as written).
 Patterns that held up in at least two separate events in this repo. One-off sightings live in T-041's Decision ("watching").
 
 ## Patterns
