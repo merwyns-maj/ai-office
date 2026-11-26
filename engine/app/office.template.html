@@ -324,7 +324,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 #chgrip:after{content:'';position:absolute;left:50%;top:5px;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:rgba(255,255,255,.3)}
 #chgrip:hover:after,#chgrip.on:after{background:rgba(255,255,255,.6)}
 #chgrip:focus-visible{outline:2px solid var(--text);outline-offset:-2px}
-#cmid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin}
+#cmid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 #chat .uh h2{white-space:nowrap}
 #chat .cb{max-width:min(88%,720px)}
 #chat .uh .ucol{font-size:18px}
@@ -368,11 +368,12 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
 .cbtns button:hover,.cmore:hover,#cnew:hover{background:rgba(255,255,255,.08)}
 .ccopy{position:absolute;right:4px;top:4px;padding:1px 6px;min-height:20px;background:#2a2c42}
 #cnew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% - 0px);z-index:2}
-.cwrap{position:relative;flex:1 1 auto;min-height:64px;display:flex;flex-direction:column}
+.cwrap{position:relative;flex:1 1 auto;min-height:56px;display:flex;flex-direction:column}
 #cnew{bottom:6px;background:var(--paper);color:var(--panel);border:0;font-weight:700}
 .cnotice{margin:0 12px 6px;font-size:11px;line-height:1.4;color:var(--text-dim);flex:none}
 .cnotice.need{padding:8px 10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:var(--text)}
 .cnotice summary{cursor:pointer}
+.cnotice:not(.need){max-height:5em;overflow:auto}
 .cack{margin-top:6px;background:var(--paper);color:var(--panel);border:0;font-weight:700;padding:6px 12px}
 .cform{position:relative;padding:0 12px 10px;flex:none;display:flex;flex-direction:column;gap:6px}
 .cto{font-size:11px;color:var(--text-dim);display:flex;gap:4px;flex-wrap:wrap;align-items:center}
@@ -451,10 +452,10 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
   <section id="chat" class="panel" aria-label="Office chat" hidden>
     <div id="chgrip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize chat"></div>
     <div class="uh"><h2>Office chat</h2><span id="chst" class="chst"></span><button id="chx" class="ucol" type="button" aria-label="Close chat">×</button></div>
+    <div id="cnotice" class="cnotice"></div>
     <div id="cmid">
     <div id="cnote" class="cnote"></div>
     <div class="cwrap"><div id="cthread" class="cthread" role="log" aria-label="Chat messages" aria-live="polite" tabindex="0"></div><button id="cnew" type="button" hidden>New replies</button></div>
-    <div id="cnotice" class="cnotice"></div>
     </div>
     <form id="cform" class="cform" autocomplete="off">
       <ul id="clist" role="listbox" aria-label="Agents" hidden></ul>
@@ -875,13 +876,14 @@ body.rm .cb.new,body.rm .cchip.replying i{animation:none}
     return JSON.stringify(o);
   }
   /* chat dock (T-066) */
-  var DOCK = { MIN: 180, DEF_D: 0.38, DEF_P: 0.40, MIN_STAGE_D: 240, MIN_STAGE_P: 160, STEP: 16, STEP_BIG: 64 };
+  var DOCK = { MIN: 180, LINES: 58, DEF_D: 0.38, DEF_P: 0.40, MIN_STAGE_D: 240, MIN_STAGE_P: 160, STEP: 16, STEP_BIG: 64 };
   /* want: saved px or anything else (default); chrome: top strip + bar + tone; kb: keyboard px */
-  function chatH(want, vh, chrome, phone, kb) {
-    var def = Math.round(vh * (phone ? DOCK.DEF_P : DOCK.DEF_D)), max = vh - chrome - (phone ? DOCK.MIN_STAGE_P : DOCK.MIN_STAGE_D);
-    if (pnum(kb) && kb > 0) return Math.max(DOCK.MIN, vh - kb - chrome);
-    max = Math.max(DOCK.MIN, max);
-    return Math.round(pclamp(pnum(want) && want > 0 ? want : def, DOCK.MIN, max));
+  /* need: px the fixed parts (grip, header, notice, composer) take plus two thread lines; the minimum is never below it */
+  function chatH(want, vh, chrome, phone, kb, need) {
+    var mn = pnum(need) && need > DOCK.MIN ? Math.round(need) : DOCK.MIN, def = Math.round(vh * (phone ? DOCK.DEF_P : DOCK.DEF_D)), max = vh - chrome - (phone ? DOCK.MIN_STAGE_P : DOCK.MIN_STAGE_D);
+    if (pnum(kb) && kb > 0) return Math.max(mn, vh - kb - chrome);
+    max = Math.max(mn, max);
+    return Math.round(pclamp(pnum(want) && want > 0 ? want : def, mn, max));
   }
   /* ----- office chat (T-063): pure helpers; the same rules as engine/runtime/chat.py (shared fixtures keep them equal) ----- */
   var CH = {};
@@ -2509,17 +2511,18 @@ function onChatDocs() {
 }
 var DK = { h: 0, min: 0, max: 0 }, dockT = 0;
 function chatOpen() { return !!(CFG && CS && CS.st.open); }
-function dockEnd() {   
+function dockEnd() {
   clearTimeout(dockT); var r = document.documentElement; dockBusy = false; r.classList.remove('cm', 'cc');
   if (!chatOpen()) $('chat').hidden = true;
   if (scene) scene.resize();
 }
-function dockLayout(anim) {   
+function dockLayout(anim) {
   var r = document.documentElement, open = chatOpen(), px = 0, kb = parseFloat(r.style.getPropertyValue('--kb')) || 0, phone = innerWidth < 900;
   if (open) {
     var chrome = (parseFloat(getComputedStyle($('stage')).top) || 0) + $('bar').offsetHeight + (phone ? 36 : 0);
-    px = C.chatH(CS.st.h, innerHeight, chrome, phone, kb);
-    DK.min = C.chatDock.MIN; DK.max = Math.max(DK.min, innerHeight - chrome - (phone ? C.chatDock.MIN_STAGE_P : C.chatDock.MIN_STAGE_D));
+    var need = $('cmid').offsetTop + $('cnote').offsetHeight + C.chatDock.LINES + $('cform').offsetHeight + (parseFloat(getComputedStyle($('chat')).paddingBottom) || 0);
+    px = C.chatH(CS.st.h, innerHeight, chrome, phone, kb, need);
+    DK.min = C.chatH(1, innerHeight, chrome, phone, 0, need); DK.max = C.chatH(1e5, innerHeight, chrome, phone, 0, need);
     var g = $('chgrip'); g.setAttribute('aria-valuemin', DK.min); g.setAttribute('aria-valuemax', DK.max); g.setAttribute('aria-valuenow', px);
   }
   DK.h = px;
@@ -2557,7 +2560,7 @@ function openChat(scrollTo) {
   var p = $('chat'), was = chatOpen(); p.hidden = false; CS.st.open = true; saveChatSt();
   $('chatbtn').setAttribute('aria-expanded', 'true');
   if (!was) void p.offsetHeight;
-  dockLayout(!was && !CS.booting);
+  renderNotice(); dockLayout(!was && !CS.booting);
   chatInit(); CS.stick = true; CS.scrollTo = scrollTo || null; renderChat();
   if (focused) renderFocus();
   setTimeout(function () { if (!$('ctext').disabled) $('ctext').focus(); }, 0);
@@ -2658,7 +2661,7 @@ function renderNotice() {
   box.textContent = '';
   if (!CS.st.ack) {
     box.className = 'cnotice need'; box.appendChild(document.createTextNode(txt));
-    var b = el('button', 'cack'); b.type = 'button'; b.textContent = 'I understand'; b.addEventListener('click', function () { CS.st.ack = true; saveChatSt(); renderChat(); $('ctext').focus(); }); box.appendChild(document.createElement('br')); box.appendChild(b);
+    var b = el('button', 'cack'); b.type = 'button'; b.textContent = 'I understand'; b.addEventListener('click', function () { CS.st.ack = true; saveChatSt(); renderChat(); dockLayout(false); $('ctext').focus(); }); box.appendChild(document.createElement('br')); box.appendChild(b);
   } else {
     box.className = 'cnotice'; var d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'No personal data or credentials here. Details'; d.appendChild(s); d.appendChild(document.createTextNode(txt)); box.appendChild(d);
   }

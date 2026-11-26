@@ -4,7 +4,7 @@ title: "Chat as a docked section below the office; the office resizes"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-065]
@@ -108,6 +108,17 @@ Dinda's UX accepted as written. Only `engine/app/office.template.html` and `test
 - Screenshots (not committed), in /tmp/t066: shot-closed-1280x800.png, shot-open-1280x800.png, shot-open-1280x800-max.png, shot-open-1280x560-resized.png, shot-closed-390x844.png, shot-open-390x844.png, shot-open-390x844-kb.png, shot-pub-closed-1280.png, shot-pub-open-1280.png, shot-pub-open-390.png. The harness prints its result JSON at the top of the page, so it shows in the screenshots only.
 
 **Open questions**: none. C1 to C8 untouched (notice, footnote, scan, storage and agents code not changed; chat state stays in `office.chat.v1`, now with `h` only).
+— Sebastian (engineer)
+
+### Rework 1
+Fixes for Review 1 (REJECT). Files: `engine/app/office.template.html`, `tests/test_office_app.py`, rebuilt `engine/app/office.html`.
+1. **Notice pinned.** `#cnotice` moved out of the scroller: DOM order is now grip, header, notice, `#cmid` (note + thread), composer. It stays `flex:none`; `#cmid` no longer scrolls, so the thread takes what is left. Notice text, "I understand" button and ack gate are unchanged (C3). The acknowledged one-line notice gets `max-height:5em` with its own scroll, so its expanded details cannot squeeze the thread.
+2. **Minimum follows the content.** `C.chatH(want, vh, chrome, phone, kb, need)` has a new `need` argument: the measured px of grip, header, notice, note, composer and safe-area padding plus `C.chatDock.LINES` (58, two thread lines; `.cwrap` min-height 56). The minimum is `max(180, need)`. So the 180 px floor is kept where it fits and rises where it cannot: desktop 257 acknowledged / 324 not; phone 301 / 414. Office strip stays above Dinda's minimums (desktop min 240, phone 160): phone unacknowledged leaves 218 at the minimum. `dockLayout` re-measures on open, resize and after "I understand"; `aria-valuemin/max` follow. This is a deviation from "min 180": at 180 the header (64 px on phone), grip, composer and notice alone need more than 180 px, so no layout can show the notice and two lines there.
+3. **Tests.** `test_chat_notice_is_pinned_outside_the_scroll_area` (structure: notice between grip and `#cmid`, never inside it, `flex:none`, no overflow on `#cmid`, `.cwrap` min 56, `chatH` gets `need`) and new `dock` node cases for `need` (raise, never lower than 180, invalid need, short window, keyboard). Trailing spaces on `dockEnd` and `dockLayout` removed.
+4. **Size.** Committed page 221,168 B of 221,184 B (limit unchanged, 16 B headroom). Needed no extra trimming beyond Build 1. The next page change must trim or the Architect must decide.
+
+**Headless (Chrome, software GL, dpr 1; harness and stub `claude` in /tmp/t066, not committed).** At 1280x800 and 390x844, default / min (Home) / max (End), before and after the ack: chat full width, chat top >= bar bottom >= stage bottom, `scrollHeight == innerHeight`, no page errors. Unacknowledged: notice and button inside the chat, notice below header, button bottom above the composer, no inner scroll (1280: chat 324/324/448, button 581-608 above form 701; 390: 414/414/472, button 615-642 above form 735). After clicking "I understand" the thread is >= 56 px and above the composer in every case (min: 1280 chat 257, thread 57; 390 chat 301, thread 57). Closed stage 688 and 632, focus to composer on open and to Chat button on Escape. 12 of 12 cases OK for both the committed page and the published build (`--ledger ...session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`, 223 KB, not size-tested as before).
+Not re-run this round: panel position, tablet and simulated-keyboard cases from Build 1 (layout code for those is unchanged); real touch device.
 — Sebastian (engineer)
 
 ## Review log

@@ -488,6 +488,14 @@ if (mode === 'sprint3') {
   assert.strictEqual(H(300, 844, 212, true, 330), 844 - 330 - 212);
   assert.strictEqual(H(300, 500, 212, true, 400), 180);
   assert.strictEqual(H(300, 844, 212, true, 0), 300); assert.strictEqual(H(300, 844, 212, true, NaN), 300);
+  // need (T-066 rework): the minimum rises to what grip + header + notice + composer + 2 thread lines take, so nothing is clipped
+  assert.strictEqual(H(undefined, 844, 212, true, 0, 412), 412); assert.strictEqual(H(50, 844, 212, true, 0, 412), 412);
+  assert.strictEqual(H(9999, 844, 212, true, 0, 412), 472); assert.strictEqual(H(50, 800, 112, false, 0, 255), 255);
+  assert.strictEqual(H(50, 800, 112, false, 0, 100), 180);   // a small need never lowers the 180 minimum
+  [undefined, NaN, 'x', -1].forEach(n => assert.strictEqual(H(50, 800, 112, false, 0, n), 180));
+  assert.strictEqual(H(50, 500, 212, true, 0, 412), 412);   // window too short: the need wins over the office strip
+  assert.strictEqual(H(300, 844, 212, true, 330, 412), 412);
+  assert.ok(K.LINES >= 56);
   // panels: bounds end above the dock; a saved rect below it clamps up, the input rect is not changed
   const B0 = C.panelBounds(1280, 800, 56), B1 = C.panelBounds(1280, 800, 56, 304);
   assert.deepStrictEqual(B0, { left: 8, right: 1272, top: 56, bottom: 736 });
@@ -635,6 +643,20 @@ class CoreUnderNode(unittest.TestCase):
         # nothing is anchored to the bar alone: every bottom offset from the bar carries the dock height
         self.assertEqual(re.findall(r"bottom:calc\(var\(--bar\)[^)]*\)", html), [])
         self.assertNotIn("bottom:var(--bar)", html)
+
+    def test_chat_notice_is_pinned_outside_the_scroll_area(self):
+        # Review 1 of T-066: the needs-ack C3 notice sat inside the scroller and was cut off. It must stay a fixed block above the thread.
+        html = HTML.read_text(encoding="utf-8")
+        chat = html[html.index('<section id="chat"'):html.index('<div id="live"')]
+        self.assertLess(chat.index('id="cnotice"'), chat.index('id="cmid"'))
+        self.assertLess(chat.index('id="chgrip"'), chat.index('id="cnotice"'))
+        self.assertLess(chat.index('id="cmid"'), chat.index('id="cform"'))
+        self.assertNotIn('id="cnotice"', chat[chat.index('id="cmid"'):chat.index('id="cform"')])
+        css = html[:html.index("</style>")]
+        self.assertRegex(css, r"\.cnotice\{[^}]*flex:none")
+        self.assertNotRegex(re.search(r"#cmid\{[^}]*\}", css).group(0), r"overflow")   # no inner scroll that could hide the notice
+        self.assertRegex(css, r"\.cwrap\{[^}]*min-height:56px")                         # two thread lines at least
+        self.assertIn("C.chatH(CS.st.h, innerHeight, chrome, phone, kb, need)", html)       # the dock minimum follows the measured parts
 
     def test_chat_logic_under_node(self):
         with tempfile.TemporaryDirectory() as tmp:
