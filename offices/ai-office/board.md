@@ -43,7 +43,7 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
 | [T-053](backlog/T-053-recon-regulatory-figures-workflow.md) | P2 | Reconciliation and regulatory figures workflow | pmo | T-002, T-016 |
-| [T-064](backlog/T-064-standalone-office-app.md) | P2 | Standalone office app (desktop and mobile) on the office runtime | pmo | T-024, T-063 |
+| [T-064](backlog/T-064-standalone-office-app.md) | P2 | Standalone office app (desktop and mobile) on the office runtime | pmo | T-024 |
 
 ## spec (0)
 
