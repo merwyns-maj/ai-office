@@ -2,9 +2,9 @@
 id: T-024
 title: "Engine runtime: load an office folder and run its agents on the Agent SDK"
 phase: 6-office
-status: todo
+status: spec
 priority: P1
-owner: pmo
+owner: pm
 where: code
 project: ai-office
 depends_on: [T-001]
@@ -12,6 +12,8 @@ pr: null
 ---
 
 > Replaces the Claude Code subagent phase
+
+> Merwyn, 26 Nov 2026 19:54 WIB: "Just start these all no worries except 6". Started as planning only (spec and design). Where the runtime runs, hosting, sign-in, keys and any paid resource are human gates: listed for Merwyn, nothing created. Goal from T-063: agents reply to chat without an open Claude session.
 
 ## Done when
 - [ ] Runs offices/ai-office end to end on one task
