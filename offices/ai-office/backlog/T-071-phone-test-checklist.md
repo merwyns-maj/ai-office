@@ -2,9 +2,9 @@
 id: T-071
 title: "A 2-minute phone checklist Merwyn runs after each UI change"
 phase: 6-office
-status: review
+status: build
 priority: P2
-owner: reviewer
+owner: engineer
 where: repo
 project: ai-office
 depends_on: []
@@ -112,6 +112,30 @@ Checked `git diff main...HEAD`, `skills/phone-check/SKILL.md`, the pmo-playbook 
 - Step 2 "agents ... with names": at under 600 px the top strip shows initials (`.seg .nm` hidden). Check that the names the step means are the 3D labels.
 - Step 10 "same numbers as step 3" holds today because the page is the ledger as of its build. T-069 (usage from the artifact db) may change that; T-069's Design should name this step.
 - Build-notes deviation (a separate paragraph, not "§9 Publish, 3 lines") is fine: the playbook has no numbered sections.
+- External skills design:accessibility-review and data:validate-data: not available in this session; not used.
+
+**Review 2: REJECT (second rejection)** (26 Nov 2026). — Cahyani (reviewer)
+Checked `git diff 1574988..HEAD` (4 files: T-071 task, T-024 task, `skills/phone-check/SKILL.md`, pmo-playbook), `engine/app/office.template.html`, and headless Chrome screenshots of the committed `office.html` at 390x844 (portrait) and 844x390 (landscape), three.min.js copied under /tmp, not committed. WebGL is unavailable headless, so the 3D labels were not seen.
+
+Review 1 fixes:
+- F1 fixed for portrait (under 600 px). Step 3/10: `#gear` is shown (line 304), `#bar .opt` hides `#ubtn` (line 302), the gear's `#msheet` gets a "Usage" button only when `HAS_MODELS` (line 1469), and it opens `#usheet` with an x (`#usx`, line 1374). So the "no Usage button means no usage data" note is right. Step 6: `#usage`/`#ticker` hidden below 900 px (lines 272-273); `#tone` sits at `bottom:var(--bb)` where `--bb` = bar + chat height (lines 15, 274), so it stays above the bar and chat. My 390x844 screenshot shows the initials strip, the tone strip "+00:00 Janice starts T-901" above the bar, the chat icon with no label, and the gear.
+- F2 fixed. "Not on top of each other" is gone. Step 6 and the pmo-playbook "Phone check (T-071)" paragraph both say T-067 adds the no-overlap step when it merges. T-067 is still open and its Done when holds the rule.
+- Notes from Review 1 handled: step 4 says speech-bubble with no label (line 409), step 2 says initials (line 297), and step 10 is handed to T-069's Design.
+
+| Done when | Result | Evidence |
+|---|---|---|
+| 1. Under 12 steps, each with Expect, every area named | pass | 10 numbered **Do/Expect** steps covering open, office, usage, chat open/close, handle, keyboard, events strip, usage again. The no-overlap area is deferred to T-067 on purpose (F2) |
+| 2. About 2 minutes | not possible | no real phone here. 10 short steps, about 2 min is plausible |
+| 3. Playbook: when, who, where | pass | pmo-playbook line 85 |
+| 4. Matches T-066; no step relies on a missing feature | **fail** | F3 below |
+| 5. Tests, validate, no other file changes | pass | `python -m unittest discover -s tests`: "Ran 411 tests in 17.895s / OK", exit 0. `python -m engine.runtime validate ai-office`: "ai-office: OK — 8 agents, 5 stages, 71 tasks, 19 skills", exit 0. `board.py` exit 0, no Problems, board.md discarded. Other files are only the T-024 ride-along |
+
+**Fix needed**
+- F3 (the steps only hold in portrait; a phone held sideways falls in 600-899 px). In that band `#gear` is hidden (base `#gear{display:none}` at line 219; shown only at 900 px and up, line 250, and under 600 px, line 304). `#ubtn` "Usage" is in the bar (line 279), the chat button shows the "Chat" label (line 398; hidden only under 600 px, line 409), and the top strip shows full names (`.seg .nm` hidden only under 600 px, line 297). My 844x390 screenshot shows exactly this: names in the strip, then Motion, Follow, **Usage** and **Chat** in the bar, and no gear. So in landscape, steps 2, 3, 4 and 10 fail as written ("one initial per agent", "tap the gear", "no label"). Under the new playbook rule a false FAIL opens a needless task. The smallest fix is one line in the intro or step 1: "Hold the phone upright (portrait) for the whole check." Or else give the 600-899 variant for steps 2, 3, 4 and 10.
+
+**Notes (not reasons for rejection)**
+- This is the second REJECT, so per reviewer-playbook it goes through Janice. The fix is one line, so Janice may decide whether Merwyn needs to see it.
+- T-024 ride-along (commit 4f342d6, PMO, planning only): fine. Frontmatter `status: parked` (a terminal status in workflow.yaml line 7), `owner: pmo`. The order note now matches Design line 70: the no-spend checks and the FakeProvider build need no gate, then Merwyn picks A/B/C, then gates 2-6 before any real run. Open questions gain the gate-4 item (push `t-xxx` branches to merwyns-maj/ai-office). That covers my Review 1 notes (a), (b) and (c).
 - External skills design:accessibility-review and data:validate-data: not available in this session; not used.
 
 ## Decision
