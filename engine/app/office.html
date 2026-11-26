@@ -128,10 +128,16 @@ button.ur:hover{background:rgba(255,255,255,.05)}
 .ur.ah .ahc > span{display:block}
 .ur.ah .ahc > .l1{display:flex}
 .ab{padding:0 0 6px 20px}
+.ur.ah .l1 .nm{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ur.ah .l1 .cost{flex:none}
+.ab .note{font:400 11px/1.4 var(--ui);color:var(--text-dim);margin-top:4px}
+.sub{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);margin:4px 0 2px}
 .ab[hidden]{display:none}
 .rr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:11px;line-height:1.5;color:var(--text-dim)}
 .tid{white-space:nowrap}
 .rr > span:first-child{white-space:nowrap}
+.rr.sh{grid-template-columns:minmax(0,1fr) auto 4ch}
+.rr.sh > span:first-child{overflow:hidden;text-overflow:ellipsis}
 .rr .rt{white-space:nowrap;text-align:right;color:var(--text)}
 .lnk{background:none;border:0;color:var(--accent);font:600 11px/1.5 var(--ui);padding:2px 0;margin-top:2px;cursor:pointer;text-decoration:underline}
 #usheet .lnk{min-height:44px}
@@ -425,6 +431,21 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     pctify(out.providers); pctify(out.agents);
     return out;
   }
+  /* inside each provider: its models and the agents that used it, tokens and whole-number share of that provider (largest remainder, adds to 100) */
+  function providerBreakdown(s) {
+    var acc = {};
+    Object.keys(s.usage).forEach(function (k) {
+      var b = s.usage[k], t = b.input + b.output + b.cache_read + b.cache_write, p = acc[b.provider] || (acc[b.provider] = { models: {}, agents: {} });
+      p.models[b.model] = (p.models[b.model] || 0) + t; p.agents[b.agent] = (p.agents[b.agent] || 0) + t;
+    });
+    function rows(m) {
+      var ids = Object.keys(m).sort(function (a, b) { return m[b] - m[a] || (a < b ? -1 : 1); }), p = shares(ids.map(function (k) { return m[k]; }));
+      return ids.map(function (k, i) { return { id: k, tokens: m[k], pct: p[i] }; });
+    }
+    var out = {};
+    Object.keys(acc).forEach(function (pid) { out[pid] = { models: rows(acc[pid].models), agents: rows(acc[pid].agents) }; });
+    return out;
+  }
   /* recorded totals so far: per agent and overall; share is of the recorded session total */
   function recTotals(s) {
     var out = { total: { runs: 0, nr: 0, tokens: 0, tools: 0 }, agents: {} };
@@ -582,7 +603,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
   root.OfficeCore = { DUR: DUR, lineDur: lineDur, talkDur: talkDur, evDur: evDur, timeline: timeline, initState: initState,
     apply: apply, stateAt: stateAt, countDue: countDue, agentStatus: agentStatus, tagWord: tagWord, needs: needs,
     stripOrder: stripOrder, sentence: sentence, kind: kind, clock: clock, RANK: RANK,
-    eventCost: eventCost, usageTotals: usageTotals, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
+    eventCost: eventCost, usageTotals: usageTotals, providerBreakdown: providerBreakdown, recTotals: recTotals, shares: shares, costText: costText, modelLabel: modelLabel, plannedDiffers: plannedDiffers,
     tickerItems: tickerItems, switchSentence: switchSentence };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
@@ -775,6 +796,9 @@ function accHTML(id, head, body, label) {
   return '<div class="acc"><button type="button" class="ur ah rowtap" data-acc="' + esc(id) + '" aria-expanded="' + open + '" aria-label="' + esc(label) + '">' + CHEV + '<span class="ahc">' + head + '</span></button>' +
     '<div class="ab"' + (open ? '' : ' hidden') + '>' + body + '</div></div>';
 }
+function shareRow(name, tokens, pct, title) {
+  return '<div class="rr sh"><span class="mono"' + (title ? ' title="' + esc(title) + '"' : '') + '>' + esc(name) + '</span><span class="rt">' + esc(fmtTok(tokens)) + '</span><span class="rt">' + pct + '%</span></div>';
+}
 function recRunLine(r) {
   return '<div class="rr"><span class="mono">#' + esc(r.run) + (r.sprint ? ' · S' + esc(r.sprint) : '') + (r.step ? ' ' + esc(r.step) : '') + '</span><span class="mono">' + (r.tasks || []).map(function (t, i, a) { return '<span class="tid">' + esc(t) + (i < a.length - 1 ? ',' : '') + '</span>'; }).join(' ') + '</span>' +
     '<span class="rt" title="' + (r.note ? esc(r.note) : NOSPLIT) + '">' + (r.total === null ? 'not reported' : esc(fmtTok(r.total))) + (r.note ? '*' : '') + '</span></div>';
@@ -797,7 +821,12 @@ function recHTML() {
     (tot.nr ? '<div class="l2 rec">Percentages exclude the ' + tot.nr + (tot.nr === 1 ? ' run' : ' runs') + ' with tokens not reported.</div>' : '') + '</div>';
   h += '<h4>By provider</h4>';
   var pid = D.log.provider, pr = pid && (D.providers || {})[pid];
-  if (pid) h += '<div class="ur"><div class="l1"><span class="nm">' + esc(pr ? pr.label : pid) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></div>' + barLine(100, pr && pr.colour, true) + '<div class="l2 rec">1 provider recorded</div></div>';
+  if (pid) {
+    var pn = pr ? pr.label : pid, ag = x.rows.filter(function (r) { return r.q.tokens > 0; }), ps = C.shares(ag.map(function (r) { return r.q.tokens; }));
+    var phead = '<span class="l1"><span class="nm">' + esc(pn) + '</span><span class="cost" title="' + NOSPLIT + '">' + esc(fmtTok(tot.tokens)) + '</span></span>' + barLine(100, pr && pr.colour, true) + '<span class="l2 rec">1 provider recorded</span>';
+    h += accHTML('prov:' + pid, phead, '<div class="sub">Agents</div>' + ag.map(function (r, i) { return shareRow(r.a.name, r.q.tokens, ps[i]); }).join('') + '<div class="note">Model not reported</div>',
+      pn + ': ' + fmtTok(tot.tokens) + ' tokens, 100% of session, ' + ag.length + ' agents');
+  }
   else h += '<div class="ur dim nrow"><div class="l1"><span class="nm">Provider</span><span class="cost">not reported</span></div></div>';
   h += '<h4>By agent, most tokens first</h4>';
   x.rows.forEach(function (r) {
@@ -822,10 +851,14 @@ function usageHTML() {
   h += '<div class="ur tot"><div class="l1"><span class="nm">Total</span><span class="cost">' + esc(C.costText(tot)) + '</span></div><div class="l2">' + figs(tot) + '</div></div>';
   h += '<h4>By provider</h4>';
   var order = Object.keys(D.providers || {}).filter(function (k) { return U.providers[k]; }).concat(Object.keys(U.providers).filter(function (k) { return !(D.providers || {})[k]; }).sort());
+  var PB = C.providerBreakdown(S);
   order.forEach(function (pid) {
     var r = U.providers[pid], pr = (D.providers || {})[pid], ml = C.modelLabel(D.providers, pid, '-');
-    h += '<div class="ur"><div class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></div>' + barLine(r.pct, pr && pr.colour, true) +
-      '<div class="l2">' + figs(r) + '</div>' + (r.dates.length ? '<div class="l3">prices checked ' + esc(r.dates.join(', ')) + '</div>' : '') + '</div>';
+    var bd = PB[pid], phead = '<span class="l1">' + chipHtml(ml) + '<span class="nm" title="' + esc(pr ? pr.label : 'unknown provider') + '">' + esc(pid) + '</span><span class="cost">' + esc(C.costText(r)) + '</span></span>' + barLine(r.pct, pr && pr.colour, true) +
+      '<span class="l2">' + figs(r) + '</span>' + (r.dates.length ? '<span class="l3">prices checked ' + esc(r.dates.join(', ')) + '</span>' : '');
+    var body = '<div class="sub">Models</div>' + bd.models.map(function (m) { var l = C.modelLabel(D.providers, pid, m.id); return shareRow(l.short, m.tokens, m.pct, l.full); }).join('') +
+      '<div class="sub">Agents</div>' + bd.agents.map(function (g) { return shareRow(NAME[g.id] || g.id, g.tokens, g.pct); }).join('');
+    h += accHTML('prov:' + pid, phead, body, pid + ': ' + fmtTok(r.input + r.output + r.cache_read + r.cache_write) + ' tokens, ' + r.pct + '% of session, ' + bd.models.length + ' models, ' + bd.agents.length + ' agents');
   });
   h += '<h4>By agent</h4>';
   D.agents.forEach(function (a) {

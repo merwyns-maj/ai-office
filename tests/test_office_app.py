@@ -232,6 +232,19 @@ if (mode === 'sprint3') {
     v.forEach((x, i) => { if (T) assert.ok(Math.abs(p[i] - 100 * x / T) < 1, JSON.stringify(v)); });   // within one point of the exact share
   }
   console.log('shares ok');
+} else if (mode === 'provshares') {
+  /* inside each provider: models and agents add to 100 within that provider, tokens match the buckets */
+  const s = { usage: {
+    'a|p1|m1|usd': { agent: 'a', provider: 'p1', model: 'm1', input: 1, output: 0, cache_read: 0, cache_write: 0 },
+    'b|p1|m1|usd': { agent: 'b', provider: 'p1', model: 'm1', input: 1, output: 0, cache_read: 0, cache_write: 0 },
+    'b|p1|m2|usd': { agent: 'b', provider: 'p1', model: 'm2', input: 0, output: 1, cache_read: 0, cache_write: 0 },
+    'a|p2|m3|plan': { agent: 'a', provider: 'p2', model: 'm3', input: 5, output: 0, cache_read: 3, cache_write: 2 } } };
+  const B = C.providerBreakdown(s), sum = a => a.reduce((x, r) => x + r.pct, 0);
+  assert.deepStrictEqual(B.p1.models.map(r => [r.id, r.tokens, r.pct]), [['m1', 2, 67], ['m2', 1, 33]]);
+  assert.deepStrictEqual(B.p1.agents.map(r => [r.id, r.tokens, r.pct]), [['b', 2, 67], ['a', 1, 33]]);
+  assert.deepStrictEqual(B.p2.models.map(r => [r.id, r.tokens, r.pct]), [['m3', 10, 100]]);
+  Object.values(B).forEach(p => { assert.strictEqual(sum(p.models), 100); assert.strictEqual(sum(p.agents), 100); });
+  console.log('provshares ok');
 } else if (mode === 'rec') {
   /* recorded page: replay every run; null runs add 0 tokens and are excluded from the percentages */
   const E = D.events, tl = C.timeline(E);
@@ -360,6 +373,9 @@ class CoreUnderNode(unittest.TestCase):
 
     def test_percentage_maths(self):
         self.assertIn("shares ok", self.node(str(HTML), "shares"))
+
+    def test_percentages_within_provider(self):
+        self.assertIn("provshares ok", self.node(str(HTML), "provshares"))
 
     def test_recorded_replay_totals_and_percentages(self):
         data, _ = office_app.build_data(OFFICE, None, LEDGER)
