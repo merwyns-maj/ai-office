@@ -8,7 +8,7 @@ owner: reviewer
 where: office
 project: ai-office
 depends_on: [T-012]
-pr: null
+pr: 29
 ---
 
 > Merwyn 25 Nov 2026: "we can discover what's best for us". Seed from T-012 section D; grow it from sprint retros.
