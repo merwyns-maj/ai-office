@@ -2,7 +2,7 @@
 id: T-054
 title: "Follow-ups: golden zero-case exit, per-line owner check, metrics partial sums"
 phase: 3-skills
-status: build
+status: review
 priority: P2
 owner: reviewer
 where: code
