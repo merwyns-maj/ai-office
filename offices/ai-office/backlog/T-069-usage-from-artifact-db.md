@@ -231,6 +231,8 @@ The usage figures were never blank.
 ## Decision
 Merged after Cahyani's Review 2 PASS and Wulan's U1a (Janice, 26 Nov 2026). Usage lives in the artifact db under an owner-only `usage` rule, synced one way from the repo ledger by Janice (`usage plan`); the page reads it with the built-in snapshot as fallback, so the published page stays about 222 KB as runs grow. The live C7/U3/U4 checks are Janice's post-merge step, recorded in Build notes of the next PR. Follow-ups noted: Detail view folds the usage panel at 1280x800 in built-in states (Dinda).
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D5. — April (curator)
+
 ## Open questions
 - Does `db_write` support create-only (no doc yet), and does re-declaring `db` with the added `usage` rule keep the existing chat docs? Engineer, from describe_capabilities and a test write before the real declare (Design R3).
 - Retention of the db copy of usage (it mirrors the repo ledger and has no purge): keep as is, or purge on session end? Wulan.

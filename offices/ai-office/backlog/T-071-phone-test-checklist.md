@@ -168,6 +168,8 @@ Verdict: PASS. Status stays `review`, owner `pmo` for merge after Merwyn's appro
 ## Decision
 Merged after Cahyani's Review 3 PASS (Janice, 26 Nov 2026; after two rejections Merwyn chose "Fix and re-review"). The phone check is a skill (`skills/phone-check`), portrait only, 10 steps; T-067 adds a no-overlap step when it merges. T-024's planning sections (parked for Merwyn's gates) were reviewed on the same PR.
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, Smaller records. — April (curator)
+
 ## Open questions
 - Which phone and browser does Merwyn use (iOS Safari, Android Chrome, the Claude app)? Unknown; steps may differ. For Merwyn.
 - Should failures from the checklist reopen the task or open a new one? For the office (PMO decides).

@@ -152,6 +152,8 @@ The Build notes, read after my check, agree with these findings. No deviations.
 ## Decision
 Merged after Cahyani's PASS (Janice, 26 Nov 2026). One published page: the real ledger and the chat on "AI Office". The T-063 line "the recorded usage page never has chat" is reversed. The committed `office.html` stays as the synthetic dev build. A second session ledger needs a new task.
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D1. — April (curator)
+
 ## Open questions
 - Which ledger file does the one published page use: the current session file only, or all sessions as new ones start? Merwyn.
 - ~~Should the committed `office.html` (synthetic, used for tests and golden) stay as a separate dev build, or does the combined page replace it? It depends on whether the ledger file counts as repo data for `--check`. Fang.~~ Answered (Fang, Design): it stays as the synthetic dev build and is not published. The combined page is generated (gitignored) and published, so ledger appends never make a committed file stale.

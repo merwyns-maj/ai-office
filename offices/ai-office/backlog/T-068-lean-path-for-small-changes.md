@@ -162,6 +162,8 @@ Hardenings: `**Compliance:** flagged` exits 1. "chat page/settings page" and "ch
 ## Decision
 Merged after Cahyani's Review 2 PASS (Janice, 26 Nov 2026). The lean path skips only the separate spec step; build and review can never be skipped (hard rule 5c). Follow-ups noted, not tasks yet: text checks are a floor (lower-case `compliance:`, `&` surfaces), unknown keys inside `paths.lean`, and the reviewer-gate check when the whole `paths` block is removed.
 
+Recorded: offices/ai-office/decisions/2026-11-sprint-07.md, D4. — April (curator)
+
 ## Open questions
 - Is a task "one surface" decided by the PMO's judgement or by a file-count rule? For the office (Architect proposes, PMO approves).
 - Expected saving is unmeasured (T-066: 7 runs, about 520k tokens; the lean path would drop at least the PM run). Measure on the first lean task? For the office.
