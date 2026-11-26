@@ -2,13 +2,13 @@
 
 _Generated 2026-11-26 by scripts/board.py. Do not edit._
 
-**49 tasks** — todo: 32 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 17 · parked: 0
+**54 tasks** — todo: 33 · spec: 0 · design: 0 · build: 0 · review: 0 · done: 21 · parked: 0
 
 ## Waiting on you
 
 - [T-002](backlog/T-002-give-claude-github-access-to-the-impact.md) Give Claude GitHub access to the impact-credit-solutions org
 
-## todo (32)
+## todo (33)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -31,8 +31,9 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-024](backlog/T-024-engine-runtime-load-an-office-folder-and.md) | P1 | Engine runtime: load an office folder and run its agents on the Agent SDK | pmo | — |
 | [T-025](backlog/T-025-first-bau-workflow-weekly-ceo-report-or.md) | P1 | First BAU workflow (weekly CEO report or PRD review) | pmo | T-024, T-002 |
 | [T-026](backlog/T-026-token-and-cost-logging-review-round-cap.md) | P1 | Token and cost logging, review-round cap | pmo | T-024 |
-| [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
-| [T-049](backlog/T-049-golden-examples-for-office-skills-slice-of-t-016.md) | P1 | Golden examples and evals for the office's own skills (slice of T-016) | pmo | — |
+| [T-050](backlog/T-050-document-assessment-skill.md) | P1 | Partner or vendor document assessment skill | pmo | — |
+| [T-051](backlog/T-051-patch-hand-off-skill.md) | P1 | Data patch hand-off skill (Bytebase-ready scripts + ITH ticket) | pmo | T-002 |
+| [T-052](backlog/T-052-prod-investigation-skill.md) | P1 | Read-only prod investigation skill (new and legacy platforms) | pmo | T-002 |
 | [T-011](backlog/T-011-one-time-backfill-from-the-claude-data-e.md) | P2 | One-time backfill from the Claude data export | pmo | T-008 |
 | [T-017](backlog/T-017-package-klik-workspace-skills-agents-and.md) | P2 | Package klik-workspace skills, agents and hooks as one team plugin | pmo | T-002 |
 | [T-020](backlog/T-020-brain-pane-mod-open-items-office-runs-wa.md) | P2 | Brain pane mod (open items, office runs, waiting on you) | pmo | T-021 |
@@ -40,10 +41,10 @@ _Generated 2026-11-26 by scripts/board.py. Do not edit._
 | [T-028](backlog/T-028-chat-panel-and-approvals-in-the-app.md) | P2 | Chat panel and approvals in the app | pmo | T-027 |
 | [T-029](backlog/T-029-telegram-bridge.md) | P2 | Telegram bridge | pmo | T-024 |
 | [T-030](backlog/T-030-move-scheduled-bau-ssot-daily-slik-month.md) | P2 | Move scheduled BAU: SSOT daily, SLIK monthly, billing recon | pmo | T-025 |
-| [T-032](backlog/T-032-adoption-metrics-hours-saved-reject-rate.md) | P2 | Adoption metrics (hours saved, reject rate, turnaround) | pmo | — |
 | [T-033](backlog/T-033-team-rollout-conventions-before-scale.md) | P2 | Team rollout: conventions before scale | pmo | T-017 |
 | [T-034](backlog/T-034-move-company-offices-to-a-company-api-ke.md) | P2 | Move company offices to a company API key when team-wide | pmo | T-033 |
-| [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
+| [T-053](backlog/T-053-recon-regulatory-figures-workflow.md) | P2 | Reconciliation and regulatory figures workflow | pmo | T-002, T-016 |
+| [T-054](backlog/T-054-tooling-follow-ups-golden-and-metrics.md) | P2 | Follow-ups: golden zero-case exit, per-line owner check, metrics partial sums | pmo | — |
 
 ## spec (0)
 
@@ -61,7 +62,7 @@ _empty_
 
 _empty_
 
-## done (17)
+## done (21)
 
 | ID | P | Task | Owner | Blocked by |
 |---|---|---|---|---|
@@ -73,6 +74,7 @@ _empty_
 | [T-043](backlog/T-043-guard-ask-mode-for-prod-writes.md) | P0 | Prod-guard mode change: prod writes ask Merwyn, Bytebase always blocked | curator | — |
 | [T-046](backlog/T-046-compliance-files-match-prod-access-decision.md) | P0 | Compliance files match the 25 Nov prod access decision | pmo | — |
 | [T-014](backlog/T-014-working-standard-skill.md) | P1 | Working-standard skill | curator | — |
+| [T-031](backlog/T-031-monthly-chat-to-office-review.md) | P1 | Monthly chat-to-office review | pmo | — |
 | [T-035](backlog/T-035-agent-names-personas-and-skills.md) | P1 | Agent names, personas and skills | curator | — |
 | [T-036](backlog/T-036-rename-agents-and-adopt-external-skills.md) | P1 | Rename agents and adopt external skills | curator | — |
 | [T-039](backlog/T-039-engine-loader-and-dry-run-slice-of-t-024.md) | P1 | Engine loader and dry-run (repo-only slice of T-024) | curator | — |
@@ -80,7 +82,10 @@ _empty_
 | [T-044](backlog/T-044-process-lessons-validate-warning-and-replay.md) | P1 | Sprint 2 process lessons: validate warns on missing defaults, pr-workflow replay not rebase | curator | — |
 | [T-047](backlog/T-047-hire-product-designer-agent.md) | P1 | Hire a product designer agent (Dinda) with a researched playbook | pmo | — |
 | [T-048](backlog/T-048-3d-animated-office-prototype.md) | P1 | 3D animated office: design and three.js prototype (slice of T-027) | pmo | — |
+| [T-049](backlog/T-049-golden-examples-for-office-skills-slice-of-t-016.md) | P1 | Golden examples and evals for the office's own skills (slice of T-016) | pmo | — |
 | [T-015](backlog/T-015-partner-facing-writing-skill.md) | P2 | Partner-facing writing skill | curator | — |
+| [T-032](backlog/T-032-adoption-metrics-hours-saved-reject-rate.md) | P2 | Adoption metrics (hours saved, reject rate, turnaround) | pmo | — |
+| [T-041](backlog/T-041-working-with-merwyn-discovered-over-time.md) | P2 | working-with-merwyn skill, discovered over time | pmo | — |
 | [T-045](backlog/T-045-partner-writing-b2-financial-terms.md) | P2 | Partner-writing B2 update: keep financial terms in English too | curator | — |
 
 ## parked (0)
