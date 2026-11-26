@@ -1,0 +1,44 @@
+{
+  "skill": "partner-writing",
+  "rules": [
+    "B6",
+    "B1"
+  ],
+  "input": "Draft a plain-text email to a bank partner listing three documents we need from them.",
+  "expected_output": "Hello,\n\nTo move ahead we need three documents from you:\n\n1. The signed agreement.\n2. The authorised signatory list.\n3. The account opening form.\n\nPlease send them when ready. The review date is to be confirmed.\n\nThank you.",
+  "checks": [
+    {
+      "type": "must_not_match",
+      "pattern": "^#",
+      "rule": "B6"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "\\*\\*",
+      "rule": "B6"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^\\s*[*-] ",
+      "rule": "B6"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "^\\|",
+      "rule": "B6"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^1\\. ",
+      "rule": "B6"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "[\\u2014\\u2013]",
+      "rule": "B1"
+    }
+  ],
+  "bad_output": "## Documents needed\n\n**Please send:**\n\n* The signed agreement\n* The authorised signatory list\n\n| Item | Status |\n|---|---|\n| Form | open |",
+  "human_note": "Check paragraphs are short and the list uses '1.' lines only because a list is needed. Greeting and sign-off fit the partner.",
+  "why": "Markdown in an email shows up as stray symbols in the partner's mail client. The case catches headings, bold, bullets and tables."
+}

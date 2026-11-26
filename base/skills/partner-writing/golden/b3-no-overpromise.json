@@ -1,0 +1,34 @@
+{
+  "skill": "partner-writing",
+  "rules": [
+    "B3",
+    "B4"
+  ],
+  "input": "A bank partner asks when the integration goes live. No date is agreed. Reply in one short paragraph.",
+  "expected_output": "The go-live date is to be confirmed. Our product lead will confirm it once both sides agree the test plan.",
+  "checks": [
+    {
+      "type": "must_contain",
+      "text": "to be confirmed",
+      "rule": "B3"
+    },
+    {
+      "type": "must_match",
+      "pattern": "(?i)\\bconfirm",
+      "rule": "B3"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)\\b(guarantee[ds]?|definitely|will go live (on|by))\\b",
+      "rule": "B3"
+    },
+    {
+      "type": "max_lines",
+      "max": 3,
+      "rule": "B4"
+    }
+  ],
+  "bad_output": "We guarantee the integration will go live by the end of next month.\nWe are definitely on track.",
+  "human_note": "Check the text names who confirms (B3) and does not restate the partner's question (B4). Whether the tone is right for this partner (B5) is a human call.",
+  "why": "Dates and SLAs not yet agreed are the likeliest overpromise in partner text. The case holds the reply to 'to be confirmed' plus an owner."
+}

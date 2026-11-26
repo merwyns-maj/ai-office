@@ -1,0 +1,44 @@
+{
+  "skill": "spec-writing",
+  "rules": [
+    "five parts",
+    "one screen"
+  ],
+  "input": "Task: 'Add a script that lists tasks with no owner.' Write the Spec section.",
+  "expected_output": "**Problem.** The board hides tasks whose owner is empty, so nobody notices they are stuck.\n\n**In scope**\n- A script that prints task ids with an empty owner.\n\n**Out of scope**\n- Fixing the owners it finds.\n\n**Done when**\n- [ ] `python scripts/orphans.py ai-office` prints one id per line and exits 0.\n\n**Open questions**\n- Should parked tasks count? Janice (pmo) can answer; not blocking.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*Problem\\.\\*\\*",
+      "rule": "five parts"
+    },
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*In scope\\*\\*",
+      "rule": "five parts"
+    },
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*Out of scope\\*\\*",
+      "rule": "five parts"
+    },
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*Done when\\*\\*",
+      "rule": "five parts"
+    },
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*Open questions\\*\\*",
+      "rule": "five parts"
+    },
+    {
+      "type": "max_lines",
+      "max": 25,
+      "rule": "one screen"
+    }
+  ],
+  "bad_output": "**Problem.** The board hides tasks without an owner.\n\n**In scope**\n- A script.\n\n**Done when**\n- [ ] The script works.",
+  "human_note": "Judge that the Problem is 1 to 2 sentences, nothing in scope picks an implementation (that is the Architect's), and every line is a fact.",
+  "why": "A spec missing Out of scope or Open questions lets scope creep in. The case pins all five parts and the one-screen limit."
+}

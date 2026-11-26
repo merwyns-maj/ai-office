@@ -1,0 +1,33 @@
+{
+  "skill": "partner-writing",
+  "rules": [
+    "B2"
+  ],
+  "input": "Tulis satu paragraf Indonesia untuk partner: dana masuk ke virtual account setelah verifikasi, lalu tenor dihitung dari tanggal pencairan.",
+  "expected_output": "Dana masuk ke *virtual account* setelah verifikasi selesai. *Tenor* dihitung dari tanggal pencairan.",
+  "checks": [
+    {
+      "type": "must_contain",
+      "text": "*virtual account*",
+      "rule": "B2"
+    },
+    {
+      "type": "must_contain",
+      "text": "*Tenor*",
+      "rule": "B2"
+    },
+    {
+      "type": "must_not_contain",
+      "text": "rekening virtual",
+      "rule": "B2"
+    },
+    {
+      "type": "must_not_contain",
+      "text": "jangka waktu",
+      "rule": "B2"
+    }
+  ],
+  "bad_output": "Dana masuk ke rekening virtual setelah verifikasi selesai. Jangka waktu dihitung dari tanggal pencairan.",
+  "human_note": "Judge whether italics are used only where the translation would read oddly, and that no term list was invented (B2 says use only terms Merwyn named).",
+  "why": "Financial terms get translated into awkward Indonesian when the skill's B2 line is lost. The case pins the two terms the rule names."
+}

@@ -1,0 +1,28 @@
+{
+  "skill": "spec-writing",
+  "rules": [
+    "Done when"
+  ],
+  "input": "Task check: 'The runner works and the output is clean.' Rewrite it as Done when items a reviewer can verify.",
+  "expected_output": "**Done when**\n- [ ] `python scripts/golden.py ai-office` exits 0 and prints `0 problems`.\n- [ ] `python -m unittest` prints `OK`.\n- [ ] `git diff --exit-code offices/ai-office/board.md` prints nothing.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^- \\[ \\] ",
+      "rule": "Done when"
+    },
+    {
+      "type": "must_match",
+      "pattern": "`[^`]+`",
+      "rule": "Done when"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "(?i)\\b(works|clean)\\b\\.?$",
+      "rule": "Done when"
+    }
+  ],
+  "bad_output": "**Done when**\n- [ ] The runner works.\n- [ ] The output is clean.",
+  "human_note": "Judge that each item is something a reviewer can run or open, and that the replacement is not just a synonym of 'works'.",
+  "why": "Vague words like 'works' and 'clean' cannot be verified. The skill says to replace them with an observable result."
+}

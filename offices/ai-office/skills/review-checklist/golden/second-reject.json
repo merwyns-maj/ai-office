@@ -1,0 +1,29 @@
+{
+  "skill": "review-checklist",
+  "rules": [
+    "verdict",
+    "second REJECT"
+  ],
+  "input": "This is the second REJECT on the same task. Write the Review log and say where the task goes.",
+  "expected_output": "## Review log\n\nREJECT (second)\n\nFailing check: 3 (board.md is committed on the task branch).\nFix: remove board.md from the PR.\n\nRan 20 tests in 1.1s\nFAILED (failures=1)\n\nWaiting on Merwyn: this task has two REJECTs.\n\nNotes\n- None.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^REJECT\\b",
+      "rule": "verdict"
+    },
+    {
+      "type": "must_contain",
+      "text": "Waiting on Merwyn",
+      "rule": "second REJECT"
+    },
+    {
+      "type": "must_contain",
+      "text": "Fix",
+      "rule": "REJECT lists the fix"
+    }
+  ],
+  "bad_output": "## Review log\n\nREJECT\n\nFailing check: 3.\nFix: remove board.md.",
+  "human_note": "Judge that this really is the second REJECT and that the task is added to Waiting on Merwyn, not sent back to the Engineer a third time.",
+  "why": "Two REJECTs mean the task needs a human. The case catches a review that forgets the escalation."
+}
