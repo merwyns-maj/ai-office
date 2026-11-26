@@ -39,3 +39,5 @@
 {"n":38,"sprint":7,"agent":"reviewer","tasks":["T-057"],"step":"review","tokens":84344,"tool_uses":36,"duration_ms":330276}
 {"n":39,"sprint":7,"agent":"engineer","tasks":["T-057"],"step":"rework","tokens":221942,"tool_uses":14,"duration_ms":140310,"note":"resumed agent (SendMessage); the harness figure may include the earlier build run, so the two may overlap"}
 {"n":40,"sprint":7,"agent":"reviewer","tasks":["T-057"],"step":"review","tokens":105174,"tool_uses":8,"duration_ms":113655,"note":"resumed agent (SendMessage); the harness figure may include the earlier review run, so the two may overlap"}
+{"n":41,"sprint":7,"agent":"engineer","tasks":["T-058"],"step":"build","tokens":58606,"tool_uses":23,"duration_ms":118427,"note":"after the Sprint 7 close, from Merwyn's artifact comment"}
+{"n":42,"sprint":7,"agent":"reviewer","tasks":["T-058"],"step":"review","tokens":56382,"tool_uses":21,"duration_ms":216661,"note":"after the Sprint 7 close, from Merwyn's artifact comment"}
