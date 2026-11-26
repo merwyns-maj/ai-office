@@ -2,7 +2,7 @@
 id: T-066
 title: "Chat as a docked section below the office; the office resizes"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
