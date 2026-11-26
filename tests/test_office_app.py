@@ -10,8 +10,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import office_app  # noqa: E402
 
-from engine.runtime import events, providers  # noqa: E402
-from tests._helpers import REPO  # noqa: E402
+from engine.runtime import events, ledger as ledger_mod, providers  # noqa: E402
+from tests._helpers import REPO, appended_copy  # noqa: E402
 
 HTML = REPO / "engine/app/office.html"
 TEMPLATE = REPO / "engine/app/office.template.html"
@@ -19,6 +19,27 @@ OFFICE = REPO / "offices/ai-office"
 ALL_TYPES = REPO / "tests/fixtures/events-all-types.jsonl"
 SPRINT3 = REPO / "engine/app/fixtures/sprint-03.jsonl"
 TEST_CFG = REPO / "tests/fixtures/providers-test.yaml"
+# T-072: tests read the live ledger only for invariants (it is append-only; honest lines must never break the suite).
+# Exact numbers come from this synthetic ledger: 7 runs, one chat run (500 tokens), one not reported, 10,500 tokens in all.
+FIXTURE = REPO / "tests/fixtures/session_FIXTURE072.jsonl"
+LIVE = REPO / "offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl"
+_AGENTS = {"pmo", "pm", "architect", "engineer", "reviewer", "compliance", "curator", "designer"}
+
+
+def ledger_runs(path):
+    return ledger_mod.load_ledger(path, agents=_AGENTS, office="ai-office")[1]
+
+
+def page_totals(runs):
+    """What the recorded page shows as used: it replays events, and chat runs (tasks: []) are not events (usage.md, T-063),
+    so its total leaves them out. ledger.totals(all runs) is the ledger's figure, not the page's. One place to change if the page changes."""
+    return ledger_mod.totals([r for r in runs if r["tasks"]])
+
+
+def page_py(runs):
+    t = page_totals(runs)
+    return {"tokens": t["session"]["tokens"], "runs": t["session"]["runs"], "nr": t["session"]["not_reported"],
+            "agents": {k: v["tokens"] for k, v in t["agents"].items()}}
 
 
 def block(html, sid):
@@ -313,7 +334,7 @@ if (mode === 'sprint3') {
     assert.strictEqual(p.row.pct, Math.round(100 * py.tokens / B.tokens));
     assert.deepStrictEqual(D.budgets.thresholds.warn_at < D.budgets.thresholds.alert_at, true);
     p.agents.concat([p]).filter(a => a.kind !== 'main').forEach(a => assert.strictEqual(a.row.level, C.budgetLevel(a.row.pct, a.row.over, D.budgets.thresholds)));
-    assert.strictEqual(p.agents.filter(a => a.kind === 'agent').length, Object.keys(py.agents).length);
+    assert.strictEqual(p.agents.filter(a => a.kind === 'agent').length, Object.keys(B.agents).length);   // one row per budgeted agent (T-072: not per agent that has a run)
     p.agents.filter(a => a.kind === 'agent').forEach(a => { assert.strictEqual(a.row.used, py.agents[a.id] || 0); assert.strictEqual(a.row.budget, B.agents[a.id].tokens); });
     assert.strictEqual(p.agents[p.agents.length - 1].kind, 'main'); assert.strictEqual(p.agents[p.agents.length - 1].id, D.budgets.main_session);
     const ratios = p.agents.filter(a => a.kind === 'agent').map(a => a.row.ratio); assert.deepStrictEqual(ratios.slice().sort((x, y) => y - x), ratios);
@@ -695,23 +716,20 @@ class CoreUnderNode(unittest.TestCase):
         self.assertIn("provshares ok", self.node(str(HTML), "provshares"))
 
     def test_recorded_replay_totals_and_percentages(self):
-        data, _ = office_app.build_data(OFFICE, None, LEDGER)
+        py = page_py(ledger_runs(FIXTURE))
+        # pinned once: 6 task runs (the chat run is not an event), 1 not reported, the 500 chat tokens left out
+        self.assertEqual(py, {"tokens": 10000, "runs": 6, "nr": 1, "agents": {"pm": 1000, "architect": 2000, "engineer": 7000, "reviewer": 0}})
         with tempfile.TemporaryDirectory() as tmp:
             page = Path(tmp) / "r.html"
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(page)]), 0)
-            led = data["ledger"]
-            py = {"tokens": led["session"]["tokens"], "runs": led["session"]["runs"], "nr": led["session"]["not_reported"],
-                  "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--out", str(page)]), 0)
             self.assertIn("rec ok", self.node(str(page), "rec", self.json_file(tmp, "p.json", py)))
 
     def test_budget_maths_and_views_recorded(self):
-        data, _ = office_app.build_data(OFFICE, None, LEDGER)
+        py = page_py(ledger_runs(FIXTURE))
         with tempfile.TemporaryDirectory() as tmp:
             page = Path(tmp) / "r.html"
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(page)]), 0)
-            led = data["ledger"]
-            py = {"tokens": led["session"]["tokens"], "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
-            self.assertIn("budgets rec ok", self.node(str(page), "budgets", self.json_file(tmp, "p.json", py)))
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--out", str(page)]), 0)
+            self.assertIn("budgets rec ok", self.node(str(page), "budgets", self.json_file(tmp, "p.json", {"tokens": py["tokens"], "agents": py["agents"]})))
 
     def test_budget_maths_and_views_synthetic(self):
         self.assertIn("budgets syn ok", self.node(str(HTML), "budgets"))
@@ -814,31 +832,31 @@ class NoLiterals(unittest.TestCase):
         self.assertGreaterEqual(html.count('<span class="syn">synthetic</span>'), 1)   # the suffix after every figure group
 
 
-LEDGER = REPO / "offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl"
-
-
 class Recorded(unittest.TestCase):
-    """--ledger: replay a recorded agent-run ledger (T-057)."""
+    """--ledger: replay a recorded agent-run ledger (T-057). self.LEDGER is the live ledger (invariants only, T-072);
+    RecordedAppended runs the same tests on it plus 3 appended valid lines. Exact numbers use FIXTURE."""
+    LEDGER = LIVE
 
     def test_ledger_page_data_is_recorded_with_totals(self):
-        data, probs = office_app.build_data(OFFICE, None, LEDGER)
+        data, probs = office_app.build_data(OFFICE, None, self.LEDGER)
         self.assertEqual(probs, [])
         self.assertEqual(data["log"]["usage_source"], "recorded")
         self.assertEqual(data["log"]["not_reported"], ["split", "model", "main_session"])
         self.assertEqual(data["log"]["provider"], "claude-code")
         self.assertEqual(data["providers"]["claude-code"]["label"], "Claude Code subagents (Max plan)")
-        self.assertEqual(data["ledger"]["session"]["tokens"], sum(e["total"] or 0 for e in data["events"]))
+        chat = sum(r["tokens"] or 0 for r in ledger_runs(self.LEDGER) if not r["tasks"])   # chat runs are in the totals, not the events
+        self.assertEqual(data["ledger"]["session"]["tokens"], sum(e["total"] or 0 for e in data["events"]) + chat)
         self.assertTrue(all(e["type"] == "usage" and "total" in e for e in data["events"]))
         self.assertNotIn("$", json.dumps(data["events"]))
 
     def _with_main(self, tmp):
-        f = Path(tmp) / LEDGER.name
-        f.write_text(LEDGER.read_text(encoding="utf-8") + '{"kind":"main_session","window":1,"date":"2026-11-26","source":"explain-usage skill",'
+        f = Path(tmp) / FIXTURE.name
+        f.write_text(FIXTURE.read_text(encoding="utf-8") + '{"kind":"main_session","window":1,"date":"2026-11-26","source":"explain-usage skill",'
                      '"since":"test fixture","requests":3,"input":10,"cache_write":20,"cache_read":30,"output":40}\n', encoding="utf-8")
         return f
 
     def test_main_session_totals_reach_the_page_data_not_the_events(self):
-        base, _ = office_app.build_data(OFFICE, None, LEDGER)
+        base, _ = office_app.build_data(OFFICE, None, FIXTURE)
         self.assertIsNone(base["ledger"]["main"])
         with tempfile.TemporaryDirectory() as tmp:
             data, probs = office_app.build_data(OFFICE, None, self._with_main(tmp))
@@ -855,23 +873,23 @@ class Recorded(unittest.TestCase):
             out = Path(tmp) / "u.html"
             self.assertEqual(office_app.main(["ai-office", "--ledger", str(self._with_main(tmp)), "--out", str(out)]), 0)
             self.assertIn('"main":{"cache_read":30', out.read_text(encoding="utf-8"))
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out)]), 0)
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(FIXTURE), "--out", str(out)]), 0)
             self.assertIn('"main":null', out.read_text(encoding="utf-8"))
 
     def test_cli_writes_the_default_name_and_check_works(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "u.html"
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out)]), 0)
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out), "--check"]), 0)
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(self.LEDGER), "--out", str(out)]), 0)
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(self.LEDGER), "--out", str(out), "--check"]), 0)
             out.write_text("x", encoding="utf-8")
-            self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--out", str(out), "--check"]), 1)
-        self.assertEqual(office_app.main(["ai-office", "--ledger", str(LEDGER), "--fixture", str(office_app.DEFAULT_FIXTURE)]), 2)
+            self.assertEqual(office_app.main(["ai-office", "--ledger", str(self.LEDGER), "--out", str(out), "--check"]), 1)
+        self.assertEqual(office_app.main(["ai-office", "--ledger", str(self.LEDGER), "--fixture", str(office_app.DEFAULT_FIXTURE)]), 2)
         self.assertEqual(office_app.main(["ai-office", "--ledger", "/nonexistent.jsonl"]), 2)
 
     def test_data_rule_hit_exits_1_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
-            bad = Path(tmp) / LEDGER.name
-            bad.write_text(LEDGER.read_text(encoding="utf-8") + '{"n":99,"sprint":4,"agent":"pm","tasks":["T-001"],"step":"x","tokens":1,'
+            bad = Path(tmp) / self.LEDGER.name
+            bad.write_text(self.LEDGER.read_text(encoding="utf-8") + '{"n":99,"sprint":4,"agent":"pm","tasks":["T-001"],"step":"x","tokens":1,'
                            '"tool_uses":1,"duration_ms":1,"note":"a@b.example"}\n', encoding="utf-8")
             out = Path(tmp) / "o.html"
             self.assertEqual(office_app.main(["ai-office", "--ledger", str(bad), "--out", str(out), "--allow-errors"]), 1)
@@ -929,6 +947,19 @@ class Recorded(unittest.TestCase):
             self.assertRegex(l, r"try\s*\{[^}]*localStorage")
         self.assertIn('role="radiogroup" aria-label="Usage view"', text)
         self.assertIn("aria-checked", text)
+
+
+class RecordedAppended(Recorded):
+    """T-072 guard: every live-ledger test above passes on the live ledger plus 3 valid lines (a not-reported run, a chat run, a main reading)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.LEDGER = appended_copy(LIVE, cls._tmp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
 
 
 @unittest.skipUnless(shutil.which("node"), "node not installed")
@@ -1050,15 +1081,17 @@ class ChatBuild(unittest.TestCase):
         data, _ = office_app.build_data(OFFICE, office_app.DEFAULT_FIXTURE)
         self.assertNotIn("chat", data)
 
+    LEDGER = LIVE
+
     def test_chat_with_ledger_builds_the_one_published_page(self):
-        only, _ = office_app.build_data(OFFICE, None, LEDGER)
-        both, _ = office_app.build_data(OFFICE, None, LEDGER, chat=True)
+        only, _ = office_app.build_data(OFFICE, None, self.LEDGER)
+        both, _ = office_app.build_data(OFFICE, None, self.LEDGER, chat=True)
         self.assertEqual({k: v for k, v in both.items() if k != "chat"}, only)
         committed = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
         self.assertEqual(both["chat"], committed["chat"])
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "one.html"
-            argv = ["ai-office", "--ledger", str(LEDGER), "--chat", "--out", str(out)]
+            argv = ["ai-office", "--ledger", str(self.LEDGER), "--chat", "--out", str(out)]
             self.assertEqual(office_app.main(argv), 0)
             self.assertEqual(office_app.main(argv + ["--check"]), 0)
             self.assertEqual(json.loads(block(out.read_text(encoding="utf-8"), "office-data")), json.loads(json.dumps(both)))
@@ -1066,12 +1099,10 @@ class ChatBuild(unittest.TestCase):
             self.assertEqual(office_app.main(argv + ["--check"]), 1)
             office_app.main(argv)
             if shutil.which("node"):
-                led = both["ledger"]
                 x = CoreUnderNode("test_recorded_replay_totals_and_percentages")
-                py = {"tokens": led["session"]["tokens"], "runs": led["session"]["runs"], "nr": led["session"]["not_reported"],
-                      "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+                py = page_py(ledger_runs(self.LEDGER))        # the page replays events: chat runs are left out (page_totals)
                 self.assertIn("rec ok", x.node(str(out), "rec", x.json_file(tmp, "p.json", py)))
-                py = {"tokens": led["session"]["tokens"], "agents": {k: v["tokens"] for k, v in led["agents"].items()}}
+                py = {"tokens": py["tokens"], "agents": py["agents"]}
                 self.assertIn("budgets rec ok", x.node(str(out), "budgets", x.json_file(tmp, "b.json", py)))
 
     def test_claude_is_only_reached_through_chat_init_which_needs_the_flag(self):
@@ -1094,6 +1125,19 @@ class ChatBuild(unittest.TestCase):
     def test_page_without_chat_has_no_chat_data_or_button_after_removal(self):
         data = json.loads(block(HTML.read_text(encoding="utf-8"), "office-data"))
         self.assertIn("chat", data)
+
+
+class ChatBuildAppended(ChatBuild):
+    """T-072 guard: the one published page also builds, checks and matches the node maths on the live ledger plus 3 valid lines."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.LEDGER = appended_copy(LIVE, cls._tmp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
 
 
 PLACE_CHECK = r'''
