@@ -1,0 +1,14 @@
+{"log": "office-events", "v": 1, "office": "ai-office", "clock": "synthetic", "usage_source": "synthetic", "title": "SYNTHETIC v1 edge cases (T-056 tests)"}
+{"t": 1, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "mystery-ai", "model": "mystery-1", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 2, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "openai", "model": "gpt-9-preview", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 3, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "deepseek", "model": "deepseek-chat", "billing": "plan", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 4, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "mystery-ai", "model": "mystery-1", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 5, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "claude-sdk", "model": "claude-opus-4-5", "billing": "plan", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl", "cost_usd": 1.5}
+{"t": 6, "type": "step_started", "agent": "engineer", "task": "T-901", "provider": "openai", "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 7, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": 1000000000, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 8, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl", "cost_usd": 0.1234567}
+{"t": 9, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": true, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 10, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "bad model!", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 11, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "Bad_Provider", "model": "claude-opus-4-5", "billing": "per_token", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 12, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "free", "input": 10, "output": 5, "src": "tests/fixtures/events-v1-edge.jsonl"}
+{"t": 13, "type": "usage", "agent": "engineer", "task": "T-901", "provider": "anthropic-api", "model": "claude-opus-4-5", "billing": "per_token", "input": 999999999, "output": 0, "src": "tests/fixtures/events-v1-edge.jsonl"}

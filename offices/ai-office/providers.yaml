@@ -1,0 +1,38 @@
+# Provider catalogue for the 3D office (T-056). Format: engine/schema/office.md.
+# Prices are USD per million tokens. They stay null ("not set") until someone copies them from the
+# provider's pricing page and fills prices.source and prices.checked (YYYY-MM-DD). Never estimate a price.
+# Model ids below are the ones the synthetic fixture uses; T-024/T-026 will say which ids the office really runs.
+providers:
+  claude-sdk:
+    label: Claude Agent SDK (Max plan)
+    code: SDK
+    colour: "#c084fc"
+    billing: plan
+    models:
+      claude-opus-4-5: { short: opus, family: opus }
+      claude-sonnet-4-5: { short: sonnet, family: sonnet }
+  anthropic-api:
+    label: Anthropic API
+    code: API
+    colour: "#5b8def"
+    billing: per_token
+    prices: { source: null, checked: null }
+    models:
+      claude-opus-4-5: { short: opus, family: opus, input: null, output: null, cache_read: null, cache_write: null }
+      claude-sonnet-4-5: { short: sonnet, family: sonnet, input: null, output: null, cache_read: null, cache_write: null }
+  openai:
+    label: OpenAI
+    code: OAI
+    colour: "#f472b6"
+    billing: per_token
+    prices: { source: null, checked: null }
+    models:
+      gpt-5: { short: gpt-5, family: gpt, input: null, output: null, cache_read: null, cache_write: null }
+  deepseek:
+    label: DeepSeek
+    code: DSK
+    colour: "#3fd0e0"
+    billing: per_token
+    prices: { source: null, checked: null }
+    models:
+      deepseek-chat: { short: v3, family: deepseek, input: null, output: null, cache_read: null, cache_write: null }

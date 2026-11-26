@@ -116,6 +116,35 @@ pr: null
 
 The page reads these through the generator and the layout is data, not code. Added in T-048.
 
+## providers.yaml (optional, T-056)
+
+The provider and model catalogue for the 3D office: which providers an office's agents may run on, how each is billed, and what a million tokens cost. Parser and rules: `engine/runtime/providers.py`; the generator (`scripts/office_app.py`) fails the build on a problem, and the page holds no provider or price data of its own.
+
+```yaml
+providers:
+  claude-sdk:                      # PROVIDER id, as in the event log
+    label: Claude Agent SDK (Max plan)
+    code: SDK                      # 2 to 4 capitals or digits: the non-colour cue on the page
+    colour: "#c084fc"              # #rrggbb. Not amber, red or the accent green (a test enforces it)
+    billing: plan                  # plan | per_token
+    models:
+      claude-opus-4-5: { short: opus, family: opus }   # short: label, at most 12 characters; family: the profile alias, for "planned"
+  anthropic-api:
+    label: Anthropic API
+    code: API
+    colour: "#5b8def"
+    billing: per_token
+    prices: { source: null, checked: null }            # source text and ISO date; USD per million tokens below
+    models:
+      claude-opus-4-5: { short: opus, family: opus, input: null, output: null, cache_read: null, cache_write: null }
+```
+
+- **Prices stay `null` ("not set") until someone copies them from the provider's pricing page** and fills `prices.source` and `prices.checked` (`YYYY-MM-DD`). A price without both is a build error. Never estimate a price. A price is `null` or a number from 0 to 10,000 with at most 4 decimals.
+- A `plan` provider must not carry `prices` or any price key.
+- An id that is not in the file (an unknown provider or model) still renders: raw id, neutral colour, dashed chip, cost `--`.
+- A missing file means no catalogue: every provider renders as unknown and the parser gives no catalogue warnings.
+- Model ids in this office's file are the ones the synthetic fixture uses; which ids the office really runs is unknown until T-024/T-026 emit them.
+
 ## Decisions (v0)
 
 - `skills/` follows the Agent Skills folder format: `skills/<name>/SKILL.md`.

@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import dryrun, events, loader
+from . import dryrun, events, loader, providers as providers_mod
 
 
 def _load_and_validate(arg):
@@ -34,8 +34,9 @@ def _events(args):
         return 1
     ids = {a.get("id") for a in office.org.get("agents", []) if isinstance(a, dict)}
     stages = set(office.stage_ids) | set(office.terminal)
+    catalogue, _ = providers_mod.load_providers(root)
     header, evs, probs = events.parse_log(text, agents=ids, stages=stages,
-                                          forbidden=events.forbidden_terms(office.repo_root))
+                                          forbidden=events.forbidden_terms(office.repo_root), providers=catalogue)
     for p in probs:
         print(p)
     errors = sum(1 for p in probs if p.level == "error")
@@ -50,7 +51,7 @@ def main(argv=None):
     for name, helptext in (("validate", "check an office against the schema"), ("dry-run", "show what the next run would do")):
         sp = sub.add_parser(name, help=helptext)
         sp.add_argument("office", help="office id (offices/<id>) or path to an office folder")
-    sp = sub.add_parser("events", help="check an event log (v0) against an office")
+    sp = sub.add_parser("events", help="check an event log (v0 or v1) against an office")
     sp.add_argument("office", help="office id (offices/<id>) or path to an office folder")
     sp.add_argument("log", help="path to a .jsonl event log")
     try:

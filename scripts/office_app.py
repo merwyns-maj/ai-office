@@ -11,17 +11,30 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "scripts"))
 
-from engine.runtime import events, loader, miniyaml  # noqa: E402
+from engine.runtime import events, loader, miniyaml, providers  # noqa: E402
+import build_agents  # noqa: E402
 
 TEMPLATE = REPO / "engine" / "app" / "office.template.html"
-DEFAULT_FIXTURE = REPO / "engine" / "app" / "fixtures" / "sprint-03.jsonl"
+DEFAULT_FIXTURE = REPO / "engine" / "app" / "fixtures" / "models-synthetic.jsonl"
 DEFAULT_OUT = REPO / "engine" / "app" / "office.html"
 PLACEHOLDER_LINE = '<script type="application/json" id="office-data">__OFFICE_DATA__</script>'
 
 
 class BuildError(Exception):
     pass
+
+
+def _planned_model(office, agent):
+    """Profile model of an agent: its office file, else its base profile (build_agents.merged), else office default."""
+    root = Path(office.repo_root)
+    f = root / "offices" / office.id / "agents" / f"{agent['id']}.md"
+    if f.exists():
+        fm, _ = build_agents.merged(f, root)
+        if fm.get("model"):
+            return fm["model"]
+    return (office.office.get("defaults") or {}).get("model")
 
 
 def build_data(office_root, fixture):
@@ -44,15 +57,22 @@ def build_data(office_root, fixture):
     org_agents = [a for a in office.org.get("agents", []) if isinstance(a, dict)]
     ids = {a["id"] for a in org_agents}
     stages = list(office.stage_ids) + list(office.terminal)
+    catalogue, cat_problems = providers.load_providers(office_root)
+    if cat_problems:
+        raise BuildError("; ".join(cat_problems))
     log_text = Path(fixture).read_text(encoding="utf-8")
     header, evs, probs = events.parse_log(log_text, agents=ids, stages=set(stages),
-                                          forbidden=events.forbidden_terms(office.repo_root))
+                                          forbidden=events.forbidden_terms(office.repo_root), providers=catalogue)
     skipped = [{"line": p.line, "message": p.message} for p in probs if p.level == "error"]
+    warnings = [{"line": p.line, "message": p.message} for p in probs if p.level == "warning"]
     data = {
-        "v": 0,
+        "v": 1,
         "office": {"id": office.id, "name": office.office.get("name", office.id)},
         "theme": {k: theme.get(k) for k in ("style", "palette", "rooms", "desks", "hub", "door")},
-        "agents": [{k: a.get(k) for k in ("id", "name", "role", "personality")} for a in org_agents],
+        "agents": [dict({k: a.get(k) for k in ("id", "name", "role", "personality")},
+                        planned_model=_planned_model(office, a)) for a in org_agents],
+        "providers": catalogue,
+        "warnings": warnings,
         "stages": stages,
         "log": header,
         "events": evs,
