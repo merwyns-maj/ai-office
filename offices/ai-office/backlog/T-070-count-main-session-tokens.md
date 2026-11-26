@@ -4,7 +4,7 @@ title: "Count the main session's own tokens in the usage ledger"
 phase: 6-office
 status: review
 priority: P2
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: []
@@ -88,6 +88,38 @@ pr: 70
 — Sebastian (engineer)
 
 ## Review log
+**Review 1, 26 Nov 2026 (branch t-070-main-session-tokens at 37d28c0; `git merge-tree --write-tree main HEAD` clean).** Checked before reading the Build notes.
+
+Spec done-when (branch "yes", per the Finding):
+1. Finding with source, output and date, read-only: **PASS**. Finding, step 1 names `explain-usage`, the four figures, 103 requests, the window limit and the date.
+2. Ledger records it per usage.md, the CLI exits 0, the page shows it, the invariant holds: **PASS**.
+   - Validation. `main_line()` with the Finding's figures parses with no problems (`tests/test_ledger.py` MainSession). My own edge cases (/tmp script, not committed): a `tokens` field (also `tokens:null`) is an error, "main-session lines carry no tokens total; units differ from agent runs". These are also errors: bool or float `window`, bool `input`, `requests:-1`, `cache_read` 10^9, `kind:null`, `kind:"run"` ("unknown kind"), a 16-digit run in `source` (data rule, kind only named), a lower figure in the same window, and a lower window. An unknown field is a warning and is kept. Two identical readings are accepted.
+   - Counting. Last reading per window counts and windows add: the test with readings (1,2,3,4), (10,20,30,40), window 2 (100..400) gives 110/220/330/440. `totals()` and `to_event_log()` get runs only (ledger.py: main lines `continue` before `_check_run`). `build_data` keeps `ledger.session` and `events` equal with and without the line (test_office_app). The four parts are never summed into one number anywhere.
+   - CLI. `python -m engine.runtime ledger ai-office offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl` gives "100 runs kept (1 not reported), 7,347,373 tokens, 0 errors, 0 warnings", exit 0. On a /tmp copy with the Finding's line appended: same output, exit 0 (same token total, so the line is not added).
+3. "No" branch: not applicable.
+4. Tests, golden, `--check`: **PASS**. `python -m unittest discover -s tests` ran 425 tests, OK, exit 0. `validate ai-office` printed "OK — 8 agents, 5 stages, 71 tasks, 19 skills". `office_app.py ai-office --chat --check` printed "up to date (230 KB, 84 events)".
+
+Other items from the review brief:
+- Page row. It reads "Main session (metered)", then "in 250 · cache write 212k · cache read 26.7M · out 52k", then "since last context summary, 1 window, 2026-11-26; explain-usage; not added to totals or budgets". There is no weighted total. The aria-label has the same text. Without lines the row still says "Main session: not reported". **PASS**
+- pmo-playbook §8 says when to run it, the one line and its fields, the `window` +1 rule, running `ledger`, never adding it to a run line and never estimating a missed window. **PASS**
+- No real main-session line in the session ledger. `git diff main...HEAD -- offices/ai-office/usage` is empty, and the only `main_session` text there is the header's `not_reported`. **PASS**
+- workflow.yaml. Only the comment changed, from "appended run lines" to "appended run or main-session lines". "Existing lines never edited or deleted" and the `ledger` check stay, and `requires_planning_only` is unchanged. Not loosened. **PASS**
+- Size. `engine/app/office.html` is 236,463 B, under the 237,568 B limit (1,105 B headroom). The published build with the fixture line is 252,370 B (one more ledger line than the engineer's build). **PASS**
+- C1-C8 not weakened. The diff touches no chat file, `events.py`, scan, notice, ack, `sendChat`, `newAsk`, purge or `claude.use`; grepping the template diff for those finds nothing. The playbook change is §8 only. The T-063/T-066 tests pass. **PASS**
+- Headless check (Playwright with google-chrome headless=new, published build from a /tmp ledger copy with the Finding's line, three.min.js copied from engine/app/, Detail view; baseline is the same build without the line):
+  - 1280x800: row 238x96 px, three parts, no overlap between them, all inside the row, no horizontal overflow. The panel is not auto-collapsed (class `panel pp rec tp`). 0 console or page errors.
+  - 1024x640: the panel is auto-collapsed (`ac`), but the baseline without the line is too, so the row does not cause it. 0 errors.
+  - 390x844 (gear menu, then Usage sheet): row 348x83 px, no overlap, inside the sheet, no overflow. 0 errors.
+  - At the three requested sizes: **PASS**. No screenshots committed.
+
+**Verdict: PASS**, with notes. The notes are not spec failures.
+1. Heights the engineer did not test. With the line present, choosing Detail auto-collapses the usage panel at 1024x700, 1280x700 and 1280x740; the baseline stays expanded at those sizes. 1024x768, 1280x760 and up are fine. The cause is the Detail content: `#ubody` scrollHeight is 426 px in the baseline and 493 px with the row. This is the T-067 ladder working as designed (it already collapses the baseline at 1024x640); the row only moves the threshold up by about 60 px. The Build notes' claim "the panel stays expanded" holds only for heights of 800 and above. Suggested follow-up: shorten the caveat line (for example "since <since> · <n> window(s) · not in totals"), or let Detail scroll before it collapses.
+2. Desktop wrapping. At 238 px wide the date in the caveat breaks at its hyphen ("2026-11-" / "26"). Cosmetic.
+3. With several windows, `since` shows only the last window's text, next to "N windows". This is accurate but can read as if the whole span is covered. Consider wording such as "last window since ...".
+4. The figure cap is 999,999,999, the same as runs. One window's `cache_read` was 26.7M after 103 requests, so the cap is far away, but it applies per reading, not per session.
+5. Skills `design:accessibility-review` and `data:validate-data` are not available in this session. I checked the aria-label by hand and the data with the edge cases above.
+
+— Cahyani (reviewer)
 
 ## Decision
 
