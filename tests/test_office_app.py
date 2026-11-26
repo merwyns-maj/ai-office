@@ -339,6 +339,71 @@ if (mode === 'sprint3') {
   // zero-length usage events do not take animation time, other types keep the 0.4 default
   assert.strictEqual(C.evDur({ type: 'usage' }), 0); assert.strictEqual(C.evDur({ type: 'zzz' }), 0.4);
   console.log('pricing ok');
+} else if (mode === 'layout') {
+  /* T-059 movable panels: pure layout maths, numbers only */
+  const P = C.PANEL, B = C.panelBounds(1280, 800, 56);
+  assert.deepStrictEqual(B, { left: 8, right: 1272, top: 56, bottom: 736 });
+  const inside = (r, b) => r.x >= b.left && r.y >= b.top && r.x + r.w <= b.right && r.y + r.h <= b.bottom;
+  // clamping: size first, then position; every result sits inside the window with the 8px margin
+  assert.deepStrictEqual(C.clampRect({ x: -50, y: -50, w: 300, h: 300 }, B), { x: 8, y: 56, w: 300, h: 300 });
+  assert.deepStrictEqual(C.clampRect({ x: 1200, y: 700, w: 300, h: 300 }, B), { x: 972, y: 436, w: 300, h: 300 });
+  assert.deepStrictEqual(C.clampRect({ x: 0, y: 0, w: 9999, h: 9999 }, B), { x: 8, y: 56, w: 520, h: 680 });   // max 520 wide, window height minus the bars
+  assert.deepStrictEqual(C.clampRect({ x: 100, y: 100, w: 10, h: 10 }, B), { x: 100, y: 100, w: 240, h: 120 });   // min 240 x 120
+  let seed = 11; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for (let k = 0; k < 600; k++) {
+    const W = 900 + Math.floor(rnd() * 1500), H = 420 + Math.floor(rnd() * 900), b = C.panelBounds(W, H, rnd() < 0.5 ? 56 : 48);
+    const r = C.clampRect({ x: (rnd() - 0.5) * 6000, y: (rnd() - 0.5) * 6000, w: rnd() * 3000, h: rnd() * 3000 }, b);
+    assert.ok(inside(r, b), JSON.stringify([W, H, r]));
+    assert.ok(r.w >= P.MIN_W && r.w <= P.MAX_W && r.h >= P.MIN_H, JSON.stringify(r));
+    assert.deepStrictEqual(C.clampRect(r, b), r);   // idempotent
+    const m = C.moveRect(r, (rnd() - 0.5) * 4000, (rnd() - 0.5) * 4000, b);
+    assert.ok(inside(m, b) && m.w === r.w && m.h === r.h, 'a move keeps the size');
+    const z = C.resizeRect(r, (rnd() - 0.2) * 3000, (rnd() - 0.2) * 3000, b);
+    assert.ok(inside(z, b) && z.x === r.x && z.y === r.y && z.w >= P.MIN_W && z.h >= P.MIN_H, 'a resize keeps the corner and stays inside');
+  }
+  // a window too small for the minimum: the panel shows at its minimum at the top-left and overflows, it is never hidden or negative
+  const tiny = C.panelBounds(200, 200, 56), t = C.clampRect({ x: 500, y: 500, w: 300, h: 300 }, tiny);
+  assert.deepStrictEqual(t, { x: 8, y: 56, w: 240, h: 120 });
+  // resizing cannot push the far edge out of the window
+  assert.strictEqual(C.resizeRect({ x: 1000, y: 100, w: 272, h: 200 }, 900, 200, B).w, 272);
+  assert.strictEqual(C.resizeRect({ x: 1000, y: 100, w: 272, h: 200 }, 100, 50, B).w, 240);
+  assert.strictEqual(C.resizeRect({ x: 100, y: 600, w: 272, h: 100 }, 272, 900, B).h, 136);
+  // a panel that starts below its minimum (today's 96px ticker) can be moved without growing
+  assert.deepStrictEqual(C.moveRect({ x: 1004, y: 644, w: 264, h: 96 }, -10, 0, B), { x: 994, y: 640, w: 264, h: 96 });
+  // snapping: within 12px of an edge margin, on all four edges, not beyond
+  assert.deepStrictEqual(C.snapRect({ x: 20, y: 68, w: 300, h: 300 }, B), { x: 8, y: 56, w: 300, h: 300 });
+  assert.deepStrictEqual(C.snapRect({ x: 21, y: 69, w: 300, h: 300 }, B), { x: 21, y: 69, w: 300, h: 300 });
+  assert.deepStrictEqual(C.snapRect({ x: 960, y: 430, w: 300, h: 300 }, B), { x: 972, y: 436, w: 300, h: 300 });
+  // keyboard steps: 8px, 32px with Shift
+  assert.deepStrictEqual(C.keyDelta('ArrowLeft', false), [-8, 0]);
+  assert.deepStrictEqual(C.keyDelta('ArrowDown', true), [0, 32]);
+  assert.strictEqual(C.keyDelta('a', false), null);
+  // opacity: blur holds at 8px down to 30% then fades to 0; shadow under 100; dim text and the dark text backing apply at 60 and below; edge at 0
+  assert.deepStrictEqual([100, 92, 30, 15, 0].map(C.blurFor), [8, 8, 8, 4, 0]);
+  assert.deepStrictEqual(C.textMode(100), { shadow: false, dim: false, edge: false });
+  assert.deepStrictEqual(C.textMode(92), { shadow: true, dim: false, edge: false });
+  assert.deepStrictEqual(C.textMode(61), { shadow: true, dim: false, edge: false });
+  assert.deepStrictEqual(C.textMode(60), { shadow: true, dim: true, edge: false });
+  assert.deepStrictEqual(C.textMode(0), { shadow: true, dim: true, edge: true });
+  assert.strictEqual(C.opacityStep(92), 92); assert.strictEqual(C.opacityStep(91), 91);
+  assert.strictEqual(C.opacityStep(40), 40); assert.strictEqual(C.opacityStep(150), 92); assert.strictEqual(C.opacityStep('9'), 92); assert.strictEqual(C.opacityStep(NaN), 92);
+  assert.strictEqual(C.rectSentence('Usage', { x: 120, y: 80, w: 300, h: 240 }), 'Usage panel at 120, 80, size 300 by 240.');
+  // saved state: valid, then every kind of corrupt storage falls back without throwing
+  const good = { usage: { x: 100, y: 90, w: 300, h: 400, o: 40 }, ticker: { x: 900, y: 500, w: 260, h: 150, o: 0 } };
+  assert.deepStrictEqual(C.parseLayout(JSON.stringify(good)), good);
+  assert.deepStrictEqual(C.parseLayout(C.serializeLayout(good)), good);
+  const none = { usage: null, ticker: null };
+  [null, undefined, '', 'null', '{', '[1,2]', '"x"', '42', 'true', '{"usage":5}', '{"usage":[]}', '{"usage":{}}', '\u0000￾'].forEach(x => assert.deepStrictEqual(C.parseLayout(x), none, String(x)));
+  const bad = v => JSON.stringify({ usage: Object.assign({}, good.usage, v), ticker: good.ticker });
+  [{ x: 'a' }, { y: null }, { w: 239 }, { w: 521 }, { h: 119 }, { x: 1e9 }, { w: NaN }, { h: -5 }].forEach(v => {
+    const r = C.parseLayout(bad(v)); assert.strictEqual(r.usage, null, JSON.stringify(v)); assert.deepStrictEqual(r.ticker, good.ticker);   // a bad panel falls back alone
+  });
+  assert.strictEqual(C.parseLayout(bad({ o: 'x' })).usage.o, 92); assert.strictEqual(C.parseLayout(bad({ o: 140 })).usage.o, 92); assert.strictEqual(C.parseLayout(bad({ o: -1 })).usage.o, 92);
+  assert.strictEqual(C.parseLayout('{"usage":{"x":1e999,"y":0,"w":300,"h":300}}').usage, null);   // Infinity
+  // a saved layout bigger than the window is clamped on load
+  const big = C.parseLayout(JSON.stringify({ usage: { x: 5000, y: 5000, w: 520, h: 9000 } })).usage;
+  assert.ok(inside(C.clampRect(big, C.panelBounds(1000, 600, 56)), C.panelBounds(1000, 600, 56)));
+  console.log('layout ok');
 }
 """
 
@@ -370,6 +435,27 @@ class CoreUnderNode(unittest.TestCase):
         self.assertEqual(probs, [])
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIn("all-types ok", self.node(str(HTML), "all", self.json_file(tmp, "all.json", {"events": data["events"]})))
+
+    def test_panel_layout_maths(self):
+        self.assertIn("layout ok", self.node(str(HTML), "layout"))
+
+    def test_layout_storage_is_always_inside_try_and_the_key_is_versioned(self):
+        html = HTML.read_text(encoding="utf-8")
+        lines = [l for l in html.splitlines() if "localStorage" in l]
+        self.assertTrue(lines)
+        for l in lines:
+            self.assertRegex(l, r"try\s*\{[^}]*localStorage", l)   # every storage touch is wrapped: the page works when storage throws
+        self.assertIn("office.layout.v1", html)
+
+    def test_panel_controls_are_named_and_reset_is_in_the_gear_menu(self):
+        html = HTML.read_text(encoding="utf-8")
+        for needle in ("'Move ' + nm + ' panel'", "'Resize ' + nm + ' panel'", "Background opacity", "Reset layout", "Layout reset"):
+            self.assertIn(needle, html)
+        self.assertRegex(html, r"#stage\{position:absolute;left:0;right:0;")   # the stage runs full width behind the panels
+        # at 60% and below each text line keeps a dark backing; the panel fill is not touched by it
+        self.assertRegex(html, r"\.pp\.tpd :not\(:has\(\*\)\)[^{]*\{background:rgba\(12,13,22,\.8\)")   # any leaf element, not a tag list
+        self.assertNotRegex(html, r"\.pp\.tpd :is\(")
+        self.assertRegex(html, r'class="oprange" type="range" id="o-\' \+ id \+ \'" min="0" max="100" step="1"')   # 92 is reachable on the slider
 
     def test_percentage_maths(self):
         self.assertIn("shares ok", self.node(str(HTML), "shares"))
