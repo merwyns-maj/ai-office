@@ -4,7 +4,7 @@ title: "Usage panel: summary mode (provider vs budget) and detail mode (agent vs
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-059]
@@ -112,6 +112,17 @@ Open `engine/app/usage-session_...html?t=99999` (recorded) or `engine/app/office
 - Budgets are never edited from the page; change budgets.yaml.
 
 **Open questions**: none new.
+
+— Sebastian (engineer)
+
+### Rework 1 (after Cahyani's REJECT)
+
+- Keyboard: `segKey` now calls `stopPropagation()`, and the document keydown handler also returns early for any target inside `[role=radiogroup]` (Arrow, Home, End, Enter, Space). Arrow keys on the switch no longer step or pause the replay; the keyboard switch keeps the cross-fade like a click. Checked in headless Chrome: recorded page scrub stays 1000, synthetic (paused) stays 8 across ArrowRight, ArrowLeft, ArrowRight, 0 console errors.
+- `fmtTok`: 999,500 and up now rolls over to the M branch ("1.0M", never "1000k"). The M branch always shows one decimal, so 1,000,000 reads "1.0M" (was "1M").
+- New `fmtPair(used, budget, pct)`: both figures in the budget's unit, with the fewest decimals at which the shown ratio rounds to the shown %. Zero used shows "0". Detail rows now: Emmy 203k / 250k 81%, Fang 514k / 650k 79%, Sebastian 1.65M / 2.15M 77%, Cahyani 1.13M / 1.5M 75%, Dinda 223k / 300k 74%, April 69k / 100k 69%, Wulan 31k / 50k 62%.
+- Tests (3 new, node, page functions cut out of the template and run with stubs): fmtTok rollover, used/budget precision (ratio of shown figures rounds to the %), arrows on the switch stop at it and the document handler ignores them. Full run: 339 tests OK, golden 13 cases 0 problems, `--check` up to date, board.py no problems (board.md discarded).
+- Screenshots: /tmp/t060-shots/rework-{syn,rec}-1280-detail.png, rework-rec-390-detail.png (read).
+- Not done (Cahyani notes 3 to 6, not reasons to reject): left for Dinda/Merwyn.
 
 — Sebastian (engineer)
 

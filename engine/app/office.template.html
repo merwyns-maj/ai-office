@@ -923,8 +923,19 @@ function announce(t) { $('live').textContent = ''; setTimeout(function () { $('l
 /* usage panel: one renderer feeds the docked panel and the phone sheet */
 function fmtTok(n) {
   if (n < 1000) return String(n);
-  if (n < 1e6) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
-  return String(Math.round(n / 1e5) / 10) + 'M';   // 2,150,000 reads 2.2M (toFixed would say 2.1M)
+  if (n < 1e6 && Math.round(n / 1000) < 1000) return (n < 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') : Math.round(n / 1000)) + 'k';
+  return (Math.round(n / 1e5) / 10).toFixed(1) + 'M';   // 2,150,000 reads 2.2M (toFixed would say 2.1M); 999,600 rolls over to 1.0M, never 1000k
+}
+/* "used / budget" that reads like the %: both in the budget's unit, with the fewest decimals at which the shown ratio rounds to the shown % */
+function fmtPair(used, budget, pct) {
+  var u = budget >= 1e6 ? 1e6 : (budget >= 1000 ? 1000 : 1), sfx = u === 1e6 ? 'M' : (u === 1000 ? 'k' : '');
+  if (u === 1 || pct === null || pct === undefined || !budget) return fmtTok(used) + ' / ' + fmtTok(budget);
+  var d, f = function (n, d) { return (Math.round(n / u * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d).replace(/(\.\d*?)0+$/, function (m, g) { return g; }).replace(/\.$/, '') + sfx; };
+  for (d = (u === 1e6 ? 1 : 0); d <= 3; d++) {
+    var a = Math.round(used / u * Math.pow(10, d)), b = Math.round(budget / u * Math.pow(10, d));
+    if (b && Math.round(100 * a / b) === pct) break;
+  }
+  return (used ? f(used, d) : '0') + ' / ' + f(budget, d);
 }
 function exact(n) { return Number(n).toLocaleString('en-US'); }
 function figs(r) {
@@ -955,7 +966,7 @@ function budgetText(r, summary) {
   return '<span class="bx' + (summary ? '' : ' pc') + '" title="' + exact(r.used) + ' of ' + exact(r.budget) + ' tokens">' + r.pct + '%' + (summary ? ' of your budget' : '') + '</span>';
 }
 function figsText(r) {
-  return r.state === 'unset' ? fmtTok(r.used) + ' used' : fmtTok(r.used) + ' / ' + fmtTok(r.budget);
+  return r.state === 'unset' ? fmtTok(r.used) + ' used' : fmtPair(r.used, r.budget, r.pct);
 }
 function rowSentence(name, r, extra) {
   var t = name + ': ';
@@ -1022,7 +1033,8 @@ function segKey(e) {
   var t = e.target.closest && e.target.closest('[role=radio]'); if (!t) return;
   var k = e.key, to = k === 'ArrowLeft' || k === 'ArrowUp' || k === 'Home' ? 'summary' : (k === 'ArrowRight' || k === 'ArrowDown' || k === 'End' ? 'detail' : (k === 'Enter' || k === ' ' ? t.dataset.mode : null));
   if (!to) return;
-  e.preventDefault(); setMode(to, true);
+  e.preventDefault(); e.stopPropagation(); setMode(to, true);   // arrows here are for the switch, not the page-wide replay shortcuts
+ 
   var box = $('usheet').classList.contains('open') ? $('usheet') : $('useg'), b = box.querySelector('[data-mode="' + to + '"]'); if (b) b.focus();   // the old buttons were replaced by the redraw
 }
 var usageKey = '', usageCol = false, usageColSet = false;
@@ -1153,6 +1165,7 @@ document.addEventListener('keydown', function (e) {
   if (e.target && (e.target.tagName === 'INPUT' && e.target.type !== 'range')) return;
   var k = e.key;
   if (e.target && e.target.classList && (e.target.classList.contains('grip') || e.target.classList.contains('rz') || e.target.classList.contains('oprange')) && (k.indexOf('Arrow') === 0 || k === ' ' || k === 'Home' || k === 'Enter')) return;   // panel controls own these keys
+  if (e.target && e.target.closest && e.target.closest('[role=radiogroup]') && (k.indexOf('Arrow') === 0 || k === ' ' || k === 'Home' || k === 'End' || k === 'Enter')) return;   // the Summary | Detail switch owns these keys
   if (k === 'Escape' && closeMenus(true)) return;
   if (k === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('play').click(); }
   else if (k === 'ArrowRight' && e.target.id !== 'scrub') { stepEv(1); }

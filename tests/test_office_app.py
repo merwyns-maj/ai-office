@@ -704,6 +704,77 @@ class Recorded(unittest.TestCase):
         self.assertIn("aria-checked", text)
 
 
+@unittest.skipUnless(shutil.which("node"), "node not installed")
+class UsageSwitchUnderNode(unittest.TestCase):
+    """Page-script pieces (fmtTok, fmtPair, segKey, the document keydown handler) are cut out of the template and run with stubs."""
+
+    PROBE = r"""
+const fs = require('fs'), assert = require('assert');
+const src = fs.readFileSync(process.argv[2], 'utf8');
+const grab = (start) => { const i = src.indexOf(start); assert.ok(i >= 0, start); let j = src.indexOf('\n}\n', i); return src.slice(i, j + 3); };
+const fns = [grab('function fmtTok('), grab('function fmtPair('), grab('function segKey(')].join('\n');
+const h0 = src.indexOf("document.addEventListener('keydown', function (e) {"); const h1 = src.indexOf('\n});', h0);
+const handler = src.slice(h0, h1 + 4);
+const calls = [];
+const ctx = new Function('calls', 'document', '$', 'setMode', 'stepEv', 'setSpeed', 'closeMenus', 'closeSheet', 'focusAgent', 'SYSTEM_RM', 'REDUCED', 'focused', 'handlers',
+  fns + '\n' + handler + '\nreturn {fmtTok, fmtPair, segKey};');
+const handlers = [];
+const radio = { dataset: { mode: 'summary' }, focus() {} };
+const box = { querySelector: () => radio, classList: { contains: () => false } };
+const target = { tagName: 'BUTTON', id: '', classList: { contains: () => false }, closest: (sel) => (sel === '[role=radio]' ? radio : (sel === '[role=radiogroup]' ? box : null)) };
+const doc = { addEventListener: (n, f) => handlers.push(f) };
+const api = ctx(calls, doc, () => box, (m) => calls.push('setMode:' + m), (d) => calls.push('step:' + d), () => calls.push('speed'), () => false, () => {}, () => {}, false, false, null, handlers);
+const mk = (key) => { const e = { key, target, stopped: false, prevented: false, preventDefault() { this.prevented = true; }, stopPropagation() { this.stopped = true; } }; return e; };
+if (process.argv[3] === 'tok') {
+  const t = api.fmtTok;
+  assert.strictEqual(t(999), '999'); assert.strictEqual(t(1500), '1.5k'); assert.strictEqual(t(999400), '999k');
+  assert.strictEqual(t(999500), '1.0M'); assert.strictEqual(t(999600), '1.0M'); assert.strictEqual(t(1000000), '1.0M'); assert.strictEqual(t(2150000), '2.2M');
+  for (let n = 0; n < 3e6; n += 137) assert.ok(!/^1000k$/.test(t(n)), n);
+  console.log('tok ok');
+} else if (process.argv[3] === 'pair') {
+  const p = api.fmtPair;
+  assert.strictEqual(p(1649066, 2150000, 77), '1.65M / 2.15M');
+  assert.strictEqual(p(1125617, 1500000, 75), '1.13M / 1.5M');
+  assert.strictEqual(p(30785, 50000, 62), '31k / 50k');
+  assert.strictEqual(p(3813702, 5000000, 76), '3.8M / 5M');
+  assert.strictEqual(p(100, 0, null), '100 / 0');
+  // whatever is shown, the ratio of the shown figures rounds to the % (when 3 decimals are enough)
+  for (const [u, b] of [[1649066, 2150000], [1125617, 1500000], [514115, 650000], [222869, 300000], [202660, 250000], [68590, 100000], [30785, 50000]]) {
+    const pct = Math.round(100 * u / b), [a, c] = p(u, b, pct).split(' / ').map((x) => parseFloat(x));
+    assert.strictEqual(Math.round(100 * a / c), pct, p(u, b, pct));
+  }
+  console.log('pair ok');
+} else {
+  for (const k of ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']) {
+    calls.length = 0; const e = mk(k);
+    api.segKey(e);
+    assert.ok(e.stopped && e.prevented, k + ' stopped at the switch');
+    assert.deepStrictEqual(calls.length, 1); assert.ok(calls[0].startsWith('setMode:'));
+    calls.length = 0; const e2 = mk(k); handlers[0](e2);   // even if one did reach the document handler
+    assert.deepStrictEqual(calls, [], k + ' must not step or toggle the replay');
+  }
+  console.log('keys ok');
+}
+"""
+
+    def run_probe(self, mode):
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "probe.js"
+            f.write_text(self.PROBE, encoding="utf-8")
+            r = subprocess.run(["node", str(f), str(TEMPLATE), mode], capture_output=True, text=True, timeout=60)
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        return r.stdout
+
+    def test_fmt_tok_rolls_over_to_millions(self):
+        self.assertIn("tok ok", self.run_probe("tok"))
+
+    def test_used_and_budget_show_enough_precision_to_read_like_the_percentage(self):
+        self.assertIn("pair ok", self.run_probe("pair"))
+
+    def test_arrow_keys_on_the_switch_do_not_reach_the_replay_shortcuts(self):
+        self.assertIn("keys ok", self.run_probe("keys"))
+
+
 class Providers(unittest.TestCase):
     def test_bad_catalogue_fails_the_build(self):
         with tempfile.TemporaryDirectory() as tmp:
