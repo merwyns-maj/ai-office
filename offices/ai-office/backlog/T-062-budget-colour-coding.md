@@ -2,9 +2,9 @@
 id: T-062
 title: "Budget bars: green, yellow, red as usage nears the budget"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-060]
@@ -92,6 +92,29 @@ Open for Reviewer: contrast ratios are from Dinda's table (not re-measured); I c
 — Sebastian (engineer)
 
 ## Review log
+### Review 1, 26 Nov 2026, PR #50 head 91c6735e087425c89204155793ad5e9836afa63a: REJECT
+
+Checks (run on the PR head, not taken from Build notes):
+- Tests, golden, --check, ledger: `python -m unittest discover -s tests` -> `Ran 346 tests ... OK`; `python scripts/golden.py ai-office` -> `golden: 13 cases, 75 checks, 0 problems`; `office_app.py ai-office --check` -> `office.html: up to date (169 KB, 84 events)`; `python -m engine.runtime ledger ai-office offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl` -> `53 runs kept (1 not reported), 4,198,359 tokens, 0 errors, 0 warnings`. PASS.
+- Thresholds in node: tests cover 0/69/70/89/90/100/over and custom 50/80; bad or missing thresholds fall back to 70/90. On the page (temp copy of the recorded page, agent budgets set from real use): Sebastian 69% green `lv-ok rgb(83,186,126)`, Dinda 70% yellow "near budget" `rgb(240,224,74)`, Cahyani 89% yellow, Emmy 90% red "at limit" (fill `rgb(230,57,70)`, text `rgb(255,107,107)`), Fang 100% red "at limit", April "over by 6.2k" red with triangle and hatch. Same at 1280x800 and 390x844, Summary and Detail. PASS.
+- Config validation (temp office copies, built with --ledger): equal 80/80, reversed 90/70, warn 0, alert 101, warn "70" -> exit 1 `budgets: thresholds: need 0 < warn_at < alert_at <= 100`; set_by removed -> exit 1 `thresholds: set_by is required`; 70/100 -> exit 0. Shipped file: 70/90, Janice (pmo), 2026-11-26. PASS.
+- Theme tokens: `near: "#f0e04a"` in theme.yaml; template rules use `var(--near)`, `var(--bad)`, `var(--bad-text)`, `var(--accent)`; the `:root` hex is the existing fallback, overwritten at runtime from `D.theme.palette` (same pattern as every other token). PASS.
+- Never colour alone: words "near budget" / "at limit" / "over by X" on rows and Detail headers; aria-labels end ", near budget" / ", at limit" / "over budget by X", no colour names. PASS.
+- Contrast, measured with getComputedStyle and WCAG luminance: on panel #1d1e2c green 6.82, yellow 12.14, red text 5.94; usage panel at opacity 0 (`tp tpd`, backing `rgba(12,13,22,.8)`) over the panel colour green 7.81, yellow 13.90, red 6.80. All >= 4.5. PASS.
+- Amber pill vs yellow: headless render, synthetic page Detail with `#pill.on` ("1 needs you", bg `rgb(244,162,97)`) beside four yellow rows: filled orange pill vs thin lemon bars and lemon text, clearly distinct. PASS. Screenshot /tmp/rv062/shots/pill-vs-yellow-1280.png.
+- Provider chips and "budget not set": main vs branch synthetic page, all 8 chips identical (`SDK|rgb(192,132,252)|... /0.22|solid`); unset track identical (`dashed rgb(154,160,180) 1px 4px`, 1 row). PASS.
+- Console errors: none across 16 page loads (recorded, temp, synthetic, main; 1280x800 and 390x844). PASS.
+- **Collapsed summary line: FAIL.** Dinda's design: "Collapsed summary line: the % or 'over by X' text takes the state colour and the word follows it". Build notes say it does. It does not: `usageSummary()` adds `class="lv-near"` / `class="lv-alert"` / `<b class="lv-over">`, but no CSS rule matches them outside `.bx`, `.dh` and `.bw`. Measured: `<span class="lv-near">84% of your budget</span>` -> `rgb(242,237,228)` (the plain text colour); `<span class="lv-alert">93% ...</span>` -> `rgb(242,237,228)`; `<b class="lv-over">▲ over by 198k</b>` -> `rgb(242,237,228)`. Only the trailing word is coloured, and the over case has no colour at all. Screenshot /tmp/rv062/shots/over-collapsed.png.
+
+Fix needed (one item)
+1. Give the collapsed line's state spans their colour from the tokens, e.g. `.usum .lv-ok{color:var(--accent)}.usum .lv-near{color:var(--near)}.usum .lv-alert,.usum .lv-over{color:var(--bad-text)}` (or put `bx` on those spans), and add a test that the collapsed ok/near/alert/over text gets the state colour (a template-rule assertion like the existing palette test is enough). Regenerate office.html.
+
+Notes (not reasons for the reject)
+- Contrast against the backing over a light part of the scene (worst case, backing over white) is lower: green 4.44, red 3.87. The spec measures against the panel, so this passes the spec; worth a look if Merwyn runs the panel at 0% over the paper-coloured walls.
+- `budgetLevel` accepts any numeric thresholds in the browser (it does not re-check warn < alert); fine because budgets.py validates before build.
+- External skills design:accessibility-review and data:validate-data are not available in this session; checks were done by hand as above.
+
+— Cahyani (reviewer)
 
 ## Decision
 
