@@ -2,9 +2,9 @@
 id: T-069
 title: "Usage numbers from the artifact db, so the page needs no republish per ledger append"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: pmo
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-067, T-070]
@@ -113,6 +113,8 @@ Compliance: PASS with conditions (T-069 design, 26 Nov 2026). New data class in 
 - U7 Repo: the plan is stdin-only and its output is never redirected into the repo; fixtures are invented (no realistic NIK or phone); the Review log runs one scan test and one orphan-delete test.
 Not legal advice. Retention for personal data does not arise here because none is allowed (T-063 C6 covers chat, 30 days).
 — Wulan (compliance), pasted by Janice
+- 2026-11-26 Compliance: U1 deviation ACCEPTED with tightening U1a. The exemption (top-level `session` field only, value == header session, events patterns and forbidden terms still applied, same text elsewhere still a hit) is narrow and tested; the id is already the file name and the db is owner-only.
+  U1a: `scan_doc` must check `ledger.SESSION_RE.fullmatch(s)` itself (exempt only when it matches), not rely on the loader. Add a test: a session value that fails the pattern but is long, e.g. 40 chars with a hyphen, is refused with "secret-like token". Reviewer to confirm. — Wulan (compliance), pasted by Janice
 
 **Design accepted** (Janice, 26 Nov 2026 22:30 WIB). Build starts after T-070 merges. U4: Janice asks Merwyn to confirm the re-declare and publish before doing them.
 
