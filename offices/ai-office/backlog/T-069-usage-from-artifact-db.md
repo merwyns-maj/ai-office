@@ -4,7 +4,7 @@ title: "Usage numbers from the artifact db, so the page needs no republish per l
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-067, T-070]
@@ -157,6 +157,54 @@ In every state the Summary and Detail figures are present (never blank). Detail 
 — Sebastian (engineer)
 
 ## Review log
+**Verdict: PASS** (26 Nov 2026). Branch `t-069-usage-from-db` at ae6297c, PR 73. Merge base is main 1a36e15 (origin/main is the same), and `git merge-tree` merges cleanly. No `board.md` in the diff. Every check below was run in this worktree. Plans and pages were written to /tmp only, and no artifact or db tool was called.
+
+**Suite and CLIs**
+- `python -m unittest discover -s tests`: `Ran 483 tests ... OK`, exit 0.
+- `validate ai-office`: `OK — 8 agents, 5 stages, 72 tasks, 19 skills`, exit 0. `office_app.py ai-office --chat --check`: `up to date (229 KB, 84 events)`, exit 0. Ledger CLI: `109 runs kept (2 not reported), 7,846,635 tokens, 0 errors, 0 warnings`, exit 0.
+- `tests/test_chat.py` is not in the diff, so the T-063 tests are unchanged. `rules_problem(rules)` with its default path gives the same answers as before.
+
+**Done when**
+- Owner-only rule, and the chat rule unchanged: **pass in code. The live part is still open.** With `usage plan` on the live ledger: a missing `usage` rule, `read:view`, `write:view`, a wide `""`, `*` or `/` rule, a view rule under `usage/office`, two `usage` rules, a missing chat rule, chat at view, and rules that are not a list all exit 1 with 0 actions. Owner rules, including a wide owner/owner rule, exit 0 with 3 actions. The `db_write asLevel:view` refusals (U3/C7) have not been recorded, because no db tool may be called yet. They belong to Janice's first-time steps in pmo-playbook section 8, after Merwyn confirms the re-declare (U4). They must be recorded before the first usage write.
+- Totals equal those of a `--ledger` build: **pass.** On the live ledger, `meta.totals == ledger.totals(runs)` and `meta.main == ledger.main_totals`, and the null-token runs 22 and 103 keep `null`. On the page, the Summary and Detail usage text (sync note removed, whitespace ignored) matched main's baked `--ledger --chat` build at `?t=999999` in every state and viewport. That covers the per-agent bars, the budget bars and the main-session row ("in 448 · cache write 593k · cache read 56.4M · out 102k").
+- Append, sync, reload, and idempotency: **pass.** Re-planning from the written docs gave `writes:0, in_sync:true` and `[]`. With one run appended (n=110, +100,000 tokens) the plan was `set chunk-001 (ifVersion v1), set usage/office (v1)`. On the page, a pushed snapshot without a reload changed "7.8M / 8M 98%" to "7.9M / 8M 99%" and the note to "Synced 27 Nov 09:00 WIB". That matches main's baked build of the 110-run ledger at all three sizes.
+- `budgets.yaml` change: **pass.** I set the provider budget to 20000000 as a test value. The plan was `set usage/budgets, set usage/office`. The page went live to "7.8M / 20M 39%", and the "at limit" colour and label went away. I reverted the value with `git checkout`, and `git status` is clean.
+- Empty, error and stale db, 0 console errors: **pass** (see the headless check below).
+- Flat page size: **pass.** Published builds with 67, 109 and 209 runs are 221,655, 221,669 and 221,672 B, a spread of 17 B. Main's build of the same ledger was 248 KB. The committed page is 234,993 B, under the 237,568 B limit, and the limit is not raised. `--check` passes.
+- Limits: **pass.** `other_docs` 24997 exits 0. 24998 exits 1 with "3 usage docs + 24998 other docs would pass the 25000 doc limit". Values of -1, `true` and `"3"` are refused. Mutation checks: disabling the doc-size check, the doc-count check, the scan, the allowlist or the orphan delete each makes `tests.test_usage_sync` fail.
+- Nothing written to the repo, and the scan runs on every doc: **pass.** `git status` stayed clean after every plan. The plan has no output flag. A phone number in a run note exits 1 with `field 'runs[109].note' looks like personal data (phone number)`, naming the kind but not the value, and plans nothing.
+
+**U1-U7**
+- U1: **pass.** `scan_doc` walks every string of every doc: chunks, budgets, and the meta minus the generated `chunks` and `budgets_sha256`. A hit stops the plan before anything is planned.
+- U2: **pass.** An unknown run field (`borrower`) gives `1 field(s) outside the allowlist`, exit 1. The live chunk's run keys are a subset of `ledger.RUN_KEYS`. The meta `header` holds only `provider`, `not_reported` and `covers`, never `source` or `recorded_by`.
+- U3: **pass** as above. The live view-level test is pending for Janice.
+- U4 and U5: these are procedures and documentation. pmo-playbook section 8 has the re-declare and chat-count steps. The README states that the artifact stays private and that sharing needs a new compliance check and a `usage` purge.
+- U6: **pass.** An orphan chunk of another session gives `delete ... ifVersion v9` and is listed in `orphans`. `usage/zzz` is listed as `unknown` and is not deleted (Deviation 4). This was my own run of the orphan-delete test.
+- U7: **pass.** The plan reads stdin only. The fixture is invented, and the test's phone-like string is assembled by `join`.
+
+**Comment stripping**: **pass.** 90 lines (8,371 B) are removed from the built page only. No removed line holds two comments, and the 4 continuation lines are comment text. Of the 43 `//` in the template, the one removed is inside a comment (`links only when they start with https://`). No `//` in code, a string, a URL or a regex is touched. The built page runs with 0 console errors.
+
+**Headless check** (Chrome headless with software GL and a stub `claude` that reads db docs made by `usage plan`, local `three.min.js` copied to /tmp; no screenshots). At 1280x800, 1024x640 and 390x844 (phone: the usage sheet from the gear menu), in each state: synced (the same ledger), empty, stale (a 67-run copy), `onSnapshot` error `unavailable`, `not_granted`, `use('db')` rejecting, no `claude` at all, and synced 110 on a 109 build. Every case had 0 overlaps among top, strip, usage, tlist, usheet, tone, focus, msheet, bar and chat, and 0 console errors. The notes read as follows:
+- synced: "Synced 27 Nov 08:00 WIB"
+- empty: "Built-in copy as of run #109 (2026-11-26): never synced."
+- stale: "... synced copy is older (synced 27 Nov 08:00 WIB)."
+- unavailable, not_granted, rejected and no `claude`: "... synced data not available."
+
+The usage figures were never blank.
+
+**C1-C8**: **not weakened.** `chat.py` changes only the generalised `rules_problem`, whose default is unchanged. The page's chat changes only by sharing `getDb()`, with the same 10 s timeout, and "use(db) rejects" still gives 0 errors. The inbox refusal (C7), retention (C6) and the playbook's section 9 chat steps are unchanged.
+
+**U1 session-id exemption (my view; Wulan rules on it).** I think it is acceptable. It is narrow: only a top-level `session` field whose value equals the header session id is exempt, and that id has already passed `ledger.SESSION_RE`. It is an opaque harness id that is already in the repo file name and on the page, not personal data. It still gets the `events.py` data patterns and the forbidden terms. The same text in a note is still a hit (test).
+
+**Notes (none of these cause a reject)**
+1. Before the first sync, Janice must record the live U3/C7 view-level refusals and the Design R3 answers (create-only `db_write`, and whether chat docs survive the re-declare). The U4 re-declare is a gate for Merwyn. Until then the page shows the built-in copy, which is safe.
+2. At 1280x800 in Detail, the built-in states auto-collapse the usage panel to its one-line summary (class `ac`), because the longer note adds a line. Main's build and the synced state do not collapse. It is not an overlap and not blank, but it may be worth a look from Dinda.
+3. On a delete-only plan, `report.synced_at` shows the new time even though the meta is not re-stamped.
+4. If the `s == session` condition in the exemption is removed, the tests still pass. It is redundant today, because `build()` sets `session` from the header, but a test would pin it.
+5. Already true before T-069: `chat.scan` does not flag a 30-character `sk...` token (the long-token rule starts at 32).
+6. The external skills design:accessibility-review and data:validate-data were not available in this session, so I checked by hand.
+
+— Cahyani (reviewer)
 
 ## Decision
 
