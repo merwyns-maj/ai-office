@@ -42,6 +42,8 @@ A second line kind, kept apart from runs. The header keeps `main_session` in `no
 ## Page
 `python scripts/office_app.py ai-office --ledger <file>` (add `--chat` for the one published AI Office page, T-065) converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored). Chat runs (no task) are not in the event log, which needs a task per usage event; they stay in the ledger totals.
 
+Tests (T-072): the suite reads the live ledger only for invariants (clean parse, totals add up, chat runs not in events, main lines not in run totals, old lines unchanged); exact numbers come from `tests/fixtures/session_FIXTURE072.jsonl`. Appending a valid line must never break the suite; `RealLedgerAppended` checks this. The page's used figure excludes chat runs.
+
 ## Budgets (T-060)
 The usage panel compares these totals with `offices/<office>/budgets.yaml` (per provider, and per agent inside a provider; format and rules in `engine/runtime/budgets.py`). A budget is set by Merwyn or whoever he names, every value has `set_by` and `set_on`, and the page never invents one: no budget reads "budget not set". Period today: the session.
 

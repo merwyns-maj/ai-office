@@ -5,11 +5,12 @@ import unittest
 from pathlib import Path
 
 from engine.runtime import events, ledger
-from tests._helpers import REPO, run
+from tests._helpers import REPO, appended_copy, run
 
 AGENTS = {"pmo", "pm", "architect", "engineer", "reviewer", "compliance", "curator", "designer"}
 REAL = REPO / "offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl"
 EDGE = REPO / "tests/fixtures/ledger-edge.jsonl"
+FIXTURE = REPO / "tests/fixtures/session_FIXTURE072.jsonl"   # exact numbers live here, never in the live ledger (T-072)
 HDR = ('{"log":"agent-runs","v":1,"office":"ai-office","session":"session_TEST0001","source":"s","recorded_by":"r",'
        '"covers":"c","date":"2026-11-26","not_reported":["split"]}')
 
@@ -29,20 +30,23 @@ def errs(probs):
 
 
 class RealLedger(unittest.TestCase):
+    """T-072: the live ledger is append-only, so these tests check invariants only. Exact numbers come from FIXTURE."""
+    LEDGER = REAL
+
     def setUp(self):
-        self.h, self.runs, self.probs = ledger.load_ledger(REAL, agents=AGENTS, office="ai-office",
+        self.h, self.runs, self.probs = ledger.load_ledger(self.LEDGER, agents=AGENTS, office="ai-office",
                                                            forbidden=events.forbidden_terms(REPO))
 
     def test_loads_clean(self):
         self.assertEqual(self.probs, [])
-        self.assertEqual(self.h["session"], REAL.stem)
+        self.assertEqual(self.h["session"], self.LEDGER.stem)
         self.assertEqual(self.h["not_reported"], ["split", "model", "main_session"])
         self.assertGreaterEqual(len(self.runs), 35)
 
     def test_run_22_is_not_reported_and_run_8_has_its_note(self):
         by = {r["n"]: r for r in self.runs}
         self.assertEqual([by[22][k] for k in ledger.NUMS], [None, None, None])   # null, never 0
-        self.assertEqual(sum(1 for r in self.runs if r["tokens"] is None), 1)
+        self.assertEqual(ledger.totals(self.runs)["session"]["not_reported"], sum(1 for r in self.runs if r["tokens"] is None))
         self.assertIn("general-purpose agent", by[8]["note"])
 
     def test_totals_add_up_everywhere(self):
@@ -52,7 +56,7 @@ class RealLedger(unittest.TestCase):
         self.assertEqual(sum(r["tokens"] for r in t["agents"].values()), total)
         self.assertEqual(sum(r["tokens"] for r in t["sprints"].values()), total)
         self.assertEqual(sum(r["solo_tokens"] for r in t["tasks"].values()) + t["shared"]["tokens"], total)
-        self.assertEqual(t["session"]["not_reported"], 1)
+        self.assertEqual(t["session"]["not_reported"], sum(r["tokens"] is None for r in self.runs))
         self.assertEqual(sum(r["runs"] for r in t["agents"].values()), len(self.runs))
 
     def test_seed_numbers_at_build(self):
@@ -65,15 +69,46 @@ class RealLedger(unittest.TestCase):
         h, evs, probs = events.parse_log(txt, agents=AGENTS, stages={"todo"})
         self.assertEqual(probs, [])
         self.assertEqual((h["v"], h["usage_source"]), (1, "recorded"))
-        self.assertEqual(len(evs), len(self.runs))
-        self.assertIsNone(next(e for e in evs if e["run"] == 22)["total"])
-        self.assertEqual(sum(e["total"] or 0 for e in evs), ledger.totals(self.runs)["session"]["tokens"])
+        self.assertEqual(len(evs), sum(1 for r in self.runs if r["tasks"]))
+        chat = [r for r in self.runs if not r["tasks"]]
+        self.assertFalse({r["n"] for r in chat} & {e["run"] for e in evs})        # a chat run is not in the event log
+        self.assertEqual(sum(e["total"] or 0 for e in evs) + sum(r["tokens"] or 0 for r in chat),
+                         ledger.totals(self.runs)["session"]["tokens"])
+        self.assertIsNone(next(e for e in evs if e["run"] == 22)["total"])          # old lines never change
         self.assertTrue(all(e["src"].endswith(f"#n={e['run']}") for e in evs))
 
     def test_no_dollar_or_percent_of_plan_in_the_file(self):
-        text = REAL.read_text(encoding="utf-8")
+        text = self.LEDGER.read_text(encoding="utf-8")
         self.assertNotIn("$", text)
         self.assertNotIn("%", text)
+
+    def test_main_lines_are_not_in_run_totals_or_events(self):
+        h, runs, main, probs = ledger.load_ledger_full(self.LEDGER, agents=AGENTS, office="ai-office")
+        self.assertEqual(runs, self.runs)
+        self.assertNotIn("cache_read", ledger.to_event_log(h, runs))
+        self.assertTrue(all("tokens" not in m for m in main))
+
+
+class RealLedgerAppended(RealLedger):
+    """T-072 guard: the live ledger plus 3 valid lines (a not-reported run, a chat run, a main-session reading) must pass
+    every invariant test above. Appending a valid line must never break the suite."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.LEDGER = appended_copy(REAL, cls._tmp.name)
+        code, out, _ = run("ledger", "ai-office", str(cls.LEDGER))
+        assert code == 0 and "0 errors" in out, out
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def test_the_appended_lines_were_read(self):
+        live = ledger.load_ledger(REAL, agents=AGENTS)[1]
+        self.assertEqual(len(self.runs), len(live) + 2)
+        self.assertIsNone(self.runs[-2]["tokens"])
+        self.assertEqual(self.runs[-1]["tasks"], [])
 
 
 class Totals(unittest.TestCase):
@@ -90,6 +125,20 @@ class Totals(unittest.TestCase):
                                                "tokens_with_shared": 10, "not_reported": 1})
         self.assertEqual(sum(r["solo_tokens"] for r in t["tasks"].values()) + t["shared"]["tokens"], t["session"]["tokens"])
         self.assertEqual(t["agents"]["pm"]["not_reported"], 1)
+
+
+class FixtureTotals(unittest.TestCase):
+    """The exact numbers, pinned once, on the synthetic fixture (T-072)."""
+
+    def test_pinned_numbers(self):
+        h, runs, probs = ledger.load_ledger(FIXTURE, agents=AGENTS, office="ai-office")
+        self.assertEqual(probs, [])
+        t = ledger.totals(runs)
+        self.assertEqual((t["session"]["runs"], t["session"]["not_reported"], t["session"]["tokens"]), (7, 1, 10_500))
+        self.assertEqual((t["shared"]["tokens"], t["shared"]["runs"]), (4_500, 2))      # the 2-task run and the chat run
+        self.assertEqual(t["tasks"]["T-902"]["solo_tokens"], 3_000)
+        h, evs, probs = events.parse_log(ledger.to_event_log(h, runs), agents=AGENTS, stages={"todo"})
+        self.assertEqual((probs, len(evs), sum(e["total"] or 0 for e in evs)), ([], 6, 10_000))   # chat run's 500 is not an event
 
 
 class Parser(unittest.TestCase):
@@ -268,16 +317,32 @@ class MainSession(unittest.TestCase):
 
 
 class Cli(unittest.TestCase):
+    LEDGER = REAL
+
     def test_exit_codes(self):
-        code, out, _ = run("ledger", "ai-office", str(REAL))
+        code, out, _ = run("ledger", "ai-office", str(self.LEDGER))   # live: only what stays true as honest lines are appended
         self.assertEqual(code, 0)
-        self.assertIn("0 errors", out)
-        self.assertIn("1 not reported", out)
+        self.assertIn("0 errors, 0 warnings", out)
+        self.assertRegex(out, r"\(\d+ not reported\)")
+        code, out, _ = run("ledger", "ai-office", str(FIXTURE))      # exact numbers come from the fixture
+        self.assertEqual(code, 0)
+        self.assertIn("7 runs kept (1 not reported), 10,500 tokens", out)
         code, out, _ = run("ledger", "ai-office", str(EDGE))
         self.assertEqual(code, 1)
         self.assertNotIn("someone@", out)
         self.assertEqual(run("ledger", "ai-office", "/nonexistent.jsonl")[0], 2)
         self.assertEqual(run("ledger", "ai-office")[0], 2)   # usage error
+
+
+class CliAppended(Cli):
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.LEDGER = appended_copy(REAL, cls._tmp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
 
 
 if __name__ == "__main__":
