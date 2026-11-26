@@ -82,6 +82,8 @@ Merwyn messages the office from the 3D office page (the AI Office artifact). The
 
 **Publish (T-065).** There is one published page and one artifact: "AI Office" (5f1bb811-1633-4bfb-8285-9bcb2408dec2). It shows the real usage ledger and the chat. The single build command is `python scripts/office_app.py ai-office --ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat`, which writes `engine/app/usage-session_01MDGJq3GfaeozLojJo8W5Td.html` (gitignored, never committed). Call `declare_capabilities` (`db`, `user`) first, then publish that file to "AI Office" (with `three.min.js` as a sibling, or rely on the CDN fallbacks). Republish after a ledger append you want shown: the page is the ledger as of its build. Record the build's printed size in KB. The committed `engine/app/office.html` is the synthetic dev build for tests and is never published. The "AI Office token usage" artifact is retired: delete it only when Merwyn confirms.
 
+**Phone check (T-071).** After a merged UI change is published, ask Merwyn to run `skills/phone-check` and name his phone and browser. Record his reply in that task's Review log as `Merwyn (human), phone check <date WIB>, <phone/browser>: PASS | FAIL step N: <his words>`. It does not replace Reviewer PASS. A FAIL does not reopen the done task: open a new task at `todo` quoting the failed step and linking the original. A Review log line is not planning-only, so it goes into the next `t-xxx` PR (on a FAIL, the follow-up task's PR).
+
 ## Anti-patterns
 - Reporting only Green. Treating RAG as a weapon instead of a signal.
 - Starting new tasks to look busy while others sit in review.
