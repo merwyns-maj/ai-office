@@ -2,7 +2,7 @@
 id: T-068
 title: "Lean path for small changes (one design step, then build and review)"
 phase: 0-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: repo
