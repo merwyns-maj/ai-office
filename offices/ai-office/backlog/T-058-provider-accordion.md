@@ -2,9 +2,9 @@
 id: T-058
 title: "Usage panel: By provider as an accordion"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-057]
@@ -41,6 +41,9 @@ How to verify:
 Deviations / notes: there is no scripts/validate.py in the repo, so no validate run; board.py ran (58 tasks), board.md discarded. Keyboard Enter/Space and reduced motion are inherited from the T-057 button and CSS; I checked them by code reuse, not by a scripted key test. three.min.js copied in for screenshots, gitignored.
 
 ## Review log
+PASS, 26 Nov 2026, PR #43 head 540545c. Diff limited to template, generated office.html, tests and task file; 311 tests; golden 13/75/0; --check up to date; recorded page built. Within-provider shares match a Python largest-remainder sum of the synthetic fixture and the ledger, every list adds to 100. Headless at 1280x800 and 390x844, both pages, normal and reduced motion: provider headers are buttons, expanded by default; Enter/Space flip aria-expanded and keep focus; 0 console errors.
+Notes: recorded provider name truncated at 1280; "Model not reported" needs a scroll on the phone sheet; recorded agent shares tested by hand only.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
