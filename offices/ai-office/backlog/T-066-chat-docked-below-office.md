@@ -4,7 +4,7 @@ title: "Chat as a docked section below the office; the office resizes"
 phase: 6-office
 status: review
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-065]
@@ -157,6 +157,59 @@ Done-when checks:
 - With 407 B left, the next page change will need either a limit raise or more trimming. Please state the number when that happens.
 - Reopening during the 140 ms close motion keeps the `cc` (ease-in) class until `dockEnd`. This is cosmetic.
 - External skills `design:accessibility-review` and `data:validate-data` are not available in this session. I did the accessibility checks by hand (above).
+— Cahyani (reviewer)
+
+**Review 2 (26 Nov 2026): PASS.** The fixes from Review 1 hold. The spec checks pass at 1280x800 and 390x844. One edge defect is filed below as a note, not a reject.
+
+Commands run on `t-066-chat-dock` at 7b22b48:
+- `python -m unittest discover -s tests`: `Ran 389 tests ... OK`, exit 0.
+- `python -m engine.runtime validate ai-office`: `ai-office: OK — 8 agents, 5 stages, 66 tasks, 18 skills`, exit 0.
+- `python scripts/office_app.py ai-office --chat --check`: `engine/app/office.html: up to date (215 KB, 84 events)`, exit 0.
+- Size: `wc -c engine/app/office.html` gives 221168. `test_size_limit` is still `216 * 1024` (221,184) and the PR does not change it, so the headroom is 16 B. Published build (`--ledger offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl --chat --out /tmp/...`): `written, 223 KB, 8 agents, 71 events`, exit 0, 228,518 B. No size test covers it, as before.
+- Trailing spaces: `dockEnd` and `dockLayout` are clean. No `+` line in the PR diff ends in a space. The only trailing-space line left in the template (line 1344) is already on main.
+- Headless Chromium (Playwright, software GL, dpr 1). I used my own Review 1 harness plus a stub `claude` on copies under /tmp, rebuilt from this head. Screenshots are not committed. Every case passed the Review 1 geometry checks: chat full width; chat top >= bar bottom >= stage bottom; usage, ticker and tone sit above the chat and inside the stage; canvas buffer = stage size; `scrollHeight == innerHeight`; `scrollY == 0`; no console errors or page exceptions.
+
+Review 1 fixes:
+1. **Notice visible before the ack, at every reachable height: pass.** I checked against every clipping ancestor. The notice and "I understand" are fully inside the visible box, above the composer, and the notice does not scroll inside itself. Before the ack the reachable range is 324-448 on desktop and 414-472 on phone (default = min).
+   - 1280x800: default/min chat 324, button 581-608, form 701. Max chat 448, button 457-484.
+   - 390x844: default/min chat 414, button 615-642, form 735. Max chat 472, button 557-584.
+   - The same results came from: a drag to the screen bottom; a reload with a stale saved `h:180`; the empty, nodb and full stub modes with the chat open on load; and the published build.
+2. **At least two thread lines at the minimum after the ack: pass.** The min is 257 on desktop and 301 on phone. The thread is 57 px against a 17.55 px line height. With the acknowledged notice's details open, the thread is 56 px (the notice is capped at 5em). The empty and nodb states give the same 57 px.
+3. **The new test would catch the original failure: pass.** In a copy under /tmp I moved `#cnotice` back inside `#cmid` and restored its `overflow-y:auto`. `test_chat_notice_is_pinned_outside_the_scroll_area` then FAILED. Run against the Review 1 page (521dddd), it and the `dock` node test fail (2 failures). The test checks structure, not geometry, but it hits the exact cause.
+4. **Trailing spaces: fixed** (see above).
+
+Deviation: the minimum is now measured instead of a fixed 180. I accept it. The refined Spec has no number. Dinda's 180 assumed "header, 2 thread lines, composer", and the measured parts alone are larger than 180, so measuring is what her definition asks for. Office minimums at the two spec sizes:
+- Desktop: the stage is 431 at min after the ack, 364 before it, and 240 at max, all >= 240.
+- Phone: the stage is 331 after the ack, 218 before it, and 160 at max, all >= 160.
+
+The phone strip size is honest. 218 and 331 are the real 3D stage: the canvas buffer equals the stage client size, and the stage runs from 112 to 330. The tone strip (36) and the bar sit outside it, between the stage and the chat. On a first phone visit the office strip is 218, not Dinda's 292, because the needs-ack notice forces the 414 minimum. It goes back to 294 at the default once acknowledged.
+
+Done-when regression (all pass, same harness as Review 1):
+1. Full width, nothing under the chat: 1280 closed 688. After the ack: open 304/384; +32, Shift -64, End 448/240, Home 257/431, Enter back to 304; drag +100 gives 404 and saves `h:404`; dragging to the top clamps at 448. 390: closed 632; 338/294; End 472/160; Home 301/331; drag gives 438.
+2. Canvas resize, no scroll: the buffer matched the stage in every case. Mid-open (`--chat-h` 427.9px) `scrollHeight` 800 = innerHeight.
+3. Panels: with saved usage (900,500), ticker (100,560) and a stale `chat` entry, the panels sit above the dock when open (bottoms 432 at default, 288 at max). After Escape they are back at exactly the saved spots, and `office.layout.v1` is not rewritten.
+4. Bar: an `elementFromPoint` hit test on every visible bar button gives true, open and closed, at both sizes.
+5. Reload: first visit `office.chat.v1` null and closed. Reload restores open at 448 and restores closed.
+6. Keyboard and focus: before the ack, focus stays on the Chat button (composer disabled, as T-063). After "I understand", focus goes to `ctext`. Escape and the close button return focus to `chatbtn`, and `aria-expanded` flips. Escape in the mentions list closes only the list. Grip `aria-valuemin/max/now` now follow the measured min (257/448/304 desktop, 301/472/338 phone; 324/448 and 414/472 before the ack).
+7. T-063 states: all render.
+   - Mentions list: 9 items, inside the chat.
+   - Chips: "Fang · needs you", "Janice · answered", "Sebastian is replying", "waiting for Cahyani to pick up".
+   - Needs-you: the amber edge, the pill, and "Show Fang in the office" with the focus card at 60-292 inside the stage (bottom 296).
+   - The blocked 16-digit send: "This looks like personal data or a secret (16-digit run). Not sent. Use a loan ID or a link instead."
+   - Empty, nodb and "Office not running", the offline banner, the footnote and Clear chat.
+   - Phone with a simulated 330 px keyboard: the chat runs 212-514 and the stage is 0; the office comes back after.
+   - Published build: closed, open, key +64 and closed again at both sizes, all OK.
+- C1-C8 are not weakened. Across the PR diff, the notice text, the ack gate, the footnote and the scan are moved or refactored only (`loadChatSt` now calls `C.chat.parseSt`; `cfoot` moved with the DOM). The rework only adds `dockLayout(false)` to the ack handler. `engine/runtime` is unchanged. No `board.md` or images in the diff.
+
+**Non-blocking notes (follow-up suggested to the PMO)**
+- **Composer warnings at the minimum height overlap the thread.** `need` is measured on open, on resize and after the ack, but not when `#cwarn` appears. `#cmid` has no overflow clip, and `.cwrap` keeps `min-height:56px`. So when the composer grows, the thread runs under it. At the minimum height:
+  - Offline: about 21 px of thread is visible on desktop.
+  - Blocked send: 21 px on desktop and **4 px on phone**. On the phone the last bubble's time and the "Sebastian is replying" chip show through the warning's translucent fill.
+  - The warning stays on top and readable (`elementFromPoint` hit 156/156 and 45/45 points on it), the send is still blocked, and at the default height the thread keeps 68 / 41 px. So this is a visual defect in a transient state at a user-chosen height, not a C3 or spec failure.
+  - Suggested fix: call `dockLayout(false)` when `#cwarn` toggles, and add `overflow:hidden` to `#cmid`. That needs bytes, and there are 16 B left.
+- In short windows the measured min wins over the office minimum, as the Design allows ("MIN wins"). At 1280x560 the stage is 191 after the ack, and about 124 before it, against 240. This is outside the spec sizes.
+- With 16 B of headroom, the next page change must trim or the Architect must raise the limit with a stated number.
+- External skills `design:accessibility-review` and `data:validate-data` are not available in this session. Accessibility was checked by hand (above).
 — Cahyani (reviewer)
 
 ## Decision
