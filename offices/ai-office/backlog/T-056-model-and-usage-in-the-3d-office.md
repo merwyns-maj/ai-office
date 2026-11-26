@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-048]
-pr: null
+pr: 37
 ---
 
 > Merwyn, 26 Nov 2026 10:35: "in the 3d AI office, can we also track which model is currently being used, the usage as well. Let's say if i have multiple LLM (Claude SDK, Anthropic API, ChatGPT, Deepseek, etc.)". Prototype slice on the recorded log; real numbers arrive with the runtime (T-024) and cost logging (T-026).
