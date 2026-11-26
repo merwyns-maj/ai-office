@@ -2,9 +2,9 @@
 id: T-063
 title: "Office chat: a pop-up chat in the 3D office, @mention one or more agents"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-062]
@@ -244,6 +244,44 @@ Screenshots (headless Chrome, a stub `claude` injected into a copy of the page u
 — Sebastian (engineer)
 
 ## Review log
+**REJECT (first review), 26 Nov 2026, head eb0628b.** Most of it works and is well built. Three fixes are needed, all small: two are correctness bugs I found by running edge cases, one is a design step that was skipped.
+
+**Checks run (real output)**
+- `python -m pytest -q`: `385 passed`, exit 0. `python scripts/golden.py ai-office`: `13 cases, 75 checks, 0 problems`, exit 0. `python -m engine.runtime validate ai-office`: `OK — 8 agents, 5 stages, 64 tasks, 18 skills`. `python scripts/office_app.py ai-office --chat --check`: `up to date (209 KB, 84 events)`, exit 0. `--chat --ledger x`: exit 2. `python -m engine.runtime ledger ai-office offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl`: `59 runs kept, 0 errors, 0 warnings`.
+- Headless Chrome at 1280x800 and 390x844. I used my own stub of `claude.use`, written under /tmp and not committed. It checks even/odd path segments (TypeError otherwise), makes `update` reject a missing doc, gives one orderBy and limit 1-1000, uses `{docs:[{id,exists,data(),metadata}]}` snapshots, logs any read of `window.claude.db`, and logs any write from a snapshot callback or two writes to one doc at a time. Results at both sizes:
+  - `claude.use` was called for `db` and `user` only. 2 subscriptions were opened over the whole run, including reopening, sending, retrying and Clear chat. 0 rule violations.
+  - The composer stays disabled until the C3 notice is acknowledged. Notice and footnote text match C3 exactly.
+  - Keyboard autocomplete: `@Fa` lists Fang. `@` lists 9 rows (8 agents and @all). Enter and Tab insert the mention, and `aria-activedescendant` is set. Sending "Hi @Fang and @Dinda is T-063 ready?" writes one `set` on `chat/office/messages/m-…` with `recipients` {architect, designer} at `new`.
+  - Simulated session writes: chips read "Fang is replying" and "Dinda picked this up", then "Dinda · needs you" and "Fang · answered". After that, `document.title` is "(1) needs you · AI Office", Dinda is amber in the strip and the scene, and the closed badge shows `?`.
+  - A `<script>` payload renders as text (0 script nodes). A `javascript:` link is not linked. The https link gets `noopener noreferrer`, `_blank`.
+  - A blocked send ("@Fang call 0811 1111 1111") shows "…(phone number). Not sent…". It makes 0 writes and keeps the text.
+  - Esc closes the panel and puts focus on `chatbtn`. Open/closed survives a reload. A failed write shows "Not sent. Retry", and retry writes the same id. Clear chat (two clicks) deleted every doc.
+  - With db null, and with `use` hanging (10 s timer), the panel shows "Chat storage is not available in this view".
+  - Console: 0 page errors. The only error was my test server's favicon 404.
+  - Screenshots are in /tmp/rv63/shots (not committed).
+- Recorded page: `--ledger … --out /tmp/…` gives `data.chat` absent and no Chat button, and `claude.use` is never called.
+- Page API use, checked against the artifact db API: paths have the right parity. Only `set` (new docs) and `delete` are used, never `update` on a missing doc. There is one subscription each on messages and `chat/office`. No db writes come from render or snapshot callbacks. Every error goes to one generic state (note 1).
+- Office CLI run with db_list-shaped input `{id,data,version}`. `plan` puts `post` and `refuse` first, carries `ifVersion` from `version`, and the refuse text and reply text match C2. Rules open below owner exit 1 for `rules` and `plan` (C7). `reply` on a 16-digit run exits 1 and names only the kind.
+- C1 to C8 against the code and pmo-playbook section 9: C1, C2, C3, C4, C5 (playbook allowlist), C7 and C8 are present. Fixture numbers are repeated digits, nothing realistic. C6 is present, but its delete step does not work as written (fix 2).
+- Python against node parity, my own probes (17 cases): 14 match. The three differences: `@constructor` (fix 1); Arabic-Indic digits, which Python flags and the page does not (note 2); and a different kind name for one phone case, where both still block.
+
+**Required fixes**
+1. Mention parsing in the page breaks on names of Object.prototype properties. `hmap` is a plain `{}`, so `@constructor` resolves to the `Object` function. Node shows `newAsk('@constructor please check')` gives recipient key `"function Object() { [native code] }"` and `mentions:[null]`. Python gives `unknown:["constructor"]` and routes to Janice. The ask is never routed, because `chat plan` skips it as invalid. Fix: use `Object.create(null)` or a `hasOwnProperty` check in `hmap` and `parseMentions`, and add `@constructor` to `chat-mentions.json`.
+2. `chat purge` and `chat status` drop the document version, but `db_write` needs `ifVersion` on every op on an existing doc (Janice's facts in the Design). Input `{id,data,version:7}` to `purge` printed `{"op":"delete","path":…,"id":…}` with no `ifVersion`. So C6 step 10 ("delete what it lists with db_write op delete") fails when run as written. Fix: carry `ifVersion` from the input on each purge delete and on the `status` output, as `plan` and `reply` already do, and add a test.
+3. The page size limit was raised from 200 to 224 KB in the build. Fang's design says: "If it does not fit, Sebastian stops and asks me. Raising the limit is a design change, not a build fix." The comment explains why, but Fang's acceptance is not recorded. Fix: Fang accepts the 224 KB limit in Design, or the page is trimmed under 200 KB.
+
+**Notes (not blocking)**
+1. The page handles every db error the same way. A snapshot error, even a transient `unavailable`, turns into a permanent "not available" state with no retry. `quota_exceeded`, `revoked` and `not_granted` are not told apart.
+2. The page scan uses ASCII `\d`, so non-ASCII digits get past it. The office side (C2) still catches them.
+3. `rules_problem` checks only `path:"chat"` and `chat/…`. A wider rule such as a root path would not be caught.
+4. `reply` and `status` patches carry the whole `recipients` map, so another agent's status can be stale in the patch. `ifVersion` turns this into a conflict, and the next `plan` repairs it.
+5. While typing `@d`, the To row briefly says "No agent called D".
+6. `chat.md` and the chatStore comment still say the API shape is unconfirmed. The API now quoted by Janice matches what the page and `_norm` use, so update the wording.
+7. Clear chat sends up to 200 deletes in parallel. It may hit the rate limit, and if it does the page shows a warning.
+
+External skills design:accessibility-review and data:validate-data are not available in this session. The accessibility checks above were done by hand.
+
+— Cahyani (reviewer)
 
 ## Decision
 
