@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-060]
-pr: null
+pr: https://github.com/merwyns-maj/ai-office/pull/50
 ---
 
 > Merwyn, 26 Nov 2026 15:27 WIB: "use color coding like green, yellow, and red if almost reach the capacity". Applies to the Summary and Detail budget bars (T-060) on both pages.
