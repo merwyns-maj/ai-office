@@ -385,6 +385,7 @@ if (mode === 'sprint3') {
   assert.deepStrictEqual(C.textMode(61), { shadow: true, dim: false, edge: false });
   assert.deepStrictEqual(C.textMode(60), { shadow: true, dim: true, edge: false });
   assert.deepStrictEqual(C.textMode(0), { shadow: true, dim: true, edge: true });
+  assert.strictEqual(C.opacityStep(92), 92); assert.strictEqual(C.opacityStep(91), 91);
   assert.strictEqual(C.opacityStep(40), 40); assert.strictEqual(C.opacityStep(150), 92); assert.strictEqual(C.opacityStep('9'), 92); assert.strictEqual(C.opacityStep(NaN), 92);
   assert.strictEqual(C.rectSentence('Usage', { x: 120, y: 80, w: 300, h: 240 }), 'Usage panel at 120, 80, size 300 by 240.');
   // saved state: valid, then every kind of corrupt storage falls back without throwing
@@ -452,7 +453,9 @@ class CoreUnderNode(unittest.TestCase):
             self.assertIn(needle, html)
         self.assertRegex(html, r"#stage\{position:absolute;left:0;right:0;")   # the stage runs full width behind the panels
         # at 60% and below each text line keeps a dark backing; the panel fill is not touched by it
-        self.assertRegex(html, r"\.pp\.tpd :is\([^)]*\)[^{]*\{background:rgba\(12,13,22,\.8\)")
+        self.assertRegex(html, r"\.pp\.tpd :not\(:has\(\*\)\)[^{]*\{background:rgba\(12,13,22,\.8\)")   # any leaf element, not a tag list
+        self.assertNotRegex(html, r"\.pp\.tpd :is\(")
+        self.assertRegex(html, r'class="oprange" type="range" id="o-\' \+ id \+ \'" min="0" max="100" step="1"')   # 92 is reachable on the slider
 
     def test_percentage_maths(self):
         self.assertIn("shares ok", self.node(str(HTML), "shares"))

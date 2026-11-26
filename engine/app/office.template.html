@@ -253,7 +253,7 @@ body.rm .tl.new{animation:none}
   body.free .pp.tp{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6)}
   body.free .pp.tpd{--text-dim:var(--text)}
   /* at 60% and below: every text line keeps a soft dark backing so it stays readable; the panel fill itself stays as set */
-  body.free .pp.tpd :is(h2,h3,h4,p,span,div,b,i,em,strong,small,a,label,li,td,th,code):not(:has(*)):not(:empty):not(.bar):not(.synpill):not(.pmb):not(.grip):not(.rz):not(.pm *){background:rgba(12,13,22,.8);border-radius:4px;padding:2px 3px;margin:-2px -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;width:fit-content;max-width:100%}
+  body.free .pp.tpd :not(:has(*)):not(:empty):not(svg *):not(.bar):not(.synpill):not(.pmb):not(.grip):not(.rz):not(.pm *){background:rgba(12,13,22,.8);border-radius:4px;padding:2px 3px;margin:-2px -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;box-sizing:border-box;width:fit-content;max-width:calc(100% + 6px)}
   body.free .pp.anim{transition:left var(--pdur,.16s) ease-out,top var(--pdur,.16s) ease-out,width var(--pdur,.16s) ease-out,height var(--pdur,.16s) ease-out}
   body.free .pp.drag{box-shadow:0 16px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.2);transition:box-shadow .1s}
   body.rm.free .pp,body.rm.free .pp.anim,body.rm.free .pp.drag{transition:none}
@@ -670,7 +670,7 @@ body.tk #ticker{display:flex!important;position:absolute;margin:0;left:8px;right
     return { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[key] || null;
   }
   /* background opacity 0..100: blur holds at 8px down to 30% and fades to 0 below it; dim text rises to full text colour under 60% */
-  function opacityStep(o) { return pnum(o) && o >= 0 && o <= 100 ? Math.round(o) : PANEL.OPACITY; }   // the slider moves in 5s; today's 92 is kept as it is
+  function opacityStep(o) { return pnum(o) && o >= 0 && o <= 100 ? Math.round(o) : PANEL.OPACITY; }   // the slider moves in 1s, so today's 92 is reachable
   function blurFor(o) { return o >= 30 ? 8 : Math.round(8 * Math.max(0, o) / 30 * 10) / 10; }
   function textMode(o) { return { shadow: o < 100, dim: o <= 60, edge: o <= 0 }; }
   function rectSentence(name, r) { return name + ' panel at ' + r.x + ', ' + r.y + ', size ' + r.w + ' by ' + r.h + '.'; }
@@ -2026,7 +2026,7 @@ function attachPanel(id) {
   hd.insertBefore(grip, hd.firstChild);
   var pmb = el('button', 'pmb', DOTS); pmb.type = 'button'; pmb.id = 'pmb-' + id; pmb.setAttribute('aria-label', nm + ' panel options'); pmb.setAttribute('aria-haspopup', 'true'); pmb.setAttribute('aria-expanded', 'false'); pmb.setAttribute('aria-controls', 'pm-' + id);
   var uc = hd.querySelector('.ucol'); if (uc) hd.insertBefore(pmb, uc); else hd.appendChild(pmb);
-  var pm = el('div', 'pm', '<label for="o-' + id + '">Background opacity<span class="sr"> of the ' + nm + ' panel</span></label><div class="pr"><input class="oprange" type="range" id="o-' + id + '" min="0" max="100" step="5" value="' + PN.OPACITY + '"><output id="ov-' + id + '" for="o-' + id + '"></output></div>');
+  var pm = el('div', 'pm', '<label for="o-' + id + '">Background opacity<span class="sr"> of the ' + nm + ' panel</span></label><div class="pr"><input class="oprange" type="range" id="o-' + id + '" min="0" max="100" step="1" value="' + PN.OPACITY + '"><output id="ov-' + id + '" for="o-' + id + '"></output></div>');
   pm.id = 'pm-' + id; pm.hidden = true; pm.setAttribute('role', 'group'); pm.setAttribute('aria-label', nm + ' panel options');
   var rz = el('span', 'rz', RZ); rz.setAttribute('role', 'button'); rz.tabIndex = 0; rz.setAttribute('aria-label', 'Resize ' + nm + ' panel'); rz.title = 'Drag to resize. Arrow keys resize 8 px, Shift 32 px.';
   p.appendChild(pm); p.appendChild(rz);

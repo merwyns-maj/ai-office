@@ -4,7 +4,7 @@ title: "3D office: rearrange, resize and set opacity of the panels"
 phase: 6-office
 status: build
 priority: P1
-owner: engineer
+owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-058]
@@ -142,6 +142,19 @@ All at or above 4.5:1. Shots: `/tmp/t059-shots/rework-00.png`, `-30`, `-60`, `-9
 
 **Known limit:** the visual look (dark pills behind each line at 60% and below) is a change in the default feel when set transparent; the Reviewer should look at `rework-30.png`.
 
+— Sebastian (engineer)
+
+**Rework 2** (answers Review 1 fixes 1-3)
+1. Backing rule is now `.pp.tpd :not(:has(*)):not(:empty)` minus svg, `.bar`, `.synpill`, `.pmb`, `.grip`, `.rz`, `.pm *`: any leaf element with text, so the ticker `<time>` and any future tag are covered (no tag list).
+2. Backing box is `box-sizing:border-box; width:fit-content; max-width:calc(100% + 6px)` against the -3px side margins, so it is no longer narrower than the text in grid or ellipsis cells. `.nm` ellipsis is untouched (still `.ur.ah .l1 .nm`). Check: no backed leaf is narrower than its text + 5.5px.
+3. Slider is `step="1"`, so the 92% default is reachable. New assertions in `test_panel_controls_are_named_and_reset_is_in_the_gear_menu` (slider step, no tag list) and `test_panel_layout_maths` (`opacityStep(92)` = 92, `(91)` = 91).
+Measured with Cahyani's `/tmp/rv59/scripts/contrast.py` (99th-percentile background luminance under each text box, panel moved to the lightest 264 px scene area, `?t=40`, ticker with 11 text boxes showing). `contrast_sh.py` (shadow kept) gives 9.24 / 12.20 / 14.10 / 5.29 and 9.57 / 12.17 / 14.10 / 5.58.
+| Panel | 0% | 30% | 60% | 92% | text boxes without own backing at 0-60% |
+|---|---|---|---|---|---|
+| Usage (lightest scene area) | 9.23 | 11.84 | 13.77 | 5.14 | 0 of 43 |
+| Latest events (?t=40) | 9.23 | 11.84 | 13.64 | 5.43 | 0 of 11 |
+Worst case 5.14:1 (usage at 92%, no backing there by design, shadow only); every setting is above 4.5:1. Console errors none. 314 tests OK, `--check` up to date, golden 13 cases 0 problems, board.py ran (board.md discarded). Recorded page rebuilt from `offices/ai-office/usage/session_01MDGJq3GfaeozLojJo8W5Td.jsonl`.
+Not changed (Review notes): first action moving the default ticker 4px; resize handle after content in Tab order.
 — Sebastian (engineer)
 
 ## Review log
