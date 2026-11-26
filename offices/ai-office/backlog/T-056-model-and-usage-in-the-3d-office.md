@@ -2,7 +2,7 @@
 id: T-056
 title: "Show which model each agent uses, and usage, in the 3D office (multi-provider)"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
