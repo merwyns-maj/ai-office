@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-059]
-pr: null
+pr: 47
 ---
 
 > Merwyn, 26 Nov 2026 14:55 WIB: "let's just create 2 mode. 1. Summary on the high level on the provider level (i.e. Claude Max Plan 20% out of 100% capacity) 2. Detail view Show each agent consumption (no need up to the task level) vs budget for each agents."
