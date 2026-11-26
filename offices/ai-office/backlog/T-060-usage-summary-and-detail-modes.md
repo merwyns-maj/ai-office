@@ -2,9 +2,9 @@
 id: T-060
 title: "Usage panel: summary mode (provider vs budget) and detail mode (agent vs budget)"
 phase: 6-office
-status: review
+status: build
 priority: P1
-owner: reviewer
+owner: engineer
 where: code
 project: ai-office
 depends_on: [T-059]
@@ -116,6 +116,32 @@ Open `engine/app/usage-session_...html?t=99999` (recorded) or `engine/app/office
 — Sebastian (engineer)
 
 ## Review log
+
+**REJECT** (first), 26 Nov 2026, head 2dad710. One correctness bug in the keyboard switch; everything else passes.
+
+Checks (run by me, outputs real):
+- `python -m unittest`: Ran 336 tests ... OK. `golden.py ai-office`: 13 cases, 75 checks, 0 problems. `office_app.py ai-office --check`: up to date (166 KB, 84 events). Ledger CLI: 48 runs kept (1 not reported), 3,813,702 tokens, 0 errors, 0 warnings. Recorded page built (167 KB, 8 agents, 48 events). board.py: no problems (board.md discarded).
+- Maths by hand (Python, from the ledger): provider 3,813,702 / 5,000,000 = 76.27%, page says 76%. Used per agent: engineer 1,649,066, reviewer 1,125,617, architect 514,115, designer 222,869, pm 202,660, curator 68,590, compliance 30,785 (sum 3,813,702). Budgets = share x 5,000,000: 2,150,000 / 1,500,000 / 650,000 / 300,000 / 250,000 / 100,000 / 50,000 (loader gives the same, sum 5,000,000). % 76.7, 75.04, 79.1, 74.3, 81.06, 68.6, 61.6; page shows 77, 75, 79, 74, 81, 69, 62 and orders Emmy, Fang, Sebastian, Cahyani, Dinda, April, Wulan, Janice "Main session: not reported" last: correct. % is computed from exact integers, so display rounding never changes a % or the order. "2.2M" for 2,150,000 is honest half-up (exact figure in `title`); see note 1.
+- budgets.yaml broken 26 ways through `resolve`: shares 99 and 101, negative share, negative/zero/float/string provider tokens, missing set_by, missing or bad set_on, mixed share and tokens, both, neither, unknown agent, unknown provider, period `week`, no period, bad main_session, unknown key, shares without provider tokens, boolean share, blank set_by: all rejected with a clear message. Shares 42.5 + 1.5 accepted (fractional allowed by design). End to end, shares 99 makes `office_app --ledger` exit 1 with "agent shares add to 99, must be 100", nothing written.
+- Ledger `date`: "2026-11-26" kept; "2026-13-01", "26 Nov", 20261126, null, "2026-11-26T10:00" each give "date must be YYYY-MM-DD" and the line is dropped.
+- Wording: no "capacity" or "of the plan" in office.html. Summary "76% of your budget"; footer "Budgets are yours to set. Anthropic does not publish the Max plan's limit in tokens." Over (synthetic Anthropic API): "over by 20k (140% of your budget)", Detail "over by 20k", leading glyph, hatch 64px after a 160px bar (40%); computed colours of the text, glyph and hatch are all --text rgb(242,237,228), no amber or red. Unset: dashed track, "budget not set" italic dim, "134k used".
+- Headless Chrome (playwright, swiftshader), both pages, both modes, 1280x800 and 390x844 (phone sheet via gear, Usage): rendered, no horizontal scroll (scrollWidth 1280 / 390), 0 console errors on every page. Screenshots `/tmp/cy60/{rec,syn}-{1280,390}-{summary,detail}.png`, collapsed `/tmp/cy60/rec-collapsed.png` ("Claude Code subagents 76% of your budget", switch hidden).
+- Keyboard: ArrowRight/Left/Down, Home, End, Enter, Space all select; roving tabindex 0/-1 correct; focus stays on the selected radio; live region "Detail view, 8 agents". Mode survives reload. localStorage getter throwing: page loads in Summary, switching works, 0 errors. Reduced motion (media query and body.rm): animation none, bar transition 0s.
+
+**Fail (correctness, accepted design: "Left/Right/Home/End move and select"):** the arrow keys on the Summary | Detail switch also reach the document shortcut handler, which steps the replay. Measured: synthetic page playing, focus Summary, ArrowRight: the replay pauses and the scrub jumps from 8 to 11; paused recorded page at 400, ArrowRight gives 404, ArrowLeft 383 (same on the phone sheet). So switching view by keyboard pauses and moves the replay, which changes the very numbers being looked at. It also kills the keyboard cross-fade: the step re-renders the panel 4ms later without `ufade` (click keeps it). Fix: in `segKey`, `e.stopPropagation()` after `preventDefault()` (or add the radiogroup to the "panel controls own these keys" exclusion in the document keydown handler), plus a test that an arrow key on the switch leaves the replay position and play state unchanged.
+
+Notes (not reasons to reject):
+1. Rounded figures can read inconsistently with the %: "1.6M / 2.2M 77%" (1.6/2.2 is 73%) sits above "1.1M / 1.5M 75%". The % is right (exact maths); Merwyn may prefer two decimals in millions or the exact figure in the row. Design question for Dinda.
+2. `fmtTok(999_600)` gives "1000k" (rounds to 1000 below the 1M branch).
+3. Agent `tokens` amounts are not checked against the provider total (9M each under a 5M provider is accepted). Not in the spec; worth a warning later.
+4. Share 0 gives a 0-token budget; any use then reads "over by X" with no %. Acceptable, but maybe reject share 0 or treat as unset.
+5. Summary row 3 shows `note` instead of "Budget set by X" whenever a note exists, so a stale note would hide who set a new value.
+6. Focus ring uses --text, design said --accent. Deviations 1 to 8 in Build notes are reasoned and fine by me.
+7. External skills design:accessibility-review and data:validate-data are not available in this session; checks above done by hand.
+
+Build notes were on screen when I opened the task file (one read of the whole file); every figure above comes from my own runs, not from them.
+
+— Cahyani (reviewer)
 
 ## Decision
 
