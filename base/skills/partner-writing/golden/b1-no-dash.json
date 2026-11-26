@@ -1,0 +1,28 @@
+{
+  "skill": "partner-writing",
+  "rules": [
+    "B1"
+  ],
+  "input": "Write two sentences for a bank partner saying the weekly report will be late and a corrected file follows.",
+  "expected_output": "The weekly report is late this week. A corrected file follows once the totals are confirmed, to be confirmed by our data team.",
+  "checks": [
+    {
+      "type": "must_not_match",
+      "pattern": "[\\u2014\\u2013]",
+      "rule": "B1"
+    },
+    {
+      "type": "must_not_match",
+      "pattern": "[\\u2190-\\u21ff\\u2600-\\u27bf\\U0001F300-\\U0001FAFF]",
+      "rule": "B1"
+    },
+    {
+      "type": "must_contain",
+      "text": "to be confirmed",
+      "rule": "B3"
+    }
+  ],
+  "bad_output": "The weekly report is late this week \u2014 a corrected file follows \u2192 once the totals are confirmed.",
+  "human_note": "Read it as the partner would: is a comma, full stop or 'to' used where a dash would have gone, and does it still sound natural? The script only finds the characters.",
+  "why": "Em-dashes and arrows are the most common AI-sounding slip in partner text. A wording change in the skill could drop B1 unnoticed."
+}

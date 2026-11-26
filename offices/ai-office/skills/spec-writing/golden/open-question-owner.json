@@ -1,0 +1,28 @@
+{
+  "skill": "spec-writing",
+  "rules": [
+    "Open questions"
+  ],
+  "input": "Two things are unknown: which format the report uses, and whether a second office needs it. Write the Open questions part.",
+  "expected_output": "**Open questions**\n- Which format should the report use? Fang (architect) can answer; blocks the build.\n- Does a second office need it? Merwyn can answer; not blocking.",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "\\*\\*Open questions\\*\\*",
+      "rule": "Open questions"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^- .*(\\((pmo|pm|architect|engineer|reviewer|curator|compliance|designer)\\)|Merwyn)",
+      "rule": "Open questions"
+    },
+    {
+      "type": "must_match",
+      "pattern": "(?i)blocks the build|not blocking",
+      "rule": "Open questions"
+    }
+  ],
+  "bad_output": "**Open questions**\n- Which format should the report use?\n- Does a second office need it?",
+  "human_note": "Check the named person is the right one to answer and that 'blocks the build' is only said where it is true. The script finds a name, not the right name.",
+  "why": "An open question with no owner is never answered. The skill asks for who can answer and whether it blocks."
+}

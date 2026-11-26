@@ -1,0 +1,39 @@
+{
+  "skill": "review-checklist",
+  "rules": [
+    "verdict",
+    "real output"
+  ],
+  "input": "Every check in the Spec passed when the reviewer ran it. Write the Review log.",
+  "expected_output": "## Review log\n\nPASS\n\nRan 12 tests in 0.4s\nOK\n\nEvery Done when check was run on the PR branch and passed.\n\nNotes\n- The README section could use a shorter intro (style, not a reject).",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^(- )?(PASS|REJECT)\\b",
+      "rule": "verdict"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^PASS\\b",
+      "rule": "verdict"
+    },
+    {
+      "type": "must_not_contain",
+      "text": "REJECT",
+      "rule": "verdict"
+    },
+    {
+      "type": "must_match",
+      "pattern": "^Ran \\d+ tests?",
+      "rule": "real output"
+    },
+    {
+      "type": "must_contain",
+      "text": "Notes",
+      "rule": "style under Notes"
+    }
+  ],
+  "bad_output": "## Review log\n\nLooks fine to me.",
+  "human_note": "Judge that the pasted output is real and covers each Done when check, and that Notes holds only style points.",
+  "why": "A review with no verdict or no pasted output cannot move the task. The case holds the shape of a PASS."
+}

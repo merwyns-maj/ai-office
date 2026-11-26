@@ -1,0 +1,34 @@
+{
+  "skill": "review-checklist",
+  "rules": [
+    "verdict",
+    "REJECT lists failing checks"
+  ],
+  "input": "Done when check 2 fails: the runner exits 0 on a case with an empty check list. Write the Review log.",
+  "expected_output": "## Review log\n\nREJECT\n\nFailing check: 2 (runner exits 1 on an empty check list).\nRan 1 test\nFAILED (failures=1)\nFix: validate that checks is not empty before running them.\n\nNotes\n- Variable names are a little long (style, not a reject).",
+  "checks": [
+    {
+      "type": "must_match",
+      "pattern": "^REJECT\\b",
+      "rule": "verdict"
+    },
+    {
+      "type": "must_match",
+      "pattern": "(?i)failing check:? *\\d+",
+      "rule": "REJECT lists failing checks"
+    },
+    {
+      "type": "must_contain",
+      "text": "Fix",
+      "rule": "REJECT lists the fix"
+    },
+    {
+      "type": "must_contain",
+      "text": "Notes",
+      "rule": "style under Notes"
+    }
+  ],
+  "bad_output": "## Review log\n\nREJECT\n\nThe naming style is inconsistent.",
+  "human_note": "Judge that the failing check is real and the fix is specific. Check that no style point is given as a reason to reject.",
+  "why": "A REJECT without the failing check and a fix leaves the Engineer guessing. Style comments must not cause a reject."
+}
