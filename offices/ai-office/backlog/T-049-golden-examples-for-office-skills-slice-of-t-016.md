@@ -2,9 +2,9 @@
 id: T-049
 title: "Golden examples and evals for the office's own skills (slice of T-016)"
 phase: 3-skills
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: []
@@ -192,6 +192,9 @@ Tests went from 200 to 224 (24 new). board.py ran with no problems; board.md dis
 — Sebastian (engineer)
 
 ## Review log
+PASS (26 Nov 2026, head 9bfa41e). All 8 Done-when checks pass: 4+3+3 cases; malformed JSON, missing why/input, empty checks, bad regex, only max_lines, too-loose bad_output and 6 cases each exit 1 naming file and problem; email, 16-digit, 10-digit, forbidden term, @-escaped email reported by kind only, value never echoed; 224 tests OK; README section; T-016 note; build_agents no diff; no company data.
+Notes (not rejects): zero cases exits 0 (consider exit 1); spec-writing open-question owner regex passes if any one line names an owner; review-checklist "Notes" check only proves the heading exists.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
