@@ -7,7 +7,7 @@ priority: P2
 owner: pmo
 where: code
 project: ai-office
-depends_on: [T-024]
+depends_on: [T-024, T-063]
 pr: null
 ---
 
@@ -29,4 +29,3 @@ pr: null
 ## Decision
 
 ## Open questions
-- 2026-11-26 (Janice): also follows T-063 (office chat, in build); add it to depends_on once T-063 is merged.

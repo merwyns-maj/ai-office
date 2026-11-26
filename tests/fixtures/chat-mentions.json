@@ -1,0 +1,379 @@
+{
+ "note": "Invented cases. Read by tests/test_chat.py and by the node check in tests/test_office_app.py; agents are the 8 in offices/ai-office/org.yaml.",
+ "cases": [
+  {
+   "text": "@Janice hi",
+   "ids": [
+    "pmo"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Emmy hi",
+   "ids": [
+    "pm"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang hi",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Sebastian hi",
+   "ids": [
+    "engineer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Cahyani hi",
+   "ids": [
+    "reviewer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Wulan hi",
+   "ids": [
+    "compliance"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@April hi",
+   "ids": [
+    "curator"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Dinda hi",
+   "ids": [
+    "designer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@fang lower case",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@FANG UPPER CASE",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@fAnG mixed",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang, comma",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang's tool",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "is it ready @fang?",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "(@Fang) in brackets",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang. Then @Dinda!",
+   "ids": [
+    "architect",
+    "designer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Dinda @Fang order is first appearance",
+   "ids": [
+    "designer",
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang @fang @FANG once",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang and @Dinda and @Fang",
+   "ids": [
+    "architect",
+    "designer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@all anything blocked?",
+   "ids": [
+    "pmo",
+    "pm",
+    "architect",
+    "engineer",
+    "reviewer",
+    "compliance",
+    "curator",
+    "designer"
+   ],
+   "all": true,
+   "unknown": []
+  },
+  {
+   "text": "@ALL caps",
+   "ids": [
+    "pmo",
+    "pm",
+    "architect",
+    "engineer",
+    "reviewer",
+    "compliance",
+    "curator",
+    "designer"
+   ],
+   "all": true,
+   "unknown": []
+  },
+  {
+   "text": "@all and @Dinda",
+   "ids": [
+    "pmo",
+    "pm",
+    "architect",
+    "engineer",
+    "reviewer",
+    "compliance",
+    "curator",
+    "designer"
+   ],
+   "all": true,
+   "unknown": []
+  },
+  {
+   "text": "@Dinda and @all",
+   "ids": [
+    "pmo",
+    "pm",
+    "architect",
+    "engineer",
+    "reviewer",
+    "compliance",
+    "curator",
+    "designer"
+   ],
+   "all": true,
+   "unknown": []
+  },
+  {
+   "text": "@Bob who",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "bob"
+   ]
+  },
+  {
+   "text": "@Bob @bob @BOB",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "bob"
+   ]
+  },
+  {
+   "text": "@Bob and @Fang",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": [
+    "bob"
+   ]
+  },
+  {
+   "text": "@Fang and @Bob and @Carol",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": [
+    "bob",
+    "carol"
+   ]
+  },
+  {
+   "text": "write to x@fang.test please",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "mail a.b@dinda.test",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@ Fang",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@1fang",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@@Fang",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang@Dinda",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang-",
+   "ids": [
+    "architect"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Fang-Dinda",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "fang-dinda"
+   ]
+  },
+  {
+   "text": "@aaaaaaaaaaaaaaaaaaaaaaaa exactly 24",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "aaaaaaaaaaaaaaaaaaaaaaaa"
+   ]
+  },
+  {
+   "text": "@aaaaaaaaaaaaaaaaaaaaaaaaa over 24",
+   "ids": [],
+   "all": false,
+   "unknown": [
+    "aaaaaaaaaaaaaaaaaaaaaaaa"
+   ]
+  },
+  {
+   "text": "",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "no mention at all",
+   "ids": [],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "line one\n@Wulan line two",
+   "ids": [
+    "compliance"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "tab\t@April tab",
+   "ids": [
+    "curator"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "@Janice\n@Emmy\n@Cahyani",
+   "ids": [
+    "pmo",
+    "pm",
+    "reviewer"
+   ],
+   "all": false,
+   "unknown": []
+  },
+  {
+   "text": "email-like fang@Dinda but @Emmy ok",
+   "ids": [
+    "pm"
+   ],
+   "all": false,
+   "unknown": []
+  }
+ ]
+}

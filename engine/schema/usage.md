@@ -18,7 +18,7 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 ```json
 {"n":1,"sprint":4,"agent":"pm","tasks":["T-046","T-047","T-048"],"step":"spec","tokens":43592,"tool_uses":19,"duration_ms":65582}
 ```
-- `n` integer >= 1, strictly increasing (a repeat or decrease is an error, a gap a warning); `sprint` integer >= 1; `agent` an `org.yaml` id; `tasks` 1-8 distinct `T-nnn`; `step` a lowercase slug (spec, ux, design, compliance, build, rework, review today).
+- `n` integer >= 1, strictly increasing (a repeat or decrease is an error, a gap a warning); `sprint` integer >= 1; `agent` an `org.yaml` id; `tasks` 1-8 distinct `T-nnn`; `step` a lowercase slug (spec, ux, design, compliance, build, rework, review, chat today). A run with `step: "chat"` (T-063) may have `tasks: []` and then must carry `note: "chat message <id>"` (the pointer to the artifact db message; never the chat text). `tasks: []` is an error for any other step.
 - `tokens`, `tool_uses`, `duration_ms`: integer 0 to 999,999,999, or `null` = **not reported**. A run whose harness report had no usage stays in the file with `null`, never 0.
 - `date` (optional, T-060): the day the run happened, YYYY-MM-DD. New run lines should carry it so a budget period (day, week, month) can be applied later; until every line has one, the usage panel's period is the session. A bad date is an error.
 - `note` (optional, 1-200 characters). On a run with `tokens: null` it explains the missing usage; on any other run it records a caveat such as the model differing from the profile (the page marks `planned*` only for the latter).
@@ -27,10 +27,10 @@ UTF-8 JSONL, a line is at most 2000 characters, blank lines are ignored, a dupli
 - Data rule: the `events.py` rule (email, 16-digit run, 10+ digit run, forbidden term from `workspaces.yaml`) runs first on every string of the header and every line; a header hit rejects the file. Keys and numbers are not scanned.
 
 ## Totals
-`ledger.totals(runs)`: session, per agent, per sprint, per task. A null adds 0 to every sum and 1 to `not_reported`. A run with one task counts in that task's `solo_tokens`; a run with 2+ tasks counts once under `shared` and in full in `tokens_with_shared` of each task it touched. It is never split between tasks. Invariant: sum over agents = sum over sprints = sum of `solo_tokens` + `shared` = session.
+`ledger.totals(runs)`: session, per agent, per sprint, per task. A null adds 0 to every sum and 1 to `not_reported`. A run with one task counts in that task's `solo_tokens`; a run with 2+ tasks, or none (a chat run), counts once under `shared` and in full in `tokens_with_shared` of each task it touched. It is never split between tasks. Invariant: sum over agents = sum over sprints = sum of `solo_tokens` + `shared` = session.
 
 ## Page
-`python scripts/office_app.py ai-office --ledger <file>` converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored).
+`python scripts/office_app.py ai-office --ledger <file>` converts the ledger with `ledger.to_event_log` to a v1 event log (`usage_source: recorded`, `usage` events in the `total` shape, see `events.md`) and builds `engine/app/usage-<session>.html` (gitignored). Chat runs (no task) are not in the event log, which needs a task per usage event; they stay in the ledger totals.
 
 ## Budgets (T-060)
 The usage panel compares these totals with `offices/<office>/budgets.yaml` (per provider, and per agent inside a provider; format and rules in `engine/runtime/budgets.py`). A budget is set by Merwyn or whoever he names, every value has `set_by` and `set_on`, and the page never invents one: no budget reads "budget not set". Period today: the session.

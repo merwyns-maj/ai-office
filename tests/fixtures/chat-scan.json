@@ -1,0 +1,194 @@
+{
+ "note": "Invented. A part is text or [\"rep\", chars, n] (chars repeated n times) so no realistic number is written here. hit = kind, or null.",
+ "cases": [
+  {
+   "parts": [
+    "see a.b@example.test now"
+   ],
+   "hit": "email address"
+  },
+  {
+   "parts": [
+    "id ",
+    [
+     "rep",
+     "7",
+     16
+    ],
+    " end"
+   ],
+   "hit": "16-digit run"
+  },
+  {
+   "parts": [
+    "acct ",
+    [
+     "rep",
+     "5",
+     12
+    ]
+   ],
+   "hit": "run of 10+ digits"
+  },
+  {
+   "parts": [
+    "acct ",
+    [
+     "rep",
+     "5",
+     10
+    ]
+   ],
+   "hit": "run of 10+ digits"
+  },
+  {
+   "parts": [
+    "short ",
+    [
+     "rep",
+     "5",
+     9
+    ]
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "call 08",
+    [
+     "rep",
+     "1",
+     10
+    ]
+   ],
+   "hit": "run of 10+ digits"
+  },
+  {
+   "parts": [
+    "call +62 811-1111-1111"
+   ],
+   "hit": "phone number"
+  },
+  {
+   "parts": [
+    "call 0811 1111 1111"
+   ],
+   "hit": "phone number"
+  },
+  {
+   "parts": [
+    "acct 555-555-5555"
+   ],
+   "hit": "long number with separators"
+  },
+  {
+   "parts": [
+    "on 2026-11-26 at 15:54"
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "T-063 and T-064 and PR 53"
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "Rp 1.000.000 only"
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "key sk-",
+    [
+     "rep",
+     "a1",
+     12
+    ]
+   ],
+   "hit": "secret-like token"
+  },
+  {
+   "parts": [
+    "ghp_",
+    [
+     "rep",
+     "Ab3",
+     8
+    ]
+   ],
+   "hit": "secret-like token"
+  },
+  {
+   "parts": [
+    "password: hunter2hunter2"
+   ],
+   "hit": "secret-like token"
+  },
+  {
+   "parts": [
+    "Authorization Bearer ",
+    [
+     "rep",
+     "Ab3",
+     8
+    ]
+   ],
+   "hit": "secret-like token"
+  },
+  {
+   "parts": [
+    "blob ",
+    [
+     "rep",
+     "a1",
+     16
+    ],
+    " end"
+   ],
+   "hit": "secret-like token"
+  },
+  {
+   "parts": [
+    "commit ",
+    [
+     "rep",
+     "a",
+     40
+    ]
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "commit ",
+    [
+     "rep",
+     "1a",
+     20
+    ]
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "https://example.test/a/b?c=d plain link"
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    "loan id L-12 is fine, no data"
+   ],
+   "hit": null
+  },
+  {
+   "parts": [
+    ""
+   ],
+   "hit": null
+  }
+ ]
+}

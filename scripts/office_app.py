@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate the self-contained 3D office page: theme + org + workflow + event log -> engine/app/office.html.
 
-Usage: python scripts/office_app.py <office> [--fixture PATH | --ledger PATH] [--out PATH] [--check] [--allow-errors]
+Usage: python scripts/office_app.py <office> [--fixture PATH | --ledger PATH] [--chat] [--out PATH] [--check] [--allow-errors]
 --ledger replays a recorded agent-run ledger (offices/<office>/usage/<session>.jsonl, T-057); default out engine/app/usage-<session>.html (not committed).
+--chat (T-063) adds the office chat (data.chat): the committed AI Office page is built with it; it cannot be combined with --ledger (the recorded usage page never has chat).
 Exit 0 written or up to date; 1 data-rule problems (always), other log errors (unless --allow-errors), missing theme layout or a stale file (--check); 2 usage.
 """
 import argparse
@@ -38,7 +39,11 @@ def _planned_model(office, agent):
     return (office.office.get("defaults") or {}).get("model")
 
 
-def build_data(office_root, fixture, ledger=None):
+CHAT_MAX_LEN = 4000
+CHAT_LEASE_S = 1800
+
+
+def build_data(office_root, fixture, ledger=None, chat=False):
     """Return (data dict for the page, list of LogProblem). With ledger: the page replays that agent-run ledger instead of fixture."""
     office_root = Path(office_root)
     office, problems = loader.load_office(office_root)
@@ -105,6 +110,11 @@ def build_data(office_root, fixture, ledger=None):
     }
     if totals is not None:
         data["ledger"] = totals
+    if chat:
+        if ledger is not None:
+            raise BuildError("--chat cannot be used with --ledger")
+        data["chat"] = {"v": 1, "agents": [{k: a.get(k) for k in ("id", "name", "role")} for a in org_agents], "default": "pmo",
+                        "all": "all", "max_len": CHAT_MAX_LEN, "lease_s": CHAT_LEASE_S}
     return data, probs
 
 
@@ -121,6 +131,7 @@ def main(argv=None):
     ap.add_argument("office", help="office id (offices/<id>) or a path to an office folder")
     ap.add_argument("--fixture")
     ap.add_argument("--ledger", help="replay an agent-run ledger instead of an event log")
+    ap.add_argument("--chat", action="store_true", help="add the office chat (T-063); not with --ledger")
     ap.add_argument("--out")
     ap.add_argument("--check", action="store_true", help="fail if --out is not what would be generated")
     ap.add_argument("--allow-errors", action="store_true", help="drop bad log lines instead of failing")
@@ -131,6 +142,9 @@ def main(argv=None):
     if args.fixture and args.ledger:
         print("office_app: --fixture and --ledger cannot be used together", file=sys.stderr)
         return 2
+    if args.chat and args.ledger:
+        print("office_app: --chat and --ledger cannot be used together (the recorded usage page has no chat)", file=sys.stderr)
+        return 2
     try:
         root = loader.resolve_office(args.office, Path.cwd())
         template = TEMPLATE.read_text(encoding="utf-8")
@@ -140,7 +154,7 @@ def main(argv=None):
             out_default = REPO / "engine" / "app" / f"usage-{Path(args.ledger).stem}.html"
         else:
             out_default = DEFAULT_OUT
-        data, probs = build_data(root, Path(args.fixture or DEFAULT_FIXTURE), Path(args.ledger) if args.ledger else None)
+        data, probs = build_data(root, Path(args.fixture or DEFAULT_FIXTURE), Path(args.ledger) if args.ledger else None, chat=args.chat)
     except FileNotFoundError as e:
         print(str(e), file=sys.stderr)
         return 2
@@ -164,7 +178,7 @@ def main(argv=None):
     out = Path(args.out or out_default)
     if args.check:
         if not out.exists() or out.read_text(encoding="utf-8") != html:
-            print(f"office_app: {out} is stale; run: python scripts/office_app.py {args.office}" + (f" --ledger {args.ledger}" if args.ledger else ""), file=sys.stderr)
+            print(f"office_app: {out} is stale; run: python scripts/office_app.py {args.office}" + (f" --ledger {args.ledger}" if args.ledger else "") + (" --chat" if args.chat else ""), file=sys.stderr)
             return 1
         print(f"{out}: up to date ({len(html.encode('utf-8')) // 1024} KB, {len(data['events'])} events)")
         return 0

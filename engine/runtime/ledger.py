@@ -20,6 +20,7 @@ RUN_KEYS = ("n", "sprint", "agent", "tasks", "step", "tokens", "tool_uses", "dur
 NUMS = ("tokens", "tool_uses", "duration_ms")
 SPLIT = ("input", "output", "cache_read", "cache_write")
 MAX_NOTE = 200
+CHAT_NOTE = re.compile(r"^chat message m-[0-9a-z]{6,12}-[0-9a-z]{4}$")
 
 
 def _int(v, lo=0, hi=events.MAX_TOKENS):
@@ -74,7 +75,10 @@ def _check_run(r, agents):
     if not isinstance(r["agent"], str) or r["agent"] not in agents:
         return f"unknown agent {r['agent']!r}"
     t = r["tasks"]
-    if not (isinstance(t, list) and 1 <= len(t) <= 8 and len(set(map(str, t))) == len(t)
+    if t == [] and r["step"] == "chat":   # a chat run (T-063) has no task; its note is the pointer to the db message
+        if not (isinstance(r.get("note"), str) and CHAT_NOTE.match(r["note"])):
+            return "a chat run needs note 'chat message <id>'"
+    elif not (isinstance(t, list) and 1 <= len(t) <= 8 and len(set(map(str, t))) == len(t)
             and all(isinstance(x, str) and events.TASK_RE.match(x) for x in t)):
         return "tasks must be 1 to 8 distinct task ids"
     if not isinstance(r["step"], str) or not STEP_RE.match(r["step"]):
@@ -206,7 +210,7 @@ def totals(runs):
         _add(out["agents"].setdefault(r["agent"], _row()), r)
         _add(out["sprints"].setdefault(r["sprint"], _row()), r)
         tok = r["tokens"] or 0
-        shared = len(r["tasks"]) > 1
+        shared = len(r["tasks"]) != 1   # 2+ tasks, or none (a chat run): counted once, in `shared`, never in a task row
         if shared:
             _add(out["shared"], r)
         for t in r["tasks"]:
@@ -233,6 +237,8 @@ def to_event_log(header, runs):
         head["provider"] = header["provider"]
     lines = [json.dumps(head, ensure_ascii=False, separators=(",", ":"))]
     for r in runs:
+        if not r["tasks"]:
+            continue   # a chat run has no task for the event shape; its tokens stay in the ledger totals
         ev = {"t": 2 * (r["n"] - 1), "type": "usage", "src": f"{ref}#n={r['n']}", "agent": r["agent"], "task": r["tasks"][0],
               "tasks": r["tasks"], "total": r["tokens"], "tool_uses": r["tool_uses"], "run": r["n"], "sprint": r["sprint"], "step": r["step"]}
         if "note" in r:
