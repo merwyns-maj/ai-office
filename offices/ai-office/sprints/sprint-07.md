@@ -23,3 +23,5 @@ Status: scope Green, schedule Green, budget Green.
 **Published:** recorded usage page https://claude.ai/artifact/YL5g2LV4MgWL9n2PHQ6eP3; 3D office (synthetic demo) republished with the same bars and accordion.
 
 **Carry forward:** usage.md example header still says claude-sdk; phone usage sheet cramped; unknown-agent error echoes the value on stderr; resumed-agent overlap needs a rule (prefer fresh agents for rework, or record the delta).
+
+**PMO note, 26 Nov 2026 22:10 WIB (Janice):** Merwyn, at 7,347,373 agent tokens (92% of 8M): "np just proceed. budget is not a constraint". The `budget_used >= 0.8` gate is answered for this session's remaining work (T-070, T-069, chat replies); the 8M figure in budgets.yaml stays as the page's reference until Merwyn sets another, so the bar shows red past 8M. Chat messages m-mwxhmrx2-582l and m-mwxhs3dt-3w9c waited about 3 hours unanswered: the inbox was not checked during agent waits. From now on Janice checks the inbox after each merge.
