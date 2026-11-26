@@ -2,13 +2,13 @@
 id: T-055
 title: "Hotfix: metrics test breaks when a new sprint closes"
 phase: 3-skills
-status: review
+status: done
 priority: P0
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-032]
-pr: null
+pr: 33
 ---
 
 > Found by Janice after the Sprint 5 close (PR #32): main is red. tests/test_metrics.py RealFiles.test_sprint_task_counts asserts the exact dict {1: 2, 2: 3, 3: 3, 4: 3}; closing Sprint 5 adds 5: 4.
@@ -33,6 +33,8 @@ OK
 — Janice (pmo), building a one-line P0 hotfix; Cahyani reviews
 
 ## Review log
+PASS (26 Nov 2026, head cb8d587). Main red on test_sprint_task_counts ({.., 5: 4} != {1: 2, 2: 3, 3: 3, 4: 3}); branch green, 240 tests OK; diff only the assertion (filtered to k <= 4) and the task file; a wrong Sprint 3 count still fails the test. Re-run after merge.
+— Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
 
