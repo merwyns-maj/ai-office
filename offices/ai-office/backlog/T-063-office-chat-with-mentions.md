@@ -2,7 +2,7 @@
 id: T-063
 title: "Office chat: a pop-up chat in the 3D office, @mention one or more agents"
 phase: 6-office
-status: build
+status: review
 priority: P1
 owner: reviewer
 where: code
