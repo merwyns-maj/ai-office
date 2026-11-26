@@ -2,9 +2,9 @@
 id: T-059
 title: "3D office: rearrange, resize and set opacity of the panels"
 phase: 6-office
-status: review
+status: done
 priority: P1
-owner: reviewer
+owner: pmo
 where: code
 project: ai-office
 depends_on: [T-058]
@@ -161,6 +161,10 @@ Not changed (Review notes): first action moving the default ticker 4px; resize h
 Review 1, 26 Nov 2026, PR #45 head 6f5ab63: REJECT on readability at 0% and 30% (Done when line 2, Merwyn's backing decision); all else passes. Passing: 314 tests, golden, --check, recorded page; mouse drag, clamp under the top bar, resize limits, snap; window re-clamp; keyboard model; reload keeps layout and opacity; Reset; corrupt and throwing storage; reduced motion; touch; 390 and 800 widths unchanged; 0 console errors. Measured (99th-percentile scene luminance under each text box): usage worst 1.25:1 at 0%, 4.49:1 at 30%; latest events 1.14:1 at 0%, 3.27:1 at 30%.
 Fixes: (1) ticker `<time>` has no backing; cover every text leaf; (2) backing ~3px narrower than its text in grid/ellipsis cells (max-width with padding), keep the ellipsis; (3) re-measure 0/30/60% including latest events with events showing (?t=40).
 Notes: default 92% unreachable with 5% steps; first action moves the default ticker 4px; resize handle comes after panel content in Tab order. Deviations 1-6 accepted by Janice.
+— Cahyani (reviewer), recorded by Janice (pmo)
+
+Review 2, 26 Nov 2026, PR #45 head a36627e: PASS. All three Review 1 fixes verified on both pages: every text leaf in both panels has the backing (171 and 155 elements, 0 missing), ticker times included; no backing narrower than its text and the `.nm` ellipsis still works; worst-case contrast at 0/30/60/92%: usage 9.23/11.84/13.77/5.14, latest events 9.23/11.84/13.64/5.43, none under 4.5:1. Slider reaches 92. Regression: 314 tests, golden, --check; drag, clamp, resize, snap, keyboard, reload, Reset, corrupt and throwing storage, reduced motion, touch as in Review 1; 390 and 800 widths match main; 0 console errors.
+Notes: first action moves the default ticker 4px; resize handle comes after panel content in Tab order.
 — Cahyani (reviewer), recorded by Janice (pmo)
 
 ## Decision
