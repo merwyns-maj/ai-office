@@ -8,7 +8,7 @@ owner: reviewer
 where: code
 project: ai-office
 depends_on: [T-070]
-pr: null
+pr: 71
 ---
 
 > Lean (Janice, 26 Nov 2026 22:45 WIB): one surface (tests); no new data, no compliance flag, no human gate; spec skipped per T-068, the Architect writes a short spec and design.
